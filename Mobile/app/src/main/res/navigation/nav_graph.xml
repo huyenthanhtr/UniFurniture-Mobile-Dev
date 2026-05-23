@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.unifurniture.mobile.ui.home.HomeFragment"
+        android:label="Trang chủ" />
+
+    <fragment
+        android:id="@+id/productListFragment"
+        android:name="com.unifurniture.mobile.ui.product.ProductListFragment"
+        android:label="Sản phẩm">
+        <argument
+            android:name="search"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+        <argument
+            android:name="categoryId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+        <argument
+            android:name="categoryName"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/productDetailFragment"
+        android:name="com.unifurniture.mobile.ui.product.ProductDetailFragment"
+        android:label="Chi tiết sản phẩm">
+        <argument
+            android:name="slug"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/cartFragment"
+        android:name="com.unifurniture.mobile.ui.cart.CartFragment"
+        android:label="Giỏ hàng" />
+
+    <fragment
+        android:id="@+id/checkoutFragment"
+        android:name="com.unifurniture.mobile.ui.checkout.CheckoutFragment"
+        android:label="Thanh toán" />
+
+    <fragment
+        android:id="@+id/accountFragment"
+        android:name="com.unifurniture.mobile.ui.account.AccountFragment"
+        android:label="Tài khoản" />
+
+</navigation>

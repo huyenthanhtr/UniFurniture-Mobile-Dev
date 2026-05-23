@@ -1,4 +1,4 @@
-﻿# Dependencies
+# Dependencies
 node_modules/
 
 # Environment variables
@@ -40,9 +40,19 @@ Thumbs.db
 .env.development
 .env.production
 
-# Package lock (optional náº¿u team thá»‘ng nháº¥t)
+# Package lock (optional nếu team thống nhất)
 # package-lock.json
 # yarn.lock
 # Local uploads/temp
 tmp_utf8_test.txt
+
+# Android specific
+**/local.properties
+**/.gradle/
+**/build/
+**/app/build/
+**/*.iml
+**/*.jks
+**/captures/
+
 

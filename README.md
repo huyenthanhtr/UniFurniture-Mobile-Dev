@@ -12,18 +12,21 @@ Hệ thống Website Nội thất cá nhân hóa (AR & Keyword) - Tham khảo m�
 ---
 
 ## 📂 Cấu trúc dự án (Mono-repo)
-Dự án được quản lý tập trung trong 3 thư mục chính:
+Dự án được quản lý tập trung trong các thư mục chính:
 * `client/` : Frontend dành cho khách hàng (**Huyền, Vân, Khải**).
 * `admin/`  : Frontend dành cho quản trị viên (**Vinh, Nhất**).
-* `server/` : Backend chung sử dụng **Express + MongoDB** (Dùng cho cả 2 web).
+* `server/` : Backend chung sử dụng **Express + MongoDB** (Dùng cho cả web và di động).
+* `Mobile/` : Ứng dụng di động Android (Java) dành cho khách hàng (**Khải**).
 
 ---
 
-## ⚙️ Thống nhất về Port (Cổng chạy Web)
+## ⚙️ Thống nhất về Port (Cổng chạy Web & API)
 Để test đồng thời cả hệ thống, mọi người lưu ý set port như sau:
 * **Server:** Cổng `3000`
-* **Client:** Cổng `4200`
-* **Admin:** Cổng `4201` *(Dùng lệnh: `ng serve --port 4201`)*
+* **Client (Web):** Cổng `4200`
+* **Admin (Web):** Cổng `4201` *(Dùng lệnh: `ng serve --port 4201`)*
+* **Mobile (API):** Gọi tới IP của máy host cổng `3000`. Cấu hình trong `Mobile/local.properties` dưới biến `api.base.url`.
+
 
 ---
 

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/surface">
+
+    <!-- Toolbar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/primary"
+        android:padding="16dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Sản phẩm"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/tvProductCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:alpha="0.7"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <!-- Sort Chips -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:background="@color/white">
+        <com.google.android.material.chip.ChipGroup
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            app:singleSelection="true">
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipNewest"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mới nhất"
+                style="@style/Widget.MaterialComponents.Chip.Choice" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipBestSelling"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bán chạy"
+                style="@style/Widget.MaterialComponents.Chip.Choice" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipPriceLow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Giá thấp"
+                style="@style/Widget.MaterialComponents.Chip.Choice" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipPriceHigh"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Giá cao"
+                style="@style/Widget.MaterialComponents.Chip.Choice" />
+        </com.google.android.material.chip.ChipGroup>
+    </HorizontalScrollView>
+
+    <!-- Progress -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
+    <!-- Product Grid -->
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefresh"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvProducts"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="8dp"
+            android:clipToPadding="false" />
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+</LinearLayout>

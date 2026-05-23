@@ -1,0 +1,27 @@
+# Add generated files
+*.class
+*.log
+*.ctxt
+
+# Gradle
+.gradle/
+build/
+!src/**/build/
+
+# Local configuration
+local.properties
+*.properties.local
+
+# Android Studio
+.idea/
+*.iml
+*.iws
+.DS_Store
+captures/
+
+# Keystore
+*.jks
+*.keystore
+
+# Generated
+/app/build/
