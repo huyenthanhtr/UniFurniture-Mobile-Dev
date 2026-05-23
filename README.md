@@ -25,7 +25,12 @@ Dự án được quản lý tập trung trong các thư mục chính:
 * **Server:** Cổng `3000`
 * **Client (Web):** Cổng `4200`
 * **Admin (Web):** Cổng `4201` *(Dùng lệnh: `ng serve --port 4201`)*
-* **Mobile (API):** Gọi tới IP của máy host cổng `3000`. Cấu hình trong `Mobile/local.properties` dưới biến `api.base.url`.
+* **Mobile (API):** Gọi tới IP của máy host cổng `3000`. Cấu hình trong file `Mobile/local.properties` dưới biến `api.base.url`. Người phát triển cần copy file `Mobile/local.properties.example` thành `Mobile/local.properties` và cấu hình IP tương ứng.
+  * **Cách lấy IP LAN của máy tính:**
+    * **Linux**: `hostname -I` hoặc `ip route get 1.1.1.1 | awk '{print $7}'`
+    * **macOS**: `ipconfig getifaddr en0` (hoặc `en1`)
+    * **Windows**: Mở CMD/PowerShell gõ `ipconfig` (xem IPv4 Address)
+
 
 
 ---
