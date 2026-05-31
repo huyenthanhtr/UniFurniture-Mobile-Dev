@@ -1,0 +1,442 @@
+# UniFurniture Mobile — Technical Decisions & Conventions
+
+Last updated: 2026-05-31
+Branch: feature/home
+Owner of this file: Như Ngọc
+
+---
+
+## Architecture
+
+### Pattern: MVVM + Repository
+
+```
+Fragment / Activity
+    ↓  observes LiveData
+ViewModel  (AndroidViewModel)
+    ↓  calls
+Repository
+    ↓  calls
+ApiService  (Retrofit interface)
+    ↓  HTTP
+Node.js Backend  (:3000/api/)
+```
+
+Fragments own no business logic. They only:
+1. Inflate layout via ViewBinding
+2. Pass user events to ViewModel methods
+3. Observe LiveData and update views
+
+ViewModels own state and call repositories. They never reference Android views or
+Fragments directly.
+
+Repositories call `ApiService`, wrap callbacks with `MutableLiveData`, and return
+`LiveData<T>` to ViewModels.
+
+---
+
+### Navigation: Single Activity per context
+
+- `SplashActivity` — launcher, routes after 1.8s
+- `AuthActivity` — hosts Login / Register / OTP fragments (not yet using NavComponent)
+- `MainActivity` — hosts all main-app fragments via Jetpack NavComponent + `nav_graph.xml`
+- Bottom navigation menu IDs (`homeFragment`, `productListFragment`, etc.) match
+  fragment destination IDs in `nav_graph.xml` exactly — required for `NavigationUI`
+  to highlight the correct tab
+
+Cross-fragment navigation uses `Navigation.findNavController(view).navigate(R.id.dest, args)`.
+Safe Args is NOT used — arguments are passed via `Bundle` manually.
+
+---
+
+### Application class: `UniFurnitureApp`
+
+The `Application` subclass holds and exposes the `ApiService` singleton.
+ViewModels access it via `UniFurnitureApp.getInstance().getApiService()`.
+
+There is **no dependency injection framework** (no Hilt, no Dagger).
+All dependencies are wired manually in ViewModel constructors.
+
+---
+
+### API Configuration
+
+The base URL is set at build time via `local.properties`:
+
+```
+# local.properties
+api.base.url=http://192.168.x.x:3000/api/
+```
+
+It is injected into `BuildConfig.API_BASE_URL` and consumed by `ApiClient`.
+The emulator default is `http://10.0.2.2:3000/api/`.
+Never hardcode an IP address — always use `local.properties`.
+
+---
+
+## Coding Conventions
+
+### File naming
+- Java classes: `PascalCase` (e.g., `ProductListFragment.java`)
+- Layout XML: `snake_case` mirroring class name (`fragment_product_list.xml`,
+  `item_product_card.xml`, `activity_main.xml`)
+- Drawable: `ic_` prefix for icons, `bg_` for backgrounds, `placeholder_` for
+  placeholder images
+
+### ViewBinding
+All layouts use ViewBinding (`buildFeatures { viewBinding true }`).
+- Fragments: inflate in `onCreateView`, null in `onDestroyView`
+- Pattern:
+  ```java
+  private FragmentHomeBinding binding;
+
+  public View onCreateView(...) {
+      binding = FragmentHomeBinding.inflate(inflater, container, false);
+      return binding.getRoot();
+  }
+
+  public void onDestroyView() {
+      super.onDestroyView();
+      binding = null;
+  }
+  ```
+
+### ListAdapter + DiffUtil
+All RecyclerView adapters extend `ListAdapter<T, VH>` with an inner `DiffUtil.ItemCallback`.
+Use `submitList()` to update data — never call `notifyDataSetChanged()` directly.
+Current implementations use only `_id` equality for `areContentsTheSame`; update
+this if fine-grained diff is needed.
+
+### LiveData pattern in Repositories
+Repositories wrap Retrofit callbacks in `MutableLiveData` and return `LiveData`:
+```java
+public LiveData<ProductDto> getProductDetail(String slug) {
+    MutableLiveData<ProductDto> result = new MutableLiveData<>();
+    apiService.getProductBySlug(slug).enqueue(new Callback<ProductDto>() {
+        public void onResponse(...) { result.setValue(...); }
+        public void onFailure(...)  { result.setValue(null); }
+    });
+    return result;
+}
+```
+On failure, repositories post `null` — ViewModels and Fragments must null-check before use.
+
+### ViewModel LiveData observation
+ViewModels use `observeForever` when chaining repository calls inside the ViewModel
+itself (not recommended long-term but consistent throughout the project — do not
+deviate). Fragments observe with `getViewLifecycleOwner()`.
+
+### String IDs in DTO
+MongoDB `_id` fields are mapped with `@SerializedName("_id") public String id;`
+across all DTOs. Always use `.id` in code — never `._id`.
+
+### Currency formatting
+Always use `FormatUtil.formatCurrency(Double)` — never format VND manually.
+It handles null (returns "Liên hệ") and formats with dots as thousands separator.
+
+### Discount badge
+Always use `FormatUtil.discountBadge(minPrice, compareAtPrice)` — returns null if
+no discount, returns `-XX%` string if discounted. Check for null before setting visibility.
+
+---
+
+## Reusable Components
+
+### Adapters (already exist — reuse, do not recreate)
+
+| Adapter | Item type | Key method |
+|---|---|---|
+| `ProductCardAdapter` | `ProductDto` | `submitList(List<ProductDto>)` |
+| `CategoryAdapter` | `CategoryDto` | `submitList(List<CategoryDto>)` |
+| `ImageSliderAdapter` | `List<String>` (URLs) | `updateImages(List<String>)` |
+| `ReviewAdapter` | `ReviewDto` | `submitList(List<ReviewDto>)` |
+
+`ProductCardAdapter` is shared between `HomeFragment` (horizontal) and
+`ProductListFragment` (grid). The same adapter handles both layouts because
+`item_product_card.xml` is fixed at 160dp wide — suitable for horizontal scroll
+and grid with 2 columns.
+
+For a new `CollectionAdapter`, follow the same `ListAdapter + DiffUtil` pattern
+as `CategoryAdapter` — it is the closest equivalent.
+
+### Utilities
+
+| Class | Method | Use |
+|---|---|---|
+| `FormatUtil` | `formatCurrency(Double)` | All price displays |
+| `FormatUtil` | `discountBadge(Double, Double)` | Discount badge text |
+| `FormatUtil` | `formatSold(int)` | Sold count display (e.g. "1.2k") |
+| `SessionManager` | `getCustomerId()` | Required for cart/order/wishlist API calls |
+| `SessionManager` | `isLoggedIn()` | Guard for auth-required actions |
+| `SessionManager` | `getToken()` | If auth header needs to be added to requests |
+
+### Repository methods already implemented
+
+`ProductRepository`:
+- `getProducts(page, limit, search, categories, collection, sortBy, order)`
+- `getProductDetail(slug)`
+- `getProductImages(productId)`
+- `getProductVariants(productId)`
+- `getProductReviews(productId)` — returns `LiveData<ReviewSummaryDto>`
+- `getCategories()`
+- `getCollections()`
+
+`CartRepository`:
+- `getActiveCart(customerId)`
+- `addToCart(customerId, productId, variantId, quantity)`
+- `updateCartItemQuantity(cartItemId, quantity)`
+- `removeCartItem(cartItemId)`
+
+No new repositories are needed for Như Ngọc's scope. All required API calls are
+already wired.
+
+---
+
+## Implementation Constraints
+
+### Room is declared but unused
+`androidx.room:room-runtime:2.6.1` is in `build.gradle` but no `@Database`,
+`@Dao`, or `@Entity` classes exist yet. It was declared "for offline cart cache"
+in a comment. Do not use Room in the Discovery scope (Home/ProductList/Detail) —
+those screens fetch live data only.
+
+### No auth header on API calls
+`ApiClient` does not attach a `Bearer` token header. Current API endpoints in the
+Discovery scope (products, categories, collections, reviews) are public and do not
+require auth. Cart/wishlist endpoints need `customer_id` as a query param instead
+of a header. This is consistent with existing usage — do not add an auth interceptor
+unless an endpoint returns 401.
+
+### Product rating is not a direct filter param on the API
+The `GET /products` endpoint does not accept a `minRating` query param based on
+current `ApiService` definitions. A rating filter on the ProductList screen must
+be applied client-side (filter the returned list in the ViewModel) unless the
+server endpoint is extended. Confirm with backend owner before adding a server param.
+
+### `observeForever` memory leak risk
+ViewModels use `observeForever` for chained calls (e.g., `loadProduct` triggers
+`loadImages`, `loadVariants`, `loadReviews`). This is an existing pattern in the
+project — follow it for consistency, but be aware it can cause leaks if the
+ViewModel is not cleared. Do not add new `observeForever` calls in Fragments.
+
+### Deprecated back navigation
+`ProductDetailFragment` calls `requireActivity().onBackPressed()`, deprecated
+since API 33 (Android 13). The minimum SDK is 26 so it still compiles, but the
+replacement is:
+```java
+requireActivity().getOnBackPressedDispatcher().onBackPressed();
+```
+Fix this when touching `ProductDetailFragment`.
+
+### `ProductListFragment` has no inline search bar
+Search only reaches `ProductListFragment` via navigation arguments from Home.
+If a user lands on Products via the bottom nav tab, there is no way to search
+from within that screen. A search `EditText` or `SearchView` in the toolbar of
+`ProductListFragment` is needed to fully satisfy the Search requirement.
+
+### `ImageSliderAdapter` does not use `DiffUtil`
+It uses plain `notifyDataSetChanged()` in `updateImages()`. This is fine for the
+image slider (small, replaced all at once) — do not change this adapter, but do
+not use this pattern in new adapters.
+
+---
+
+## Technical Recommendations
+
+### 1. Banner slider: reuse CollectionDto.bannerUrl
+`HomeViewModel` already calls `getCollections()` and exposes `getCollections()`
+LiveData. Use the Collection items' `bannerUrl` field as banner images. Reuse
+`ImageSliderAdapter` directly (do not subclass) + `ViewPager2` + `Handler`
+auto-scroll loop. Full decision record is in the "Feature Decisions" section below.
+
+### 2. Filter bottom sheet: use Material BottomSheetDialogFragment
+Create `FilterBottomSheetFragment extends BottomSheetDialogFragment`. Pass the
+current filter state in via a static factory method. Communicate selected filters
+back to `ProductListFragment` via a shared ViewModel scoped to the Activity, or
+via a listener interface. Do not use Fragment result API here — the ViewModel
+approach is consistent with the rest of the project.
+
+### 3. Pagination: append, do not replace
+`ProductListViewModel` currently replaces the `products` LiveData on every load.
+For pagination, maintain a running `List<ProductDto>` in the ViewModel and
+merge pages:
+```java
+List<ProductDto> allProducts = new ArrayList<>(current);
+allProducts.addAll(newPage.items);
+products.setValue(new ApiListResponse<>(allProducts, newPage.total));
+```
+Detect end of data with `allProducts.size() >= total`.
+
+### 4. Real-time search: Handler debounce
+In `HomeFragment.onQueryTextChange`, post a delayed `Runnable` (300ms) to the
+main `Handler`. Remove pending callbacks on each new keystroke before posting the
+new one. Navigate to `ProductListFragment` only on submit; for autocomplete,
+show results inline in a `RecyclerView` beneath the search bar.
+
+### 5. Grid/List toggle: swap LayoutManager
+Keep a boolean `isGrid` in `ProductListFragment`. On toggle:
+```java
+binding.rvProducts.setLayoutManager(
+    isGrid ? new GridLayoutManager(requireContext(), 2)
+           : new LinearLayoutManager(requireContext()));
+adapter.notifyDataSetChanged();
+```
+The same `ProductCardAdapter` works in both modes — the card width is fixed at
+160dp which fills a grid cell well but may look odd in list view. Consider a
+separate `item_product_list.xml` for full-width list rows.
+
+### 6. Quantity selector: standalone layout component
+Add a `+/-` row to `fragment_product_detail.xml` between the variant chips and
+the bottom bar. Track quantity as an `int` local field in the Fragment (not in
+the ViewModel — it is transient UI state). Pass it to `viewModel.addToCart`.
+
+### 7. Recommendations: extend ProductDetailViewModel
+Add a `MutableLiveData<List<ProductDto>> recommendations` field.
+After `loadProduct` resolves, call:
+```java
+productRepo.getRecommendations(slug, userId).observeForever(recommendations::setValue);
+```
+`getProductRecommendations` in `ApiService` already returns `Map<String, List<ProductDto>>` —
+extract the `"recommendations"` key from the map.
+
+---
+
+## Feature Decisions
+
+This section records implementation decisions for specific features as they are
+analysed or built. One entry per feature, added before implementation begins.
+
+---
+
+### [P1 #1] Home: Banner / Image Slider
+
+**Date recorded:** 2026-05-31
+**Status:** In Progress — implementation not yet started
+
+---
+
+#### Decision: Reuse `ImageSliderAdapter` without modification
+
+**What was decided:** Use `ImageSliderAdapter` exactly as it exists today. Do not
+create a subclass (`BannerAdapter`) and do not modify the existing class.
+
+**Why:**
+- `ImageSliderAdapter` already does exactly what the banner needs: it accepts
+  `List<String>` image URLs and renders each as a full-bleed `CENTER_CROP`
+  `ImageView` inside a `ViewPager2`. The `updateImages(List<String>)` method
+  refreshes data correctly.
+- It is already proven working in `ProductDetailFragment` for the product image
+  slider — the same layout pattern (ViewPager2 inside a fixed-height FrameLayout
+  with DotsIndicator overlay) is used there verbatim.
+- Creating a subclass would introduce a parallel class with identical behaviour,
+  violating the project rule "avoid duplicate implementations" (see `decisions.md`
+  Rules section).
+- The adapter creates `ImageView` instances programmatically, so there is no layout
+  XML to change — only `fragment_home.xml` and `HomeFragment.java` are touched.
+
+**Trade-off acknowledged:** Because `ImageSliderAdapter` creates plain `ImageView`s
+with no layout file, it is not possible to add a text overlay (e.g., collection
+name) to each banner slide without modifying the adapter. This is acceptable for
+the current task. If text overlays are required in a future iteration, the approach
+would be: create `item_banner.xml` (ImageView + TextView), change `onCreateViewHolder`
+to inflate it, and add a parallel `updateBanners(List<CollectionDto>)` method.
+
+---
+
+#### Decision: Extract `bannerUrl` list in the Fragment, not the ViewModel
+
+**What was decided:** The Fragment (`HomeFragment`) filters `CollectionDto` items
+to a `List<String>` of non-null `bannerUrl` values and passes that list to the
+adapter. The ViewModel is not changed.
+
+**Why:**
+- The ViewModel already exposes the full `ApiListResponse<CollectionDto>` via
+  `getCollections()`. Adding a second LiveData for banner URLs alone would duplicate
+  state unnecessarily.
+- URL extraction (`c.bannerUrl != null && !c.bannerUrl.isEmpty()`) is a view-layer
+  concern — it determines what to *display*, not what to *store*.
+- The same `getCollections()` observer will be reused for the Collections section
+  (P1 #2), which needs the full `CollectionDto` objects (id, name, slug). Keeping
+  one observer that feeds both the banner and the collections row minimises API
+  calls and code duplication.
+
+---
+
+#### Decision: Implement auto-scroll with `Handler` + `Runnable`, not `Timer`
+
+**What was decided:** Use `new Handler(Looper.getMainLooper())` with a self-posting
+`Runnable` for the 3.5-second auto-scroll cycle.
+
+**Why:**
+- `Handler` posts to the main thread directly — no `runOnUiThread` wrapper needed.
+- `Timer` / `ScheduledExecutorService` run on background threads; updating
+  `ViewPager2.setCurrentItem()` from a background thread causes a
+  `CalledFromWrongThreadException`.
+- `Handler.removeCallbacks(runnable)` is the correct, well-documented cancellation
+  mechanism and integrates cleanly with the Fragment lifecycle.
+- This is the conventional Android pattern for auto-scrolling banners and requires
+  no additional dependencies.
+
+---
+
+#### Lifecycle management for auto-scroll — rules and rationale
+
+The `Handler` + `Runnable` pair must be managed across three Fragment lifecycle
+events. Failing to do so causes either a memory leak or a `NullPointerException`
+after `binding` is set to null in `onDestroyView`.
+
+| Lifecycle event | Action | Reason |
+|---|---|---|
+| `onViewCreated` | Create `Handler` and `Runnable`; do NOT post yet | Adapter has no data yet; posting before data loads wastes cycles |
+| After `bannerAdapter.updateImages(urls)` | `handler.postDelayed(runnable, 3500)` | Only start after data is confirmed present and count > 1 |
+| `onPause` | `handler.removeCallbacks(runnable)` | Fragment is backgrounded (user switches apps or receives a call); scroll should stop |
+| `onResume` | `handler.postDelayed(runnable, 3500)` if `count > 1` | Fragment returns to foreground; scroll resumes |
+| `onDestroyView` | `handler.removeCallbacks(runnable)` | View is destroyed on navigation; `binding` will be null on next `Runnable` fire without this guard, causing NPE |
+
+**Critical constraint:** The `Runnable` references `binding.bannerViewPager` to
+call `setCurrentItem`. If `onDestroyView` nulls `binding` before `removeCallbacks`
+is called, the next `Runnable` fire crashes. `removeCallbacks` must always be
+called before `binding = null`.
+
+**Correct `onDestroyView` order:**
+```java
+public void onDestroyView() {
+    super.onDestroyView();
+    if (autoScrollHandler != null) {
+        autoScrollHandler.removeCallbacks(autoScrollRunnable);  // ← before null
+    }
+    binding = null;  // ← after removeCallbacks
+}
+```
+
+**`onResume` guard:**
+```java
+public void onResume() {
+    super.onResume();
+    if (bannerAdapter != null && bannerAdapter.getItemCount() > 1) {
+        autoScrollHandler.postDelayed(autoScrollRunnable, 3500);
+    }
+}
+```
+The `bannerAdapter != null` guard handles the case where `onResume` fires before
+`onViewCreated` has set up the adapter (e.g., after process restore).
+
+---
+
+#### Layout approach: mirror `fragment_product_detail.xml`
+
+The `ProductDetailFragment` already uses `ViewPager2` + `DotsIndicator` inside a
+`FrameLayout`. The same structure is used for the Home banner with height changed
+from 300dp to 200dp. This means the pattern is already verified on-device — no
+new layout patterns are being introduced.
+
+```
+FrameLayout  (match_parent × 200dp)
+  ├── ViewPager2   id="bannerViewPager"   (match_parent × match_parent)
+  └── DotsIndicator  id="bannerDotsIndicator"
+        layout_gravity="bottom|center_horizontal"
+        layout_marginBottom="8dp"
+```
+
+`DotsIndicator` version 5.0 is already in `build.gradle` and its `attachTo(ViewPager2)`
+API is confirmed working. No version change required.

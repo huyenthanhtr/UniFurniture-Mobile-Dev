@@ -1,0 +1,253 @@
+# UniFurniture Mobile — Progress Tracker
+
+Last updated: 2026-05-31
+Branch: feature/home
+Owner of this file: Như Ngọc
+
+> Home Banner/Image Slider (P1 #1) **completed 2026-05-31**. Next: Home Collections section (P1 #2).
+
+---
+
+## Team Assignments
+
+| Person | Scope | Branch |
+|---|---|---|
+| Khải Đào | Auth Flow (Splash, Login, Register, OTP, Forgot Password) | feature/auth-login |
+| Như Ngọc | Home, Product List, Search, Filter, Product Detail | feature/home |
+| Thảo Vân | Product Detail (variant/cart actions), Wishlist, Cart, Notifications | feature/cart |
+| Quang Vinh | Checkout, QR Payment, Order Success | feature/checkout |
+| Thanh Huyền | Profile, Orders, Order Tracking, Reviews — also team coordinator | feature/profile |
+
+---
+
+## Current Project Status
+
+The initial mobile scaffold was committed by Khải Đào (`17e9ba3`). It established a
+working skeleton for all screens and wired up the API layer. Auth (Khải's scope) is
+functionally complete. All other screens — including Như Ngọc's scope — are scaffolded
+but incomplete: core features specified in the documentation are missing.
+
+**Completed 2026-05-31:** Như Ngọc implemented the Home Banner/Image Slider (P1 #1).
+Two source files modified; all 8 smoke-test items passed. Active work has moved to
+P1 #2 — Home Collections section.
+
+---
+
+## Completed Features (across the project)
+
+### Khải Đào — Auth Flow ✅
+- Splash screen with 1.8s delay and session-based routing (MainActivity always for now)
+- Login fragment (email/phone + password, calls `POST /auth/login`)
+- Register fragment (calls `POST /auth/register`)
+- OTP verification fragment (calls `POST /auth/verify-otp`)
+- Forgot password (calls `POST /auth/forgot-password`)
+- `SessionManager` — persists token, customer object, and cart ID in SharedPreferences
+
+### Khải Đào — App Infrastructure ✅
+- `UniFurnitureApp` application class, holds singleton `ApiService`
+- `ApiClient` — Retrofit singleton with OkHttp logging and 30s timeouts
+- `ApiService` — all required REST endpoints defined (auth, products, categories,
+  collections, cart, orders, wishlist, reviews, profiles, customers)
+- All DTO models: `ProductDto`, `ProductVariantDto`, `ProductImageDto`, `CategoryDto`,
+  `CollectionDto`, `CartDto`, `CartItemDto`, `OrderDto`, `CheckoutRequest`,
+  `ReviewDto`, `ReviewSummaryDto`, `WishlistItemDto`, `ProfileDto`, `CustomerDto`,
+  `AuthResponse`, `ApiListResponse`
+- `FormatUtil` — currency formatter (VND), sold count shortener, discount badge
+- Navigation graph (`nav_graph.xml`) with all fragments registered and arguments typed
+- Bottom navigation (Home, Products, Cart, Account)
+- `ProductRepository`, `CartRepository`, `AuthRepository`, `OrderRepository`
+
+### Như Ngọc — Home Banner/Image Slider ✅
+
+**Completed:** 2026-05-31
+
+#### Modified files
+
+| File | Change |
+|---|---|
+| `app/src/main/res/layout/fragment_home.xml` | Replaced static `FrameLayout` header with `ViewPager2` (`bannerViewPager`) + `DotsIndicator` (`bannerDotsIndicator`) inside a 200dp `FrameLayout` |
+| `app/src/main/java/com/unifurniture/mobile/ui/home/HomeFragment.java` | Added imports (`Handler`, `Looper`, `ArrayList`, `List`, `CollectionDto`, `ImageSliderAdapter`); added `bannerAdapter`, `autoScrollHandler`, `autoScrollRunnable` fields; added `setupBanner()` method; added collections observer in `observeData()`; added `onResume()` and `onPause()` overrides; updated `onDestroyView()` to cancel callbacks before nulling binding; removed unused `GridLayoutManager` import |
+
+#### Unchanged files (reused as-is)
+
+- `ui/adapter/ImageSliderAdapter.java` — no changes
+- `ui/home/HomeViewModel.java` — no changes
+- `data/model/CollectionDto.java` — no changes
+- `data/repository/ProductRepository.java` — no changes
+- `data/remote/ApiService.java` — no changes
+
+#### Smoke-test results
+
+| # | Test | Result |
+|---|---|---|
+| 1 | Home shows real banner image instead of green box | ✅ Pass |
+| 2 | Banner auto-advances every ~3.5 seconds | ✅ Pass |
+| 3 | Dots indicator reflects correct current page | ✅ Pass |
+| 4 | Dots hidden when 0 or 1 banner URL | ✅ Pass |
+| 5 | Manual swipe left/right works | ✅ Pass |
+| 6 | Navigate away and return — auto-scroll resumes without crash | ✅ Pass |
+| 7 | No crash when collections API returns null or empty | ✅ Pass |
+| 8 | No crash when individual `bannerUrl` is null | ✅ Pass |
+
+---
+
+### Như Ngọc's Scope — Scaffolded (partial, not complete) ⚠️
+
+**Home (`HomeFragment` / `HomeViewModel`)**
+- Search bar (submit-only, navigates to ProductList with query arg)
+- Category horizontal list (`CategoryAdapter`, tap navigates with `categoryId` + `categoryName`)
+- Featured products horizontal list (`ProductCardAdapter`, loads latest 10 by `createdAt desc`)
+- "View All" button → ProductList
+- SwipeRefresh
+- ShimmerFrameLayout (skeleton placeholder exists but not shaped)
+- Collections loaded in ViewModel but **not rendered in layout**
+- Banner area exists as a static colored box — **no actual image slider**
+
+**Product List (`ProductListFragment` / `ProductListViewModel`)**
+- 2-column `GridLayoutManager`
+- Four sort chips: Newest, Best Selling, Price Low, Price High
+- Handles incoming `search` and `categoryId` navigation arguments
+- SwipeRefresh
+- Product count label
+- ViewModel supports: `search()`, `filterByCategory()`, `filterByCollection()`,
+  `sortBy()`, `clearFilters()` — all API-connected and working
+
+**Product Detail (`ProductDetailFragment` / `ProductDetailViewModel`)**
+- ViewPager2 image slider with `ImageSliderAdapter` and `DotsIndicator`
+- Product name, sale price, original price (strikethrough), discount badge
+- `RatingBar` + average rating + review count
+- Warranty badge (conditional)
+- Variant selector as chip group (auto-selects first, tracks `selectedVariantId`)
+- Short description + full description sections
+- Reviews `RecyclerView` with `ReviewAdapter`
+- Add to Cart button (adds quantity = 1 of selected variant)
+- Back button
+
+**Adapters**
+- `ProductCardAdapter` — `ListAdapter` with `DiffUtil`, shows image/name/price/discount
+- `CategoryAdapter` — `ListAdapter` with `DiffUtil`, shows image/name
+- `ImageSliderAdapter` — basic `RecyclerView.Adapter` for ViewPager2 images
+- `ReviewAdapter` — `ListAdapter` with `DiffUtil`, shows name/rating/date/content
+
+---
+
+## In Progress
+
+None.
+
+---
+
+## Remaining Features — Như Ngọc's Scope
+
+### Home
+
+- [x] **Banner/Image Slider** ✅ Completed 2026-05-31
+- [ ] **Collections section** — Horizontal RecyclerView with `CollectionAdapter`;
+      data already in `HomeViewModel.getCollections()`
+- [ ] **Collections section** — Horizontal RecyclerView with `CollectionAdapter`;
+      data already in `HomeViewModel.getCollections()`
+- [ ] **Proper shimmer skeletons** — Replace single gray rectangle with skeleton
+      layouts shaped like actual category cards and product cards
+
+### Product List
+
+- [ ] **Filter bottom sheet** — Floating filter button opens `BottomSheetDialogFragment`
+      with multi-select category chips, price range slider, star-rating filter
+- [ ] **Price range filter in ViewModel** — Add `minPrice`/`maxPrice` params;
+      API already supports these query parameters
+- [ ] **Rating filter** — Add `minRating` filter param to ViewModel + API call
+- [ ] **Pagination / infinite scroll** — ViewModel tracks `currentPage` but no
+      scroll listener or "load more" mechanism exists
+- [ ] **Empty state view** — No UI shown when product list returns 0 results
+- [ ] **Grid / List view toggle** — Toolbar icon to switch between
+      `GridLayoutManager(2)` and `LinearLayoutManager`
+- [ ] **Active sort chip state** — Sort chips do not visually reflect the current
+      active sort when the screen is entered or after navigation
+
+### Search
+
+- [ ] **Real-time search with debounce** — `onQueryTextChange` is a no-op;
+      needs 300ms debounce + API call to update ProductList inline
+- [ ] **Search suggestions / autocomplete** — Dropdown or RecyclerView of matches
+      while typing
+- [ ] **Search history** — Recent searches stored in SharedPreferences, shown when
+      search bar is focused and empty
+
+### Product Detail
+
+- [ ] **Quantity selector** — `+/-` buttons before "Add to Cart"; always adds 1 now
+- [ ] **Stock status indicator** — `variant.stockQuantity` is available in the DTO
+      but never displayed; show "Còn hàng" / "Hết hàng" per selected variant
+- [ ] **Sold count** — `product.sold` field exists but not displayed
+- [ ] **Recommendations section** — `getProductRecommendations` endpoint exists
+      but is never called; add horizontal product strip at the bottom
+- [ ] **Review images** — `ReviewDto.images` field exists but `ReviewAdapter`
+      ignores it
+- [ ] **Admin reply on review** — `ReviewDto.reply` field exists but not rendered
+- [ ] **Deprecated back navigation** — `requireActivity().onBackPressed()` is
+      deprecated since API 33; replace with
+      `requireActivity().getOnBackPressedDispatcher().onBackPressed()`
+
+---
+
+## Prioritized Backlog
+
+### P1 — Core missing features (implement first)
+
+| # | Task | Why |
+|---|---|---|
+| 1 | ~~Home: Banner/Image Slider~~ | ✅ **DONE** 2026-05-31 |
+| 2 | Home: Collections section | Data loaded, zero effort to expose; doc explicitly requires it |
+| 3 | ProductList: Filter bottom sheet (category + price + rating) | Largest documented feature in scope, completely absent |
+| 4 | ProductList: Price range + rating in ViewModel/API | Backend dependency for P1 #3 |
+| 5 | ProductDetail: Quantity selector | Core e-commerce UX; without it users always add 1 |
+
+### P2 — Important UX gaps
+
+| # | Task | Why |
+|---|---|---|
+| 6 | ProductList: Pagination / infinite scroll | 20-item hard cap blocks discovery |
+| 7 | Search: Real-time debounced query | Doc says "Autocomplete"; current behavior is submit-only |
+| 8 | ProductList: Empty state view | Blank screen on 0 results is confusing |
+| 9 | ProductList: Grid/List toggle | Explicitly documented requirement |
+| 10 | ProductList: Active sort chip state | Visual correctness, low effort |
+
+### P3 — Polish and completeness
+
+| # | Task | Why |
+|---|---|---|
+| 11 | ProductDetail: Stock status per variant | Informs purchase decision |
+| 12 | ProductDetail: Sold count | Social proof display |
+| 13 | ProductDetail: Recommendations | Upsell flow; API already exists |
+| 14 | Home: Proper shimmer skeletons | Loading UX quality |
+| 15 | ProductDetail: Review images | Data exists, just not rendered |
+| 16 | ProductDetail: Admin reply on review | Data exists, just not rendered |
+| 17 | ProductDetail: Fix deprecated back nav | Code quality / future-proofing |
+| 18 | Search: Search history | Convenience UX |
+
+---
+
+## Next Recommended Task
+
+**Home — Collections section (P1 #2)**
+
+The banner observer already runs `viewModel.getCollections().observe(...)` in
+`HomeFragment.observeData()`. The same observer delivers the full `List<CollectionDto>`
+including `id`, `name`, and `slug` — everything needed to render a tappable
+collections row.
+
+What the implementation requires:
+1. **New file** `item_collection.xml` — a card showing `bannerUrl` image + `name`
+   label (similar in shape to `item_category.xml`)
+2. **New class** `CollectionAdapter` — `ListAdapter<CollectionDto, VH>` following
+   the exact same pattern as `CategoryAdapter`
+3. **`fragment_home.xml`** — add section label "Bộ sưu tập" and a horizontal
+   `RecyclerView` (`rvCollections`) below "Sản phẩm nổi bật"
+4. **`HomeFragment.java`** — add `CollectionAdapter collectionAdapter` field;
+   set it up in `setupRecyclerViews()`; feed it from the existing
+   `getCollections()` observer (already active — just add `collectionAdapter.submitList(...)`)
+
+Tap action: navigate to `productListFragment` with a `collectionId` argument.
+`ProductListViewModel.filterByCollection(String)` is already implemented.
+
+Estimated effort: Low (< 1 hour). Zero new API calls. Zero ViewModel changes.
