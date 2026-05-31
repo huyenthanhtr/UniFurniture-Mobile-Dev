@@ -4,7 +4,7 @@ Last updated: 2026-05-31
 Branch: feature/home
 Owner of this file: Như Ngọc
 
-> Home Banner/Image Slider (P1 #1) **completed 2026-05-31**. Next: Home Collections section (P1 #2).
+> Home Banner/Image Slider (P1 #1) **fully completed 2026-05-31** — implementation + 3 post-implementation bugs fixed + UI polish verified. Categories & Collections API format mismatch (server returns `List`, not `ApiListResponse`) also fixed as a side-effect. Next: Home Collections section (P1 #2).
 
 ---
 
@@ -27,21 +27,40 @@ working skeleton for all screens and wired up the API layer. Auth (Khải's scop
 functionally complete. All other screens — including Như Ngọc's scope — are scaffolded
 but incomplete: core features specified in the documentation are missing.
 
-**Completed 2026-05-31:** Như Ngọc implemented the Home Banner/Image Slider (P1 #1).
-Two source files modified; all 8 smoke-test items passed. Active work has moved to
-P1 #2 — Home Collections section.
+**Completed 2026-05-31:** Như Ngọc implemented and fully verified the Home Banner/Image
+Slider (P1 #1). Initial implementation + 3 post-implementation bugs fixed + UI polish
+applied. All 8 manual test items passed.
+
+**Also fixed 2026-05-31 (bugs found during first test run):**
+- `AuthActivity` showed blank white screen — fragment transaction was missing in `onCreate`
+- Server `POST /api/auth/login` rejected app requests — field name mismatch (`phone` vs
+  `emailOrPhone`) and response format mismatch (`profile` vs `{token, customer}`)
+- Network: `10.0.2.2` does not work on machines with VMware installed; use the host WiFi
+  IP (`192.168.1.12`) and set it in `Mobile/local.properties`
+
+**Also fixed 2026-05-31 (post-banner bugs):**
+- `GET /categories` and `GET /collections` return plain JSON arrays `[...]` but
+  `ApiService` declared `Call<ApiListResponse<T>>` — Gson failed silently, categories
+  and banner never rendered. Fixed by changing to `Call<List<T>>` across
+  `ApiService`, `ProductRepository`, `HomeViewModel`, `HomeFragment`,
+  `ProductListViewModel`.
+
+Active work has moved to P1 #2 — Home Collections section.
 
 ---
 
 ## Completed Features (across the project)
 
-### Khải Đào — Auth Flow ✅
-- Splash screen with 1.8s delay and session-based routing (MainActivity always for now)
+### Khải Đào — Auth Flow ✅ (with fixes applied 2026-05-31)
+- Splash screen with 1.8s delay and session-based routing
 - Login fragment (email/phone + password, calls `POST /auth/login`)
 - Register fragment (calls `POST /auth/register`)
 - OTP verification fragment (calls `POST /auth/verify-otp`)
 - Forgot password (calls `POST /auth/forgot-password`)
 - `SessionManager` — persists token, customer object, and cart ID in SharedPreferences
+- **Fix:** `AuthActivity.onCreate()` now shows `LoginFragment` on start (was blank screen)
+- **Fix:** `server/auth.controller.js` `login()` now accepts `phone` field alongside
+  `emailOrPhone`, and returns `{token, customer}` format the app expects
 
 ### Khải Đào — App Infrastructure ✅
 - `UniFurnitureApp` application class, holds singleton `ApiService`
@@ -61,26 +80,37 @@ P1 #2 — Home Collections section.
 
 **Completed:** 2026-05-31
 
+#### Implementation summary
+
+Banner slider powered by `ViewPager2` + `ImageSliderAdapter` (reused as-is from
+`ProductDetailFragment`) + `DotsIndicator`. Images sourced from `CollectionDto.bannerUrl`
+via the existing `HomeViewModel.getCollections()` LiveData. Auto-scroll every 3.5s via
+`Handler` + `Runnable`, lifecycle-managed across `onResume` / `onPause` / `onDestroyView`.
+UI polished with a dark gradient overlay behind the dots and accent-gold dot colour.
+
 #### Modified files
 
 | File | Change |
 |---|---|
-| `app/src/main/res/layout/fragment_home.xml` | Replaced static `FrameLayout` header with `ViewPager2` (`bannerViewPager`) + `DotsIndicator` (`bannerDotsIndicator`) inside a 200dp `FrameLayout` |
-| `app/src/main/java/com/unifurniture/mobile/ui/home/HomeFragment.java` | Added imports (`Handler`, `Looper`, `ArrayList`, `List`, `CollectionDto`, `ImageSliderAdapter`); added `bannerAdapter`, `autoScrollHandler`, `autoScrollRunnable` fields; added `setupBanner()` method; added collections observer in `observeData()`; added `onResume()` and `onPause()` overrides; updated `onDestroyView()` to cancel callbacks before nulling binding; removed unused `GridLayoutManager` import |
+| `fragment_home.xml` | Replaced static colored box with `ViewPager2` + gradient overlay `View` + styled `DotsIndicator` inside 200dp `FrameLayout`; added `android:overScrollMode="never"` |
+| `HomeFragment.java` | Added `setupBanner()`, collections observer (extracts `bannerUrl`, rewrites `localhost:3000` → real host), auto-scroll handler, `onResume`/`onPause`/`onDestroyView` lifecycle management |
+| `ImageSliderAdapter.java` | Added `DiskCacheStrategy.ALL` to Glide call so banner images are cached to disk — instant on subsequent opens |
+| `ApiService.java` | `getCategories` + `getCollections` return type: `Call<ApiListResponse<T>>` → `Call<List<T>>` (server returns plain array) |
+| `ProductRepository.java` | `getCategories` + `getCollections` return type: `LiveData<ApiListResponse<T>>` → `LiveData<List<T>>`; added `import java.util.List` |
+| `HomeViewModel.java` | `categories` + `collections` field type: `MutableLiveData<ApiListResponse<T>>` → `MutableLiveData<List<T>>`; updated getters; added `import java.util.List` |
+| `ProductListViewModel.java` | `categories` field + getter updated to `List<CategoryDto>`; added `import java.util.List` |
+| `drawable/bg_banner_gradient.xml` | New file — transparent-to-30%-black linear gradient used as overlay behind dots |
 
 #### Unchanged files (reused as-is)
 
-- `ui/adapter/ImageSliderAdapter.java` — no changes
-- `ui/home/HomeViewModel.java` — no changes
 - `data/model/CollectionDto.java` — no changes
-- `data/repository/ProductRepository.java` — no changes
-- `data/remote/ApiService.java` — no changes
+- `data/model/CollectionDto.bannerUrl` mapped via `@SerializedName("banner_url")`
 
-#### Smoke-test results
+#### Manual test results
 
 | # | Test | Result |
 |---|---|---|
-| 1 | Home shows real banner image instead of green box | ✅ Pass |
+| 1 | Home shows real banner images from `CollectionDto.bannerUrl` | ✅ Pass |
 | 2 | Banner auto-advances every ~3.5 seconds | ✅ Pass |
 | 3 | Dots indicator reflects correct current page | ✅ Pass |
 | 4 | Dots hidden when 0 or 1 banner URL | ✅ Pass |
@@ -142,8 +172,6 @@ None.
 ### Home
 
 - [x] **Banner/Image Slider** ✅ Completed 2026-05-31
-- [ ] **Collections section** — Horizontal RecyclerView with `CollectionAdapter`;
-      data already in `HomeViewModel.getCollections()`
 - [ ] **Collections section** — Horizontal RecyclerView with `CollectionAdapter`;
       data already in `HomeViewModel.getCollections()`
 - [ ] **Proper shimmer skeletons** — Replace single gray rectangle with skeleton

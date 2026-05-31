@@ -1,6 +1,6 @@
 # UniFurniture Mobile — Technical Decisions & Conventions
 
-Last updated: 2026-05-31
+Last updated: 2026-05-31 (P1 #1 closed)
 Branch: feature/home
 Owner of this file: Như Ngọc
 
@@ -239,6 +239,57 @@ It uses plain `notifyDataSetChanged()` in `updateImages()`. This is fine for the
 image slider (small, replaced all at once) — do not change this adapter, but do
 not use this pattern in new adapters.
 
+### `AuthActivity` was missing its initial fragment transaction
+`AuthActivity.onCreate()` called `setContentView()` but never showed any fragment,
+resulting in a blank white screen. Fixed by adding:
+```java
+if (savedInstanceState == null) {
+    getSupportFragmentManager()
+        .beginTransaction()
+        .replace(android.R.id.content, new LoginFragment())
+        .commit();
+}
+```
+All auth fragment navigation (Login → Register → OTP) uses `android.R.id.content`
+as the container — the initial transaction must use the same container for consistency.
+
+### VMware on host machine breaks Android emulator's `10.0.2.2` routing
+On machines with VMware installed, the standard emulator shortcut `10.0.2.2`
+(which normally maps to host's `localhost`) times out. Root cause: VMware's virtual
+network adapters (`VMnet1`, `VMnet8`) interfere with QEMU's virtual network routing.
+
+**Workaround confirmed working (2026-05-31):**
+Set `api.base.url` in `Mobile/local.properties` to the host machine's WiFi adapter IP:
+```
+api.base.url=http://192.168.1.12:3000/api/
+```
+Find the correct IP with `ipconfig` — use the `IPv4 Address` under `Wireless LAN adapter Wi-Fi`,
+not any VMware adapter. This IP changes when the network changes, so each team member
+must set their own value. `local.properties` is gitignored — never commit it.
+
+`adb reverse tcp:3000 tcp:3000` also works as an alternative but resets on every
+emulator restart; the WiFi IP approach is more stable for development.
+
+### Server `POST /api/auth/login` had two API mismatches with the mobile app
+Discovered 2026-05-31 during first login test. Two issues:
+
+**Issue 1 — Field name:** App sent `{"phone": "..."}`, server expected `{"emailOrPhone": "..."}`,
+causing a `400 Information required` response.
+
+**Issue 2 — Response format:** Server returned `{ message, profile }`, but the app's
+`AuthViewModel` checks `response.token != null` and `LoginFragment` calls
+`session.saveCustomer(result.customer)`. Without `token` and `customer` keys, login
+appeared to fail silently.
+
+**Fix applied to `server/src/controllers/auth.controller.js`:**
+- `login()` now reads `emailOrPhone || phone` so both field names are accepted
+- Successful login returns `{ token: profile._id, customer: { _id, name, phone, email } }`
+
+**Note:** The `token` is currently the MongoDB `_id` string — not a signed JWT.
+This is sufficient for development and guest-mode testing, but Khải should replace
+it with a proper `jsonwebtoken`-signed token before the project is demoed, since
+`SessionManager` uses the token presence to determine login state.
+
 ---
 
 ## Technical Recommendations
@@ -311,7 +362,7 @@ analysed or built. One entry per feature, added before implementation begins.
 ### [P1 #1] Home: Banner / Image Slider
 
 **Date recorded:** 2026-05-31
-**Status:** In Progress — implementation not yet started
+**Status:** ✅ Completed 2026-05-31 — manually tested, all 8 items passed
 
 ---
 
@@ -440,3 +491,54 @@ FrameLayout  (match_parent × 200dp)
 
 `DotsIndicator` version 5.0 is already in `build.gradle` and its `attachTo(ViewPager2)`
 API is confirmed working. No version change required.
+
+---
+
+#### Decision: Fix `GET /categories` and `GET /collections` to return `List<T>` not `ApiListResponse<T>`
+
+**Discovered:** 2026-05-31 during banner testing (categories and banner both blank)
+
+**Root cause:** Both server controllers (`getAllCategories`, `getAllCollections`) return
+a plain JSON array `[...]`. The Android `ApiService` declared
+`Call<ApiListResponse<CategoryDto>>` / `Call<ApiListResponse<CollectionDto>>`, which
+expects `{ items: [...], total: N }`. Gson threw a `JsonSyntaxException` silently →
+`onFailure` called → LiveData set to `null` → nothing rendered.
+
+**Fix applied:** Changed return types to `Call<List<T>>` in `ApiService`,
+`LiveData<List<T>>` in `ProductRepository`, `MutableLiveData<List<T>>` in
+`HomeViewModel` and `ProductListViewModel`.
+
+**Why not fix the server instead:** The web admin's `AdminCollections` component
+does `this.collections = data` expecting a raw array. Wrapping the server response
+in `{ items, total }` would break the admin UI. The mobile-side fix is the safer
+change with zero cross-team impact.
+
+**Rule going forward:** Before adding a new `ApiService` endpoint that returns a
+list, check the actual server response shape with Postman first. Do not assume all
+list endpoints return `ApiListResponse`.
+
+---
+
+#### Decision: Banner UI polish — gradient overlay + styled DotsIndicator + disk cache
+
+**Date:** 2026-05-31
+
+**Gradient overlay:**
+Added a 60dp `View` with `bg_banner_gradient.xml` (transparent → 33% black, top to
+bottom) anchored to the bottom of the banner `FrameLayout`. This ensures dots remain
+readable against any banner image without darkening the full slide.
+
+**DotsIndicator styling:**
+- `app:dotsColor="#80FFFFFF"` — inactive dots: 50% white
+- `app:selectedDotColor="@color/accent"` — active dot: `#D4A853` gold (confirmed
+  correct attribute name for `dotsindicator:5.0`; `dotsSelectedColor` does NOT exist
+  in this version and causes a resource-linking error)
+- `app:dotsSize="5dp"` / `app:dotsSpacing="3dp"` — smaller and tighter than library
+  defaults (8dp / 4dp) for a cleaner look on the 200dp banner
+
+**Glide disk cache:**
+Added `diskCacheStrategy(DiskCacheStrategy.ALL)` to `ImageSliderAdapter.onBindViewHolder`.
+This caches both the original and transformed (centre-cropped) bitmap to disk.
+After the first network load, subsequent app opens show banner images instantly
+without waiting for a network round-trip. Applies to all `ImageSliderAdapter` usages
+(home banner and product detail images).

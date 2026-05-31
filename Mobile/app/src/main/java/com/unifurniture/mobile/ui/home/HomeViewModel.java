@@ -8,13 +8,14 @@ import androidx.lifecycle.MutableLiveData;
 import com.unifurniture.mobile.UniFurnitureApp;
 import com.unifurniture.mobile.data.model.*;
 import com.unifurniture.mobile.data.repository.ProductRepository;
+import java.util.List;
 
 public class HomeViewModel extends AndroidViewModel {
 
     private final ProductRepository repository;
     private final MutableLiveData<ApiListResponse<ProductDto>> featuredProducts = new MutableLiveData<>();
-    private final MutableLiveData<ApiListResponse<CategoryDto>> categories = new MutableLiveData<>();
-    private final MutableLiveData<ApiListResponse<CollectionDto>> collections = new MutableLiveData<>();
+    private final MutableLiveData<List<CategoryDto>> categories = new MutableLiveData<>();
+    private final MutableLiveData<List<CollectionDto>> collections = new MutableLiveData<>();
     private final MutableLiveData<Boolean> loading = new MutableLiveData<>(false);
 
     public HomeViewModel(@NonNull Application application) {
@@ -38,7 +39,7 @@ public class HomeViewModel extends AndroidViewModel {
     }
 
     public LiveData<ApiListResponse<ProductDto>> getFeaturedProducts() { return featuredProducts; }
-    public LiveData<ApiListResponse<CategoryDto>> getCategories() { return categories; }
-    public LiveData<ApiListResponse<CollectionDto>> getCollections() { return collections; }
+    public LiveData<List<CategoryDto>> getCategories() { return categories; }
+    public LiveData<List<CollectionDto>> getCollections() { return collections; }
     public LiveData<Boolean> isLoading() { return loading; }
 }

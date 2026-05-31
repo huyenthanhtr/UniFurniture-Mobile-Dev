@@ -8,13 +8,14 @@ import androidx.lifecycle.MutableLiveData;
 import com.unifurniture.mobile.UniFurnitureApp;
 import com.unifurniture.mobile.data.model.*;
 import com.unifurniture.mobile.data.repository.ProductRepository;
+import java.util.List;
 
 public class ProductListViewModel extends AndroidViewModel {
 
     private final ProductRepository repository;
     private final MutableLiveData<ApiListResponse<ProductDto>> products = new MutableLiveData<>();
     private final MutableLiveData<Boolean> loading = new MutableLiveData<>(false);
-    private final MutableLiveData<ApiListResponse<CategoryDto>> categories = new MutableLiveData<>();
+    private final MutableLiveData<List<CategoryDto>> categories = new MutableLiveData<>();
 
     private int currentPage = 1;
     private static final int PAGE_SIZE = 20;
@@ -82,5 +83,5 @@ public class ProductListViewModel extends AndroidViewModel {
 
     public LiveData<ApiListResponse<ProductDto>> getProducts() { return products; }
     public LiveData<Boolean> isLoading() { return loading; }
-    public LiveData<ApiListResponse<CategoryDto>> getCategories() { return categories; }
+    public LiveData<List<CategoryDto>> getCategories() { return categories; }
 }

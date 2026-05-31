@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.unifurniture.mobile.R;
 import java.util.List;
 
@@ -42,6 +43,7 @@ public class ImageSliderAdapter extends RecyclerView.Adapter<ImageSliderAdapter.
         Glide.with(context)
                 .load(imageUrls.get(position))
                 .placeholder(R.drawable.placeholder_product)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .centerCrop()
                 .into((ImageView) holder.itemView);
     }

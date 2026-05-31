@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.unifurniture.mobile.R;
+import com.unifurniture.mobile.BuildConfig;
 import com.unifurniture.mobile.data.model.CollectionDto;
 import com.unifurniture.mobile.databinding.FragmentHomeBinding;
 import com.unifurniture.mobile.ui.adapter.CategoryAdapter;
@@ -116,18 +117,19 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        viewModel.getCategories().observe(getViewLifecycleOwner(), response -> {
-            if (response != null && response.items != null) {
-                categoryAdapter.submitList(response.items);
+        viewModel.getCategories().observe(getViewLifecycleOwner(), items -> {
+            if (items != null) {
+                categoryAdapter.submitList(items);
             }
         });
 
-        viewModel.getCollections().observe(getViewLifecycleOwner(), response -> {
-            if (response == null || response.items == null) return;
+        viewModel.getCollections().observe(getViewLifecycleOwner(), items -> {
+            if (items == null || items.isEmpty()) return;
+            String serverHost = BuildConfig.API_BASE_URL.replace("/api/", "");
             List<String> bannerUrls = new ArrayList<>();
-            for (CollectionDto c : response.items) {
+            for (CollectionDto c : items) {
                 if (c.bannerUrl != null && !c.bannerUrl.isEmpty()) {
-                    bannerUrls.add(c.bannerUrl);
+                    bannerUrls.add(c.bannerUrl.replace("http://localhost:3000", serverHost));
                 }
             }
             if (bannerUrls.isEmpty()) return;

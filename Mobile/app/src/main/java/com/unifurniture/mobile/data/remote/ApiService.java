@@ -60,14 +60,14 @@ public interface ApiService {
 
     // ── Categories & Collections ──────────────────────────────────────────────
     @GET("categories")
-    Call<ApiListResponse<CategoryDto>> getCategories(
+    Call<List<CategoryDto>> getCategories(
             @Query("page") int page,
             @Query("limit") int limit,
             @Query("status") String status
     );
 
     @GET("collections")
-    Call<ApiListResponse<CollectionDto>> getCollections(
+    Call<List<CollectionDto>> getCollections(
             @Query("page") int page,
             @Query("limit") int limit,
             @Query("status") String status
