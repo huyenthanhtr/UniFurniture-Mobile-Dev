@@ -71,10 +71,11 @@ public class OrderListFragment extends Fragment {
         public OrderListViewModel(@NonNull Application application) {
             super(application);
             repository = new OrderRepository(UniFurnitureApp.getInstance().getApiService());
-            String customerId = SessionManager.getInstance(application).getCustomerId();
-            if (customerId != null) {
+            // Use profile ID (account_id) instead of customer_id
+            String accountId = SessionManager.getInstance(application).getProfileId();
+            if (accountId != null) {
                 loading.setValue(true);
-                repository.getOrders(customerId).observeForever(r -> {
+                repository.getOrders(accountId).observeForever(r -> {
                     orders.setValue(r);
                     loading.setValue(false);
                 });

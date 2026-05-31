@@ -25,7 +25,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:text="UniFurniture"
+                    android:text="@string/str_app_name"
                     android:textColor="@color/white"
                     android:textSize="28sp"
                     android:textStyle="bold" />
@@ -38,7 +38,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
                 android:background="@drawable/bg_search"
-                app:queryHint="Tìm kiếm sản phẩm..."
+                app:queryHint="@string/str_search_products_hint"
                 app:iconifiedByDefault="false" />
 
             <!-- Loading Shimmer -->
@@ -60,7 +60,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
-                android:text="Danh mục"
+                android:text="@string/str_categories"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="@color/black" />
@@ -87,7 +87,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Sản phẩm nổi bật"
+                    android:text="@string/str_featured_products"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="@color/black" />
@@ -95,7 +95,7 @@
                     android:id="@+id/btnViewAll"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Xem tất cả ›"
+                    android:text="@string/str_view_all"
                     android:textColor="@color/primary"
                     android:padding="8dp" />
             </LinearLayout>

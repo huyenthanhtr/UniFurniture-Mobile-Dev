@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import com.unifurniture.mobile.UniFurnitureApp;
 import com.unifurniture.mobile.data.model.CartDto;
+import com.unifurniture.mobile.data.model.CartItemDto;
 import com.unifurniture.mobile.data.repository.CartRepository;
 import com.unifurniture.mobile.util.SessionManager;
 
@@ -33,6 +34,9 @@ public class CartViewModel extends AndroidViewModel {
         loading.setValue(true);
         repository.getActiveCart(customerId).observeForever(c -> {
             cart.setValue(c);
+            if (c != null && c.getCartId() != null) {
+                session.saveCartId(c.getCartId());
+            }
             loading.setValue(false);
         });
     }
@@ -43,18 +47,23 @@ public class CartViewModel extends AndroidViewModel {
             return;
         }
         repository.updateCartItemQuantity(cartItemId, quantity)
-                .observeForever(cart::setValue);
+                .observeForever(success -> {
+                    if (Boolean.TRUE.equals(success)) loadCart();
+                });
     }
 
     public void removeItem(String cartItemId) {
-        repository.removeCartItem(cartItemId).observeForever(cart::setValue);
+        repository.removeCartItem(cartItemId)
+                .observeForever(success -> {
+                    if (Boolean.TRUE.equals(success)) loadCart();
+                });
     }
 
     public double getTotal() {
         CartDto c = cart.getValue();
         if (c == null || c.items == null) return 0;
         double total = 0;
-        for (var item : c.items) total += item.getTotalPrice();
+        for (CartItemDto item : c.items) total += item.getTotalPrice();
         return total;
     }
 

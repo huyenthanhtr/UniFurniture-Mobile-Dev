@@ -20,7 +20,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Sản phẩm"
+            android:text="@string/str_nav_products"
             android:textColor="@color/white"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -48,25 +48,25 @@
                 android:id="@+id/chipNewest"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Mới nhất"
+                android:text="@string/str_sort_newest"
                 style="@style/Widget.MaterialComponents.Chip.Choice" />
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipBestSelling"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Bán chạy"
+                android:text="@string/str_sort_best_selling"
                 style="@style/Widget.MaterialComponents.Chip.Choice" />
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipPriceLow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Giá thấp"
+                android:text="@string/str_sort_price_low"
                 style="@style/Widget.MaterialComponents.Chip.Choice" />
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipPriceHigh"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Giá cao"
+                android:text="@string/str_sort_price_high"
                 style="@style/Widget.MaterialComponents.Chip.Choice" />
         </com.google.android.material.chip.ChipGroup>
     </HorizontalScrollView>

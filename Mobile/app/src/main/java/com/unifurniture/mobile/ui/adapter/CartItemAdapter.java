@@ -68,21 +68,26 @@ public class CartItemAdapter extends ListAdapter<CartItemDto, CartItemAdapter.Vi
 
         void bind(CartItemDto item, OnQuantityChangeListener quantityListener,
                   OnRemoveListener removeListener) {
-            // Product info
-            if (item.product != null) {
-                binding.tvName.setText(item.product.name);
+            // Product info — from nested variant → product
+            binding.tvName.setText(item.getProductName());
+            String imageUrl = item.getImageUrl();
+            if (imageUrl != null && !imageUrl.isEmpty()) {
                 Glide.with(binding.getRoot())
-                        .load(item.product.getImageUrl())
+                        .load(imageUrl)
                         .placeholder(R.drawable.placeholder_product)
                         .centerCrop()
                         .into(binding.ivProduct);
             }
-            if (item.variant != null && item.variant.color != null) {
-                binding.tvVariant.setText("Màu: " + item.variant.color);
+
+            String colorLabel = item.getColorLabel();
+            if (colorLabel != null && !colorLabel.isEmpty()) {
+                binding.tvVariant.setText(binding.getRoot().getContext().getString(R.string.str_color_format, colorLabel));
                 binding.tvVariant.setVisibility(View.VISIBLE);
+            } else {
+                binding.tvVariant.setVisibility(View.GONE);
             }
 
-            binding.tvPrice.setText(FormatUtil.formatCurrency(item.price));
+            binding.tvPrice.setText(FormatUtil.formatCurrency(item.getEffectivePrice()));
             binding.tvQuantity.setText(String.valueOf(item.quantity != null ? item.quantity : 1));
 
             binding.btnMinus.setOnClickListener(v -> {

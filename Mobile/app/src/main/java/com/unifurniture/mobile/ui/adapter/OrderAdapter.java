@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import com.unifurniture.mobile.data.model.OrderDto;
 import com.unifurniture.mobile.databinding.ItemOrderBinding;
+import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.util.FormatUtil;
 
 public class OrderAdapter extends ListAdapter<OrderDto, OrderAdapter.ViewHolder> {
@@ -49,11 +50,10 @@ public class OrderAdapter extends ListAdapter<OrderDto, OrderAdapter.ViewHolder>
         }
 
         void bind(OrderDto order) {
-            binding.tvOrderId.setText("Đơn hàng #" + order.id.substring(Math.max(0, order.id.length() - 8)));
+            binding.tvOrderId.setText(binding.getRoot().getContext().getString(R.string.str_order_code_format, order.getDisplayCode()));
             binding.tvStatus.setText(order.getStatusLabel());
             binding.tvTotal.setText(FormatUtil.formatCurrency(order.totalAmount));
-            binding.tvDate.setText(order.createdAt != null ?
-                    order.createdAt.substring(0, Math.min(10, order.createdAt.length())) : "");
+            binding.tvDate.setText(order.getDisplayDate());
         }
     }
 }

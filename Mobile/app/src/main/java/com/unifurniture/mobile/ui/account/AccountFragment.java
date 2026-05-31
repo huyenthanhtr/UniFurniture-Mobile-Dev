@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import com.unifurniture.mobile.data.model.ProfileDto;
 import com.unifurniture.mobile.databinding.FragmentAccountBinding;
 import com.unifurniture.mobile.ui.auth.AuthActivity;
 import com.unifurniture.mobile.util.SessionManager;
@@ -40,9 +41,9 @@ public class AccountFragment extends Fragment {
         binding.layoutGuest.setVisibility(View.GONE);
         binding.layoutUser.setVisibility(View.VISIBLE);
 
-        var customer = session.getCustomer();
-        binding.tvUserName.setText(customer.name != null ? customer.name : "Khách hàng");
-        binding.tvUserPhone.setText(customer.phone);
+        ProfileDto profile = session.getProfile();
+        binding.tvUserName.setText(profile.getDisplayName());
+        binding.tvUserPhone.setText(profile.phone != null ? profile.phone : "");
 
         binding.itemOrders.setOnClickListener(v -> {
             // Navigate to order list

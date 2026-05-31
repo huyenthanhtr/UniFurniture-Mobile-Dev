@@ -17,7 +17,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="UniFurniture"
+        android:text="@string/str_app_name"
         android:textSize="26sp"
         android:textStyle="bold"
         android:textColor="@color/primary"
@@ -26,7 +26,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Đăng nhập"
+        android:text="@string/str_login"
         android:textSize="18sp"
         android:textColor="@color/gray_600"
         android:layout_marginTop="4dp"
@@ -35,20 +35,20 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Số điện thoại"
+        android:hint="@string/str_hint_email_or_phone"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etPhone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="phone"
+            android:inputType="text"
             android:imeOptions="actionNext" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Mật khẩu"
+        android:hint="@string/str_password"
         android:layout_marginTop="12dp"
         app:passwordToggleEnabled="true"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -61,6 +61,16 @@
             android:imeOptions="actionDone" />
     </com.google.android.material.textfield.TextInputLayout>
 
+    <TextView
+        android:id="@+id/tvForgotPassword"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/str_forgot_password_prompt"
+        android:textColor="@color/gray_600"
+        android:padding="8dp"
+        android:layout_gravity="end"
+        android:layout_marginTop="4dp" />
+
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
@@ -72,7 +82,7 @@
         android:id="@+id/btnLogin"
         android:layout_width="match_parent"
         android:layout_height="52dp"
-        android:text="Đăng nhập"
+        android:text="@string/str_login"
         android:layout_marginTop="20dp"
         style="@style/Widget.UniFurniture.Button.Primary" />
 
@@ -80,7 +90,7 @@
         android:id="@+id/tvRegister"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Chưa có tài khoản? Đăng ký ngay"
+        android:text="@string/str_new_customer_register"
         android:textColor="@color/primary"
         android:padding="12dp"
         android:layout_marginTop="8dp" />

@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.databinding.FragmentRegisterBinding;
 
 public class RegisterFragment extends Fragment {
@@ -31,9 +32,37 @@ public class RegisterFragment extends Fragment {
 
         binding.btnRegister.setOnClickListener(v -> {
             String name = binding.etName.getText().toString().trim();
+            String email = binding.etEmail.getText().toString().trim();
             String phone = binding.etPhone.getText().toString().trim();
             String password = binding.etPassword.getText().toString().trim();
-            viewModel.register(phone, password, name);
+            String confirmPassword = binding.etConfirmPassword.getText().toString().trim();
+
+            if (name.isEmpty() || phone.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+                Toast.makeText(requireContext(), R.string.str_please_fill_required_fields, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (!email.isEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                Toast.makeText(requireContext(), R.string.str_invalid_email, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (phone.length() < 9 || phone.length() > 10) {
+                Toast.makeText(requireContext(), R.string.str_invalid_phone, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (password.length() < 8) {
+                Toast.makeText(requireContext(), R.string.str_password_too_short, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (!password.equals(confirmPassword)) {
+                Toast.makeText(requireContext(), R.string.str_password_mismatch, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            viewModel.register(phone, password, name, email);
         });
 
         binding.tvLogin.setOnClickListener(v -> requireActivity().onBackPressed());
@@ -50,7 +79,7 @@ public class RegisterFragment extends Fragment {
         viewModel.getAuthResult().observe(getViewLifecycleOwner(), result -> {
             if (result != null) {
                 Toast.makeText(requireContext(),
-                        "Đăng ký thành công! Nhập OTP xác thực.", Toast.LENGTH_LONG).show();
+                        R.string.str_register_success_otp_prompt, Toast.LENGTH_LONG).show();
                 // Navigate to OTP screen
                 requireActivity().getSupportFragmentManager()
                         .beginTransaction()

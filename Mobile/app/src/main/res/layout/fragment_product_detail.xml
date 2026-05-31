@@ -30,12 +30,12 @@
                 android:src="@drawable/ic_back"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:tint="@color/white"
-                android:contentDescription="Quay lại" />
+                android:contentDescription="@string/str_back" />
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Chi tiết sản phẩm"
+                android:text="@string/str_product_detail"
                 android:textColor="@color/white"
                 android:textSize="17sp"
                 android:textStyle="bold"
@@ -169,7 +169,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Chọn màu / kiểu"
+                android:text="@string/str_select_variant"
                 android:textStyle="bold"
                 android:textSize="15sp" />
             <com.google.android.material.chip.ChipGroup
@@ -190,7 +190,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Mô tả ngắn"
+                android:text="@string/str_short_desc"
                 android:textStyle="bold"
                 android:textSize="15sp" />
             <TextView
@@ -213,7 +213,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Mô tả chi tiết"
+                android:text="@string/str_detailed_desc"
                 android:textStyle="bold"
                 android:textSize="15sp" />
             <TextView
@@ -236,7 +236,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Đánh giá"
+                android:text="@string/str_reviews"
                 android:textStyle="bold"
                 android:textSize="15sp" />
             <androidx.recyclerview.widget.RecyclerView
@@ -269,7 +269,7 @@
             android:id="@+id/btnAddToCart"
             android:layout_width="match_parent"
             android:layout_height="52dp"
-            android:text="Thêm vào giỏ"
+            android:text="@string/str_add_to_cart"
             style="@style/Widget.UniFurniture.Button.Primary" />
 
     </LinearLayout>

@@ -85,7 +85,7 @@ public class ProductDetailFragment extends Fragment {
             binding.tvDescription.setText(product.description);
             binding.tvShortDesc.setText(product.shortDescription);
             if (product.warrantyMonths != null && product.warrantyMonths > 0) {
-                binding.tvWarranty.setText("Bảo hành " + product.warrantyMonths + " tháng");
+                binding.tvWarranty.setText(getString(R.string.str_warranty_format, product.warrantyMonths));
                 binding.tvWarranty.setVisibility(View.VISIBLE);
             }
         });
@@ -128,15 +128,15 @@ public class ProductDetailFragment extends Fragment {
         viewModel.getReviews().observe(getViewLifecycleOwner(), summary -> {
             if (summary != null) {
                 binding.tvRating.setText(String.format("%.1f", summary.averageRating));
-                binding.tvReviewCount.setText("(" + summary.totalReviews + " đánh giá)");
+                binding.tvReviewCount.setText(getString(R.string.str_reviews_count_format, summary.totalReviews));
                 binding.ratingBar.setRating((float) summary.averageRating);
                 if (summary.items != null) reviewAdapter.submitList(summary.items);
             }
         });
 
-        viewModel.getAddToCartResult().observe(getViewLifecycleOwner(), cart -> {
-            if (cart != null) {
-                Toast.makeText(requireContext(), "Đã thêm vào giỏ hàng!", Toast.LENGTH_SHORT).show();
+        viewModel.getAddToCartResult().observe(getViewLifecycleOwner(), success -> {
+            if (Boolean.TRUE.equals(success)) {
+                Toast.makeText(requireContext(), R.string.str_added_to_cart_success, Toast.LENGTH_SHORT).show();
             }
         });
 

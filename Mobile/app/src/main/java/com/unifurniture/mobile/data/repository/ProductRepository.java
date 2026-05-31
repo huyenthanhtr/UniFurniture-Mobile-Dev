@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import com.unifurniture.mobile.data.model.*;
 import com.unifurniture.mobile.data.remote.ApiService;
+import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -105,15 +106,25 @@ public class ProductRepository {
 
     public LiveData<ApiListResponse<CategoryDto>> getCategories() {
         MutableLiveData<ApiListResponse<CategoryDto>> result = new MutableLiveData<>();
-        apiService.getCategories(1, 100, "active")
-                .enqueue(new Callback<ApiListResponse<CategoryDto>>() {
+        apiService.getCategories()
+                .enqueue(new Callback<List<CategoryDto>>() {
                     @Override
-                    public void onResponse(Call<ApiListResponse<CategoryDto>> call,
-                                           Response<ApiListResponse<CategoryDto>> response) {
-                        result.setValue(response.isSuccessful() ? response.body() : null);
+                    public void onResponse(Call<List<CategoryDto>> call,
+                                           Response<List<CategoryDto>> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            ApiListResponse<CategoryDto> wrapped = new ApiListResponse<>();
+                            wrapped.items = response.body();
+                            wrapped.total = response.body().size();
+                            wrapped.limit = response.body().size();
+                            wrapped.page = 1;
+                            wrapped.totalPages = 1;
+                            result.setValue(wrapped);
+                        } else {
+                            result.setValue(null);
+                        }
                     }
                     @Override
-                    public void onFailure(Call<ApiListResponse<CategoryDto>> call, Throwable t) {
+                    public void onFailure(Call<List<CategoryDto>> call, Throwable t) {
                         result.setValue(null);
                     }
                 });
@@ -122,15 +133,25 @@ public class ProductRepository {
 
     public LiveData<ApiListResponse<CollectionDto>> getCollections() {
         MutableLiveData<ApiListResponse<CollectionDto>> result = new MutableLiveData<>();
-        apiService.getCollections(1, 100, "active")
-                .enqueue(new Callback<ApiListResponse<CollectionDto>>() {
+        apiService.getCollections()
+                .enqueue(new Callback<List<CollectionDto>>() {
                     @Override
-                    public void onResponse(Call<ApiListResponse<CollectionDto>> call,
-                                           Response<ApiListResponse<CollectionDto>> response) {
-                        result.setValue(response.isSuccessful() ? response.body() : null);
+                    public void onResponse(Call<List<CollectionDto>> call,
+                                           Response<List<CollectionDto>> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            ApiListResponse<CollectionDto> wrapped = new ApiListResponse<>();
+                            wrapped.items = response.body();
+                            wrapped.total = response.body().size();
+                            wrapped.limit = response.body().size();
+                            wrapped.page = 1;
+                            wrapped.totalPages = 1;
+                            result.setValue(wrapped);
+                        } else {
+                            result.setValue(null);
+                        }
                     }
                     @Override
-                    public void onFailure(Call<ApiListResponse<CollectionDto>> call, Throwable t) {
+                    public void onFailure(Call<List<CollectionDto>> call, Throwable t) {
                         result.setValue(null);
                     }
                 });

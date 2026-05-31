@@ -1,18 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">UniFurniture</string>
-    <string name="nav_home">Trang chủ</string>
-    <string name="nav_products">Sản phẩm</string>
-    <string name="nav_cart">Giỏ hàng</string>
-    <string name="nav_account">Tài khoản</string>
-    <string name="login">Đăng nhập</string>
-    <string name="register">Đăng ký</string>
-    <string name="phone">Số điện thoại</string>
-    <string name="password">Mật khẩu</string>
-    <string name="add_to_cart">Thêm vào giỏ</string>
-    <string name="checkout">Thanh toán</string>
-    <string name="total">Tổng cộng</string>
-    <string name="empty_cart">Giỏ hàng trống</string>
-    <string name="no_orders">Bạn chưa có đơn hàng nào</string>
-    <string name="loading">Đang tải...</string>
+    <string name="str_app_name">UniFurniture</string>
+    <string name="str_nav_home">Trang chủ</string>
+    <string name="str_nav_products">Sản phẩm</string>
+    <string name="str_nav_cart">Giỏ hàng</string>
+    <string name="str_nav_account">Tài khoản</string>
+    <string name="str_login">Đăng nhập</string>
+    <string name="str_register">Đăng ký</string>
+    <string name="str_phone">Số điện thoại</string>
+    <string name="str_password">Mật khẩu</string>
+    <string name="str_add_to_cart">Thêm vào giỏ</string>
+    <string name="str_checkout">Thanh toán</string>
+    <string name="str_total">Tổng cộng</string>
+    <string name="str_empty_cart">Giỏ hàng trống</string>
+    <string name="str_no_orders">Bạn chưa có đơn hàng nào</string>
+    <string name="str_loading">Đang tải...</string>
+
+    <!-- Login screen -->
+    <string name="str_forgot_password_prompt">Quên mật khẩu?</string>
+    <string name="str_new_customer_register">Khách hàng mới? Tạo tài khoản</string>
+    <string name="str_hint_email_or_phone">Nhập email hoặc số điện thoại</string>
+
+    <!-- Register screen -->
+    <string name="str_register_title">Đăng ký tài khoản</string>
+    <string name="str_hint_fullname">Họ và tên</string>
+    <string name="str_hint_email_optional">Email (Không bắt buộc)</string>
+    <string name="str_confirm_password">Xác nhận mật khẩu</string>
+    <string name="str_already_have_account">Đã có tài khoản? Đăng nhập</string>
+
+    <!-- OTP screen -->
+    <string name="str_otp_title">Xác thực OTP</string>
+    <string name="str_otp_instruction">Nhập mã OTP đã gửi qua SMS</string>
+    <string name="str_hint_otp">Mã OTP</string>
+    <string name="str_verify">Xác thực</string>
+
+    <!-- Forgot Password screen -->
+    <string name="str_forgot_title">Khôi phục mật khẩu</string>
+    <string name="str_forgot_phone_instruction">Nhập số điện thoại đã đăng ký để nhận mã OTP:</string>
+    <string name="str_send_otp">Gửi mã OTP</string>
+    <string name="str_forgot_otp_instruction">Nhập mã OTP (6 số) đã được gửi đến số điện thoại:</string>
+    <string name="str_verify_otp_btn">Xác nhận OTP</string>
+    <string name="str_forgot_newpass_instruction">Nhập mật khẩu mới cho tài khoản:</string>
+    <string name="str_forgot_newpass_hint">Mật khẩu mới (ít nhất 8 ký tự)</string>
+    <string name="str_forgot_confirmpass_hint">Xác nhận mật khẩu mới</string>
+    <string name="str_reset_password_btn">Đặt lại mật khẩu</string>
+    <string name="str_remembered_password">Đã nhớ mật khẩu? Đăng nhập</string>
+
+    <!-- Other general screens -->
+    <string name="str_not_logged_in">Bạn chưa đăng nhập</string>
+    <string name="str_login_or_register">Đăng nhập / Đăng ký</string>
+    <string name="str_my_orders">Đơn hàng của tôi</string>
+    <string name="str_favorite_products">Sản phẩm yêu thích</string>
+    <string name="str_logout">Đăng xuất</string>
+    <string name="str_back">Quay lại</string>
+    <string name="str_order">Đặt hàng</string>
+    <string name="str_shipping_info">Thông tin giao hàng</string>
+    <string name="str_shipping_name_hint">Họ và tên người nhận</string>
+    <string name="str_shipping_address_hint">Địa chỉ giao hàng</string>
+    <string name="str_payment_method">Phương thức thanh toán</string>
+    <string name="str_payment_cod">💵  Thanh toán khi nhận hàng (COD)</string>
+    <string name="str_payment_bank">🏦  Chuyển khoản ngân hàng</string>
+    <string name="str_confirm_order">Xác nhận đặt hàng</string>
+    <string name="str_search_products_hint">Tìm kiếm sản phẩm...</string>
+    <string name="str_categories">Danh mục</string>
+    <string name="str_featured_products">Sản phẩm nổi bật</string>
+    <string name="str_view_all">Xem tất cả ›</string>
+    <string name="str_sort_newest">Mới nhất</string>
+    <string name="str_sort_best_selling">Bán chạy</string>
+    <string name="str_sort_price_low">Giá thấp</string>
+    <string name="str_sort_price_high">Giá cao</string>
+    <string name="str_product_detail">Chi tiết sản phẩm</string>
+    <string name="str_select_variant">Chọn màu / kiểu</string>
+    <string name="str_short_desc">Mô tả ngắn</string>
+    <string name="str_detailed_desc">Mô tả chi tiết</string>
+    <string name="str_reviews">Đánh giá</string>
+    <string name="str_login_to_shop">Đăng nhập để mua sắm</string>
+    <string name="str_delete">Xóa</string>
+    <string name="str_product">Sản phẩm</string>
+    <string name="str_product_image">Hình ảnh sản phẩm</string>
+
+    <!-- Toast / Dialog / Validation / Formats -->
+    <string name="str_added_to_cart_success">Đã thêm vào giỏ hàng!</string>
+    <string name="str_please_fill_all_fields">Vui lòng điền đầy đủ thông tin</string>
+    <string name="str_order_success">Đặt hàng thành công!</string>
+    <string name="str_order_failed">Đặt hàng thất bại. Thử lại.</string>
+    <string name="str_please_fill_required_fields">Vui lòng nhập đầy đủ thông tin bắt buộc (*)</string>
+    <string name="str_invalid_email">Định dạng email không hợp lệ</string>
+    <string name="str_invalid_phone">Số điện thoại phải có 9 hoặc 10 chữ số</string>
+    <string name="str_password_too_short">Mật khẩu phải có ít nhất 8 ký tự</string>
+    <string name="str_password_mismatch">Mật khẩu xác nhận không khớp</string>
+    <string name="str_register_success_otp_prompt">Đăng ký thành công! Nhập OTP xác thực.</string>
+    <string name="str_invalid_otp">Mã OTP phải có 6 chữ số</string>
+    <string name="str_reset_password_success">Đặt lại mật khẩu thành công!</string>
+    <string name="str_warranty_format">Bảo hành %1$d tháng</string>
+    <string name="str_reviews_count_format">(%1$d đánh giá)</string>
+    <string name="str_forgot_otp_instruction_format">Nhập mã OTP (6 số) đã được gửi đến số %1$s:</string>
+    <string name="str_order_code_format">Đơn hàng #%1$s</string>
+    <string name="str_color_format">Màu: %1$s</string>
 </resources>

@@ -47,6 +47,15 @@ public class LoginFragment extends Fragment {
                     .commit();
         });
 
+        binding.tvForgotPassword.setOnClickListener(v -> {
+            // Navigate to forgot password
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(android.R.id.content, new ForgotFragment())
+                    .addToBackStack(null)
+                    .commit();
+        });
+
         // Observers
         viewModel.isLoading().observe(getViewLifecycleOwner(), loading -> {
             binding.btnLogin.setEnabled(!loading);
@@ -58,10 +67,10 @@ public class LoginFragment extends Fragment {
         });
 
         viewModel.getAuthResult().observe(getViewLifecycleOwner(), result -> {
-            if (result != null && result.token != null) {
+            if (result != null && result.profile != null) {
+                // Login success — save profile to session
                 SessionManager session = SessionManager.getInstance(requireContext());
-                session.saveToken(result.token);
-                session.saveCustomer(result.customer);
+                session.saveProfile(result.profile);
                 // Go to MainActivity
                 startActivity(new Intent(requireContext(), MainActivity.class));
                 requireActivity().finish();

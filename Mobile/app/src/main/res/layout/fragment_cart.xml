@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:background="@color/primary"
         android:padding="16dp"
-        android:text="Giỏ hàng"
+        android:text="@string/str_nav_cart"
         android:textColor="@color/white"
         android:textSize="18sp"
         android:textStyle="bold" />
@@ -34,7 +34,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Giỏ hàng trống"
+            android:text="@string/str_empty_cart"
             android:textSize="18sp"
             android:textColor="@color/gray_600"
             android:layout_marginTop="8dp" />
@@ -42,7 +42,7 @@
             android:id="@+id/btnLoginPrompt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Đăng nhập để mua sắm"
+            android:text="@string/str_login_to_shop"
             android:layout_marginTop="16dp"
             style="@style/Widget.UniFurniture.Button.Primary" />
     </LinearLayout>
@@ -86,7 +86,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Tổng cộng"
+                    android:text="@string/str_total"
                     android:textColor="@color/gray_600"
                     android:textSize="13sp" />
                 <TextView
@@ -102,7 +102,7 @@
                 android:id="@+id/btnCheckout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Thanh toán"
+                android:text="@string/str_checkout"
                 style="@style/Widget.UniFurniture.Button.Primary" />
         </LinearLayout>
     </LinearLayout>

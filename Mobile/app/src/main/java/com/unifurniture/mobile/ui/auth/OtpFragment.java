@@ -18,7 +18,6 @@ public class OtpFragment extends Fragment {
 
     private FragmentOtpBinding binding;
     private AuthViewModel viewModel;
-    private String pendingPhone;
 
     @Nullable
     @Override
@@ -32,6 +31,13 @@ public class OtpFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         viewModel = new ViewModelProvider(requireActivity()).get(AuthViewModel.class);
+
+        // Pre-fill phone from the pending registration
+        viewModel.getPendingPhone().observe(getViewLifecycleOwner(), phone -> {
+            if (phone != null && binding.etPhone.getText().toString().trim().isEmpty()) {
+                binding.etPhone.setText(phone);
+            }
+        });
 
         binding.btnVerify.setOnClickListener(v -> {
             String phone = binding.etPhone.getText().toString().trim();
@@ -47,10 +53,10 @@ public class OtpFragment extends Fragment {
         });
 
         viewModel.getAuthResult().observe(getViewLifecycleOwner(), result -> {
-            if (result != null && result.token != null) {
+            if (result != null && result.profile != null) {
+                // OTP verified — save profile to session and go to main
                 SessionManager session = SessionManager.getInstance(requireContext());
-                session.saveToken(result.token);
-                session.saveCustomer(result.customer);
+                session.saveProfile(result.profile);
                 startActivity(new Intent(requireContext(), MainActivity.class));
                 requireActivity().finish();
             }
