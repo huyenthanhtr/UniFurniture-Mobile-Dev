@@ -1,6 +1,6 @@
 # UniFurniture Mobile — Technical Decisions & Conventions
 
-Last updated: 2026-05-31 (P1 #1 closed)
+Last updated: 2026-06-01 (P2 #8, #9, #10 closed)
 Branch: feature/home
 Owner of this file: Như Ngọc
 
@@ -608,6 +608,269 @@ the full `http://localhost:3000/...` origin URL (set by the upload middleware at
 create/update time), which is why only `bannerUrl` needs rewriting.
 
 ---
+
+---
+
+### [P2 #9] ProductList: Grid/List Toggle
+
+**Date recorded:** 2026-06-01
+**Status:** ✅ Completed 2026-06-01
+
+#### Decision: GridLayoutManager(1) + setColumns() trong adapter thay vì LinearLayoutManager
+
+**What was decided:** List mode dùng `GridLayoutManager(1)` kết hợp `adapter.setColumns(1)` để set
+`lp.width = MATCH_PARENT` trong `onBindViewHolder`. Không dùng `LinearLayoutManager`.
+
+**Why:**
+- `GridLayoutManager` với span=1 force child width bằng RecyclerView width — nhưng chỉ khi child
+  dùng `match_parent`. Card có `layout_width="160dp"` nên GridLayoutManager không override được.
+- `LinearLayoutManager` cũng không giúp được vì lý do tương tự.
+- Fix đúng: cập nhật `LayoutParams.width` trực tiếp trong `onBindViewHolder` theo `columns` state.
+  Khi `columns=1` → `MATCH_PARENT`, khi `columns=2` → reset về `160dp_px`.
+- `notifyDataSetChanged()` trong `setColumns()` trigger rebind toàn bộ visible items với LayoutParams mới.
+
+**Tại sao không ảnh hưởng HomeFragment:** `ProductCardAdapter` ở Home là instance riêng, `columns`
+default = 2, luôn set về 160dp → hành vi không thay đổi.
+
+---
+
+### [P2 #8] ProductList: Empty State
+
+**Date recorded:** 2026-06-01
+**Status:** ✅ Completed 2026-06-01
+
+#### Decision: Bọc RecyclerView trong FrameLayout thay vì dùng ViewSwitcher
+
+**What was decided:** `SwipeRefreshLayout` → `FrameLayout` → (`RecyclerView` + `LinearLayout` empty state),
+toggle visibility trong Fragment observer.
+
+**Why:** `SwipeRefreshLayout` chỉ nhận đúng 1 direct child. `FrameLayout` là lớp bọc tối giản nhất
+để chứa 2 view chồng lên nhau — không cần `ViewSwitcher`, `ViewFlipper`, hay `ViewStub`. Toggle
+`VISIBLE`/`GONE` trực tiếp trong observer đủ đơn giản cho use case này.
+
+---
+
+### [P2 #10] ProductList: Sort Chip Active State
+
+**Date recorded:** 2026-06-01
+**Status:** ✅ Completed 2026-06-01
+
+#### Decision: syncSortChip() đọc ViewModel state, không track chip state trong Fragment
+
+**What was decided:** Thêm `getCurrentSortBy()` / `getCurrentOrder()` vào ViewModel. Fragment gọi
+`syncSortChip()` để set checked state của 4 chip dựa theo ViewModel — không dùng biến boolean
+riêng trong Fragment để track chip nào đang active.
+
+**Why:** ViewModel là single source of truth cho sort state. Nếu Fragment tự track (biến `activeChip`
+v.v.), state có thể lệch với ViewModel sau khi `clearFilters()` hoặc config change. Đọc thẳng từ
+ViewModel đảm bảo chip luôn sync đúng.
+
+**Khi nào gọi `syncSortChip()`:**
+- Cuối `onViewCreated()` — initial state khi Fragment tạo mới
+- Sau `onFiltersCleared()` — `clearFilters()` reset sort về `createdAt/desc`, chip phải theo
+
+Không cần gọi khi user tap chip vì `ChipGroup.singleSelection="true"` tự handle visual khi user tương tác.
+
+---
+
+### [P1 #5] ProductDetail: Quantity Selector
+
+**Date recorded:** 2026-06-01
+**Status:** ✅ Completed 2026-06-01
+
+---
+
+#### Decision: Đặt quantity row trong bottom bar, không phải scroll content
+
+**What was decided:** Row `Số lượng / − / 1 / +` đặt trong `layoutBottomBar` (fixed, non-scrollable)
+ngay trên nút "Thêm vào giỏ", không đặt trong `NestedScrollView`.
+
+**Why:**
+- Ban đầu đặt giữa Variants và Short Description trong scroll area. Vì image slider 300dp + product
+  info + variants, người dùng phải cuộn khá xa mới thấy. Thực tế người dùng không biết cần cuộn →
+  không tìm thấy nút.
+- Bottom bar luôn hiển thị bất kể vị trí scroll. Đặt quantity cạnh nút Add to Cart là đúng về mặt
+  UX — hai hành động liên quan trực tiếp với nhau.
+- `decisions.md` khuyến nghị "between variant chips and bottom bar" — bottom bar là vị trí
+  phù hợp nhất với nghĩa đó.
+
+---
+
+#### Decision: Dùng plain `Button` + custom drawable thay vì `MaterialButton` cho nút `−` / `+`
+
+**What was decided:** Nút `−` và `+` dùng `android.widget.Button` (standard) với
+`android:background="@drawable/bg_quantity_btn_outline"` và `bg_quantity_btn_filled`
+thay vì `MaterialButton`.
+
+**Why:**
+- `MaterialButton` có attribute `insetLeft/Right/Top/Bottom` để loại bỏ internal insets
+  (cần thiết để thu nhỏ button xuống 36×36dp), nhưng các attribute này **không khai báo được
+  trong layout XML** — chỉ dùng được trong `<style>` resource.
+- Dùng trực tiếp `app:insetLeft` trong layout gây build error:
+  `attribute insetLeft (aka com.unifurniture.mobile:insetLeft) not found`.
+- Plain `Button` với `android:background` custom drawable không có internal insets mặc định →
+  co về đúng 36×36dp mà không cần workaround.
+- Hai file drawable (`bg_quantity_btn_outline.xml`, `bg_quantity_btn_filled.xml`) là shape
+  rectangles với `cornerRadius="8dp"` — nhất quán về bo góc với các UI element khác trong project.
+
+---
+
+#### Decision: `quantity` là local field trong Fragment, không vào ViewModel
+
+**Why:** Quantity là transient UI state — nó reset về 1 mỗi khi Fragment được tạo lại, đúng với
+expected behavior. Không có lý do gì để persist nó qua config changes hay expose qua LiveData.
+`ProductDetailViewModel.addToCart(variantId, quantity)` nhận quantity như một parameter tại thời
+điểm gọi — đây là pattern đúng cho one-shot action.
+
+---
+
+### [P2 #6] ProductList: Pagination / Infinite Scroll
+
+**Date recorded:** 2026-06-01
+**Status:** ✅ Completed 2026-06-01
+
+---
+
+#### Decision: Infinite scroll (append) thay vì page numbers hoặc "Xem thêm" button
+
+**What was decided:** Dùng `RecyclerView.OnScrollListener` trigger load page tiếp theo tự động
+khi user cuộn gần cuối list. Không dùng page number bar, không dùng "Xem thêm" button.
+
+**Why:**
+- Infinite scroll là pattern chuẩn cho product listing trên mobile — Shopee, Tiki, Lazada đều dùng.
+- Ngón cái cuộn tự nhiên hơn là bấm button thêm bước.
+- Page number bar chiếm diện tích màn hình, khó bấm trên mobile.
+- "Xem thêm" button phù hợp hơn cho desktop hoặc khi dataset nhỏ.
+
+**Trade-off acknowledged:** User không biết đang ở "đâu" trong kết quả.
+Fix: `tvProductCount` hiển thị `"Hiển thị X / Y sản phẩm"` để cung cấp context vị trí.
+
+---
+
+#### Decision: `hasMore = response.page < response.totalPages`
+
+**What was decided:** Dùng server metadata `page` và `totalPages` để xác định còn trang tiếp
+theo không. Không dùng `response.items.size() >= PAGE_SIZE`.
+
+**Why:**
+- `totalPages` là ground truth từ server, chính xác hơn.
+- `items.size() < PAGE_SIZE` có thể false-negative nếu server trả đúng PAGE_SIZE item ở trang
+  cuối (ví dụ tổng 40 item, PAGE_SIZE=20, trang 2 trả đúng 20 → `size() >= 20` nhưng không có
+  trang 3). Với `page < totalPages`, case này được xử lý đúng.
+- Khi `currentMinRating > 0`, rating filter được apply client-side nên số item hiển thị < số
+  item server trả về. Dùng `totalPages` đảm bảo pagination dựa trên server count, không bị
+  ảnh hưởng bởi client-side filter.
+
+---
+
+#### Decision: `allProducts` là accumulated list trong ViewModel, không phải trong Fragment
+
+**What was decided:** ViewModel giữ `List<ProductDto> allProducts` và post toàn bộ list
+mỗi lần fetch. Fragment chỉ `adapter.submitList(response.items)` như bình thường.
+
+**Why:**
+- Fragment không nên giữ state — đúng với MVVM pattern của project.
+- `ListAdapter + DiffUtil` tự xử lý animation khi list mới có thêm item ở cuối —
+  không cần Fragment biết gì về pagination logic.
+- Nếu Fragment giữ list, config change (rotate screen) sẽ mất data vì Fragment bị recreate.
+  ViewModel survive config change, `allProducts` vẫn còn.
+
+---
+
+### [P1 #3] ProductList: Filter Bottom Sheet
+
+**Date recorded:** 2026-06-01
+**Status:** ⚙️ Implemented 2026-06-01 — awaiting manual test
+
+---
+
+#### Decision: Listener interface for filter result communication
+
+**What was decided:** `FilterBottomSheetFragment` defines an inner interface
+`OnFiltersAppliedListener` with two methods: `onFiltersApplied(categoryId, minPrice, maxPrice, minRating)`
+and `onFiltersCleared()`. `ProductListFragment` sets an anonymous instance via
+`sheet.setOnFiltersAppliedListener(...)` before calling `sheet.show(...)`.
+
+**Why:**
+- The decisions doc explicitly recommends either a shared ViewModel or a listener interface —
+  and rules out Fragment result API. The listener interface is the simpler of the two options:
+  no extra ViewModel class needed, no `ViewModelProvider` scope gymnastics, and the coupling
+  is explicit and local to `showFilterSheet()`.
+- A shared ViewModel would be appropriate if the filter state needed to survive across the
+  full Activity lifetime and be read by multiple fragments. Here only `ProductListFragment`
+  reads the result — one call site, one consumer.
+- This pattern is consistent with `CategoryAdapter.OnCategoryClickListener`,
+  `CollectionAdapter.OnCollectionClickListener`, and `ProductCardAdapter.OnProductClickListener`
+  already in the project.
+
+---
+
+#### Decision: Pass categories as parallel ArrayLists, not Parcelable DTOs
+
+**What was decided:** `FilterBottomSheetFragment.newInstance()` accepts
+`ArrayList<String> categoryIds` and `ArrayList<String> categoryNames` rather than
+`ArrayList<CategoryDto>`.
+
+**Why:**
+- `CategoryDto` is not `Parcelable` and adding `implements Parcelable` would touch a shared
+  data-layer class for a single UI concern.
+- Only `id` and `name` are needed in the bottom sheet. Passing the full DTO would be wasteful.
+- `Bundle.putStringArrayList()` is a first-class Bundle method — no serialization overhead,
+  survives process death correctly.
+
+**Trade-off:** `ProductListFragment.showFilterSheet()` must iterate `viewModel.getCategories().getValue()`
+at tap time to build the two lists. `getValue()` may return null if the LiveData has not
+yet been set (categories still loading). In that case the sheet opens with only the "Tất cả"
+chip — acceptable degradation (user can dismiss and retry once the list loads).
+
+---
+
+#### Decision: Dynamically generated chip IDs via `View.generateViewId()`
+
+**What was decided:** Each category chip gets `chip.setId(View.generateViewId())` before
+being added to the `ChipGroup`.
+
+**Why:**
+- `ChipGroup.getCheckedChipId()` returns the view ID of the selected chip.
+- Chips without an explicit ID have `getId() == View.NO_ID (-1)`. Multiple chips with
+  `NO_ID` make `getCheckedChipId()` ambiguous and `ChipGroup.check(id)` non-functional.
+- `View.generateViewId()` is available since API 17 (minSdk = 26 ✓) and is the
+  standard Android pattern for runtime-assigned unique IDs.
+
+---
+
+#### Decision: "Tất cả" chip represents no category filter
+
+**What was decided:** The first chip added to the category `ChipGroup` is a hardcoded
+"Tất cả" chip with `tag = null`. Its tag is read in `applyAndDismiss()` and the null
+value is passed as `categoryId` to `viewModel.applyFilters()`, which interprets
+`null` as "no category filter".
+
+**Why:**
+- Without a "Tất cả" chip, there is no way for the user to explicitly remove a previously
+  set category filter via the bottom sheet (they would have to use "Xóa bộ lọc" which
+  also clears price and rating).
+- `ChipGroup` with `singleSelection="true"` does allow deselecting the current chip by
+  tapping it again (since `selectionRequired` is not set). But this is a hidden gesture —
+  most users expect a visible "All" option.
+- `tag = null` distinguishes "Tất cả" from real categories without needing a sentinel
+  ID string.
+
+---
+
+#### Decision: CoordinatorLayout as root for `fragment_product_list.xml`
+
+**What was decided:** The root element of `fragment_product_list.xml` was changed from
+`LinearLayout` to `CoordinatorLayout`. The original `LinearLayout` becomes a direct child
+filling the full parent. The `FloatingActionButton` is a sibling of the `LinearLayout`.
+
+**Why:**
+- `FloatingActionButton` must float over content, requiring a parent that supports overlapping
+  children (i.e., not `LinearLayout` or `ConstraintLayout` with match constraints).
+- `CoordinatorLayout` is the recommended parent for FABs in Material Design — it enables
+  built-in behaviors like FAB moving up when a Snackbar appears, which may be useful later.
+- All existing ViewBinding references (`binding.tvTitle`, `binding.rvProducts`, etc.) remain
+  valid — ViewBinding traverses the full view hierarchy regardless of nesting depth.
 
 ---
 

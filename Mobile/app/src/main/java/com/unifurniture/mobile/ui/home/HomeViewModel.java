@@ -28,7 +28,7 @@ public class HomeViewModel extends AndroidViewModel {
         loading.setValue(true);
 
         // Load featured products (latest 10)
-        repository.getProducts(1, 10, null, null, null, "createdAt", "desc")
+        repository.getProducts(1, 10, null, null, null, "createdAt", "desc", null, null)
                 .observeForever(response -> {
                     featuredProducts.setValue(response);
                     loading.setValue(false);

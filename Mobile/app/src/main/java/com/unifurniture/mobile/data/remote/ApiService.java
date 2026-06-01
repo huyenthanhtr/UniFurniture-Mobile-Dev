@@ -30,8 +30,10 @@ public interface ApiService {
             @Query("sortBy") String sortBy,
             @Query("order") String order,
             @Query("q") String search,
-            @Query("categories") String categories,
+            @Query("category") String categories,
             @Query("collection") String collection,
+            @Query("minPrice") Double minPrice,
+            @Query("maxPrice") Double maxPrice,
             @Query("fields") String fields
     );
 

@@ -55,7 +55,7 @@ public class ProductDetailViewModel extends AndroidViewModel {
         productRepo.getProductReviews(productId).observeForever(reviews::setValue);
     }
 
-    public void addToCart(String variantId) {
+    public void addToCart(String variantId, int quantity) {
         SessionManager session = SessionManager.getInstance(getApplication());
         String customerId = session.getCustomerId();
         ProductDto p = product.getValue();
@@ -63,7 +63,7 @@ public class ProductDetailViewModel extends AndroidViewModel {
             error.setValue("Vui lòng đăng nhập để thêm vào giỏ hàng");
             return;
         }
-        cartRepo.addToCart(customerId, p.id, variantId, 1)
+        cartRepo.addToCart(customerId, p.id, variantId, quantity)
                 .observeForever(addToCartResult::setValue);
     }
 

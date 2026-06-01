@@ -4,7 +4,7 @@ Last updated: 2026-06-01
 Branch: feature/home
 Owner of this file: Như Ngọc
 
-> **2026-06-01:** P1 #2 Home Collections section ✅, BottomNavigationView Home tab bug ✅, ProductList collection filter race condition ✅. Next: P1 #3 Filter bottom sheet.
+> **2026-06-01:** P1 all done ✅. P2 #8 ✅, #9 ✅, #10 ✅, #6 ✅. Next: P2 #7 Search debounce.
 
 ---
 
@@ -212,6 +212,219 @@ No nav_graph, fragment, adapter, or layout changes.
 
 ---
 
+### P2 #9 — ProductList: Grid/List Toggle
+
+**Status:** ✅ Completed 2026-06-01 — implementation + 1 bug fixed (card không full-width).
+
+#### Implementation summary
+
+`ImageButton` (`btnToggleLayout`) thêm vào toolbar bên phải `tvProductCount`. Tap → flip `isGrid`,
+đổi `GridLayoutManager(2)` ↔ `GridLayoutManager(1)`, đổi icon, gọi `adapter.setColumns()`.
+
+`ProductCardAdapter` thêm `columns` field + `setColumns(int)`. Trong `onBindViewHolder`, cập nhật
+`lp.width` theo `columns`: `MATCH_PARENT` khi 1 cột, `160dp_px` khi 2 cột.
+
+#### Modified/created files
+
+| # | File | Action |
+|---|---|---|
+| 1 | `res/drawable/ic_grid_view.xml` | CREATED — 4-ô grid icon, fill trắng |
+| 2 | `res/drawable/ic_view_list.xml` | CREATED — 3-gạch list icon, fill trắng |
+| 3 | `res/layout/fragment_product_list.xml` | MODIFIED — thêm `btnToggleLayout` ImageButton vào toolbar |
+| 4 | `ui/adapter/ProductCardAdapter.java` | MODIFIED — thêm `columns` field, `setColumns()`, update `LayoutParams` trong `onBindViewHolder` |
+| 5 | `ui/product/ProductListFragment.java` | MODIFIED — thêm `isGrid` field, `toggleLayout()`, wire `btnToggleLayout` |
+
+#### Bug fixed
+
+Ban đầu dùng `GridLayoutManager(1)` nghĩ sẽ tự stretch card. Thực ra `GridLayoutManager` chỉ
+override width khi child dùng `match_parent` / `wrap_content`, không override kích thước cứng
+(`160dp`). Fix: `setColumns()` + `onBindViewHolder` set `lp.width` đúng mode.
+
+#### Testing checklist
+
+- [x] Icon toggle hiện trên toolbar (góc phải)
+- [x] Tap → chuyển 1 cột full-width, icon đổi thành grid
+- [x] Tap lại → về 2 cột 160dp, icon đổi thành list
+- [x] Card full-width đúng khi 1 cột
+- [x] Home screen card không bị ảnh hưởng (adapter instance riêng)
+
+---
+
+### P2 #8 — ProductList: Empty State + P2 #10 Sort Chip Active State
+
+**Status:** ✅ Completed 2026-06-01 — manually tested.
+
+#### Implementation summary
+
+**#8 Empty state:** Thêm `layoutEmpty` (LinearLayout với 2 TextView) bên trong `FrameLayout`
+bao `RecyclerView` trong `SwipeRefreshLayout`. Khi `response.items.isEmpty()` → show empty, hide
+RecyclerView; ngược lại thì đảo lại.
+
+**#10 Sort chip:** `chipNewest` thêm `android:checked="true"` trong XML (default sort). ViewModel
+thêm `getCurrentSortBy()` / `getCurrentOrder()`. Fragment thêm `syncSortChip()` để set đúng chip
+checked theo state ViewModel — gọi khi Fragment load và sau `onFiltersCleared()`.
+
+#### Modified files
+
+| # | File | Action |
+|---|---|---|
+| 1 | `res/layout/fragment_product_list.xml` | `RecyclerView` bọc trong `FrameLayout`; thêm `layoutEmpty`; `chipNewest` thêm `android:checked="true"` |
+| 2 | `ui/product/ProductListViewModel.java` | Thêm `getCurrentSortBy()` và `getCurrentOrder()` |
+| 3 | `ui/product/ProductListFragment.java` | Observer show/hide `layoutEmpty`; thêm `syncSortChip()`; gọi sau load và sau `clearFilters()` |
+
+#### Testing checklist
+
+- [x] Filter không có kết quả → hiện "Không tìm thấy sản phẩm"
+- [x] Search vô nghĩa → hiện empty state
+- [x] Xóa bộ lọc sau empty → grid hiện lại, empty ẩn
+- [x] Kết quả bình thường → không hiện empty state
+- [x] Mở ProductList → chip "Mới nhất" đang checked
+- [x] Tap sort chip khác → chip đó checked, chip cũ bỏ checked
+- [x] Xóa bộ lọc → chip quay về "Mới nhất"
+- [x] Navigate sang ProductDetail → back → chip vẫn đúng
+
+---
+
+### P1 #5 — ProductDetail: Quantity Selector
+
+**Status:** ✅ Completed 2026-06-01 — implementation + 1 build bug fixed.
+
+#### Implementation summary
+
+Row `Số lượng` với nút `−` / số / `+` thêm vào **bottom bar cố định** (không nằm trong scroll area)
+ngay trên nút "Thêm vào giỏ". Luôn hiển thị mà không cần cuộn. `quantity` được track là local field
+trong Fragment (transient UI state, không vào ViewModel). Nút `−` giảm tới min=1, nút `+` tăng tới
+max=99. `ProductDetailViewModel.addToCart()` đổi signature từ `addToCart(variantId)` sang
+`addToCart(variantId, quantity)`.
+
+#### Modified/created files
+
+| # | File | Action |
+|---|---|---|
+| 1 | `res/layout/fragment_product_detail.xml` | MODIFIED — `layoutBottomBar` đổi sang `vertical`; thêm row quantity (`Button` outline + `TextView` + `Button` filled) trên `btnAddToCart` |
+| 2 | `res/drawable/bg_quantity_btn_outline.xml` | CREATED — rounded rect, viền `primary`, nền transparent (nút `−`) |
+| 3 | `res/drawable/bg_quantity_btn_filled.xml` | CREATED — rounded rect, fill `primary` (nút `+`) |
+| 4 | `ui/product/ProductDetailViewModel.java` | MODIFIED — `addToCart(variantId)` → `addToCart(variantId, int quantity)`; bỏ hardcode `1` |
+| 5 | `ui/product/ProductDetailFragment.java` | MODIFIED — thêm field `quantity=1`; wire `btnDecrease`/`btnIncrease`; truyền `quantity` vào `addToCart` |
+
+#### Post-implementation bug fixed
+
+`app:insetLeft/Right/Top/Bottom` không phải XML attribute của `MaterialButton` (chỉ dùng được trong
+style resource) → build error "attribute insetLeft not found". Fix: thay `MaterialButton` bằng plain
+`Button` với custom drawable background — loại bỏ hoàn toàn dependency vào `app:inset*`.
+
+#### Testing checklist
+
+- [ ] Row "Số lượng" hiển thị trong bottom bar (luôn thấy, không cần cuộn)
+- [ ] Nút `−` giảm quantity, không xuống dưới 1
+- [ ] Nút `+` tăng quantity, không vượt quá 99
+- [ ] Số giữa cập nhật real-time khi nhấn
+- [ ] "Thêm vào giỏ" gửi đúng quantity lên API
+- [ ] Mở product detail mới — quantity reset về 1
+
+---
+
+### P2 #6 — ProductList: Pagination / Infinite Scroll
+
+**Status:** ✅ Completed 2026-06-01
+
+#### Implementation summary
+
+Infinite scroll với `RecyclerView.OnScrollListener`. Khi user cuộn gần cuối list (còn 3 item),
+Fragment gọi `viewModel.loadNextPage()`. ViewModel accumulate các page vào `allProducts` và
+post toàn bộ list lên `products` LiveData — `ListAdapter + DiffUtil` tự animate các item mới ở cuối.
+
+`tvProductCount` hiển thị `"Hiển thị X / Y sản phẩm"` để user biết mình đang ở đâu trong kết quả.
+Footer spinner (`progressBarLoadMore`) hiện trong lúc fetch page tiếp theo.
+
+`hasMore` được xác định bằng `response.page < response.totalPages` (dùng server metadata,
+chính xác hơn so với check `items.size() >= PAGE_SIZE`).
+
+Mọi action reset list (sort, filter, search, swipeRefresh) đều gọi `loadProducts()` → clear
+`allProducts`, reset `page=1`.
+
+#### Modified files
+
+| # | File | Action |
+|---|---|---|
+| 1 | `ui/product/ProductListViewModel.java` | MODIFIED — tách `loadProducts()` thành fresh-load + `fetchCurrentPage(boolean)`; thêm `loadNextPage()`, `canLoadMore()`, `allProducts` list, `hasMore` flag, `loadingMore` LiveData |
+| 2 | `res/layout/fragment_product_list.xml` | MODIFIED — thêm `progressBarLoadMore` bên dưới SwipeRefreshLayout |
+| 3 | `ui/product/ProductListFragment.java` | MODIFIED — thêm `RecyclerView.OnScrollListener`; observe `isLoadingMore()`; cập nhật `tvProductCount` thành "Hiển thị X / Y sản phẩm" |
+
+#### Testing checklist
+
+- [ ] Scroll xuống cuối page 1 → footer spinner xuất hiện → page 2 append vào list
+- [ ] `tvProductCount` cập nhật: `"Hiển thị 20 / 120 sản phẩm"` → `"Hiển thị 40 / 120 sản phẩm"`
+- [ ] Scroll hết data → không load thêm, không spinner
+- [ ] SwipeRefresh → list reset hoàn toàn về page 1
+- [ ] Đổi sort chip → list reset, load page 1 mới
+- [ ] Áp filter → list reset, load page 1 mới
+- [ ] Không crash khi scroll nhanh (nhiều trigger liên tiếp)
+
+---
+
+### P1 #3 — ProductList: Filter Bottom Sheet
+
+**Status:** ✅ Completed 2026-06-01 — implementation + 4 post-implementation bugs fixed.
+
+#### Implementation summary
+
+Floating filter button (`FloatingActionButton`, `ic_filter_list`) added to the Product List screen.
+Tapping it opens `FilterBottomSheetFragment` (extends `BottomSheetDialogFragment`) pre-populated
+with the current filter state. The sheet contains:
+- Horizontal scrolling category chips (dynamically built from `viewModel.getCategories()` at tap time,
+  plus a "Tất cả" chip for "no category" selection)
+- Min/max price text fields
+- Rating chips (Tất cả / 3★ / 4★ / 5★)
+- "Áp dụng" → calls `viewModel.applyFilters(categoryId, minPrice, maxPrice, minRating)`
+- "Xóa bộ lọc" → calls `viewModel.clearFilters()`
+
+Communication back to `ProductListFragment` via `OnFiltersAppliedListener` interface (not shared ViewModel,
+not Fragment result API — consistent with project listener pattern).
+
+#### Modified/created files
+
+| # | File | Action |
+|---|---|---|
+| 1 | `ui/product/FilterBottomSheetFragment.java` | CREATED — `BottomSheetDialogFragment`, `newInstance()` factory, `OnFiltersAppliedListener` interface, dynamic category chip builder with `View.generateViewId()`, price/rating state restoration |
+| 2 | `res/layout/fragment_product_list.xml` | MODIFIED — wrapped root in `CoordinatorLayout`; added `FloatingActionButton` (`fabFilter`) at `bottom|end` |
+| 3 | `ui/product/ProductListFragment.java` | MODIFIED — added `fabFilter` click → `showFilterSheet()`; `showFilterSheet()` builds category id/name lists from current ViewModel state and passes them to the bottom sheet |
+
+#### Post-implementation bugs fixed (2026-06-01)
+
+| Bug | Root cause | Fix |
+|---|---|---|
+| Toàn bộ text trong bottom sheet vô hình | Root `LinearLayout` không có background → nền tối của dialog lộ ra | Thêm `android:background="@color/white"` vào root `LinearLayout` |
+| Nút "Áp dụng" text vô hình | Filled button với `backgroundTint=primary` nhưng không có `textColor` → theme tự set text tối trên nền tối | Thêm `android:textColor="@color/white"` |
+| Filter theo danh mục không có tác dụng | `ApiService` gửi `?categories=…` nhưng server đọc `req.query.category` (số ít) | Đổi `@Query("categories")` → `@Query("category")` trong `ApiService.java` |
+| Icon FAB 3 gạch màu đen | FAB apply tint tối từ theme đè lên `fillColor="#FFFFFF"` của vector | Thêm `app:tint="@color/white"` vào FAB trong layout |
+
+#### Testing checklist
+
+- [ ] Filter FAB visible on Product List screen (bottom-right corner), icon 3 gạch trắng
+- [ ] Tap FAB → bottom sheet slides up, toàn bộ text hiển thị rõ
+- [ ] Category chips populated from API data (scrollable)
+- [ ] "Tất cả" category chip selected by default when no filter active
+- [ ] Selected category chip pre-checked when re-opening sheet
+- [ ] Min/max price fields accept numeric input
+- [ ] Price values restored correctly when re-opening sheet
+- [ ] Rating chips: only one selectable at a time
+- [ ] "Áp dụng" với category → ProductList chỉ hiện sản phẩm đúng danh mục
+- [ ] "Áp dụng" với giá → sản phẩm ngoài khoảng giá bị loại
+- [ ] "Áp dụng" với rating → sản phẩm dưới mức rating bị ẩn
+- [ ] "Xóa bộ lọc" → reset toàn bộ, load lại sản phẩm
+- [ ] Sheet đóng sau khi nhấn nút
+- [ ] Không crash khi danh mục rỗng
+
+#### Database cleanup (2026-06-01)
+
+Xóa 3 entries test/rác khỏi MongoDB qua REST API:
+- Collection `iloveuel` (id `69b4666263e0e522607cb99f`) — `DELETE /api/collections/:id`
+- Category `Lê Thị Duy Nhất` (id `69b45cb1eec4649e243c508c`) — `DELETE /api/categories/:id`
+- Category `áo test` (id `69b45af663f22fa60b852c7b`) — `DELETE /api/categories/:id`
+
+---
+
 ### P1 #2 — Home Collections Section
 
 **Status:** ✅ Completed 2026-06-01 — implementation + collection filter bug fixed + manually tested.
@@ -268,18 +481,12 @@ pattern.
 
 ### Product List
 
-- [ ] **Filter bottom sheet** — Floating filter button opens `BottomSheetDialogFragment`
-      with multi-select category chips, price range slider, star-rating filter
-- [ ] **Price range filter in ViewModel** — Add `minPrice`/`maxPrice` params;
-      API already supports these query parameters
-- [ ] **Rating filter** — Add `minRating` filter param to ViewModel + API call
-- [ ] **Pagination / infinite scroll** — ViewModel tracks `currentPage` but no
-      scroll listener or "load more" mechanism exists
-- [ ] **Empty state view** — No UI shown when product list returns 0 results
-- [ ] **Grid / List view toggle** — Toolbar icon to switch between
-      `GridLayoutManager(2)` and `LinearLayoutManager`
-- [ ] **Active sort chip state** — Sort chips do not visually reflect the current
-      active sort when the screen is entered or after navigation
+- [x] **Filter bottom sheet** ✅ Completed 2026-06-01
+- [x] **Price range + rating filter** ✅ Completed 2026-06-01 (wired trong P1 #3)
+- [x] **Pagination / infinite scroll** ✅ Completed 2026-06-01
+- [x] **Empty state view** ✅ Completed 2026-06-01
+- [x] **Grid / List view toggle** ✅ Completed 2026-06-01
+- [x] **Active sort chip state** ✅ Completed 2026-06-01
 
 ### Search
 
@@ -292,7 +499,7 @@ pattern.
 
 ### Product Detail
 
-- [ ] **Quantity selector** — `+/-` buttons before "Add to Cart"; always adds 1 now
+- [x] **Quantity selector** ✅ Completed 2026-06-01
 - [ ] **Stock status indicator** — `variant.stockQuantity` is available in the DTO
       but never displayed; show "Còn hàng" / "Hết hàng" per selected variant
 - [ ] **Sold count** — `product.sold` field exists but not displayed
@@ -315,19 +522,19 @@ pattern.
 |---|---|---|
 | 1 | ~~Home: Banner/Image Slider~~ | ✅ **DONE** 2026-05-31 |
 | 2 | ~~Home: Collections section~~ | ✅ **DONE** 2026-06-01 |
-| 3 | ProductList: Filter bottom sheet (category + price + rating) | Largest documented feature in scope, completely absent |
-| 4 | ProductList: Price range + rating in ViewModel/API | Backend dependency for P1 #3 |
-| 5 | ProductDetail: Quantity selector | Core e-commerce UX; without it users always add 1 |
+| 3 | ~~ProductList: Filter bottom sheet (category + price + rating)~~ | ✅ **DONE** 2026-06-01 |
+| 4 | ~~ProductList: Price range + rating in ViewModel/API~~ | ✅ **DONE** 2026-06-01 (wired cùng P1 #3) |
+| 5 | ~~ProductDetail: Quantity selector~~ | ✅ **DONE** 2026-06-01 |
 
 ### P2 — Important UX gaps
 
 | # | Task | Why |
 |---|---|---|
-| 6 | ProductList: Pagination / infinite scroll | 20-item hard cap blocks discovery |
+| 6 | ~~ProductList: Pagination / infinite scroll~~ | ✅ **DONE** 2026-06-01 |
 | 7 | Search: Real-time debounced query | Doc says "Autocomplete"; current behavior is submit-only |
-| 8 | ProductList: Empty state view | Blank screen on 0 results is confusing |
-| 9 | ProductList: Grid/List toggle | Explicitly documented requirement |
-| 10 | ProductList: Active sort chip state | Visual correctness, low effort |
+| 8 | ~~ProductList: Empty state view~~ | ✅ **DONE** 2026-06-01 |
+| 9 | ~~ProductList: Grid/List toggle~~ | ✅ **DONE** 2026-06-01 |
+| 10 | ~~ProductList: Active sort chip state~~ | ✅ **DONE** 2026-06-01 |
 
 ### P3 — Polish and completeness
 
@@ -346,7 +553,7 @@ pattern.
 
 ## Next Recommended Task
 
-**ProductList — Filter Bottom Sheet (P1 #3)**
+**Search: Real-time debounced query (P2 #7)**
 
 Largest remaining feature in scope. Requires a new `FilterBottomSheetFragment extends
 BottomSheetDialogFragment` with:

@@ -19,10 +19,17 @@ public class ProductCardAdapter extends ListAdapter<ProductDto, ProductCardAdapt
     }
 
     private final OnProductClickListener listener;
+    private int columns = 2;
 
     public ProductCardAdapter(OnProductClickListener listener) {
         super(DIFF_CALLBACK);
         this.listener = listener;
+    }
+
+    public void setColumns(int columns) {
+        if (this.columns == columns) return;
+        this.columns = columns;
+        notifyDataSetChanged();
     }
 
     private static final DiffUtil.ItemCallback<ProductDto> DIFF_CALLBACK =
@@ -47,6 +54,13 @@ public class ProductCardAdapter extends ListAdapter<ProductDto, ProductCardAdapt
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        ViewGroup.LayoutParams lp = holder.itemView.getLayoutParams();
+        if (lp != null) {
+            lp.width = columns == 1
+                    ? ViewGroup.LayoutParams.MATCH_PARENT
+                    : (int) (160 * holder.itemView.getResources().getDisplayMetrics().density);
+            holder.itemView.setLayoutParams(lp);
+        }
         holder.bind(getItem(position), listener);
     }
 

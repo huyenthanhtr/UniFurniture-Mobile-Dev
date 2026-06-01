@@ -10,15 +10,20 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import com.unifurniture.mobile.R;
+import com.unifurniture.mobile.data.model.CategoryDto;
 import com.unifurniture.mobile.databinding.FragmentProductListBinding;
 import com.unifurniture.mobile.ui.adapter.ProductCardAdapter;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProductListFragment extends Fragment {
 
     private FragmentProductListBinding binding;
     private ProductListViewModel viewModel;
     private ProductCardAdapter adapter;
+    private boolean isGrid = true;
 
     @Nullable
     @Override
@@ -36,12 +41,17 @@ public class ProductListFragment extends Fragment {
         setupRecyclerView();
         handleArguments();
         observeData();
+        syncSortChip();
 
         // Sort chips
         binding.chipNewest.setOnClickListener(v -> viewModel.sortBy("createdAt", "desc"));
         binding.chipPriceLow.setOnClickListener(v -> viewModel.sortBy("min_price", "asc"));
         binding.chipPriceHigh.setOnClickListener(v -> viewModel.sortBy("min_price", "desc"));
         binding.chipBestSelling.setOnClickListener(v -> viewModel.sortBy("sold", "desc"));
+
+
+        binding.fabFilter.setOnClickListener(v -> showFilterSheet());
+        binding.btnToggleLayout.setOnClickListener(v -> toggleLayout());
 
         binding.swipeRefresh.setOnRefreshListener(() -> {
             viewModel.loadProducts();
@@ -83,18 +93,90 @@ public class ProductListFragment extends Fragment {
         });
         binding.rvProducts.setLayoutManager(new GridLayoutManager(requireContext(), 2));
         binding.rvProducts.setAdapter(adapter);
+        binding.rvProducts.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView rv, int dx, int dy) {
+                if (dy <= 0) return;
+                GridLayoutManager lm = (GridLayoutManager) rv.getLayoutManager();
+                if (lm == null) return;
+                int lastVisible = lm.findLastVisibleItemPosition();
+                if (lastVisible >= lm.getItemCount() - 3) {
+                    viewModel.loadNextPage();
+                }
+            }
+        });
+    }
+
+    private void toggleLayout() {
+        isGrid = !isGrid;
+        int span = isGrid ? 2 : 1;
+        binding.rvProducts.setLayoutManager(new GridLayoutManager(requireContext(), span));
+        adapter.setColumns(span);
+        binding.btnToggleLayout.setImageResource(
+                isGrid ? R.drawable.ic_view_list : R.drawable.ic_grid_view);
     }
 
     private void observeData() {
         viewModel.getProducts().observe(getViewLifecycleOwner(), response -> {
             if (response != null && response.items != null) {
                 adapter.submitList(response.items);
-                binding.tvProductCount.setText(response.total + " sản phẩm");
+                binding.tvProductCount.setText("Hiển thị " + response.items.size() + " / " + response.total + " sản phẩm");
+                boolean empty = response.items.isEmpty();
+                binding.layoutEmpty.setVisibility(empty ? View.VISIBLE : View.GONE);
+                binding.rvProducts.setVisibility(empty ? View.GONE : View.VISIBLE);
             }
         });
 
         viewModel.isLoading().observe(getViewLifecycleOwner(), loading ->
                 binding.progressBar.setVisibility(loading ? View.VISIBLE : View.GONE));
+
+        viewModel.isLoadingMore().observe(getViewLifecycleOwner(), more ->
+                binding.progressBarLoadMore.setVisibility(more ? View.VISIBLE : View.GONE));
+    }
+
+    private void syncSortChip() {
+        String s = viewModel.getCurrentSortBy();
+        String o = viewModel.getCurrentOrder();
+        binding.chipNewest.setChecked("createdAt".equals(s));
+        binding.chipBestSelling.setChecked("sold".equals(s));
+        binding.chipPriceLow.setChecked("min_price".equals(s) && "asc".equals(o));
+        binding.chipPriceHigh.setChecked("min_price".equals(s) && "desc".equals(o));
+    }
+
+    private void showFilterSheet() {
+        List<CategoryDto> cats = viewModel.getCategories().getValue();
+        ArrayList<String> catIds = new ArrayList<>();
+        ArrayList<String> catNames = new ArrayList<>();
+        if (cats != null) {
+            for (CategoryDto c : cats) {
+                if (c.id != null && c.name != null) {
+                    catIds.add(c.id);
+                    catNames.add(c.name);
+                }
+            }
+        }
+
+        FilterBottomSheetFragment sheet = FilterBottomSheetFragment.newInstance(
+                catIds, catNames,
+                viewModel.getCurrentCategoryId(),
+                viewModel.getCurrentMinPrice(),
+                viewModel.getCurrentMaxPrice(),
+                viewModel.getCurrentMinRating());
+
+        sheet.setOnFiltersAppliedListener(new FilterBottomSheetFragment.OnFiltersAppliedListener() {
+            @Override
+            public void onFiltersApplied(String categoryId, Double minPrice, Double maxPrice, int minRating) {
+                viewModel.applyFilters(categoryId, minPrice, maxPrice, minRating);
+            }
+
+            @Override
+            public void onFiltersCleared() {
+                viewModel.clearFilters();
+                syncSortChip();
+            }
+        });
+
+        sheet.show(getChildFragmentManager(), "filter");
     }
 
     @Override

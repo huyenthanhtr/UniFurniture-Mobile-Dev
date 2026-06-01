@@ -27,6 +27,7 @@ public class ProductDetailFragment extends Fragment {
     private ImageSliderAdapter sliderAdapter;
     private ReviewAdapter reviewAdapter;
     private String selectedVariantId = null;
+    private int quantity = 1;
 
     @Nullable
     @Override
@@ -52,7 +53,20 @@ public class ProductDetailFragment extends Fragment {
         viewModel.loadProduct(slug);
         observeData();
 
-        binding.btnAddToCart.setOnClickListener(v -> viewModel.addToCart(selectedVariantId));
+        binding.btnDecrease.setOnClickListener(v -> {
+            if (quantity > 1) {
+                quantity--;
+                binding.tvQuantity.setText(String.valueOf(quantity));
+            }
+        });
+        binding.btnIncrease.setOnClickListener(v -> {
+            if (quantity < 99) {
+                quantity++;
+                binding.tvQuantity.setText(String.valueOf(quantity));
+            }
+        });
+
+        binding.btnAddToCart.setOnClickListener(v -> viewModel.addToCart(selectedVariantId, quantity));
         binding.btnBack.setOnClickListener(v ->
                 Navigation.findNavController(requireView()).navigateUp());
     }
