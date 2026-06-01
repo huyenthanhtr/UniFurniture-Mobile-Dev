@@ -135,7 +135,6 @@
                     android:id="@+id/tvRating"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="0.0"
                     android:textSize="13sp"
                     android:layout_marginStart="4dp" />
                 <TextView
@@ -146,6 +145,16 @@
                     android:textColor="@color/gray_600"
                     android:layout_marginStart="4dp" />
             </LinearLayout>
+
+            <!-- Sold count -->
+            <TextView
+                android:id="@+id/tvSoldCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textSize="13sp"
+                android:textColor="@color/gray_600"
+                android:visibility="gone" />
 
             <!-- Warranty -->
             <TextView
@@ -177,6 +186,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp" />
+            <TextView
+                android:id="@+id/tvStockStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
         </LinearLayout>
 
         <!-- Short Description -->

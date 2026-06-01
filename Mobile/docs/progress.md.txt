@@ -1,6 +1,6 @@
 # UniFurniture Mobile — Progress Tracker
 
-Last updated: 2026-06-01 (P2 #7 search fully complete)
+Last updated: 2026-06-01 (P3 #11 #12 #17 done)
 Branch: feature/home
 Owner of this file: Như Ngọc
 
@@ -324,6 +324,36 @@ style resource) → build error "attribute insetLeft not found". Fix: thay `Mate
 
 ---
 
+### P3 #11+#12 — ProductDetail: Stock Status + Sold Count
+
+**Status:** ✅ Completed 2026-06-01
+
+#### Implementation summary
+
+**Stock status (#11):** `tvStockStatus` thêm vào layout bên dưới `chipGroupVariants`. Fragment giữ `Map<String, Integer> variantStock` (variantId → stockQuantity). Mỗi khi user chọn chip variant → `updateStockStatus(variantId)` cập nhật text + màu + trạng thái `btnAddToCart`. "Còn hàng" (xanh, `@color/success`), "Hết hàng" (đỏ, `@color/discount_red`, disable nút Add to Cart). Ẩn khi `stockQuantity == null`.
+
+**Sold count (#12):** `tvSoldCount` thêm vào Product Info section, dòng riêng bên dưới rating row (cách 4dp). Chỉ hiện khi `product.sold != null && product.sold > 0`. Dùng `FormatUtil.formatSold()` để format (ví dụ 1200 → "1.2k").
+
+**Rating fix:** Ẩn toàn bộ rating row (RatingBar + tvRating + tvReviewCount) khi `totalReviews == 0` thay vì hiện "0.0". Default text của `tvRating` trong XML đổi từ "0.0" về empty string.
+
+#### Modified files
+
+| # | File | Action |
+|---|---|---|
+| 1 | `res/layout/fragment_product_detail.xml` | Thêm `tvStockStatus`, `tvSoldCount`; fix default tvRating text; tách tvSoldCount ra dòng riêng |
+| 2 | `ui/product/ProductDetailFragment.java` | Thêm `variantStock` Map, `updateStockStatus()`, sold count observer, rating guard |
+
+#### Testing checklist
+
+- [x] Mở "Combo Giường Tủ Quần Áo VLINE V3" → hiện "Đã bán: 8"
+- [x] Sản phẩm sold = 0 → không hiện "Đã bán"
+- [x] Sản phẩm không có review → rating row ẩn hoàn toàn
+- [ ] Variant hết hàng → hiện "Hết hàng" đỏ, nút Add to Cart disable
+- [ ] Variant còn hàng → hiện "Còn hàng" xanh, nút Add to Cart enable
+- [ ] Đổi variant → stock status cập nhật đúng
+
+---
+
 ### P2 #7 — Search: Real-time Debounce + Suggestions
 
 **Status:** ✅ Completed 2026-06-01
@@ -555,17 +585,14 @@ pattern.
 ### Product Detail
 
 - [x] **Quantity selector** ✅ Completed 2026-06-01
-- [ ] **Stock status indicator** — `variant.stockQuantity` is available in the DTO
-      but never displayed; show "Còn hàng" / "Hết hàng" per selected variant
-- [ ] **Sold count** — `product.sold` field exists but not displayed
+- [x] **Stock status indicator** ✅ Completed 2026-06-01
+- [x] **Sold count** ✅ Completed 2026-06-01
 - [ ] **Recommendations section** — `getProductRecommendations` endpoint exists
       but is never called; add horizontal product strip at the bottom
 - [ ] **Review images** — `ReviewDto.images` field exists but `ReviewAdapter`
       ignores it
 - [ ] **Admin reply on review** — `ReviewDto.reply` field exists but not rendered
-- [ ] **Deprecated back navigation** — `requireActivity().onBackPressed()` is
-      deprecated since API 33; replace with
-      `requireActivity().getOnBackPressedDispatcher().onBackPressed()`
+- [x] **Deprecated back navigation** ✅ Already using `navigateUp()` — no change needed
 
 ---
 
@@ -595,13 +622,13 @@ pattern.
 
 | # | Task | Why |
 |---|---|---|
-| 11 | ProductDetail: Stock status per variant | Informs purchase decision |
-| 12 | ProductDetail: Sold count | Social proof display |
+| 11 | ~~ProductDetail: Stock status per variant~~ | ✅ **DONE** 2026-06-01 |
+| 12 | ~~ProductDetail: Sold count~~ | ✅ **DONE** 2026-06-01 |
 | 13 | ProductDetail: Recommendations | Upsell flow; API already exists |
 | 14 | Home: Proper shimmer skeletons | Loading UX quality |
 | 15 | ProductDetail: Review images | Data exists, just not rendered |
 | 16 | ProductDetail: Admin reply on review | Data exists, just not rendered |
-| 17 | ProductDetail: Fix deprecated back nav | Code quality / future-proofing |
+| 17 | ~~ProductDetail: Fix deprecated back nav~~ | ✅ Already done (navigateUp()) |
 | 18 | Search: Search history | Convenience UX |
 
 ---

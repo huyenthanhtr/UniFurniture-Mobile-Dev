@@ -18,7 +18,9 @@ import com.unifurniture.mobile.ui.adapter.ImageSliderAdapter;
 import com.unifurniture.mobile.ui.adapter.ReviewAdapter;
 import com.unifurniture.mobile.util.FormatUtil;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ProductDetailFragment extends Fragment {
 
@@ -28,6 +30,7 @@ public class ProductDetailFragment extends Fragment {
     private ReviewAdapter reviewAdapter;
     private String selectedVariantId = null;
     private int quantity = 1;
+    private final Map<String, Integer> variantStock = new HashMap<>();
 
     @Nullable
     @Override
@@ -107,6 +110,10 @@ public class ProductDetailFragment extends Fragment {
                 binding.tvWarranty.setText("Bảo hành " + product.warrantyMonths + " tháng");
                 binding.tvWarranty.setVisibility(View.VISIBLE);
             }
+            if (product.sold != null && product.sold > 0) {
+                binding.tvSoldCount.setText("Đã bán: " + FormatUtil.formatSold(product.sold));
+                binding.tvSoldCount.setVisibility(View.VISIBLE);
+            }
         });
 
         viewModel.getImages().observe(getViewLifecycleOwner(), response -> {
@@ -122,9 +129,11 @@ public class ProductDetailFragment extends Fragment {
 
         viewModel.getVariants().observe(getViewLifecycleOwner(), response -> {
             if (response != null && response.items != null && !response.items.isEmpty()) {
-                // Auto-select first variant
+                variantStock.clear();
+                for (var variant : response.items) {
+                    if (variant.id != null) variantStock.put(variant.id, variant.stockQuantity);
+                }
                 selectedVariantId = response.items.get(0).id;
-                // Show variant chips
                 binding.chipGroupVariants.removeAllViews();
                 for (var variant : response.items) {
                     com.google.android.material.chip.Chip chip =
@@ -133,7 +142,10 @@ public class ProductDetailFragment extends Fragment {
                             (variant.variantName != null ? variant.variantName : variant.name));
                     chip.setCheckable(true);
                     chip.setOnCheckedChangeListener((btn, checked) -> {
-                        if (checked) selectedVariantId = variant.id;
+                        if (checked) {
+                            selectedVariantId = variant.id;
+                            updateStockStatus(variant.id);
+                        }
                     });
                     binding.chipGroupVariants.addView(chip);
                 }
@@ -141,16 +153,24 @@ public class ProductDetailFragment extends Fragment {
                     ((com.google.android.material.chip.Chip)
                             binding.chipGroupVariants.getChildAt(0)).setChecked(true);
                 }
+                updateStockStatus(selectedVariantId);
             }
         });
 
         viewModel.getReviews().observe(getViewLifecycleOwner(), summary -> {
-            if (summary != null) {
+            if (summary == null) return;
+            if (summary.totalReviews == 0) {
+                binding.ratingBar.setVisibility(View.GONE);
+                binding.tvRating.setVisibility(View.GONE);
+                binding.tvReviewCount.setVisibility(View.GONE);
+            } else {
                 binding.tvRating.setText(String.format("%.1f", summary.averageRating));
                 binding.tvReviewCount.setText("(" + summary.totalReviews + " đánh giá)");
+                binding.tvReviewCount.setVisibility(View.VISIBLE);
+                binding.ratingBar.setVisibility(View.VISIBLE);
                 binding.ratingBar.setRating((float) summary.averageRating);
-                if (summary.items != null) reviewAdapter.submitList(summary.items);
             }
+            if (summary.items != null) reviewAdapter.submitList(summary.items);
         });
 
         viewModel.getAddToCartResult().observe(getViewLifecycleOwner(), cart -> {
@@ -162,6 +182,24 @@ public class ProductDetailFragment extends Fragment {
         viewModel.getError().observe(getViewLifecycleOwner(), error -> {
             if (error != null) Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
         });
+    }
+
+    private void updateStockStatus(String variantId) {
+        Integer stock = variantStock.get(variantId);
+        if (stock == null) {
+            binding.tvStockStatus.setVisibility(View.GONE);
+            return;
+        }
+        binding.tvStockStatus.setVisibility(View.VISIBLE);
+        if (stock <= 0) {
+            binding.tvStockStatus.setText("Hết hàng");
+            binding.tvStockStatus.setTextColor(requireContext().getColor(R.color.discount_red));
+            binding.btnAddToCart.setEnabled(false);
+        } else {
+            binding.tvStockStatus.setText("Còn hàng");
+            binding.tvStockStatus.setTextColor(requireContext().getColor(R.color.success));
+            binding.btnAddToCart.setEnabled(true);
+        }
     }
 
     @Override
