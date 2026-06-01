@@ -14,8 +14,11 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.tbuonomo.viewpagerdotsindicator.DotsIndicator;
 import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.databinding.FragmentProductDetailBinding;
+import com.unifurniture.mobile.data.model.ProductDto;
 import com.unifurniture.mobile.ui.adapter.ImageSliderAdapter;
+import com.unifurniture.mobile.ui.adapter.ProductCardAdapter;
 import com.unifurniture.mobile.ui.adapter.ReviewAdapter;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import com.unifurniture.mobile.util.FormatUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +31,7 @@ public class ProductDetailFragment extends Fragment {
     private ProductDetailViewModel viewModel;
     private ImageSliderAdapter sliderAdapter;
     private ReviewAdapter reviewAdapter;
+    private ProductCardAdapter recommendationAdapter;
     private String selectedVariantId = null;
     private int quantity = 1;
     private final Map<String, Integer> variantStock = new HashMap<>();
@@ -53,6 +57,7 @@ public class ProductDetailFragment extends Fragment {
 
         setupImageSlider();
         setupReviews();
+        setupRecommendations();
         viewModel.loadProduct(slug);
         observeData();
 
@@ -85,6 +90,17 @@ public class ProductDetailFragment extends Fragment {
         binding.rvReviews.setAdapter(reviewAdapter);
     }
 
+    private void setupRecommendations() {
+        recommendationAdapter = new ProductCardAdapter(product -> {
+            Bundle args = new Bundle();
+            args.putString("slug", product.slug != null ? product.slug : product.id);
+            Navigation.findNavController(requireView()).navigate(R.id.productDetailFragment, args);
+        });
+        binding.rvRecommendations.setLayoutManager(
+                new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        binding.rvRecommendations.setAdapter(recommendationAdapter);
+    }
+
     private void observeData() {
         viewModel.isLoading().observe(getViewLifecycleOwner(), loading ->
                 binding.progressBar.setVisibility(loading ? View.VISIBLE : View.GONE));
@@ -114,17 +130,29 @@ public class ProductDetailFragment extends Fragment {
                 binding.tvSoldCount.setText("Đã bán: " + FormatUtil.formatSold(product.sold));
                 binding.tvSoldCount.setVisibility(View.VISIBLE);
             }
+            // Fallback: show thumbnail immediately if slider still empty
+            String thumb = product.getImageUrl();
+            if (sliderAdapter.getItemCount() == 0 && thumb != null && !thumb.isEmpty()) {
+                List<String> fallback = new ArrayList<>();
+                fallback.add(thumb);
+                sliderAdapter.updateImages(fallback);
+            }
         });
 
         viewModel.getImages().observe(getViewLifecycleOwner(), response -> {
+            List<String> urls = new ArrayList<>();
             if (response != null && response.items != null) {
-                List<String> urls = new ArrayList<>();
                 for (var img : response.items) {
                     if (img.imageUrl != null && !img.imageUrl.isEmpty()) urls.add(img.imageUrl);
                 }
-                sliderAdapter.updateImages(urls);
-                binding.dotsIndicator.setVisibility(urls.size() > 1 ? View.VISIBLE : View.GONE);
             }
+            if (urls.isEmpty()) {
+                ProductDto p = viewModel.getProduct().getValue();
+                String thumb = p != null ? p.getImageUrl() : null;
+                if (thumb != null && !thumb.isEmpty()) urls.add(thumb);
+            }
+            sliderAdapter.updateImages(urls);
+            binding.dotsIndicator.setVisibility(urls.size() > 1 ? View.VISIBLE : View.GONE);
         });
 
         viewModel.getVariants().observe(getViewLifecycleOwner(), response -> {
@@ -181,6 +209,13 @@ public class ProductDetailFragment extends Fragment {
 
         viewModel.getError().observe(getViewLifecycleOwner(), error -> {
             if (error != null) Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
+        });
+
+        viewModel.getRecommendations().observe(getViewLifecycleOwner(), items -> {
+            if (items != null && !items.isEmpty()) {
+                recommendationAdapter.submitList(items);
+                binding.layoutRecommendations.setVisibility(View.VISIBLE);
+            }
         });
     }
 

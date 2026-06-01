@@ -264,6 +264,33 @@
                 android:layout_marginTop="8dp" />
         </LinearLayout>
 
+        <!-- Recommendations -->
+        <LinearLayout
+            android:id="@+id/layoutRecommendations"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginTop="8dp"
+            android:background="@color/white"
+            android:visibility="gone">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sản phẩm liên quan"
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:textColor="@color/black" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvRecommendations"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:clipToPadding="false"
+                android:paddingEnd="8dp"
+                android:orientation="horizontal" />
+        </LinearLayout>
+
         <!-- Bottom Spacer -->
         <View android:layout_width="match_parent" android:layout_height="90dp" />
 

@@ -23,6 +23,7 @@ public class ProductDetailViewModel extends AndroidViewModel {
     private final MutableLiveData<CartDto> addToCartResult = new MutableLiveData<>();
     private final MutableLiveData<Boolean> loading = new MutableLiveData<>(false);
     private final MutableLiveData<String> error = new MutableLiveData<>();
+    private final MutableLiveData<java.util.List<ProductDto>> recommendations = new MutableLiveData<>();
 
     public ProductDetailViewModel(@NonNull Application application) {
         super(application);
@@ -38,6 +39,7 @@ public class ProductDetailViewModel extends AndroidViewModel {
                 loadImages(p.id);
                 loadVariants(p.id);
                 loadReviews(p.id);
+                loadRecommendations(slug);
             }
             loading.setValue(false);
         });
@@ -53,6 +55,12 @@ public class ProductDetailViewModel extends AndroidViewModel {
 
     private void loadReviews(String productId) {
         productRepo.getProductReviews(productId).observeForever(reviews::setValue);
+    }
+
+    private void loadRecommendations(String slug) {
+        String userId = SessionManager.getInstance(getApplication()).getCustomerId();
+        productRepo.getProductRecommendations(slug, userId)
+                .observeForever(recommendations::setValue);
     }
 
     public void addToCart(String variantId, int quantity) {
@@ -74,4 +82,5 @@ public class ProductDetailViewModel extends AndroidViewModel {
     public LiveData<CartDto> getAddToCartResult() { return addToCartResult; }
     public LiveData<Boolean> isLoading() { return loading; }
     public LiveData<String> getError() { return error; }
+    public LiveData<java.util.List<ProductDto>> getRecommendations() { return recommendations; }
 }

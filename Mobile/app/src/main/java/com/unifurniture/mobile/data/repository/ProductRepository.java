@@ -104,6 +104,28 @@ public class ProductRepository {
         return result;
     }
 
+    public LiveData<List<ProductDto>> getProductRecommendations(String slug, String userId) {
+        MutableLiveData<List<ProductDto>> result = new MutableLiveData<>();
+        apiService.getProductRecommendations(slug, userId)
+                .enqueue(new Callback<java.util.Map<String, List<ProductDto>>>() {
+                    @Override
+                    public void onResponse(retrofit2.Call<java.util.Map<String, List<ProductDto>>> call,
+                                           retrofit2.Response<java.util.Map<String, List<ProductDto>>> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            List<ProductDto> items = response.body().get("items");
+                            result.setValue(items != null ? items : new java.util.ArrayList<>());
+                        } else {
+                            result.setValue(null);
+                        }
+                    }
+                    @Override
+                    public void onFailure(retrofit2.Call<java.util.Map<String, List<ProductDto>>> call, Throwable t) {
+                        result.setValue(null);
+                    }
+                });
+        return result;
+    }
+
     public LiveData<List<CategoryDto>> getCategories() {
         MutableLiveData<List<CategoryDto>> result = new MutableLiveData<>();
         apiService.getCategories(1, 100, "active")

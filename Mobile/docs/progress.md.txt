@@ -1,6 +1,6 @@
 # UniFurniture Mobile — Progress Tracker
 
-Last updated: 2026-06-01 (P3 #11 #12 #17 done)
+Last updated: 2026-06-01 (P3 #11 #12 #13 #17 done)
 Branch: feature/home
 Owner of this file: Như Ngọc
 
@@ -324,6 +324,36 @@ style resource) → build error "attribute insetLeft not found". Fix: thay `Mate
 
 ---
 
+### P3 #13 — ProductDetail: Recommendations
+
+**Status:** ✅ Completed 2026-06-01
+
+#### Implementation summary
+
+Horizontal `RecyclerView` (`rvRecommendations`) thêm vào cuối ProductDetail, bọc trong `layoutRecommendations` (`LinearLayout`, `visibility=gone`). Khi API trả về items → show section. Tap card → navigate sang ProductDetail của sản phẩm đó.
+
+`ProductRepository.getProductRecommendations(slug, userId)` gọi `GET /products/:slug/recommendations`. Server trả về `{ "items": [...] }` — extract key `"items"` (không phải `"recommendations"` như docs cũ ghi).
+
+**Fallback ảnh:** Nếu `product_images` rỗng (sản phẩm chỉ có thumbnail CDN, không có record trong product_images collection) → dùng `product.thumbnail` làm fallback cho ImageSliderAdapter. Áp dụng cả khi product load xong mà slider vẫn rỗng.
+
+#### Modified files
+
+| # | File | Action |
+|---|---|---|
+| 1 | `data/repository/ProductRepository.java` | ADDED — `getProductRecommendations(slug, userId)`, extract key `"items"` |
+| 2 | `ui/product/ProductDetailViewModel.java` | ADDED — `recommendations` LiveData, `loadRecommendations(slug)`, getter |
+| 3 | `res/layout/fragment_product_detail.xml` | ADDED — `layoutRecommendations` + `rvRecommendations` trước bottom spacer |
+| 4 | `ui/product/ProductDetailFragment.java` | ADDED — `setupRecommendations()`, observe, fallback thumbnail logic |
+
+#### Testing checklist
+
+- [x] Mở "Combo Giường Tủ Quần Áo VLINE V3" → section "Sản phẩm liên quan" hiện cuối trang
+- [x] Scroll ngang trong section → thấy các card sản phẩm
+- [x] Tap card → navigate sang ProductDetail đúng sản phẩm, ảnh hiển thị
+- [ ] Sản phẩm không có recommendations → section ẩn hoàn toàn
+
+---
+
 ### P3 #11+#12 — ProductDetail: Stock Status + Sold Count
 
 **Status:** ✅ Completed 2026-06-01
@@ -587,8 +617,7 @@ pattern.
 - [x] **Quantity selector** ✅ Completed 2026-06-01
 - [x] **Stock status indicator** ✅ Completed 2026-06-01
 - [x] **Sold count** ✅ Completed 2026-06-01
-- [ ] **Recommendations section** — `getProductRecommendations` endpoint exists
-      but is never called; add horizontal product strip at the bottom
+- [x] **Recommendations section** ✅ Completed 2026-06-01
 - [ ] **Review images** — `ReviewDto.images` field exists but `ReviewAdapter`
       ignores it
 - [ ] **Admin reply on review** — `ReviewDto.reply` field exists but not rendered
@@ -624,7 +653,7 @@ pattern.
 |---|---|---|
 | 11 | ~~ProductDetail: Stock status per variant~~ | ✅ **DONE** 2026-06-01 |
 | 12 | ~~ProductDetail: Sold count~~ | ✅ **DONE** 2026-06-01 |
-| 13 | ProductDetail: Recommendations | Upsell flow; API already exists |
+| 13 | ~~ProductDetail: Recommendations~~ | ✅ **DONE** 2026-06-01 |
 | 14 | Home: Proper shimmer skeletons | Loading UX quality |
 | 15 | ProductDetail: Review images | Data exists, just not rendered |
 | 16 | ProductDetail: Admin reply on review | Data exists, just not rendered |
