@@ -43,15 +43,32 @@
                     android:visibility="gone" />
             </FrameLayout>
 
-            <!-- Search Bar -->
-            <androidx.appcompat.widget.SearchView
-                android:id="@+id/searchView"
+            <!-- Search Bar + Suggestions -->
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:background="@drawable/bg_search"
-                app:queryHint="Tìm kiếm sản phẩm..."
-                app:iconifiedByDefault="false" />
+                android:layout_height="wrap_content">
+
+                <androidx.appcompat.widget.SearchView
+                    android:id="@+id/searchView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="16dp"
+                    android:background="@drawable/bg_search"
+                    app:queryHint="Tìm kiếm sản phẩm..."
+                    app:iconifiedByDefault="false" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvSearchSuggestions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="56dp"
+                    android:background="@color/white"
+                    android:elevation="8dp"
+                    android:visibility="gone" />
+
+            </FrameLayout>
 
             <!-- Loading Shimmer -->
             <com.facebook.shimmer.ShimmerFrameLayout

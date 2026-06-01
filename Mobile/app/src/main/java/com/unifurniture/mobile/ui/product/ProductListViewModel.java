@@ -97,7 +97,7 @@ public class ProductListViewModel extends AndroidViewModel {
     }
 
     public void search(String query) {
-        currentSearch = query;
+        currentSearch = (query != null && !query.trim().isEmpty()) ? query.trim() : null;
         currentPage = 1;
         loadProducts();
     }

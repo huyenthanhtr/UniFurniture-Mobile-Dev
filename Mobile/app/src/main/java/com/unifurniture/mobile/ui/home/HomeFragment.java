@@ -15,11 +15,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.BuildConfig;
 import com.unifurniture.mobile.data.model.CollectionDto;
+import com.unifurniture.mobile.data.model.ProductDto;
 import com.unifurniture.mobile.databinding.FragmentHomeBinding;
 import com.unifurniture.mobile.ui.adapter.CategoryAdapter;
 import com.unifurniture.mobile.ui.adapter.CollectionAdapter;
 import com.unifurniture.mobile.ui.adapter.ImageSliderAdapter;
 import com.unifurniture.mobile.ui.adapter.ProductCardAdapter;
+import com.unifurniture.mobile.ui.adapter.SearchSuggestionAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +35,9 @@ public class HomeFragment extends Fragment {
     private ImageSliderAdapter bannerAdapter;
     private Handler autoScrollHandler;
     private Runnable autoScrollRunnable;
+    private SearchSuggestionAdapter searchSuggestionAdapter;
+    private Handler searchHandler;
+    private Runnable searchRunnable;
 
     @Nullable
     @Override
@@ -49,6 +54,7 @@ public class HomeFragment extends Fragment {
 
         setupRecyclerViews();
         setupBanner();
+        setupSearchSuggestions();
         observeData();
 
         binding.btnViewAll.setOnClickListener(v ->
@@ -57,13 +63,26 @@ public class HomeFragment extends Fragment {
         binding.searchView.setOnQueryTextListener(new androidx.appcompat.widget.SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                hideSearchSuggestions();
                 Bundle args = new Bundle();
                 args.putString("search", query);
                 Navigation.findNavController(requireView()).navigate(R.id.productListFragment, args);
                 return true;
             }
             @Override
-            public boolean onQueryTextChange(String newText) { return false; }
+            public boolean onQueryTextChange(String newText) {
+                String query = newText.trim();
+                if (searchHandler != null && searchRunnable != null) {
+                    searchHandler.removeCallbacks(searchRunnable);
+                }
+                if (query.isEmpty()) {
+                    hideSearchSuggestions();
+                    return true;
+                }
+                searchRunnable = () -> viewModel.searchForSuggestions(query);
+                searchHandler.postDelayed(searchRunnable, 300);
+                return true;
+            }
         });
 
         binding.swipeRefresh.setOnRefreshListener(() -> {
@@ -163,6 +182,34 @@ public class HomeFragment extends Fragment {
 
         viewModel.isLoading().observe(getViewLifecycleOwner(), loading ->
                 binding.shimmerLayout.setVisibility(loading ? View.VISIBLE : View.GONE));
+
+        viewModel.getSearchSuggestions().observe(getViewLifecycleOwner(), products -> {
+            if (products != null && !products.isEmpty()) {
+                searchSuggestionAdapter.submitList(products);
+                binding.rvSearchSuggestions.setVisibility(View.VISIBLE);
+            } else {
+                hideSearchSuggestions();
+            }
+        });
+    }
+
+    private void setupSearchSuggestions() {
+        searchHandler = new Handler(Looper.getMainLooper());
+        binding.rvSearchSuggestions.setLayoutManager(
+                new LinearLayoutManager(requireContext()));
+        searchSuggestionAdapter = new SearchSuggestionAdapter(product -> {
+            hideSearchSuggestions();
+            binding.searchView.setQuery("", false);
+            String slug = product.slug != null ? product.slug : product.id;
+            Bundle args = new Bundle();
+            args.putString("slug", slug);
+            Navigation.findNavController(requireView()).navigate(R.id.productDetailFragment, args);
+        });
+        binding.rvSearchSuggestions.setAdapter(searchSuggestionAdapter);
+    }
+
+    private void hideSearchSuggestions() {
+        binding.rvSearchSuggestions.setVisibility(View.GONE);
     }
 
     @Override

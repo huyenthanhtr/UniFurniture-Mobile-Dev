@@ -45,6 +45,38 @@
                 android:contentDescription="Chuyển chế độ xem" />
         </LinearLayout>
 
+        <!-- Search bar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/primary"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="10dp">
+            <EditText
+                android:id="@+id/etSearch"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_search_field"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:hint="Tìm kiếm sản phẩm..."
+                android:textColor="@color/gray_800"
+                android:textSize="14sp"
+                android:inputType="text"
+                android:maxLines="1"
+                android:focusableInTouchMode="true" />
+        </LinearLayout>
+
+        <!-- Search suggestions -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvSuggestions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:elevation="4dp"
+            android:visibility="gone" />
+
         <!-- Sort Chips -->
         <HorizontalScrollView
             android:layout_width="match_parent"

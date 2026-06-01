@@ -1,10 +1,10 @@
 # UniFurniture Mobile — Progress Tracker
 
-Last updated: 2026-06-01
+Last updated: 2026-06-01 (P2 #7 search fully complete)
 Branch: feature/home
 Owner of this file: Như Ngọc
 
-> **2026-06-01:** P1 all done ✅. P2 #8 ✅, #9 ✅, #10 ✅, #6 ✅. Next: P2 #7 Search debounce.
+> **2026-06-01:** P1 all done ✅. P2 all done ✅ (#6, #7, #8, #9, #10). Next: P3 (polish).
 
 ---
 
@@ -324,6 +324,62 @@ style resource) → build error "attribute insetLeft not found". Fix: thay `Mate
 
 ---
 
+### P2 #7 — Search: Real-time Debounce + Suggestions
+
+**Status:** ✅ Completed 2026-06-01
+
+#### Implementation summary
+
+**ProductList search bar:**
+- `EditText` pill-shape (bo tròn) bên dưới toolbar, `focusableInTouchMode="true"` để nhận input đúng
+- `TextWatcher` 300ms debounce → `viewModel.search(query)` cập nhật grid
+- Suggestions hiện ngay lập tức (client-side từ data đang load) trước khi API về → sau đó update từ API results
+- Suggestions dùng `startsWith` sau khi strip dấu tiếng Việt (NFD normalize) — chỉ match tên bắt đầu bằng query, tránh suggest sai
+- Tap suggestion → navigate thẳng vào **ProductDetail** (không search lại)
+- Submit / Enter → navigate sang **ProductList** với từ khóa
+- `progressBar` xuất hiện ngay khi gõ (trước API response) để feedback tức thì
+- `viewModel.search("")` treat empty string là null
+
+**Home search bar:**
+- `SearchView` (có sẵn) thêm `onQueryTextChange` với 300ms debounce
+- Gọi `viewModel.searchForSuggestions(query)` → API `GET /products?q=query&limit=8`
+- Suggestions overlay lên content bên dưới (FrameLayout wrapper + `elevation="8dp"`)
+- Tap suggestion → navigate thẳng vào **ProductDetail**
+- Submit → navigate sang **ProductList**
+- `searchSuggestions` LiveData trong HomeViewModel tách biệt với `featuredProducts`
+
+**Lý do suggestion tap → ProductDetail (không phải ProductList search):**
+Full product name làm search query → server không match được → empty state. Navigate thẳng bằng `slug` đảm bảo luôn tìm được sản phẩm.
+
+**UniKey + Android emulator:** UniKey intercept keystroke ở Windows level → emulator không nhận được input. Workaround: tắt UniKey khi test emulator, hoặc test trên điện thoại thật.
+
+#### Modified/created files
+
+| # | File | Action |
+|---|---|---|
+| 1 | `res/drawable/bg_search_field.xml` | CREATED — pill shape radius 20dp |
+| 2 | `res/drawable/item_search_suggestion.xml` | CREATED — row 48dp cho suggestions |
+| 3 | `res/layout/fragment_product_list.xml` | MODIFIED — search bar + `rvSuggestions` |
+| 4 | `res/layout/fragment_home.xml` | MODIFIED — FrameLayout wrapper + `rvSearchSuggestions` |
+| 5 | `ui/adapter/SearchSuggestionAdapter.java` | CREATED — adapter nhận `List<ProductDto>`, click → `ProductDto` |
+| 6 | `ui/product/ProductListFragment.java` | MODIFIED — `setupSearch()`, debounce, client-side suggestions, navigate ProductDetail on tap |
+| 7 | `ui/product/ProductListViewModel.java` | MODIFIED — `search()` treat empty as null |
+| 8 | `ui/home/HomeFragment.java` | MODIFIED — debounce, call `searchForSuggestions()`, observe suggestions LiveData |
+| 9 | `ui/home/HomeViewModel.java` | MODIFIED — thêm `searchForSuggestions()` + `searchSuggestions` LiveData |
+
+#### Testing checklist
+
+- [ ] ProductList: gõ "tu" → gợi ý chỉ hiện sản phẩm có tên bắt đầu bằng "tủ"
+- [ ] ProductList: gợi ý hiện ngay (client-side), sau đó update từ API
+- [ ] ProductList: tap gợi ý → mở ProductDetail đúng sản phẩm
+- [ ] ProductList: submit/Enter → navigate sang ProductList với từ khóa
+- [ ] ProductList: xóa text → grid về tất cả sản phẩm
+- [ ] Home: gõ → 300ms → gợi ý từ API hiện bên dưới search bar
+- [ ] Home: tap gợi ý → mở ProductDetail đúng sản phẩm
+- [ ] Home: submit → navigate sang ProductList với từ khóa
+
+---
+
 ### P2 #6 — ProductList: Pagination / Infinite Scroll
 
 **Status:** ✅ Completed 2026-06-01
@@ -490,8 +546,7 @@ pattern.
 
 ### Search
 
-- [ ] **Real-time search with debounce** — `onQueryTextChange` is a no-op;
-      needs 300ms debounce + API call to update ProductList inline
+- [x] **Real-time search with debounce** ✅ Completed 2026-06-01
 - [ ] **Search suggestions / autocomplete** — Dropdown or RecyclerView of matches
       while typing
 - [ ] **Search history** — Recent searches stored in SharedPreferences, shown when
@@ -531,7 +586,7 @@ pattern.
 | # | Task | Why |
 |---|---|---|
 | 6 | ~~ProductList: Pagination / infinite scroll~~ | ✅ **DONE** 2026-06-01 |
-| 7 | Search: Real-time debounced query | Doc says "Autocomplete"; current behavior is submit-only |
+| 7 | ~~Search: Real-time debounced query~~ | ✅ **DONE** 2026-06-01 |
 | 8 | ~~ProductList: Empty state view~~ | ✅ **DONE** 2026-06-01 |
 | 9 | ~~ProductList: Grid/List toggle~~ | ✅ **DONE** 2026-06-01 |
 | 10 | ~~ProductList: Active sort chip state~~ | ✅ **DONE** 2026-06-01 |

@@ -1,20 +1,31 @@
 package com.unifurniture.mobile.ui.product;
 
+import android.content.Context;
+import java.text.Normalizer;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.unifurniture.mobile.R;
+import com.unifurniture.mobile.data.model.ApiListResponse;
 import com.unifurniture.mobile.data.model.CategoryDto;
+import com.unifurniture.mobile.data.model.ProductDto;
 import com.unifurniture.mobile.databinding.FragmentProductListBinding;
 import com.unifurniture.mobile.ui.adapter.ProductCardAdapter;
+import com.unifurniture.mobile.ui.adapter.SearchSuggestionAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +35,10 @@ public class ProductListFragment extends Fragment {
     private ProductListViewModel viewModel;
     private ProductCardAdapter adapter;
     private boolean isGrid = true;
+    private Handler searchHandler;
+    private Runnable searchRunnable;
+    private TextWatcher searchWatcher;
+    private SearchSuggestionAdapter suggestionAdapter;
 
     @Nullable
     @Override
@@ -39,7 +54,8 @@ public class ProductListFragment extends Fragment {
         viewModel = new ViewModelProvider(this).get(ProductListViewModel.class);
 
         setupRecyclerView();
-        handleArguments();
+        handleArguments();  // populate etSearch BEFORE watcher is attached
+        setupSearch();
         observeData();
         syncSortChip();
 
@@ -69,6 +85,7 @@ public class ProductListFragment extends Fragment {
             String collectionId = args.getString("collectionId");
 
             if (search != null) {
+                binding.etSearch.setText(search);
                 viewModel.search(search);
                 filterApplied = true;
             }
@@ -116,6 +133,89 @@ public class ProductListFragment extends Fragment {
                 isGrid ? R.drawable.ic_view_list : R.drawable.ic_grid_view);
     }
 
+    private void setupSearch() {
+        binding.rvSuggestions.setLayoutManager(new LinearLayoutManager(requireContext()));
+        suggestionAdapter = new SearchSuggestionAdapter(product -> {
+            hideSuggestions();
+            InputMethodManager imm = (InputMethodManager) requireContext()
+                    .getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) imm.hideSoftInputFromWindow(binding.etSearch.getWindowToken(), 0);
+            String slug = product.slug != null ? product.slug : product.id;
+            Bundle args = new Bundle();
+            args.putString("slug", slug);
+            Navigation.findNavController(requireView()).navigate(R.id.productDetailFragment, args);
+        });
+        binding.rvSuggestions.setAdapter(suggestionAdapter);
+
+        binding.etSearch.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) hideSuggestions();
+        });
+
+        searchHandler = new Handler(Looper.getMainLooper());
+        searchWatcher = new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void afterTextChanged(Editable s) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (searchHandler != null && searchRunnable != null) {
+                    searchHandler.removeCallbacks(searchRunnable);
+                }
+                String query = s.toString().trim();
+
+                if (query.isEmpty()) {
+                    hideSuggestions();
+                    binding.progressBar.setVisibility(View.GONE);
+                    searchRunnable = () -> { viewModel.search(""); syncSortChip(); };
+                    searchHandler.postDelayed(searchRunnable, 300);
+                    return;
+                }
+
+                // Immediate feedback: show spinner + client-side suggestions
+                binding.progressBar.setVisibility(View.VISIBLE);
+                showClientSideSuggestions(query);
+
+                // Debounced API call to update the grid
+                searchRunnable = () -> { viewModel.search(query); syncSortChip(); };
+                searchHandler.postDelayed(searchRunnable, 300);
+            }
+        };
+        binding.etSearch.addTextChangedListener(searchWatcher);
+    }
+
+    private void showClientSideSuggestions(String query) {
+        ApiListResponse<ProductDto> current = viewModel.getProducts().getValue();
+        if (current == null || current.items == null) return;
+        String normalizedQuery = stripDiacritics(query.toLowerCase());
+        List<ProductDto> matched = new ArrayList<>();
+        for (ProductDto p : current.items) {
+            if (p.name != null && matchesWordStart(stripDiacritics(p.name.toLowerCase()), normalizedQuery)) {
+                matched.add(p);
+                if (matched.size() >= 8) break;
+            }
+        }
+        if (!matched.isEmpty()) {
+            suggestionAdapter.submitList(matched);
+            binding.rvSuggestions.setVisibility(View.VISIBLE);
+        } else {
+            hideSuggestions();
+        }
+    }
+
+    private String stripDiacritics(String text) {
+        String normalized = Normalizer.normalize(text, Normalizer.Form.NFD);
+        return normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+    }
+
+    // Trả về true nếu query khớp với đầu tên hoặc đầu một từ trong tên
+    private boolean matchesWordStart(String normalizedName, String normalizedQuery) {
+        return normalizedName.startsWith(normalizedQuery);
+    }
+
+    private void hideSuggestions() {
+        binding.rvSuggestions.setVisibility(View.GONE);
+    }
+
     private void observeData() {
         viewModel.getProducts().observe(getViewLifecycleOwner(), response -> {
             if (response != null && response.items != null) {
@@ -124,6 +224,14 @@ public class ProductListFragment extends Fragment {
                 boolean empty = response.items.isEmpty();
                 binding.layoutEmpty.setVisibility(empty ? View.VISIBLE : View.GONE);
                 binding.rvProducts.setVisibility(empty ? View.GONE : View.VISIBLE);
+
+                // Refresh suggestions with API results
+                String query = binding.etSearch.getText().toString().trim();
+                if (!query.isEmpty() && !response.items.isEmpty()) {
+                    int limit = Math.min(8, response.items.size());
+                    suggestionAdapter.submitList(response.items.subList(0, limit));
+                    binding.rvSuggestions.setVisibility(View.VISIBLE);
+                }
             }
         });
 
@@ -171,6 +279,10 @@ public class ProductListFragment extends Fragment {
 
             @Override
             public void onFiltersCleared() {
+                binding.etSearch.removeTextChangedListener(searchWatcher);
+                binding.etSearch.setText("");
+                binding.etSearch.addTextChangedListener(searchWatcher);
+                hideSuggestions();
                 viewModel.clearFilters();
                 syncSortChip();
             }
@@ -182,6 +294,9 @@ public class ProductListFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        if (searchHandler != null && searchRunnable != null) {
+            searchHandler.removeCallbacks(searchRunnable);
+        }
         binding = null;
     }
 }

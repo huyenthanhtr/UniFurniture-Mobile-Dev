@@ -724,6 +724,54 @@ expected behavior. Không có lý do gì để persist nó qua config changes ha
 
 ---
 
+### [P2 #7] Search: Real-time Debounce + Suggestions
+
+**Date recorded:** 2026-06-01
+**Status:** ✅ Completed 2026-06-01
+
+---
+
+#### Decision: Suggestion tap → ProductDetail, không phải ProductList search
+
+**What was decided:** Khi user tap vào một suggestion, navigate thẳng vào `ProductDetailFragment` bằng `product.slug`. Không dùng `product.name` làm search query sang ProductList.
+
+**Why:** Full product name làm `?q=` param → server không match được (search quá specific) → empty state → UX tệ. Navigate bằng `slug` đảm bảo luôn ra đúng sản phẩm.
+
+**Rule:** `SearchSuggestionAdapter` nhận `List<ProductDto>` (không phải `List<String>`), listener trả về `ProductDto` để caller tự quyết định navigate ProductDetail hay ProductList.
+
+---
+
+#### Decision: `startsWith` thay vì `contains` cho client-side suggestion matching
+
+**What was decided:** Client-side filter (ProductList) dùng `normalizedName.startsWith(normalizedQuery)` sau khi strip dấu. Không dùng `contains`.
+
+**Why:** `contains` khiến gõ "tu" suggest cả "Bộ bàn ghế **tủ** bếp" — tên bắt đầu bằng "Bộ" trông rất lạ và không liên quan với query. `startsWith` cho UX autocomplete đúng hơn: suggestions chỉ là completions của những gì đang gõ.
+
+**Note:** Grid kết quả (dùng API `?q=`) vẫn dùng full-text search của server — không bị ảnh hưởng bởi quyết định này.
+
+---
+
+#### Decision: Home search dùng API call, ProductList dùng client-side filter
+
+**What was decided:**
+- **Home**: `HomeViewModel.searchForSuggestions(query)` gọi `GET /products?q=query&limit=8` → `searchSuggestions` LiveData → Fragment observe và show
+- **ProductList**: `showClientSideSuggestions()` filter từ `viewModel.getProducts().getValue()` ngay lập tức, sau đó API results cập nhật thêm
+
+**Why:**
+- Home chỉ có 10 featured products → client-side filter quá ít, nhiều query không ra gì
+- ProductList đang có sẵn full product list từ current page → client-side filter nhanh và immediate, đủ dùng cho suggestions
+- Không cần thêm API call mới trong ProductList (đã có debounced search cho grid update)
+
+---
+
+#### Decision: Strip dấu tiếng Việt (NFD normalize) trước khi so sánh
+
+**What was decided:** Normalize text bằng `Normalizer.Form.NFD` rồi xóa combining marks trước khi so sánh. Áp dụng cho cả query và product name.
+
+**Why:** User gõ "tu" (không dấu) → cần match "Tủ" (có dấu). NFD decompose "ủ" thành "u" + combining grave, sau đó xóa combining → "u". So sánh "tu".startsWith("tu") = true.
+
+---
+
 ### [P2 #6] ProductList: Pagination / Infinite Scroll
 
 **Date recorded:** 2026-06-01
