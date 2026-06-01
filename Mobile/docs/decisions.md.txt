@@ -352,6 +352,21 @@ extract the `"recommendations"` key from the map.
 
 ---
 
+## Navigation Conventions
+
+### Bundle navigation over Safe Args
+
+**Decision:** All cross-fragment navigation uses `Bundle` + `Navigation.findNavController().navigate(R.id.dest, bundle)`. Safe Args is not used.
+
+**Why:**
+- The initial scaffold (Khải Đào, commit `17e9ba3`) established Bundle navigation throughout. Every call site — `HomeFragment` (search, category tap, "View All"), `ProductDetailFragment` (back button) — uses `getArguments().getString("key")` to read args.
+- Safe Args requires the `androidx.navigation.safeargs` Gradle plugin and generates a `*Directions` class per destination. Introducing it mid-project would require migrating all existing navigation call sites or mixing two patterns in the same codebase — both options add churn with no functional gain for this project's scope.
+- For this project (student demo, single developer per feature scope, no deep link requirements), Bundle navigation is fully sufficient.
+
+**Rule:** Always add new navigation arguments to `nav_graph.xml` as declared `<argument>` elements even when using Bundle navigation. This keeps the nav graph as the authoritative record of what arguments a destination accepts, even though the declarations have no runtime effect without Safe Args.
+
+---
+
 ## Feature Decisions
 
 This section records implementation decisions for specific features as they are
@@ -542,3 +557,157 @@ This caches both the original and transformed (centre-cropped) bitmap to disk.
 After the first network load, subsequent app opens show banner images instantly
 without waiting for a network round-trip. Applies to all `ImageSliderAdapter` usages
 (home banner and product detail images).
+
+---
+
+### [P1 #2] Home: Collections Section
+
+**Date recorded:** 2026-06-01
+**Status:** ⚙️ Implemented 2026-06-01 — awaiting manual test
+
+---
+
+#### Decision: Follow `CategoryAdapter` pattern exactly for `CollectionAdapter`
+
+**What was decided:** `CollectionAdapter` is a structural copy of `CategoryAdapter`:
+`ListAdapter<CollectionDto, VH>` + inner `DiffUtil.ItemCallback` + inner
+`OnCollectionClickListener` interface + `ViewBinding` in the ViewHolder.
+
+**Why:**
+- `CategoryAdapter` is the only existing horizontal-list adapter for entity cards in
+  this project. It is proven working (categories render correctly on Home). Deviating
+  from its structure for collections would introduce two inconsistent patterns in the
+  same adapter package with no benefit.
+- `ListAdapter` + `DiffUtil` is the project-wide convention for all RecyclerView
+  adapters (documented in `decisions.md` "ListAdapter + DiffUtil" section). Using it
+  here maintains that consistency.
+- The `OnClickListener` as an inner interface (rather than a lambda in the Fragment) is
+  consistent with `CategoryAdapter`, `ProductCardAdapter`, and `ReviewAdapter`. All
+  three use the same interface pattern.
+
+**One structural difference from `CategoryAdapter`:** `CollectionAdapter` constructor
+accepts an additional `String serverHost` parameter. This is required because
+`CollectionDto.bannerUrl` is stored as `http://localhost:3000/uploads/...` by the
+server and must be rewritten to the actual host before Glide can load it on the
+emulator. The rewrite pattern (`url.replace("http://localhost:3000", serverHost)`) is
+identical to the one already in `HomeFragment`'s banner observer. `serverHost` is
+computed once in `HomeFragment.setupRecyclerViews()` as
+`BuildConfig.API_BASE_URL.replace("/api/", "")` and injected at construction time.
+
+**Why not rewrite in the Fragment before `submitList()`:** `submitList()` takes
+`List<CollectionDto>` — the DTO objects. Rewriting would require mutating DTO fields
+in place (bad: DTOs are data-layer objects, not view-layer objects) or creating wrapper
+objects (overkill for one field). Injecting `serverHost` into the adapter is the
+minimal, clean solution.
+
+**Why `CategoryAdapter`'s `category.imageUrl` does not need the same rewrite:**
+`CategoryDto.imageUrl` is served from the same server but the emulator + WiFi-IP
+workaround (`local.properties`) is already in effect for all API calls via `ApiClient`.
+Category images load via the same base URL path. The `bannerUrl` specifically stores
+the full `http://localhost:3000/...` origin URL (set by the upload middleware at
+create/update time), which is why only `bannerUrl` needs rewriting.
+
+---
+
+---
+
+### [Bug] BottomNavigationView Home Tab — Navigation 2.7.6 Multiple Back Stacks
+
+**Date recorded:** 2026-06-01
+**Status:** ✅ Fixed 2026-06-01
+
+---
+
+#### Symptom
+
+Home tab in `BottomNavigationView` never responds to taps from any screen.
+Products / Cart / Account tabs work. No crash. No application code modifies the
+Home menu item at runtime. Appeared after P1 #1/P1 #2 made the navigation paths
+more prominent, but the root cause predates those changes (original scaffold).
+
+#### Working Theory: Navigation 2.7.6 `saveState`/`restoreState` Cycle
+
+`NavigationUI.setupWithNavController` (Navigation 2.7.6) auto-enables multiple back
+stacks. When any tab is tapped, `onNavDestinationSelected` builds:
+
+```java
+NavOptions options = new NavOptions.Builder()
+    .setLaunchSingleTop(true)
+    .setRestoreState(true)
+    .setPopUpTo(graph.findStartDestination().id, false, /*saveState=*/ true)
+    .build();
+navController.navigate(item.getItemId(), null, options);
+```
+
+For Products / Cart / Account: navigate target ≠ `popUpTo` target (`homeFragment`).
+`saveState` saves under key=target; `restoreState` looks up key=target. Different keys
+→ normal behavior ✓.
+
+For Home tab: navigate target (`homeFragment`) == `popUpTo` target (`homeFragment`).
+Both save and restore use key=`homeFragment`. `popUpTo` saves the current stack under
+key=`homeFragment`; `restoreState` immediately finds and restores that same state,
+reverting the navigation. Net effect: zero visible change from every screen.
+
+#### Proposed Fix (pending diagnostic confirmation)
+
+Replace `NavigationUI.setupWithNavController` in `MainActivity.java` with a manual
+`setOnItemSelectedListener` using plain `popUpTo` **without** `saveState`/`restoreState`:
+
+```java
+binding.bottomNavigation.setOnItemSelectedListener(item -> {
+    NavOptions options = new NavOptions.Builder()
+        .setLaunchSingleTop(true)
+        .setPopUpTo(R.id.homeFragment, false)
+        .build();
+    try {
+        navController.navigate(item.getItemId(), null, options);
+        return true;
+    } catch (IllegalArgumentException e) {
+        return false;
+    }
+});
+navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+    Menu menu = binding.bottomNavigation.getMenu();
+    for (int i = 0; i < menu.size(); i++) {
+        MenuItem menuItem = menu.getItem(i);
+        if (menuItem.getItemId() == destination.getId()) {
+            menuItem.setChecked(true);
+            break;
+        }
+    }
+});
+```
+
+This removes the `saveState`/`restoreState` cycle while preserving:
+- Correct back stack pop when switching tabs
+- Visual tab highlighting on destination change
+- `launchSingleTop` to prevent duplicate destinations
+
+Only `MainActivity.java` changes. No nav_graph, fragment, or adapter changes.
+
+#### Confirmed by Logcat (2026-06-01)
+
+```
+CLICK: itemId=2131230971 homeId=2131230971 match=true
+onNavDestinationSelected returned: false   ← always, for every Home tap
+```
+
+Listener fires ✓. Navigation fails inside `onNavDestinationSelected` because
+`NavController.navigate(homeFragment, navOptions{saveState=true, restoreState=true,
+popUpTo(homeFragment)})` throws `IllegalArgumentException`. Exception is caught by
+NavigationUI's try-catch; `false` returned; BottomNav does not select Home.
+
+---
+
+#### Decision: Use `MaterialCardView` for `item_collection.xml`
+
+**What was decided:** `item_collection.xml` uses `MaterialCardView` as the root, not
+`LinearLayout` or plain `FrameLayout`.
+
+**Why:** `item_product_card.xml` already uses `MaterialCardView` with
+`cardCornerRadius="12dp"` and `cardElevation="2dp"`. Using the same root for collection
+cards gives visual consistency (same rounded-corner, same elevation shadow) without
+adding any new dependency — Material Components is already in `build.gradle`.
+
+**Card dimensions:** 140dp wide × 90dp tall (landscape ratio, slightly wider than
+category cards at 80dp, proportional to a banner image aspect ratio).

@@ -51,17 +51,28 @@ public class ProductListFragment extends Fragment {
 
     private void handleArguments() {
         Bundle args = getArguments();
+        boolean filterApplied = false;
         if (args != null) {
             String search = args.getString("search");
             String categoryId = args.getString("categoryId");
             String categoryName = args.getString("categoryName");
+            String collectionId = args.getString("collectionId");
 
-            if (search != null) viewModel.search(search);
+            if (search != null) {
+                viewModel.search(search);
+                filterApplied = true;
+            }
             if (categoryId != null) {
                 viewModel.filterByCategory(categoryId);
                 if (categoryName != null) binding.tvTitle.setText(categoryName);
+                filterApplied = true;
+            }
+            if (collectionId != null) {
+                viewModel.filterByCollection(collectionId);
+                filterApplied = true;
             }
         }
+        if (!filterApplied) viewModel.loadProducts();
     }
 
     private void setupRecyclerView() {

@@ -28,7 +28,6 @@ public class ProductListViewModel extends AndroidViewModel {
     public ProductListViewModel(@NonNull Application application) {
         super(application);
         repository = new ProductRepository(UniFurnitureApp.getInstance().getApiService());
-        loadProducts();
         loadCategories();
     }
 

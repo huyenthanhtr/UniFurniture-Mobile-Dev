@@ -122,6 +122,27 @@
                 android:clipToPadding="false"
                 android:orientation="horizontal" />
 
+            <!-- Collections Section -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:text="Bộ sưu tập"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/black" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvCollections"
+                android:layout_width="match_parent"
+                android:layout_height="110dp"
+                android:layout_marginTop="8dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:clipToPadding="false"
+                android:orientation="horizontal" />
+
             <View android:layout_width="match_parent"
                 android:layout_height="80dp" />
 

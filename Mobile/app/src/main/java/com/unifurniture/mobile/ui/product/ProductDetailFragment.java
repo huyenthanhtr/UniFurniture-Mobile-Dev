@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 import androidx.viewpager2.widget.ViewPager2;
 import com.tbuonomo.viewpagerdotsindicator.DotsIndicator;
 import com.unifurniture.mobile.R;
@@ -41,7 +42,10 @@ public class ProductDetailFragment extends Fragment {
         viewModel = new ViewModelProvider(this).get(ProductDetailViewModel.class);
 
         String slug = getArguments() != null ? getArguments().getString("slug") : null;
-        if (slug == null) { requireActivity().onBackPressed(); return; }
+        if (slug == null) {
+            Navigation.findNavController(requireView()).navigateUp();
+            return;
+        }
 
         setupImageSlider();
         setupReviews();
@@ -49,7 +53,8 @@ public class ProductDetailFragment extends Fragment {
         observeData();
 
         binding.btnAddToCart.setOnClickListener(v -> viewModel.addToCart(selectedVariantId));
-        binding.btnBack.setOnClickListener(v -> requireActivity().onBackPressed());
+        binding.btnBack.setOnClickListener(v ->
+                Navigation.findNavController(requireView()).navigateUp());
     }
 
     private void setupImageSlider() {

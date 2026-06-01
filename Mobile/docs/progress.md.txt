@@ -1,10 +1,10 @@
 # UniFurniture Mobile — Progress Tracker
 
-Last updated: 2026-05-31
+Last updated: 2026-06-01
 Branch: feature/home
 Owner of this file: Như Ngọc
 
-> Home Banner/Image Slider (P1 #1) **fully completed 2026-05-31** — implementation + 3 post-implementation bugs fixed + UI polish verified. Categories & Collections API format mismatch (server returns `List`, not `ApiListResponse`) also fixed as a side-effect. Next: Home Collections section (P1 #2).
+> **2026-06-01:** P1 #2 Home Collections section ✅, BottomNavigationView Home tab bug ✅, ProductList collection filter race condition ✅. Next: P1 #3 Filter bottom sheet.
 
 ---
 
@@ -163,7 +163,97 @@ UI polished with a dark gradient overlay behind the dots and accent-gold dot col
 
 ## In Progress
 
-None.
+### Bug — BottomNavigationView Home Tab Unresponsive
+
+**Status:** ✅ Fixed 2026-06-01 — `MainActivity.java` replaced `NavigationUI.setupWithNavController`.
+
+#### Observed symptom
+
+After implementing P1 #1 and P1 #2, the Home tab in `BottomNavigationView` did not
+respond to taps from any screen. Icon did not become selected. No navigation occurred.
+No crash. Products / Cart / Account tabs worked normally.
+
+#### Confirmed root cause (Logcat evidence)
+
+Diagnostic log confirmed:
+- `OnItemSelectedListener` DOES fire for the Home tab (touch reaches the listener ✓)
+- `NavigationUI.onNavDestinationSelected` returns `false` for Home tab on every tap
+- `onNavDestinationSelected` returns `true` for Products/Cart/Account tabs ✓
+
+Logcat excerpt:
+```
+CLICK: itemId=2131230971 homeId=2131230971 match=true
+onNavDestinationSelected returned: false   ← always false for Home
+```
+
+`onNavDestinationSelected` returns `false` only when `NavController.navigate()` throws
+`IllegalArgumentException` internally. In Navigation Component 2.7.6,
+`NavigationUI.setupWithNavController` automatically adds `saveState=true` and
+`restoreState=true` to all bottom nav navigate calls. For the Home tab, the navigate
+destination (`homeFragment`) equals the `popUpTo` target (`graph.startDestination =
+homeFragment`). This combination causes Navigation 2.7.6 to throw
+`IllegalArgumentException` — saving and immediately restoring the same key creates an
+internal conflict. The exception is caught silently; `false` is returned; BottomNavigation
+does not select Home; no navigation occurs.
+
+This does not affect Products/Cart/Account because their destination IDs differ from the
+`popUpTo` target (`homeFragment`).
+
+This bug predates P1 #1 and P1 #2. P1 #2's Collections section made the non-Home
+navigation paths prominent, which is when the bug was first noticed during testing.
+
+#### Fix applied
+
+`MainActivity.java` — replaced `NavigationUI.setupWithNavController` with:
+- Manual `setOnItemSelectedListener` using plain `NavOptions` (no `saveState`/`restoreState`)
+- Manual `addOnDestinationChangedListener` to update tab visual state on destination change
+
+No nav_graph, fragment, adapter, or layout changes.
+
+---
+
+### P1 #2 — Home Collections Section
+
+**Status:** ✅ Completed 2026-06-01 — implementation + collection filter bug fixed + manually tested.
+**Date implemented:** 2026-06-01
+
+#### Implementation summary
+
+Horizontal scrollable row of collection cards added below "Sản phẩm nổi bật". Each card
+(`MaterialCardView` 140×90dp) shows the collection's `bannerUrl` image with a gradient
+overlay and `name` label. Tapping navigates to `ProductListFragment` filtered by
+`collectionId`. Data flows from the existing `HomeViewModel.getCollections()` observer —
+no new API calls, no ViewModel changes.
+
+`serverHost` for localhost URL rewrite is computed once in `setupRecyclerViews()` and
+injected into `CollectionAdapter`'s constructor, consistent with the banner's rewrite
+pattern.
+
+#### Modified/created files
+
+| # | File | Action |
+|---|---|---|
+| 1 | `res/layout/item_collection.xml` | CREATED — `MaterialCardView` 140×90dp, full-bleed `ImageView`, `bg_banner_gradient` overlay 36dp, `TextView` name bottom-start |
+| 2 | `ui/adapter/CollectionAdapter.java` | CREATED — `ListAdapter<CollectionDto,VH>`, `DiffUtil` (`Objects.equals`), `serverHost` constructor param, Glide `centerCrop`, `placeholder_product` |
+| 3 | `res/layout/fragment_home.xml` | MODIFIED — added "Bộ sưu tập" `TextView` + `rvCollections` `RecyclerView` 110dp before bottom spacer |
+| 4 | `ui/home/HomeFragment.java` | MODIFIED — added `collectionAdapter` field; init with `serverHost` in `setupRecyclerViews()`; added `collectionAdapter.submitList(items)` in collections observer |
+| 5 | `res/navigation/nav_graph.xml` | MODIFIED — added `collectionId` nullable string arg to `productListFragment` |
+| 6 | `ui/product/ProductListFragment.java` | MODIFIED — reads `collectionId` in `handleArguments()`, calls `viewModel.filterByCollection()` |
+
+#### Testing checklist
+
+- [x] "Bộ sưu tập" section header visible on Home screen
+- [x] Collections RecyclerView scrolls horizontally
+- [x] Each card shows banner image (or `placeholder_product` if null/fails)
+- [x] Each card shows collection name
+- [x] Tap a collection → navigates to ProductList filtered by that collection
+- [x] ProductList shows only products belonging to the tapped collection
+- [x] `filterByCollection()` clears any active category/search filter
+- [x] No crash when collections list is empty
+- [x] No crash when `bannerUrl` is null on an item
+- [x] No crash when `id` is null on an item
+- [x] Navigate away from Home and back — collections list still populated
+- [x] SwipeRefresh on Home reloads collections data
 
 ---
 
@@ -172,8 +262,7 @@ None.
 ### Home
 
 - [x] **Banner/Image Slider** ✅ Completed 2026-05-31
-- [ ] **Collections section** — Horizontal RecyclerView with `CollectionAdapter`;
-      data already in `HomeViewModel.getCollections()`
+- [x] **Collections section** ✅ Completed 2026-06-01
 - [ ] **Proper shimmer skeletons** — Replace single gray rectangle with skeleton
       layouts shaped like actual category cards and product cards
 
@@ -225,7 +314,7 @@ None.
 | # | Task | Why |
 |---|---|---|
 | 1 | ~~Home: Banner/Image Slider~~ | ✅ **DONE** 2026-05-31 |
-| 2 | Home: Collections section | Data loaded, zero effort to expose; doc explicitly requires it |
+| 2 | ~~Home: Collections section~~ | ✅ **DONE** 2026-06-01 |
 | 3 | ProductList: Filter bottom sheet (category + price + rating) | Largest documented feature in scope, completely absent |
 | 4 | ProductList: Price range + rating in ViewModel/API | Backend dependency for P1 #3 |
 | 5 | ProductDetail: Quantity selector | Core e-commerce UX; without it users always add 1 |
@@ -257,25 +346,12 @@ None.
 
 ## Next Recommended Task
 
-**Home — Collections section (P1 #2)**
+**ProductList — Filter Bottom Sheet (P1 #3)**
 
-The banner observer already runs `viewModel.getCollections().observe(...)` in
-`HomeFragment.observeData()`. The same observer delivers the full `List<CollectionDto>`
-including `id`, `name`, and `slug` — everything needed to render a tappable
-collections row.
+Largest remaining feature in scope. Requires a new `FilterBottomSheetFragment extends
+BottomSheetDialogFragment` with:
+- Multi-select category chips (data already in `ProductListViewModel.getCategories()`)
+- Price range slider (`minPrice` / `maxPrice` — API already accepts these params)
+- Star rating filter (client-side only — backend does not support `minRating` param)
 
-What the implementation requires:
-1. **New file** `item_collection.xml` — a card showing `bannerUrl` image + `name`
-   label (similar in shape to `item_category.xml`)
-2. **New class** `CollectionAdapter` — `ListAdapter<CollectionDto, VH>` following
-   the exact same pattern as `CategoryAdapter`
-3. **`fragment_home.xml`** — add section label "Bộ sưu tập" and a horizontal
-   `RecyclerView` (`rvCollections`) below "Sản phẩm nổi bật"
-4. **`HomeFragment.java`** — add `CollectionAdapter collectionAdapter` field;
-   set it up in `setupRecyclerViews()`; feed it from the existing
-   `getCollections()` observer (already active — just add `collectionAdapter.submitList(...)`)
-
-Tap action: navigate to `productListFragment` with a `collectionId` argument.
-`ProductListViewModel.filterByCollection(String)` is already implemented.
-
-Estimated effort: Low (< 1 hour). Zero new API calls. Zero ViewModel changes.
+See `decisions.md` Technical Recommendations section for implementation guidance.

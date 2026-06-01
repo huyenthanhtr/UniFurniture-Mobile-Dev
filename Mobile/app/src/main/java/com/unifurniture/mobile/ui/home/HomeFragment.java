@@ -17,6 +17,7 @@ import com.unifurniture.mobile.BuildConfig;
 import com.unifurniture.mobile.data.model.CollectionDto;
 import com.unifurniture.mobile.databinding.FragmentHomeBinding;
 import com.unifurniture.mobile.ui.adapter.CategoryAdapter;
+import com.unifurniture.mobile.ui.adapter.CollectionAdapter;
 import com.unifurniture.mobile.ui.adapter.ImageSliderAdapter;
 import com.unifurniture.mobile.ui.adapter.ProductCardAdapter;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ public class HomeFragment extends Fragment {
     private HomeViewModel viewModel;
     private ProductCardAdapter featuredAdapter;
     private CategoryAdapter categoryAdapter;
+    private CollectionAdapter collectionAdapter;
     private ImageSliderAdapter bannerAdapter;
     private Handler autoScrollHandler;
     private Runnable autoScrollRunnable;
@@ -108,6 +110,17 @@ public class HomeFragment extends Fragment {
         binding.rvCategories.setLayoutManager(
                 new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
         binding.rvCategories.setAdapter(categoryAdapter);
+
+        // Collections
+        String serverHost = BuildConfig.API_BASE_URL.replace("/api/", "");
+        collectionAdapter = new CollectionAdapter(serverHost, collection -> {
+            Bundle args = new Bundle();
+            args.putString("collectionId", collection.id);
+            Navigation.findNavController(requireView()).navigate(R.id.productListFragment, args);
+        });
+        binding.rvCollections.setLayoutManager(
+                new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        binding.rvCollections.setAdapter(collectionAdapter);
     }
 
     private void observeData() {
@@ -126,20 +139,26 @@ public class HomeFragment extends Fragment {
         viewModel.getCollections().observe(getViewLifecycleOwner(), items -> {
             if (items == null || items.isEmpty()) return;
             String serverHost = BuildConfig.API_BASE_URL.replace("/api/", "");
+
+            // Banner slider — extract non-null bannerUrl values
             List<String> bannerUrls = new ArrayList<>();
             for (CollectionDto c : items) {
                 if (c.bannerUrl != null && !c.bannerUrl.isEmpty()) {
                     bannerUrls.add(c.bannerUrl.replace("http://localhost:3000", serverHost));
                 }
             }
-            if (bannerUrls.isEmpty()) return;
-            bannerAdapter.updateImages(bannerUrls);
-            binding.bannerDotsIndicator.setVisibility(
-                    bannerUrls.size() > 1 ? View.VISIBLE : View.GONE);
-            if (bannerUrls.size() > 1) {
-                autoScrollHandler.removeCallbacks(autoScrollRunnable);
-                autoScrollHandler.postDelayed(autoScrollRunnable, 3500);
+            if (!bannerUrls.isEmpty()) {
+                bannerAdapter.updateImages(bannerUrls);
+                binding.bannerDotsIndicator.setVisibility(
+                        bannerUrls.size() > 1 ? View.VISIBLE : View.GONE);
+                if (bannerUrls.size() > 1) {
+                    autoScrollHandler.removeCallbacks(autoScrollRunnable);
+                    autoScrollHandler.postDelayed(autoScrollRunnable, 3500);
+                }
             }
+
+            // Collections row
+            collectionAdapter.submitList(items);
         });
 
         viewModel.isLoading().observe(getViewLifecycleOwner(), loading ->
