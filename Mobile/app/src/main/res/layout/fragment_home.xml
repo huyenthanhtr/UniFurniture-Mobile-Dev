@@ -54,7 +54,7 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="16dp"
                     android:background="@drawable/bg_search"
-                    app:queryHint="Tìm kiếm sản phẩm..."
+                    app:queryHint="@string/search_hint"
                     app:iconifiedByDefault="false" />
 
                 <androidx.recyclerview.widget.RecyclerView
@@ -94,7 +94,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Tìm kiếm gần đây"
+                            android:text="@string/recent_searches"
                             android:textSize="12sp"
                             android:textColor="@color/gray_600"
                             android:textStyle="bold" />
@@ -102,7 +102,7 @@
                             android:id="@+id/tvClearHistory"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Xóa tất cả"
+                            android:text="@string/clear_all"
                             android:textSize="12sp"
                             android:textColor="@color/primary"
                             android:padding="8dp" />
@@ -146,24 +146,24 @@
                         android:layout_marginTop="8dp"
                         android:paddingStart="16dp">
 
-                        <LinearLayout android:layout_width="80dp" android:layout_height="100dp" android:orientation="vertical" android:gravity="center" android:padding="4dp">
-                            <View android:layout_width="64dp" android:layout_height="64dp" android:background="@drawable/bg_shimmer_circle" />
+                        <LinearLayout android:layout_width="88dp" android:layout_height="110dp" android:orientation="vertical" android:gravity="center" android:padding="4dp">
+                            <View android:layout_width="68dp" android:layout_height="68dp" android:background="@drawable/bg_shimmer_circle" />
                             <View android:layout_width="56dp" android:layout_height="10dp" android:layout_marginTop="6dp" android:background="@drawable/bg_shimmer_rect" />
                         </LinearLayout>
-                        <LinearLayout android:layout_width="80dp" android:layout_height="100dp" android:orientation="vertical" android:gravity="center" android:padding="4dp">
-                            <View android:layout_width="64dp" android:layout_height="64dp" android:background="@drawable/bg_shimmer_circle" />
+                        <LinearLayout android:layout_width="88dp" android:layout_height="110dp" android:orientation="vertical" android:gravity="center" android:padding="4dp">
+                            <View android:layout_width="68dp" android:layout_height="68dp" android:background="@drawable/bg_shimmer_circle" />
                             <View android:layout_width="56dp" android:layout_height="10dp" android:layout_marginTop="6dp" android:background="@drawable/bg_shimmer_rect" />
                         </LinearLayout>
-                        <LinearLayout android:layout_width="80dp" android:layout_height="100dp" android:orientation="vertical" android:gravity="center" android:padding="4dp">
-                            <View android:layout_width="64dp" android:layout_height="64dp" android:background="@drawable/bg_shimmer_circle" />
+                        <LinearLayout android:layout_width="88dp" android:layout_height="110dp" android:orientation="vertical" android:gravity="center" android:padding="4dp">
+                            <View android:layout_width="68dp" android:layout_height="68dp" android:background="@drawable/bg_shimmer_circle" />
                             <View android:layout_width="56dp" android:layout_height="10dp" android:layout_marginTop="6dp" android:background="@drawable/bg_shimmer_rect" />
                         </LinearLayout>
-                        <LinearLayout android:layout_width="80dp" android:layout_height="100dp" android:orientation="vertical" android:gravity="center" android:padding="4dp">
-                            <View android:layout_width="64dp" android:layout_height="64dp" android:background="@drawable/bg_shimmer_circle" />
+                        <LinearLayout android:layout_width="88dp" android:layout_height="110dp" android:orientation="vertical" android:gravity="center" android:padding="4dp">
+                            <View android:layout_width="68dp" android:layout_height="68dp" android:background="@drawable/bg_shimmer_circle" />
                             <View android:layout_width="56dp" android:layout_height="10dp" android:layout_marginTop="6dp" android:background="@drawable/bg_shimmer_rect" />
                         </LinearLayout>
-                        <LinearLayout android:layout_width="80dp" android:layout_height="100dp" android:orientation="vertical" android:gravity="center" android:padding="4dp">
-                            <View android:layout_width="64dp" android:layout_height="64dp" android:background="@drawable/bg_shimmer_circle" />
+                        <LinearLayout android:layout_width="88dp" android:layout_height="110dp" android:orientation="vertical" android:gravity="center" android:padding="4dp">
+                            <View android:layout_width="68dp" android:layout_height="68dp" android:background="@drawable/bg_shimmer_circle" />
                             <View android:layout_width="56dp" android:layout_height="10dp" android:layout_marginTop="6dp" android:background="@drawable/bg_shimmer_rect" />
                         </LinearLayout>
 
@@ -232,7 +232,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
-                    android:text="Danh mục"
+                    android:text="@string/categories"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="@color/black" />
@@ -240,7 +240,7 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvCategories"
                     android:layout_width="match_parent"
-                    android:layout_height="100dp"
+                    android:layout_height="120dp"
                     android:layout_marginTop="8dp"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp"
@@ -259,7 +259,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Sản phẩm nổi bật"
+                        android:text="@string/featured_products"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:textColor="@color/black" />
@@ -267,7 +267,7 @@
                         android:id="@+id/btnViewAll"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Xem tất cả ›"
+                        android:text="@string/view_all"
                         android:textColor="@color/primary"
                         android:padding="8dp" />
                 </LinearLayout>
@@ -288,7 +288,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="16dp"
-                    android:text="Bộ sưu tập"
+                    android:text="@string/collections"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="@color/black" />
@@ -302,6 +302,36 @@
                     android:paddingEnd="16dp"
                     android:clipToPadding="false"
                     android:orientation="horizontal" />
+
+                <!-- Recently Viewed Section -->
+                <LinearLayout
+                    android:id="@+id/layoutRecentlyViewed"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="16dp"
+                        android:text="@string/recently_viewed"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/black" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvRecentlyViewed"
+                        android:layout_width="match_parent"
+                        android:layout_height="180dp"
+                        android:layout_marginTop="8dp"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:clipToPadding="false"
+                        android:orientation="horizontal" />
+
+                </LinearLayout>
 
             </LinearLayout>
 

@@ -31,12 +31,12 @@
                 android:src="@drawable/ic_back"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:tint="@color/white"
-                android:contentDescription="Quay lại" />
+                android:contentDescription="@string/back_desc" />
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Chi tiết sản phẩm"
+                android:text="@string/product_detail_title"
                 android:textColor="@color/white"
                 android:textSize="17sp"
                 android:textStyle="bold"
@@ -164,7 +164,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Chưa có đánh giá"
+                android:text="@string/no_rating"
                 android:textSize="13sp"
                 android:textColor="@color/gray_600"
                 android:visibility="gone" />
@@ -201,7 +201,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Chọn màu / kiểu"
+                android:text="@string/choose_variant"
                 android:textStyle="bold"
                 android:textSize="15sp" />
             <com.google.android.material.chip.ChipGroup
@@ -230,7 +230,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Mô tả ngắn"
+                android:text="@string/short_description"
                 android:textStyle="bold"
                 android:textSize="15sp" />
             <TextView
@@ -253,7 +253,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Mô tả chi tiết"
+                android:text="@string/full_description"
                 android:textStyle="bold"
                 android:textSize="15sp" />
             <TextView
@@ -274,17 +274,51 @@
             android:padding="16dp"
             android:layout_marginTop="8dp"
             android:background="@color/white">
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Đánh giá"
-                android:textStyle="bold"
-                android:textSize="15sp" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/reviews"
+                    android:textStyle="bold"
+                    android:textSize="15sp" />
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroupReviewSort"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:singleSelection="true"
+                    app:selectionRequired="true"
+                    android:visibility="gone">
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipSortNewest"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/review_sort_newest"
+                        android:checked="true" />
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipSortHighRating"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/review_sort_high_rating" />
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipSortLowRating"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/review_sort_low_rating" />
+                </com.google.android.material.chip.ChipGroup>
+            </LinearLayout>
             <TextView
                 android:id="@+id/tvNoReviews"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Chưa có đánh giá nào"
+                android:text="@string/no_reviews"
                 android:textSize="13sp"
                 android:textColor="@color/gray_600"
                 android:layout_marginTop="8dp"
@@ -310,7 +344,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Sản phẩm liên quan"
+                android:text="@string/related_products"
                 android:textStyle="bold"
                 android:textSize="15sp"
                 android:textColor="@color/black" />
@@ -356,7 +390,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Số lượng"
+                android:text="@string/quantity"
                 android:textStyle="bold"
                 android:textSize="14sp"
                 android:textColor="@color/black" />
@@ -401,7 +435,7 @@
             android:id="@+id/btnAddToCart"
             android:layout_width="match_parent"
             android:layout_height="52dp"
-            android:text="Thêm vào giỏ"
+            android:text="@string/add_to_cart"
             style="@style/Widget.UniFurniture.Button.Primary" />
 
     </LinearLayout>

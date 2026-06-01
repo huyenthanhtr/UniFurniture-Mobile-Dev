@@ -1,10 +1,11 @@
 # UniFurniture Mobile — Progress Tracker
 
-Last updated: 2026-06-01 (P3 #18 search history done — scope COMPLETE)
+Last updated: 2026-06-01 (i18n + UI/UX bonus features complete)
 Branch: feature/home
 Owner of this file: Như Ngọc
 
 > **2026-06-01:** P1 ✅ P2 ✅ P3 ✅ — ALL DONE. Bugs fixed: rvReviews LayoutManager + ReviewDto camelCase + Glide placeholder. Scope complete.
+> **2026-06-01 (session 2):** Multi-language (EN/VI/ZH/FR) + 7 UI/UX improvements (badge, shimmer, active chips, cart feedback, pinch-to-zoom, recently viewed, review sort) — ALL DONE.
 
 ---
 
@@ -801,4 +802,117 @@ Lưu lịch sử tìm kiếm vào `SharedPreferences`, hiển thị khi search b
 
 ## Next Recommended Task
 
-**Scope của Như Ngọc đã hoàn thành toàn bộ (P1 + P2 + P3).** Không còn task nào trong backlog. Bước tiếp theo: tạo PR từ `feature/home` → `main` để nhóm review và merge.
+**Scope và toàn bộ UI/UX improvements đã hoàn thành.** Bước tiếp theo: tạo PR từ `feature/home` → `main` để nhóm review và merge.
+
+**Lưu ý trước khi tạo PR:**
+- Chạy `Sync Project with Gradle Files` trong Android Studio (PhotoView dependency mới)
+- Test thủ công các tính năng mới trên emulator trước khi push
+
+---
+
+## Completed — Multi-language Support (i18n)
+
+**Completed:** 2026-06-01
+
+### Summary
+
+Toàn bộ UI text được extract ra `strings.xml` và dịch sang 4 ngôn ngữ. Default là English (theo yêu cầu thầy).
+
+| File | Ngôn ngữ |
+|---|---|
+| `res/values/strings.xml` | English (default) |
+| `res/values-vi/strings.xml` | Tiếng Việt |
+| `res/values-zh-rCN/strings.xml` | Tiếng Trung (Giản thể) |
+| `res/values-fr/strings.xml` | Tiếng Pháp |
+
+**Layouts updated (12 files):** `fragment_home`, `fragment_product_list`, `fragment_product_detail`, `fragment_filter_bottom_sheet`, `fragment_login`, `fragment_register`, `fragment_otp`, `fragment_cart`, `fragment_account`, `fragment_checkout`, `fragment_order_list`, `activity_splash`, `item_search_history`, `item_review`
+
+**Java files updated (4 files):** `ProductDetailFragment`, `ProductListFragment`, `ReviewAdapter`, `CheckoutFragment`
+
+**Cách test:** Settings → General Management → Language → chọn ngôn ngữ khác → mở lại app.
+
+---
+
+## Completed — UI/UX Improvements
+
+**Completed:** 2026-06-01
+
+### A — Filter FAB badge
+
+FAB bọc trong `FrameLayout` + `tvFilterBadge` (oval đỏ, 20dp). Hiện số lượng filter đang active (max 3: category, price, rating). `updateFilterBadge()` gọi sau mỗi `onFiltersApplied`, `onFiltersCleared`, `handleArguments`.
+
+**Files:** `fragment_product_list.xml`, `ProductListFragment.java`, `drawable/bg_badge.xml`
+
+---
+
+### B — ProductList shimmer
+
+`ShimmerFrameLayout` chứa 2 hàng × 2 cột skeleton (dùng `bg_shimmer_rect`). Chỉ hiện khi **initial load** (adapter rỗng) — không hiện khi sort/filter reload có sẵn data. `swipeRefresh` toggle `GONE`/`VISIBLE` đồng bộ với shimmer.
+
+**Files:** `fragment_product_list.xml`, `ProductListFragment.java`
+
+---
+
+### C — Active filter chips
+
+`HorizontalScrollView` + `ChipGroup` (`scrollActiveFilters`, `chipGroupActiveFilters`) đặt ngay dưới sort chips. Mỗi filter active tạo 1 `Chip` với `closeIconVisible=true`. Tap × xóa filter đó ngay mà không cần mở bottom sheet. Gọi lại `viewModel.applyFilters()` với param tương ứng set null.
+
+**Files:** `fragment_product_list.xml`, `ProductListFragment.java`
+
+---
+
+### D — Add to Cart feedback
+
+Thay Toast bằng button state change: khi `addToCartResult` arrive → `btnAddToCart` text = `btn_added` ("✓ Đã thêm"), `backgroundTint` = `@color/success`, `enabled=false`. Sau 1.5s `cartRestoreHandler.postDelayed` restore về trạng thái ban đầu. Handler được cancel trong `onDestroyView` để tránh NPE.
+
+**Files:** `ProductDetailFragment.java`
+
+---
+
+### E — Pinch-to-zoom ảnh sản phẩm
+
+`ImageSliderAdapter` thay `ImageView` → `PhotoView` (`com.github.chrisbanes:PhotoView:2.3.0`). Áp dụng cho cả ProductDetail image slider lẫn Home banner. Double-tap zoom, pinch zoom. JitPack đã có sẵn trong `settings.gradle`.
+
+**Files:** `app/build.gradle`, `ImageSliderAdapter.java`
+
+---
+
+### F — Sản phẩm đã xem gần đây
+
+`RecentlyViewedManager`: SharedPreferences + Gson, lưu `List<Item>` (id, slug, name, imageUrl), max 10, dedup theo id (move to front).
+
+`RecentlyViewedAdapter`: `ListAdapter<Item>` + `DiffUtil`, click navigate sang ProductDetail bằng slug.
+
+Section cuối `layoutContent` trong Home (`layoutRecentlyViewed` + `rvRecentlyViewed` 180dp, horizontal). Ẩn khi list rỗng. `refreshRecentlyViewed()` gọi trong `onResume` → cập nhật ngay khi user back từ ProductDetail.
+
+Lưu trong `ProductDetailFragment.observeData()` khi product load xong.
+
+**Files:** `RecentlyViewedManager.java` (NEW), `RecentlyViewedAdapter.java` (NEW), `item_recently_viewed.xml` (NEW), `fragment_home.xml`, `HomeFragment.java`, `ProductDetailFragment.java`
+
+---
+
+### G — Sort reviews
+
+`ChipGroup` (`chipGroupReviewSort`) inline bên phải header "Đánh giá" trong `fragment_product_detail.xml`. 3 chips: Mới nhất / Sao cao nhất / Sao thấp nhất. `visibility=gone` mặc định, chỉ hiện khi có reviews (`totalReviews > 0`).
+
+`allReviews: List<ReviewDto>` lưu toàn bộ list gốc trong Fragment. `sortReviews(mode)` sort bản sao và `submitList()` — list gốc không bị mutate.
+
+Sort "Mới nhất": so sánh `createdAt` String lexicographically (ISO 8601 tự sort đúng). Sort sao: so sánh `rating` int.
+
+**Files:** `fragment_product_detail.xml`, `ProductDetailFragment.java`
+
+---
+
+## UI/UX Improvements & Bonus Features
+
+### ✅ Tất cả đã implement
+
+| # | Task | Status |
+|---|---|---|
+| A | Filter FAB badge | ✅ Done 2026-06-01 |
+| B | ProductList shimmer | ✅ Done 2026-06-01 |
+| C | Active filter chips | ✅ Done 2026-06-01 |
+| D | Add to Cart feedback | ✅ Done 2026-06-01 |
+| E | Pinch-to-zoom ảnh | ✅ Done 2026-06-01 |
+| F | Sản phẩm đã xem gần đây | ✅ Done 2026-06-01 |
+| G | Sort reviews | ✅ Done 2026-06-01 |

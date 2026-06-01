@@ -1,27 +1,33 @@
 package com.unifurniture.mobile.ui.product;
 
+import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
-import androidx.viewpager2.widget.ViewPager2;
-import com.tbuonomo.viewpagerdotsindicator.DotsIndicator;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import com.unifurniture.mobile.R;
-import com.unifurniture.mobile.databinding.FragmentProductDetailBinding;
 import com.unifurniture.mobile.BuildConfig;
 import com.unifurniture.mobile.data.model.ProductDto;
+import com.unifurniture.mobile.data.model.ReviewDto;
+import com.unifurniture.mobile.databinding.FragmentProductDetailBinding;
 import com.unifurniture.mobile.ui.adapter.ImageSliderAdapter;
 import com.unifurniture.mobile.ui.adapter.ProductCardAdapter;
 import com.unifurniture.mobile.ui.adapter.ReviewAdapter;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import com.unifurniture.mobile.util.FormatUtil;
+import com.unifurniture.mobile.util.RecentlyViewedManager;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,9 +39,12 @@ public class ProductDetailFragment extends Fragment {
     private ImageSliderAdapter sliderAdapter;
     private ReviewAdapter reviewAdapter;
     private ProductCardAdapter recommendationAdapter;
+    private RecentlyViewedManager recentlyViewedManager;
     private String selectedVariantId = null;
     private int quantity = 1;
     private final Map<String, Integer> variantStock = new HashMap<>();
+    private final List<ReviewDto> allReviews = new ArrayList<>();
+    private final Handler cartRestoreHandler = new Handler(Looper.getMainLooper());
 
     @Nullable
     @Override
@@ -56,9 +65,11 @@ public class ProductDetailFragment extends Fragment {
             return;
         }
 
+        recentlyViewedManager = new RecentlyViewedManager(requireContext());
         setupImageSlider();
         setupReviews();
         setupRecommendations();
+        setupReviewSort();
         viewModel.loadProduct(slug);
         observeData();
 
@@ -104,6 +115,41 @@ public class ProductDetailFragment extends Fragment {
         binding.rvRecommendations.setAdapter(recommendationAdapter);
     }
 
+    private void setupReviewSort() {
+        binding.chipSortNewest.setOnClickListener(v -> sortReviews("newest"));
+        binding.chipSortHighRating.setOnClickListener(v -> sortReviews("high"));
+        binding.chipSortLowRating.setOnClickListener(v -> sortReviews("low"));
+    }
+
+    private void sortReviews(String mode) {
+        if (allReviews.isEmpty()) return;
+        List<ReviewDto> sorted = new ArrayList<>(allReviews);
+        switch (mode) {
+            case "high":
+                Collections.sort(sorted, (a, b) -> {
+                    int ra = a.rating != null ? a.rating : 0;
+                    int rb = b.rating != null ? b.rating : 0;
+                    return rb - ra;
+                });
+                break;
+            case "low":
+                Collections.sort(sorted, (a, b) -> {
+                    int ra = a.rating != null ? a.rating : 0;
+                    int rb = b.rating != null ? b.rating : 0;
+                    return ra - rb;
+                });
+                break;
+            default: // newest
+                Collections.sort(sorted, (a, b) -> {
+                    if (b.createdAt == null) return -1;
+                    if (a.createdAt == null) return 1;
+                    return b.createdAt.compareTo(a.createdAt);
+                });
+                break;
+        }
+        reviewAdapter.submitList(sorted);
+    }
+
     private void observeData() {
         viewModel.isLoading().observe(getViewLifecycleOwner(), loading ->
                 binding.progressBar.setVisibility(loading ? View.VISIBLE : View.GONE));
@@ -126,14 +172,17 @@ public class ProductDetailFragment extends Fragment {
             binding.tvDescription.setText(product.description);
             binding.tvShortDesc.setText(product.shortDescription);
             if (product.warrantyMonths != null && product.warrantyMonths > 0) {
-                binding.tvWarranty.setText("Bảo hành " + product.warrantyMonths + " tháng");
+                binding.tvWarranty.setText(getString(R.string.warranty, product.warrantyMonths));
                 binding.tvWarranty.setVisibility(View.VISIBLE);
             }
             int soldCount = product.sold != null ? product.sold : 0;
-            binding.tvSoldCount.setText("Đã bán: " + FormatUtil.formatSold(soldCount));
+            binding.tvSoldCount.setText(getString(R.string.sold_count, FormatUtil.formatSold(soldCount)));
             binding.tvSoldCount.setVisibility(View.VISIBLE);
-            // Fallback: show thumbnail immediately if slider still empty
+            // Save to recently viewed + use thumbnail for slider fallback
             String thumb = product.getImageUrl();
+            String slugKey = product.slug != null ? product.slug : product.id;
+            recentlyViewedManager.add(new RecentlyViewedManager.Item(
+                    product.id, slugKey, product.name, thumb));
             if (sliderAdapter.getItemCount() == 0 && thumb != null && !thumb.isEmpty()) {
                 List<String> fallback = new ArrayList<>();
                 fallback.add(thumb);
@@ -198,20 +247,37 @@ public class ProductDetailFragment extends Fragment {
                 binding.tvNoRating.setVisibility(View.GONE);
                 binding.ratingBar.setRating((float) summary.averageRating);
                 binding.tvRating.setText(String.format("%.1f", summary.averageRating));
-                binding.tvReviewCount.setText("(" + summary.totalReviews + " đánh giá)");
+                binding.tvReviewCount.setText(getString(R.string.review_count, summary.totalReviews));
                 binding.layoutRatingRow.setOnClickListener(v ->
                         binding.nestedScrollView.post(() ->
                                 binding.nestedScrollView.smoothScrollTo(
                                         0, binding.layoutReviewsSection.getTop())));
                 binding.tvNoReviews.setVisibility(View.GONE);
                 binding.rvReviews.setVisibility(View.VISIBLE);
-                if (summary.items != null) reviewAdapter.submitList(summary.items);
+                binding.chipGroupReviewSort.setVisibility(View.VISIBLE);
+                if (summary.items != null) {
+                    allReviews.clear();
+                    allReviews.addAll(summary.items);
+                    reviewAdapter.submitList(new ArrayList<>(allReviews));
+                }
             }
         });
 
         viewModel.getAddToCartResult().observe(getViewLifecycleOwner(), cart -> {
             if (cart != null) {
-                Toast.makeText(requireContext(), "Đã thêm vào giỏ hàng!", Toast.LENGTH_SHORT).show();
+                // Button feedback: green + checkmark text for 1.5s
+                binding.btnAddToCart.setEnabled(false);
+                binding.btnAddToCart.setText(R.string.btn_added);
+                binding.btnAddToCart.setBackgroundTintList(ColorStateList.valueOf(
+                        ContextCompat.getColor(requireContext(), R.color.success)));
+                cartRestoreHandler.removeCallbacksAndMessages(null);
+                cartRestoreHandler.postDelayed(() -> {
+                    if (binding == null) return;
+                    binding.btnAddToCart.setEnabled(true);
+                    binding.btnAddToCart.setText(R.string.add_to_cart);
+                    binding.btnAddToCart.setBackgroundTintList(ColorStateList.valueOf(
+                            ContextCompat.getColor(requireContext(), R.color.primary)));
+                }, 1500);
             }
         });
 
@@ -235,11 +301,11 @@ public class ProductDetailFragment extends Fragment {
         }
         binding.tvStockStatus.setVisibility(View.VISIBLE);
         if (stock <= 0) {
-            binding.tvStockStatus.setText("Hết hàng");
+            binding.tvStockStatus.setText(getString(R.string.out_of_stock));
             binding.tvStockStatus.setTextColor(requireContext().getColor(R.color.discount_red));
             binding.btnAddToCart.setEnabled(false);
         } else {
-            binding.tvStockStatus.setText("Còn hàng");
+            binding.tvStockStatus.setText(getString(R.string.in_stock));
             binding.tvStockStatus.setTextColor(requireContext().getColor(R.color.success));
             binding.btnAddToCart.setEnabled(true);
         }
@@ -248,6 +314,7 @@ public class ProductDetailFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        cartRestoreHandler.removeCallbacksAndMessages(null);
         binding = null;
     }
 }

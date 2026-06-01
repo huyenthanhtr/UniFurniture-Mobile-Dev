@@ -57,7 +57,7 @@ public class ReviewAdapter extends ListAdapter<ReviewDto, ReviewAdapter.ViewHold
         }
 
         void bind(ReviewDto review, String serverHost) {
-            binding.tvCustomerName.setText(review.customerName != null ? review.customerName : "Khách hàng");
+            binding.tvCustomerName.setText(review.customerName != null ? review.customerName : itemView.getContext().getString(R.string.guest_customer));
             binding.tvContent.setText(review.content);
             binding.ratingBar.setRating(review.rating != null ? review.rating : 5);
             binding.tvDate.setText(review.createdAt != null ?

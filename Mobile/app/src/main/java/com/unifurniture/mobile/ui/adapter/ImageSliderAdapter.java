@@ -1,14 +1,12 @@
 package com.unifurniture.mobile.ui.adapter;
 
 import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.github.chrisbanes.photoview.PhotoView;
 import com.unifurniture.mobile.R;
 import java.util.List;
 
@@ -30,12 +28,11 @@ public class ImageSliderAdapter extends RecyclerView.Adapter<ImageSliderAdapter.
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        ImageView imageView = new ImageView(context);
-        imageView.setLayoutParams(new ViewGroup.LayoutParams(
+        PhotoView photoView = new PhotoView(context);
+        photoView.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
-        imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        return new ViewHolder(imageView);
+        return new ViewHolder(photoView);
     }
 
     @Override
@@ -45,7 +42,7 @@ public class ImageSliderAdapter extends RecyclerView.Adapter<ImageSliderAdapter.
                 .placeholder(R.drawable.placeholder_product)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .centerCrop()
-                .into((ImageView) holder.itemView);
+                .into((PhotoView) holder.itemView);
     }
 
     @Override
@@ -54,7 +51,7 @@ public class ImageSliderAdapter extends RecyclerView.Adapter<ImageSliderAdapter.
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        ViewHolder(@NonNull View itemView) {
+        ViewHolder(@NonNull PhotoView itemView) {
             super(itemView);
         }
     }

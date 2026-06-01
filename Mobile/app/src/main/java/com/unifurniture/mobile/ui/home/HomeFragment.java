@@ -21,8 +21,10 @@ import com.unifurniture.mobile.ui.adapter.CategoryAdapter;
 import com.unifurniture.mobile.ui.adapter.CollectionAdapter;
 import com.unifurniture.mobile.ui.adapter.ImageSliderAdapter;
 import com.unifurniture.mobile.ui.adapter.ProductCardAdapter;
+import com.unifurniture.mobile.ui.adapter.RecentlyViewedAdapter;
 import com.unifurniture.mobile.ui.adapter.SearchHistoryAdapter;
 import com.unifurniture.mobile.ui.adapter.SearchSuggestionAdapter;
+import com.unifurniture.mobile.util.RecentlyViewedManager;
 import com.unifurniture.mobile.util.SearchHistoryManager;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +44,8 @@ public class HomeFragment extends Fragment {
     private Runnable searchRunnable;
     private SearchHistoryManager historyManager;
     private SearchHistoryAdapter historyAdapter;
+    private RecentlyViewedAdapter recentlyViewedAdapter;
+    private RecentlyViewedManager recentlyViewedManager;
 
     @Nullable
     @Override
@@ -60,6 +64,7 @@ public class HomeFragment extends Fragment {
         setupBanner();
         setupSearchSuggestions();
         setupSearchHistory();
+        setupRecentlyViewed();
         observeData();
 
         binding.btnViewAll.setOnClickListener(v ->
@@ -247,6 +252,28 @@ public class HomeFragment extends Fragment {
         binding.rvSearchSuggestions.setVisibility(View.GONE);
     }
 
+    private void setupRecentlyViewed() {
+        recentlyViewedManager = new RecentlyViewedManager(requireContext());
+        recentlyViewedAdapter = new RecentlyViewedAdapter(item -> {
+            Bundle args = new Bundle();
+            args.putString("slug", item.slug != null ? item.slug : item.id);
+            Navigation.findNavController(requireView()).navigate(R.id.productDetailFragment, args);
+        });
+        binding.rvRecentlyViewed.setLayoutManager(
+                new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        binding.rvRecentlyViewed.setAdapter(recentlyViewedAdapter);
+    }
+
+    private void refreshRecentlyViewed() {
+        List<RecentlyViewedManager.Item> items = recentlyViewedManager.getAll();
+        if (items.isEmpty()) {
+            binding.layoutRecentlyViewed.setVisibility(View.GONE);
+        } else {
+            recentlyViewedAdapter.submitList(items);
+            binding.layoutRecentlyViewed.setVisibility(View.VISIBLE);
+        }
+    }
+
     private void setupSearchHistory() {
         historyManager = new SearchHistoryManager(requireContext());
         historyAdapter = new SearchHistoryAdapter(new SearchHistoryAdapter.OnItemListener() {
@@ -299,6 +326,7 @@ public class HomeFragment extends Fragment {
         if (bannerAdapter != null && bannerAdapter.getItemCount() > 1) {
             autoScrollHandler.postDelayed(autoScrollRunnable, 3500);
         }
+        if (recentlyViewedManager != null) refreshRecentlyViewed();
     }
 
     @Override

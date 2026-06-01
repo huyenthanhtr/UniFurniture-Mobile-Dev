@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">UniFurniture</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Trang chủ</string>
+    <string name="nav_products">Sản phẩm</string>
+    <string name="nav_cart">Giỏ hàng</string>
+    <string name="nav_account">Tài khoản</string>
+
+    <!-- Auth -->
+    <string name="login">Đăng nhập</string>
+    <string name="login_subtitle">Đăng nhập</string>
+    <string name="register">Đăng ký</string>
+    <string name="register_title">Đăng ký tài khoản</string>
+    <string name="phone">Số điện thoại</string>
+    <string name="password">Mật khẩu</string>
+    <string name="full_name">Họ và tên</string>
+    <string name="no_account">Chưa có tài khoản? Đăng ký ngay</string>
+    <string name="have_account">Đã có tài khoản? Đăng nhập</string>
+    <string name="otp_title">Xác thực OTP</string>
+    <string name="otp_subtitle">Nhập mã OTP đã gửi qua SMS</string>
+    <string name="otp_code">Mã OTP</string>
+    <string name="btn_verify">Xác thực</string>
+
+    <!-- Cart -->
+    <string name="cart_title">Giỏ hàng</string>
+    <string name="empty_cart">Giỏ hàng trống</string>
+    <string name="login_to_shop">Đăng nhập để mua sắm</string>
+    <string name="total">Tổng cộng</string>
+    <string name="checkout">Thanh toán</string>
+
+    <!-- Account -->
+    <string name="account_title">Tài khoản</string>
+    <string name="not_logged_in">Bạn chưa đăng nhập</string>
+    <string name="login_or_register">Đăng nhập / Đăng ký</string>
+    <string name="my_orders">Đơn hàng của tôi</string>
+    <string name="favorites">Sản phẩm yêu thích</string>
+    <string name="logout">Đăng xuất</string>
+
+    <!-- Checkout -->
+    <string name="checkout_title">Đặt hàng</string>
+    <string name="back">Quay lại</string>
+    <string name="shipping_info">Thông tin giao hàng</string>
+    <string name="recipient_name">Họ và tên người nhận</string>
+    <string name="delivery_address">Địa chỉ giao hàng</string>
+    <string name="payment_method">Phương thức thanh toán</string>
+    <string name="cod">Thanh toán khi nhận hàng (COD)</string>
+    <string name="bank_transfer">Chuyển khoản ngân hàng</string>
+    <string name="place_order">Xác nhận đặt hàng</string>
+    <string name="order_success">Đặt hàng thành công!</string>
+    <string name="order_failed">Đặt hàng thất bại. Thử lại.</string>
+    <string name="fill_required">Vui lòng điền đầy đủ thông tin</string>
+
+    <!-- Home -->
+    <string name="search_hint">Tìm kiếm sản phẩm…</string>
+    <string name="recent_searches">Tìm kiếm gần đây</string>
+    <string name="clear_all">Xóa tất cả</string>
+    <string name="categories">Danh mục</string>
+    <string name="featured_products">Sản phẩm nổi bật</string>
+    <string name="view_all">Xem tất cả ›</string>
+    <string name="collections">Bộ sưu tập</string>
+
+    <!-- Product List -->
+    <string name="products_title">Sản phẩm</string>
+    <string name="toggle_view_desc">Chuyển chế độ xem</string>
+    <string name="sort_newest">Mới nhất</string>
+    <string name="sort_best_selling">Bán chạy</string>
+    <string name="sort_price_low">Giá thấp</string>
+    <string name="sort_price_high">Giá cao</string>
+    <string name="empty_products">Không tìm thấy sản phẩm</string>
+    <string name="empty_products_hint">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</string>
+    <string name="filter_desc">Lọc sản phẩm</string>
+    <string name="showing_products">Hiển thị %1$d / %2$d sản phẩm</string>
+
+    <!-- Product Detail -->
+    <string name="product_detail_title">Chi tiết sản phẩm</string>
+    <string name="back_desc">Quay lại</string>
+    <string name="choose_variant">Chọn màu / kiểu</string>
+    <string name="short_description">Mô tả ngắn</string>
+    <string name="full_description">Mô tả chi tiết</string>
+    <string name="reviews">Đánh giá</string>
+    <string name="no_rating">Chưa có đánh giá</string>
+    <string name="no_reviews">Chưa có đánh giá nào</string>
+    <string name="related_products">Sản phẩm liên quan</string>
+    <string name="quantity">Số lượng</string>
+    <string name="add_to_cart">Thêm vào giỏ</string>
+    <string name="warranty">Bảo hành %1$d tháng</string>
+    <string name="sold_count">Đã bán: %1$s</string>
+    <string name="review_count">(%1$d đánh giá)</string>
+    <string name="added_to_cart">Đã thêm vào giỏ hàng!</string>
+    <string name="in_stock">Còn hàng</string>
+    <string name="out_of_stock">Hết hàng</string>
+    <string name="shop_reply">Phản hồi từ cửa hàng</string>
+    <string name="guest_customer">Khách hàng</string>
+
+    <!-- Filter -->
+    <string name="filter_title">Lọc sản phẩm</string>
+    <string name="filter_category">Danh mục</string>
+    <string name="price_range">Khoảng giá (VNĐ)</string>
+    <string name="price_from">Từ</string>
+    <string name="price_to">Đến</string>
+    <string name="min_rating">Đánh giá tối thiểu</string>
+    <string name="filter_all">Tất cả</string>
+    <string name="rating_3_up">3★ trở lên</string>
+    <string name="rating_4_up">4★ trở lên</string>
+    <string name="rating_5">5★</string>
+    <string name="clear_filter">Xóa bộ lọc</string>
+    <string name="apply_filter">Áp dụng</string>
+
+    <!-- Common -->
+    <string name="loading">Đang tải…</string>
+    <string name="delete_item">Xóa</string>
+    <string name="no_orders">Bạn chưa có đơn hàng nào</string>
+    <string name="my_orders_title">Đơn hàng của tôi</string>
+    <string name="app_tagline">Nội thất thông minh</string>
+
+    <!-- Add to cart feedback -->
+    <string name="btn_added">✓ Đã thêm</string>
+
+    <!-- Review sort -->
+    <string name="review_sort_newest">Mới nhất</string>
+    <string name="review_sort_high_rating">Sao cao nhất</string>
+    <string name="review_sort_low_rating">Sao thấp nhất</string>
+
+    <!-- Recently viewed -->
+    <string name="recently_viewed">Đã xem gần đây</string>
+</resources>

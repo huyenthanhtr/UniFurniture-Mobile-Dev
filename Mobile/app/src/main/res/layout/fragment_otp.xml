@@ -11,7 +11,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Xác thực OTP"
+        android:text="@string/otp_title"
         android:textSize="22sp"
         android:textStyle="bold"
         android:textColor="@color/primary"
@@ -20,14 +20,14 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Nhập mã OTP đã gửi qua SMS"
+        android:text="@string/otp_subtitle"
         android:textColor="@color/gray_600"
         android:layout_marginBottom="24dp" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Số điện thoại"
+        android:hint="@string/phone"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etPhone"
@@ -39,7 +39,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Mã OTP"
+        android:hint="@string/otp_code"
         android:layout_marginTop="12dp"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
         <com.google.android.material.textfield.TextInputEditText
@@ -61,7 +61,7 @@
         android:id="@+id/btnVerify"
         android:layout_width="match_parent"
         android:layout_height="52dp"
-        android:text="Xác thực"
+        android:text="@string/btn_verify"
         android:layout_marginTop="20dp"
         style="@style/Widget.UniFurniture.Button.Primary" />
 

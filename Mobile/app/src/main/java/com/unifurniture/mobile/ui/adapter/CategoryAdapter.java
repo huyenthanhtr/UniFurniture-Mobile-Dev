@@ -62,7 +62,7 @@ public class CategoryAdapter extends ListAdapter<CategoryDto, CategoryAdapter.Vi
             Glide.with(binding.getRoot())
                     .load(category.imageUrl)
                     .placeholder(R.drawable.placeholder_category)
-                    .centerCrop()
+                    .circleCrop()
                     .into(binding.ivCategory);
             binding.getRoot().setOnClickListener(v -> listener.onClick(category));
         }

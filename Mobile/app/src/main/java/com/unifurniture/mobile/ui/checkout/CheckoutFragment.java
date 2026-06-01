@@ -55,7 +55,7 @@ public class CheckoutFragment extends Fragment {
             String paymentMethod = binding.rgPayment.getCheckedRadioButtonId() == R.id.rbCod ? "cod" : "bank_transfer";
 
             if (name.isEmpty() || phone.isEmpty() || address.isEmpty()) {
-                Toast.makeText(requireContext(), "Vui lòng điền đầy đủ thông tin", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), getString(R.string.fill_required), Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -66,10 +66,10 @@ public class CheckoutFragment extends Fragment {
 
         viewModel.getResult().observe(getViewLifecycleOwner(), response -> {
             if (response != null && response.order != null) {
-                Toast.makeText(requireContext(), "Đặt hàng thành công!", Toast.LENGTH_LONG).show();
+                Toast.makeText(requireContext(), getString(R.string.order_success), Toast.LENGTH_LONG).show();
                 Navigation.findNavController(requireView()).navigate(R.id.homeFragment);
             } else {
-                Toast.makeText(requireContext(), "Đặt hàng thất bại. Thử lại.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), getString(R.string.order_failed), Toast.LENGTH_SHORT).show();
             }
         });
 

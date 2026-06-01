@@ -33,6 +33,6 @@
         android:src="@drawable/ic_back"
         android:tint="@color/gray_400"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Xóa" />
+        android:contentDescription="@string/delete_item" />
 
 </LinearLayout>

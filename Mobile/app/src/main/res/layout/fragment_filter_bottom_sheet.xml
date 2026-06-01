@@ -23,7 +23,7 @@
         android:paddingHorizontal="20dp"
         android:paddingTop="8dp"
         android:paddingBottom="16dp"
-        android:text="Lọc sản phẩm"
+        android:text="@string/filter_title"
         android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="@color/black" />
@@ -39,7 +39,7 @@
         android:paddingHorizontal="20dp"
         android:paddingTop="16dp"
         android:paddingBottom="8dp"
-        android:text="Danh mục"
+        android:text="@string/filter_category"
         android:textSize="14sp"
         android:textStyle="bold"
         android:textColor="@color/black" />
@@ -64,7 +64,7 @@
         android:paddingHorizontal="20dp"
         android:paddingTop="16dp"
         android:paddingBottom="8dp"
-        android:text="Khoảng giá (VNĐ)"
+        android:text="@string/price_range"
         android:textSize="14sp"
         android:textStyle="bold"
         android:textColor="@color/black" />
@@ -85,7 +85,7 @@
                 android:id="@+id/etMinPrice"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Từ"
+                android:hint="@string/price_from"
                 android:inputType="numberDecimal"
                 android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -106,7 +106,7 @@
                 android:id="@+id/etMaxPrice"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Đến"
+                android:hint="@string/price_to"
                 android:inputType="numberDecimal"
                 android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -120,7 +120,7 @@
         android:paddingHorizontal="20dp"
         android:paddingTop="16dp"
         android:paddingBottom="8dp"
-        android:text="Đánh giá tối thiểu"
+        android:text="@string/min_rating"
         android:textSize="14sp"
         android:textStyle="bold"
         android:textColor="@color/black" />
@@ -138,28 +138,28 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
-            android:text="Tất cả" />
+            android:text="@string/filter_all" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chipRating3"
             style="@style/Widget.MaterialComponents.Chip.Choice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="3★ trở lên" />
+            android:text="@string/rating_3_up" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chipRating4"
             style="@style/Widget.MaterialComponents.Chip.Choice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="4★ trở lên" />
+            android:text="@string/rating_4_up" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chipRating5"
             style="@style/Widget.MaterialComponents.Chip.Choice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="5★" />
+            android:text="@string/rating_5" />
 
     </com.google.android.material.chip.ChipGroup>
 
@@ -178,7 +178,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginEnd="8dp"
-            android:text="Xóa bộ lọc" />
+            android:text="@string/clear_filter" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnApplyFilter"
@@ -186,7 +186,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="8dp"
-            android:text="Áp dụng"
+            android:text="@string/apply_filter"
             android:textColor="@color/white"
             app:backgroundTint="@color/primary" />
 

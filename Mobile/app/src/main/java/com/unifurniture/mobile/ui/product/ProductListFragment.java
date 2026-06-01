@@ -19,6 +19,7 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.chip.Chip;
 import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.data.model.ApiListResponse;
 import com.unifurniture.mobile.data.model.CategoryDto;
@@ -27,6 +28,7 @@ import com.unifurniture.mobile.databinding.FragmentProductListBinding;
 import com.unifurniture.mobile.ui.adapter.ProductCardAdapter;
 import com.unifurniture.mobile.ui.adapter.SearchHistoryAdapter;
 import com.unifurniture.mobile.ui.adapter.SearchSuggestionAdapter;
+import com.unifurniture.mobile.util.FormatUtil;
 import com.unifurniture.mobile.util.SearchHistoryManager;
 import java.util.ArrayList;
 import java.util.List;
@@ -106,6 +108,8 @@ public class ProductListFragment extends Fragment {
             }
         }
         if (!filterApplied) viewModel.loadProducts();
+        updateFilterBadge();
+        updateActiveFilterChips();
     }
 
     private void setupRecyclerView() {
@@ -302,7 +306,7 @@ public class ProductListFragment extends Fragment {
         viewModel.getProducts().observe(getViewLifecycleOwner(), response -> {
             if (response != null && response.items != null) {
                 adapter.submitList(response.items);
-                binding.tvProductCount.setText("Hiển thị " + response.items.size() + " / " + response.total + " sản phẩm");
+                binding.tvProductCount.setText(getString(R.string.showing_products, response.items.size(), response.total));
                 boolean empty = response.items.isEmpty();
                 binding.layoutEmpty.setVisibility(empty ? View.VISIBLE : View.GONE);
                 binding.rvProducts.setVisibility(empty ? View.GONE : View.VISIBLE);
@@ -317,11 +321,97 @@ public class ProductListFragment extends Fragment {
             }
         });
 
-        viewModel.isLoading().observe(getViewLifecycleOwner(), loading ->
-                binding.progressBar.setVisibility(loading ? View.VISIBLE : View.GONE));
+        viewModel.isLoading().observe(getViewLifecycleOwner(), loading -> {
+            boolean isInitialLoad = loading && adapter.getItemCount() == 0;
+            if (isInitialLoad) {
+                binding.shimmerLayout.setVisibility(View.VISIBLE);
+                binding.shimmerLayout.startShimmer();
+                binding.swipeRefresh.setVisibility(View.GONE);
+                binding.progressBar.setVisibility(View.GONE);
+            } else {
+                binding.shimmerLayout.stopShimmer();
+                binding.shimmerLayout.setVisibility(View.GONE);
+                binding.swipeRefresh.setVisibility(View.VISIBLE);
+                binding.progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
+            }
+        });
 
         viewModel.isLoadingMore().observe(getViewLifecycleOwner(), more ->
                 binding.progressBarLoadMore.setVisibility(more ? View.VISIBLE : View.GONE));
+    }
+
+    private void updateFilterBadge() {
+        int count = 0;
+        if (viewModel.getCurrentCategoryId() != null) count++;
+        if (viewModel.getCurrentMinPrice() != null || viewModel.getCurrentMaxPrice() != null) count++;
+        if (viewModel.getCurrentMinRating() > 0) count++;
+        if (count > 0) {
+            binding.tvFilterBadge.setText(String.valueOf(count));
+            binding.tvFilterBadge.setVisibility(View.VISIBLE);
+        } else {
+            binding.tvFilterBadge.setVisibility(View.GONE);
+        }
+    }
+
+    private void updateActiveFilterChips() {
+        binding.chipGroupActiveFilters.removeAllViews();
+        boolean hasActive = false;
+
+        String catId = viewModel.getCurrentCategoryId();
+        if (catId != null) {
+            String catName = catId;
+            List<CategoryDto> cats = viewModel.getCategories().getValue();
+            if (cats != null) {
+                for (CategoryDto c : cats) {
+                    if (catId.equals(c.id)) { catName = c.name; break; }
+                }
+            }
+            final String finalCatName = catName;
+            addActiveChip(finalCatName, () -> {
+                viewModel.applyFilters(null,
+                        viewModel.getCurrentMinPrice(),
+                        viewModel.getCurrentMaxPrice(),
+                        viewModel.getCurrentMinRating());
+                updateFilterBadge();
+                updateActiveFilterChips();
+            });
+            hasActive = true;
+        }
+
+        Double minP = viewModel.getCurrentMinPrice();
+        Double maxP = viewModel.getCurrentMaxPrice();
+        if (minP != null || maxP != null) {
+            String label = FormatUtil.formatCurrency(minP) + " – " + FormatUtil.formatCurrency(maxP);
+            addActiveChip(label, () -> {
+                viewModel.applyFilters(viewModel.getCurrentCategoryId(), null, null,
+                        viewModel.getCurrentMinRating());
+                updateFilterBadge();
+                updateActiveFilterChips();
+            });
+            hasActive = true;
+        }
+
+        int minRating = viewModel.getCurrentMinRating();
+        if (minRating > 0) {
+            addActiveChip(minRating + "★+", () -> {
+                viewModel.applyFilters(viewModel.getCurrentCategoryId(),
+                        viewModel.getCurrentMinPrice(),
+                        viewModel.getCurrentMaxPrice(), 0);
+                updateFilterBadge();
+                updateActiveFilterChips();
+            });
+            hasActive = true;
+        }
+
+        binding.scrollActiveFilters.setVisibility(hasActive ? View.VISIBLE : View.GONE);
+    }
+
+    private void addActiveChip(String label, Runnable onRemove) {
+        Chip chip = new Chip(requireContext());
+        chip.setText(label);
+        chip.setCloseIconVisible(true);
+        chip.setOnCloseIconClickListener(v -> onRemove.run());
+        binding.chipGroupActiveFilters.addView(chip);
     }
 
     private void syncSortChip() {
@@ -357,6 +447,8 @@ public class ProductListFragment extends Fragment {
             @Override
             public void onFiltersApplied(String categoryId, Double minPrice, Double maxPrice, int minRating) {
                 viewModel.applyFilters(categoryId, minPrice, maxPrice, minRating);
+                updateFilterBadge();
+                updateActiveFilterChips();
             }
 
             @Override
@@ -367,6 +459,8 @@ public class ProductListFragment extends Fragment {
                 hideSuggestions();
                 viewModel.clearFilters();
                 syncSortChip();
+                updateFilterBadge();
+                updateActiveFilterChips();
             }
         });
 

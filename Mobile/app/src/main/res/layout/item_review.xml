@@ -76,7 +76,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Phản hồi từ cửa hàng"
+            android:text="@string/shop_reply"
             android:textSize="12sp"
             android:textStyle="bold"
             android:textColor="@color/primary" />

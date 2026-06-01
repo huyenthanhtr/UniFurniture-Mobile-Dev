@@ -1,6 +1,6 @@
 # UniFurniture Mobile — Technical Decisions & Conventions
 
-Last updated: 2026-06-01 (P2 #8, #9, #10 closed)
+Last updated: 2026-06-01 (i18n + UI/UX improvements)
 Branch: feature/home
 Owner of this file: Như Ngọc
 
@@ -1093,3 +1093,97 @@ adding any new dependency — Material Components is already in `build.gradle`.
 
 **Card dimensions:** 140dp wide × 90dp tall (landscape ratio, slightly wider than
 category cards at 80dp, proportional to a banner image aspect ratio).
+
+---
+
+## Multi-language Support (i18n)
+
+### Decision: English là default, Vietnamese là values-vi
+
+**Date recorded:** 2026-06-01
+
+**What was decided:** `res/values/strings.xml` chứa English (default fallback). Các ngôn ngữ khác đặt trong `values-vi/`, `values-zh-rCN/`, `values-fr/`. Android tự chọn file theo locale thiết bị; không khớp → fallback về English.
+
+**Why:** Thầy yêu cầu "tiếng Anh mặc định trước". Default folder (`values/`) là fallback cuối cùng của Android — đặt EN ở đây đảm bảo app không bị crash khi chạy ở locale chưa hỗ trợ.
+
+**Rule:** Thêm string mới → thêm vào cả 4 file (`values`, `values-vi`, `values-zh-rCN`, `values-fr`). Không được hardcode text tiếng Việt trực tiếp trong layout XML hay Java — luôn dùng `@string/` hoặc `getString()`.
+
+---
+
+### Decision: Format strings dùng `%1$d` / `%1$s` cho dynamic text
+
+**What was decided:** Strings có tham số dùng format `%1$d` (int), `%1$s` (String), `%2$d`... Ví dụ: `"Showing %1$d / %2$d products"`. Trong Java: `getString(R.string.showing_products, count, total)`.
+
+**Why:** Android `getString(int resId, Object... args)` yêu cầu format này. Không nối chuỗi trong code (`"Hiển thị " + count + "..."`), vì dịch thuật thay đổi thứ tự từ giữa các ngôn ngữ.
+
+---
+
+## UI/UX Improvements
+
+### Decision: Filter FAB badge dùng FrameLayout wrapper, không dùng BadgeDrawable
+
+**Date recorded:** 2026-06-01
+
+**What was decided:** Bọc FAB trong `FrameLayout` (child của CoordinatorLayout), thêm `TextView tvFilterBadge` (20×20dp oval đỏ) với `layout_gravity="top|end"`. Không dùng `BadgeDrawable` của Material.
+
+**Why:** `BadgeDrawable` được thiết kế cho `BottomNavigationView` và `TabLayout` — không có API public để attach vào FAB. Cách `FrameLayout` wrapper đơn giản hơn, không cần library thêm, và Snackbar behavior không dùng trong màn hình này nên mất FAB behavior là chấp nhận được.
+
+---
+
+### Decision: ProductList shimmer chỉ hiện khi initial load (adapter rỗng)
+
+**Date recorded:** 2026-06-01
+
+**What was decided:** Check `adapter.getItemCount() == 0` trong `isLoading()` observer. Nếu true → show shimmer, hide `swipeRefresh`. Nếu false (reload sau filter/sort) → chỉ show `progressBar` nhỏ, giữ nguyên list đang hiển thị.
+
+**Why:** Shimmer khi đã có data gây layout jump khó chịu. User đang xem list, bỗng mất hết thay bằng skeleton → trải nghiệm tệ hơn không có shimmer. Shimmer phù hợp nhất cho trạng thái "màn hình trắng chưa có gì".
+
+---
+
+### Decision: Active filter chips xóa từng filter riêng lẻ, không clear all
+
+**What was decided:** Mỗi chip active (category / price range / rating) có nút ×. Tap × gọi `viewModel.applyFilters()` với chỉ param tương ứng set null, các param khác giữ nguyên.
+
+**Why:** "Xóa bộ lọc" trong bottom sheet clear tất cả — hành vi đúng khi user muốn reset hoàn toàn. Nhưng chip × cần granular: user có thể muốn giữ filter rating mà xóa filter category. Hai UI element, hai hành vi khác nhau — nhất quán với mental model của user.
+
+---
+
+### Decision: Add to Cart feedback dùng `cartRestoreHandler` là field, không tạo Handler mới mỗi lần
+
+**Date recorded:** 2026-06-01
+
+**What was decided:** `cartRestoreHandler` là field của Fragment, khởi tạo 1 lần. Gọi `removeCallbacksAndMessages(null)` trước `postDelayed` để hủy lần trước (nếu user tap Add to Cart liên tiếp nhanh). Cancel trong `onDestroyView`.
+
+**Why:** Nếu tạo Handler mới mỗi lần observe, và user tap nhiều lần, sẽ có nhiều Runnable pending → button restore nhiều lần lệch nhau. `removeCallbacksAndMessages` reset sạch trước khi post mới.
+
+---
+
+### Decision: PhotoView thay thế hoàn toàn ImageView trong ImageSliderAdapter
+
+**Date recorded:** 2026-06-01
+
+**What was decided:** `PhotoView` extends `ImageView` → drop-in replacement. Glide vẫn `.into(photoView)` bình thường. Không cần tạo subclass hay wrapper.
+
+**Why:** `PhotoView` compatible với `ViewPager2` — library đã xử lý touch conflict giữa scroll của ViewPager2 và pinch gesture của PhotoView. Không cần config thêm gì. `centerCrop` vẫn là scaleType default ban đầu; sau khi zoom PhotoView tự handle scale.
+
+---
+
+### Decision: RecentlyViewedManager lưu full Item object (4 fields), không chỉ productId
+
+**Date recorded:** 2026-06-01
+
+**What was decided:** Lưu `{id, slug, name, imageUrl}` vào SharedPreferences thay vì chỉ lưu `productId`. Adapter hiện thị trực tiếp không cần API call.
+
+**Why:** Nếu chỉ lưu productId, cần fetch lại từng sản phẩm để lấy name và image → thêm N API calls, thêm complexity. 4 fields nhỏ (tổng ~400 bytes × 10 items ≈ 4KB) hoàn toàn phù hợp SharedPreferences. Pattern giống `SearchHistoryManager` trong project.
+
+**Khi nào refresh:** `onResume` của HomeFragment — đảm bảo list cập nhật ngay khi user back từ ProductDetail, không cần LiveData hay event bus.
+
+---
+
+### Decision: Sort reviews là client-side, không request API mới
+
+**Date recorded:** 2026-06-01
+
+**What was decided:** `allReviews: List<ReviewDto>` lưu list gốc trong Fragment. `sortReviews(mode)` sort một **bản sao** (`new ArrayList<>(allReviews)`) rồi `submitList()`. List gốc không mutate → có thể re-sort bất kỳ lúc nào mà không cần fetch lại.
+
+**Why:** API `GET /reviews/product/:id` đã trả về toàn bộ reviews (không có pagination riêng cho reviews). Client-side sort là đủ và không tốn thêm request. Sort theo `createdAt` String ISO 8601 hoạt động đúng vì format `YYYY-MM-DDTHH:mm:ss` sortable lexicographically.

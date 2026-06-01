@@ -24,7 +24,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Sản phẩm"
+                android:text="@string/products_title"
                 android:textColor="@color/white"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -42,7 +42,7 @@
                 android:layout_marginStart="12dp"
                 android:src="@drawable/ic_view_list"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Chuyển chế độ xem" />
+                android:contentDescription="@string/toggle_view_desc" />
         </LinearLayout>
 
         <!-- Search bar -->
@@ -60,7 +60,7 @@
                 android:background="@drawable/bg_search_field"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
-                android:hint="Tìm kiếm sản phẩm..."
+                android:hint="@string/search_hint"
                 android:textColor="@color/gray_800"
                 android:textSize="14sp"
                 android:inputType="text"
@@ -100,7 +100,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Tìm kiếm gần đây"
+                    android:text="@string/recent_searches"
                     android:textSize="12sp"
                     android:textColor="@color/gray_600"
                     android:textStyle="bold" />
@@ -108,7 +108,7 @@
                     android:id="@+id/tvClearHistory"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Xóa tất cả"
+                    android:text="@string/clear_all"
                     android:textSize="12sp"
                     android:textColor="@color/primary"
                     android:padding="8dp" />
@@ -136,31 +136,78 @@
                     android:id="@+id/chipNewest"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Mới nhất"
+                    android:text="@string/sort_newest"
                     android:checked="true"
                     style="@style/Widget.MaterialComponents.Chip.Choice" />
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipBestSelling"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Bán chạy"
+                    android:text="@string/sort_best_selling"
                     style="@style/Widget.MaterialComponents.Chip.Choice" />
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipPriceLow"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Giá thấp"
+                    android:text="@string/sort_price_low"
                     style="@style/Widget.MaterialComponents.Chip.Choice" />
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipPriceHigh"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Giá cao"
+                    android:text="@string/sort_price_high"
                     style="@style/Widget.MaterialComponents.Chip.Choice" />
             </com.google.android.material.chip.ChipGroup>
         </HorizontalScrollView>
 
-        <!-- Progress -->
+        <!-- Active filter chips (shown when any filter is active) -->
+        <HorizontalScrollView
+            android:id="@+id/scrollActiveFilters"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:background="@color/surface"
+            android:visibility="gone">
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroupActiveFilters"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp" />
+        </HorizontalScrollView>
+
+        <!-- Shimmer skeleton — shown during initial load -->
+        <com.facebook.shimmer.ShimmerFrameLayout
+            android:id="@+id/shimmerLayout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="8dp">
+
+                <!-- Row 1 -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                    <View android:layout_width="0dp" android:layout_height="260dp" android:layout_weight="1" android:layout_margin="6dp" android:background="@drawable/bg_shimmer_rect" />
+                    <View android:layout_width="0dp" android:layout_height="260dp" android:layout_weight="1" android:layout_margin="6dp" android:background="@drawable/bg_shimmer_rect" />
+                </LinearLayout>
+                <!-- Row 2 -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                    <View android:layout_width="0dp" android:layout_height="260dp" android:layout_weight="1" android:layout_margin="6dp" android:background="@drawable/bg_shimmer_rect" />
+                    <View android:layout_width="0dp" android:layout_height="260dp" android:layout_weight="1" android:layout_margin="6dp" android:background="@drawable/bg_shimmer_rect" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </com.facebook.shimmer.ShimmerFrameLayout>
+
+        <!-- Progress (for filter/sort reload, not initial) -->
         <ProgressBar
             android:id="@+id/progressBar"
             android:layout_width="wrap_content"
@@ -198,7 +245,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Không tìm thấy sản phẩm"
+                        android:text="@string/empty_products"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="@color/gray_800" />
@@ -207,7 +254,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm"
+                        android:text="@string/empty_products_hint"
                         android:textSize="14sp"
                         android:textColor="@color/gray_600"
                         android:gravity="center" />
@@ -227,16 +274,35 @@
 
     </LinearLayout>
 
-    <!-- Filter FAB -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabFilter"
+    <!-- Filter FAB + badge wrapper -->
+    <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:contentDescription="Lọc sản phẩm"
-        android:src="@drawable/ic_filter_list"
-        app:backgroundTint="@color/primary"
-        app:tint="@color/white" />
+        android:layout_margin="16dp">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabFilter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/filter_desc"
+            android:src="@drawable/ic_filter_list"
+            app:backgroundTint="@color/primary"
+            app:tint="@color/white" />
+
+        <TextView
+            android:id="@+id/tvFilterBadge"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="top|end"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/bg_badge"
+            android:textSize="10sp"
+            android:textColor="@color/white"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+    </FrameLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
