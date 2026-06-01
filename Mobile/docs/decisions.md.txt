@@ -130,6 +130,19 @@ deviate). Fragments observe with `getViewLifecycleOwner()`.
 MongoDB `_id` fields are mapped with `@SerializedName("_id") public String id;`
 across all DTOs. Always use `.id` in code — never `._id`.
 
+### `@SerializedName` chỉ dùng khi JSON key KHÁC tên field Java
+
+**Rule:** Chỉ thêm `@SerializedName` khi JSON key thực sự khác với tên field. Nếu server trả về camelCase và field Java cũng là camelCase thì **không cần annotation** — Gson tự map theo tên field.
+
+**Why:** `ReviewDto` ban đầu dùng `@SerializedName("customer_name")` cho field `customerName`. Server trả về `"customerName"` (camelCase) → Gson tìm key `"customer_name"` → không có → field = null → hiện "Khách hàng" thay vì tên thật. Bug ẩn, không crash, khó phát hiện.
+
+**Trường hợp cần `@SerializedName`:**
+- MongoDB `_id` → `@SerializedName("_id") public String id`
+- Server snake_case thật sự: `short_description` → `@SerializedName("short_description") public String shortDescription`
+- Server key có ký tự đặc biệt hoặc keyword Java
+
+**Trước khi viết DTO mới:** Kiểm tra response thật bằng Postman/Logcat để xác nhận server trả về snake_case hay camelCase. Không giả định.
+
 ### Currency formatting
 Always use `FormatUtil.formatCurrency(Double)` — never format VND manually.
 It handles null (returns "Liên hệ") and formats with dots as thousands separator.

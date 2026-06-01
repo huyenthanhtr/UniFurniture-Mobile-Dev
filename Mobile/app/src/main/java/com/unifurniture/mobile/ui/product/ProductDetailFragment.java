@@ -14,6 +14,7 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.tbuonomo.viewpagerdotsindicator.DotsIndicator;
 import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.databinding.FragmentProductDetailBinding;
+import com.unifurniture.mobile.BuildConfig;
 import com.unifurniture.mobile.data.model.ProductDto;
 import com.unifurniture.mobile.ui.adapter.ImageSliderAdapter;
 import com.unifurniture.mobile.ui.adapter.ProductCardAdapter;
@@ -86,7 +87,9 @@ public class ProductDetailFragment extends Fragment {
     }
 
     private void setupReviews() {
-        reviewAdapter = new ReviewAdapter();
+        String serverHost = BuildConfig.API_BASE_URL.replace("/api/", "");
+        reviewAdapter = new ReviewAdapter(serverHost);
+        binding.rvReviews.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvReviews.setAdapter(reviewAdapter);
     }
 
@@ -126,10 +129,9 @@ public class ProductDetailFragment extends Fragment {
                 binding.tvWarranty.setText("Bảo hành " + product.warrantyMonths + " tháng");
                 binding.tvWarranty.setVisibility(View.VISIBLE);
             }
-            if (product.sold != null && product.sold > 0) {
-                binding.tvSoldCount.setText("Đã bán: " + FormatUtil.formatSold(product.sold));
-                binding.tvSoldCount.setVisibility(View.VISIBLE);
-            }
+            int soldCount = product.sold != null ? product.sold : 0;
+            binding.tvSoldCount.setText("Đã bán: " + FormatUtil.formatSold(soldCount));
+            binding.tvSoldCount.setVisibility(View.VISIBLE);
             // Fallback: show thumbnail immediately if slider still empty
             String thumb = product.getImageUrl();
             if (sliderAdapter.getItemCount() == 0 && thumb != null && !thumb.isEmpty()) {
@@ -186,19 +188,25 @@ public class ProductDetailFragment extends Fragment {
         });
 
         viewModel.getReviews().observe(getViewLifecycleOwner(), summary -> {
-            if (summary == null) return;
-            if (summary.totalReviews == 0) {
-                binding.ratingBar.setVisibility(View.GONE);
-                binding.tvRating.setVisibility(View.GONE);
-                binding.tvReviewCount.setVisibility(View.GONE);
+            if (summary == null || summary.totalReviews == 0) {
+                binding.layoutRatingRow.setVisibility(View.GONE);
+                binding.tvNoRating.setVisibility(View.VISIBLE);
+                binding.tvNoReviews.setVisibility(View.VISIBLE);
+                binding.rvReviews.setVisibility(View.GONE);
             } else {
+                binding.layoutRatingRow.setVisibility(View.VISIBLE);
+                binding.tvNoRating.setVisibility(View.GONE);
+                binding.ratingBar.setRating((float) summary.averageRating);
                 binding.tvRating.setText(String.format("%.1f", summary.averageRating));
                 binding.tvReviewCount.setText("(" + summary.totalReviews + " đánh giá)");
-                binding.tvReviewCount.setVisibility(View.VISIBLE);
-                binding.ratingBar.setVisibility(View.VISIBLE);
-                binding.ratingBar.setRating((float) summary.averageRating);
+                binding.layoutRatingRow.setOnClickListener(v ->
+                        binding.nestedScrollView.post(() ->
+                                binding.nestedScrollView.smoothScrollTo(
+                                        0, binding.layoutReviewsSection.getTop())));
+                binding.tvNoReviews.setVisibility(View.GONE);
+                binding.rvReviews.setVisibility(View.VISIBLE);
+                if (summary.items != null) reviewAdapter.submitList(summary.items);
             }
-            if (summary.items != null) reviewAdapter.submitList(summary.items);
         });
 
         viewModel.getAddToCartResult().observe(getViewLifecycleOwner(), cart -> {

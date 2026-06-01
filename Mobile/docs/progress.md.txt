@@ -1,10 +1,10 @@
 # UniFurniture Mobile — Progress Tracker
 
-Last updated: 2026-06-01 (P3 #11 #12 #13 #17 done)
+Last updated: 2026-06-01 (review bugs fixed — rvReviews LayoutManager + ReviewDto @SerializedName)
 Branch: feature/home
 Owner of this file: Như Ngọc
 
-> **2026-06-01:** P1 all done ✅. P2 all done ✅ (#6, #7, #8, #9, #10). Next: P3 (polish).
+> **2026-06-01:** P1 ✅ P2 ✅. P3 done: #11 #12 #13 #15 #16 #17. Bugs fixed: rvReviews LayoutManager + ReviewDto camelCase mismatch + Glide placeholder. Next: #14 (shimmer) → #18 (search history).
 
 ---
 
@@ -586,6 +586,60 @@ pattern.
 
 ---
 
+### Bug — Review section không hiển thị nội dung / ảnh
+
+**Status:** ✅ Fixed 2026-06-01
+
+#### Symptom
+
+Bấm vào trang Product Detail → phần "Đánh giá" cuộn đến đúng section nhưng không thấy item nào. Sau khi thêm LayoutManager thì thấy item, nhưng chỉ thấy tên và sao — không thấy nội dung text và ảnh đánh giá.
+
+#### Root causes (3 lớp)
+
+**1. `rvReviews` thiếu `LayoutManager`**
+
+`setupReviews()` tạo adapter và gán cho RecyclerView nhưng không gọi `setLayoutManager()`. RecyclerView không có LayoutManager → không render item nào. Fix: thêm `new LinearLayoutManager(requireContext())`.
+
+**2. `ReviewDto` dùng sai `@SerializedName` (camelCase vs snake_case)**
+
+Server `GET /api/reviews/product/:productId` trả về camelCase (`customerName`, `createdAt`, `repliedAt`, `productId`, `customerId`) nhưng DTO dùng `@SerializedName("customer_name")` v.v. → Gson không map được → các field đều null → hiện "Khách hàng" thay vì tên thật, không có ngày, không có admin reply date.
+
+Fix: xóa toàn bộ `@SerializedName` sai cho các field camelCase — Gson tự map theo tên field. Giữ lại `@SerializedName("_id")` vì `_id` là MongoDB convention.
+
+| Field | Sai | Đúng |
+|---|---|---|
+| `customerName` | `@SerializedName("customer_name")` | *(không có annotation)* |
+| `createdAt` | `@SerializedName("created_at")` | *(không có annotation)* |
+| `repliedAt` (inner) | `@SerializedName("replied_at")` | *(không có annotation)* |
+| `productId` | `@SerializedName("product_id")` | *(không có annotation)* |
+| `customerId` | `@SerializedName("customer_id")` | *(không có annotation)* |
+
+**3. Glide không có error/placeholder cho ảnh review**
+
+Khi file ảnh không tồn tại trên server (upload từ máy khác), Glide nhận 404 → hiện blank ImageView → trông như "không có ảnh". Fix: thêm `.placeholder(R.drawable.placeholder_product).error(R.drawable.placeholder_product)`.
+
+**Lưu ý về data test:** Review của "Thư Hà Yoonn" có 5 entries ảnh trong DB nhưng các file vật lý không tồn tại trên máy này (upload từ thiết bị khác). Để test ảnh đúng, dùng sản phẩm **"Combo Basic Phòng Ngủ 4 Món U-HOME FURNI HOBRO"** (`slug: combo-phong-ngu-hobro-co-ban`) — có review với 5 ảnh mà file thực tế có trong `/uploads/reviews/`.
+
+#### Modified files
+
+| File | Change |
+|---|---|
+| `ui/product/ProductDetailFragment.java` | Thêm `binding.rvReviews.setLayoutManager(new LinearLayoutManager(...))` trong `setupReviews()` |
+| `data/model/ReviewDto.java` | Xóa `@SerializedName` sai cho 5 field camelCase; giữ lại `@SerializedName("_id")` |
+| `ui/adapter/ReviewAdapter.java` | Thêm `.placeholder()`, `.error()`, `.centerCrop()` vào Glide call; thêm `import R` |
+
+#### Testing checklist
+
+- [x] Review hiện tên khách hàng thật (không còn "Khách hàng")
+- [x] Review hiện số sao đúng
+- [x] Review hiện nội dung text
+- [x] Review hiện ngày (format YYYY-MM-DD)
+- [x] Sản phẩm "Combo Basic Phòng Ngủ 4 Món" → review có 5 ảnh hiện đúng trong HorizontalScrollView
+- [ ] Admin reply hiện đúng ngày (repliedAt fix)
+- [ ] Ảnh lỗi / không tồn tại → hiện placeholder_product gray thay vì blank
+
+---
+
 ## Remaining Features — Như Ngọc's Scope
 
 ### Home
@@ -618,9 +672,8 @@ pattern.
 - [x] **Stock status indicator** ✅ Completed 2026-06-01
 - [x] **Sold count** ✅ Completed 2026-06-01
 - [x] **Recommendations section** ✅ Completed 2026-06-01
-- [ ] **Review images** — `ReviewDto.images` field exists but `ReviewAdapter`
-      ignores it
-- [ ] **Admin reply on review** — `ReviewDto.reply` field exists but not rendered
+- [x] **Review images** ✅ Completed 2026-06-01
+- [x] **Admin reply on review** ✅ Completed 2026-06-01
 - [x] **Deprecated back navigation** ✅ Already using `navigateUp()` — no change needed
 
 ---
@@ -655,8 +708,8 @@ pattern.
 | 12 | ~~ProductDetail: Sold count~~ | ✅ **DONE** 2026-06-01 |
 | 13 | ~~ProductDetail: Recommendations~~ | ✅ **DONE** 2026-06-01 |
 | 14 | Home: Proper shimmer skeletons | Loading UX quality |
-| 15 | ProductDetail: Review images | Data exists, just not rendered |
-| 16 | ProductDetail: Admin reply on review | Data exists, just not rendered |
+| 15 | ~~ProductDetail: Review images~~ | ✅ **DONE** 2026-06-01 |
+| 16 | ~~ProductDetail: Admin reply on review~~ | ✅ **DONE** 2026-06-01 |
 | 17 | ~~ProductDetail: Fix deprecated back nav~~ | ✅ Already done (navigateUp()) |
 | 18 | Search: Search history | Convenience UX |
 
@@ -664,7 +717,7 @@ pattern.
 
 ## Next Recommended Task
 
-**Search: Real-time debounced query (P2 #7)**
+**P3 #14 — Home: Shimmer skeletons** → sau đó **P3 #18 — Search history**
 
 Largest remaining feature in scope. Requires a new `FilterBottomSheetFragment extends
 BottomSheetDialogFragment` with:
