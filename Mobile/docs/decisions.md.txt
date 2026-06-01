@@ -387,6 +387,33 @@ analysed or built. One entry per feature, added before implementation begins.
 
 ---
 
+### [P3 #18] Search: Search History
+
+**Date recorded:** 2026-06-01
+**Status:** ✅ Completed 2026-06-01
+
+---
+
+#### Decision: Focus listener chỉ quản lý history, không ẩn suggestions
+
+**What was decided:** `onFocusChangeListener` (cả Home lẫn ProductList) khi `hasFocus=false` chỉ gọi `hideSearchHistory()`. **Không** gọi `hideSuggestions()` / `hideSearchSuggestions()`.
+
+**Why:** Khi user tap vào `rvSuggestions` / `rvSearchSuggestions`, EditText mất focus trước khi click event của RecyclerView item kịp fire (focus change = ACTION_DOWN, click = ACTION_UP). Nếu `hideSuggestions()` được gọi ở focus lost → view thành `GONE` → click event bị huỷ → suggestion không tap được được.
+
+Suggestions tự ẩn qua 2 path an toàn:
+1. `onTextChanged` khi query empty → `hideSuggestions()`
+2. Suggestion click handler → `hideSuggestions()` trước khi navigate
+
+**Rule:** Bất cứ khi nào thêm `OnFocusChangeListener` vào một EditText có suggestion overlay — đừng ẩn suggestion trong `hasFocus=false`. Chỉ ẩn các UI state mà không phải target của touch event đang xảy ra.
+
+---
+
+#### Decision: `SearchHistoryManager` dùng Gson + SharedPreferences, không dùng Room
+
+**Why:** History là data đơn giản (list of strings, max 10 items). Room là overkill — cần Schema, DAO, migration. SharedPreferences + Gson.toJson đủ dùng, zero boilerplate, và Gson đã có sẵn trong project (dependency của Retrofit).
+
+---
+
 ### [P3 #14] Home: Shimmer Skeletons
 
 **Date recorded:** 2026-06-01

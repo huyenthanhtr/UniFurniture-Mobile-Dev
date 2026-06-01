@@ -21,7 +21,9 @@ import com.unifurniture.mobile.ui.adapter.CategoryAdapter;
 import com.unifurniture.mobile.ui.adapter.CollectionAdapter;
 import com.unifurniture.mobile.ui.adapter.ImageSliderAdapter;
 import com.unifurniture.mobile.ui.adapter.ProductCardAdapter;
+import com.unifurniture.mobile.ui.adapter.SearchHistoryAdapter;
 import com.unifurniture.mobile.ui.adapter.SearchSuggestionAdapter;
+import com.unifurniture.mobile.util.SearchHistoryManager;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +40,8 @@ public class HomeFragment extends Fragment {
     private SearchSuggestionAdapter searchSuggestionAdapter;
     private Handler searchHandler;
     private Runnable searchRunnable;
+    private SearchHistoryManager historyManager;
+    private SearchHistoryAdapter historyAdapter;
 
     @Nullable
     @Override
@@ -55,15 +59,35 @@ public class HomeFragment extends Fragment {
         setupRecyclerViews();
         setupBanner();
         setupSearchSuggestions();
+        setupSearchHistory();
         observeData();
 
         binding.btnViewAll.setOnClickListener(v ->
                 Navigation.findNavController(v).navigate(R.id.productListFragment));
 
+        // Use inner EditText for reliable focus detection
+        android.widget.EditText searchInnerEdit = binding.searchView.findViewById(
+                androidx.appcompat.R.id.search_src_text);
+        if (searchInnerEdit != null) {
+            searchInnerEdit.setOnFocusChangeListener((v, hasFocus) -> {
+                if (hasFocus && binding.searchView.getQuery().toString().trim().isEmpty()) {
+                    showSearchHistory();
+                } else if (!hasFocus) {
+                    hideSearchHistory();
+                    // Do NOT hideSearchSuggestions() here — focus loss fires before the
+                    // suggestion click completes, causing the tap to miss.
+                    // Suggestions hide via onQueryTextChange (empty text) or suggestion tap handler.
+                }
+            });
+        }
+
         binding.searchView.setOnQueryTextListener(new androidx.appcompat.widget.SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                query = query.trim();
+                if (!query.isEmpty()) historyManager.add(query);
                 hideSearchSuggestions();
+                hideSearchHistory();
                 Bundle args = new Bundle();
                 args.putString("search", query);
                 Navigation.findNavController(requireView()).navigate(R.id.productListFragment, args);
@@ -77,8 +101,10 @@ public class HomeFragment extends Fragment {
                 }
                 if (query.isEmpty()) {
                     hideSearchSuggestions();
+                    showSearchHistory();
                     return true;
                 }
+                hideSearchHistory();
                 searchRunnable = () -> viewModel.searchForSuggestions(query);
                 searchHandler.postDelayed(searchRunnable, 300);
                 return true;
@@ -219,6 +245,52 @@ public class HomeFragment extends Fragment {
 
     private void hideSearchSuggestions() {
         binding.rvSearchSuggestions.setVisibility(View.GONE);
+    }
+
+    private void setupSearchHistory() {
+        historyManager = new SearchHistoryManager(requireContext());
+        historyAdapter = new SearchHistoryAdapter(new SearchHistoryAdapter.OnItemListener() {
+            @Override
+            public void onQueryClick(String query) {
+                hideSearchHistory();
+                binding.searchView.setQuery(query, true); // true = submit immediately
+            }
+            @Override
+            public void onDeleteClick(String query) {
+                historyManager.remove(query);
+                refreshHistory();
+            }
+        });
+        binding.rvSearchHistory.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.rvSearchHistory.setAdapter(historyAdapter);
+
+        binding.tvClearHistory.setOnClickListener(v -> {
+            historyManager.clear();
+            hideSearchHistory();
+        });
+    }
+
+    private void showSearchHistory() {
+        List<String> history = historyManager.getAll();
+        if (history.isEmpty()) {
+            hideSearchHistory();
+            return;
+        }
+        historyAdapter.submitList(history);
+        binding.layoutSearchHistory.setVisibility(View.VISIBLE);
+    }
+
+    private void hideSearchHistory() {
+        binding.layoutSearchHistory.setVisibility(View.GONE);
+    }
+
+    private void refreshHistory() {
+        List<String> history = historyManager.getAll();
+        if (history.isEmpty()) {
+            hideSearchHistory();
+        } else {
+            historyAdapter.submitList(new ArrayList<>(history));
+        }
     }
 
     @Override

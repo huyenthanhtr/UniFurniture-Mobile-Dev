@@ -1,10 +1,10 @@
 # UniFurniture Mobile — Progress Tracker
 
-Last updated: 2026-06-01 (P3 #14 shimmer skeletons done)
+Last updated: 2026-06-01 (P3 #18 search history done — scope COMPLETE)
 Branch: feature/home
 Owner of this file: Như Ngọc
 
-> **2026-06-01:** P1 ✅ P2 ✅. P3 done: #11 #12 #13 #14 #15 #16 #17. Bugs fixed: rvReviews LayoutManager + ReviewDto camelCase + Glide placeholder. Next: #18 (search history).
+> **2026-06-01:** P1 ✅ P2 ✅ P3 ✅ — ALL DONE. Bugs fixed: rvReviews LayoutManager + ReviewDto camelCase + Glide placeholder. Scope complete.
 
 ---
 
@@ -675,6 +675,57 @@ Khi file ảnh không tồn tại trên server (upload từ máy khác), Glide n
 
 ---
 
+### P3 #18 — Search: Search History
+
+**Status:** ✅ Completed 2026-06-01
+
+#### Implementation summary
+
+Lưu lịch sử tìm kiếm vào `SharedPreferences`, hiển thị khi search bar focused + query rỗng. Áp dụng cho cả **Home** (`SearchView`) lẫn **ProductList** (`EditText`).
+
+**Khi nào lưu history:**
+- Home: submit query (Enter / nút search)
+- ProductList: navigate đến với search arg từ Home (trong `handleArguments`)
+- ProductList: nhấn Enter/Done trên keyboard
+
+**Khi nào hiện history:** Focus vào search bar khi text rỗng, hoặc khi xóa hết text.
+
+**UX:**
+- Mỗi item: icon clock + query text + nút X xóa item đó
+- Header "Tìm kiếm gần đây" + nút "Xóa tất cả" ở góc phải
+- Max 10 items, item mới nhất lên đầu, duplicate tự remove
+- Tap item → fill text + search ngay lập tức
+- History ẩn khi bắt đầu gõ (suggestions thay thế)
+
+**Bug fix đi kèm:** Focus listener ban đầu gọi `hideSuggestions()` khi EditText mất focus → suggestion bị ẩn trước khi click kịp fire. Fix: focus listener chỉ quản lý history (show/hide), KHÔNG ẩn suggestions. Suggestions tự ẩn qua text change hoặc suggestion tap handler.
+
+#### Modified / created files
+
+| File | Action |
+|---|---|
+| `util/SearchHistoryManager.java` | CREATED — SharedPreferences wrapper, Gson serialization, max 10 items, dedup |
+| `ui/adapter/SearchHistoryAdapter.java` | CREATED — `ListAdapter<String>`, click + delete callbacks |
+| `res/layout/item_search_history.xml` | CREATED — clock icon + query text + delete button (48dp row) |
+| `res/drawable/ic_history.xml` | CREATED — Material Design history/clock vector icon |
+| `res/layout/fragment_home.xml` | MODIFIED — thêm `layoutSearchHistory` + `rvSearchHistory` overlay trong search FrameLayout |
+| `res/layout/fragment_product_list.xml` | MODIFIED — thêm `layoutSearchHistory` + `rvSearchHistory` sau `rvSuggestions` |
+| `ui/home/HomeFragment.java` | MODIFIED — `setupSearchHistory()`, focus listener, save on submit, show/hide logic |
+| `ui/product/ProductListFragment.java` | MODIFIED — history setup, `onEditorActionListener`, save in `handleArguments()`, show/hide logic |
+
+#### Testing checklist
+
+- [x] Search "ghế" → submit → back về Home → tap search bar → "ghế" xuất hiện trong history
+- [x] Search từ Home → ProductList mở → xóa text → history "ghế" hiện
+- [x] Tap history item → text filled + search chạy
+- [x] Nút X trên item → xóa item đó, list cập nhật
+- [x] "Xóa tất cả" → panel ẩn hoàn toàn
+- [x] Gõ chữ → history ẩn, suggestions hiện bình thường
+- [x] Tap suggestion → navigate đúng (không bị ẩn trước khi click)
+- [x] Max 10 items, search cùng query 2 lần → chỉ giữ 1 (dedup, move to front)
+- [ ] History persist sau khi kill app và mở lại
+
+---
+
 ## Remaining Features — Như Ngọc's Scope
 
 ### Home
@@ -697,8 +748,7 @@ Khi file ảnh không tồn tại trên server (upload từ máy khác), Glide n
 - [x] **Real-time search with debounce** ✅ Completed 2026-06-01
 - [ ] **Search suggestions / autocomplete** — Dropdown or RecyclerView of matches
       while typing
-- [ ] **Search history** — Recent searches stored in SharedPreferences, shown when
-      search bar is focused and empty
+- [x] **Search history** ✅ Completed 2026-06-01
 
 ### Product Detail
 
@@ -745,18 +795,10 @@ Khi file ảnh không tồn tại trên server (upload từ máy khác), Glide n
 | 15 | ~~ProductDetail: Review images~~ | ✅ **DONE** 2026-06-01 |
 | 16 | ~~ProductDetail: Admin reply on review~~ | ✅ **DONE** 2026-06-01 |
 | 17 | ~~ProductDetail: Fix deprecated back nav~~ | ✅ Already done (navigateUp()) |
-| 18 | Search: Search history | Convenience UX |
+| 18 | ~~Search: Search history~~ | ✅ **DONE** 2026-06-01 |
 
 ---
 
 ## Next Recommended Task
 
-**P3 #18 — Search: Search history**
-
-Lưu recent searches vào `SharedPreferences`. Hiện danh sách khi search bar focused + query rỗng. Tap item → điền query và search. Có nút xóa từng item và xóa tất cả.
-
-Implementation hints:
-- Key: `search_history` trong SharedPreferences, lưu dạng JSON array (max 10 items)
-- Áp dụng cho cả Home `SearchView` lẫn ProductList `EditText`
-- Dùng `SearchSuggestionAdapter` hoặc adapter riêng — cần thêm icon clock (lịch sử) vs icon search (gợi ý)
-- Trigger: `setOnQueryTextFocusChangeListener` — khi focus và text rỗng → show history
+**Scope của Như Ngọc đã hoàn thành toàn bộ (P1 + P2 + P3).** Không còn task nào trong backlog. Bước tiếp theo: tạo PR từ `feature/home` → `main` để nhóm review và merge.

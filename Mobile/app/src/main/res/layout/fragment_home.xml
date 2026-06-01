@@ -68,6 +68,53 @@
                     android:elevation="8dp"
                     android:visibility="gone" />
 
+                <!-- Search History overlay (shown when focused + empty) -->
+                <LinearLayout
+                    android:id="@+id/layoutSearchHistory"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="56dp"
+                    android:background="@color/white"
+                    android:elevation="8dp"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="4dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="4dp">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Tìm kiếm gần đây"
+                            android:textSize="12sp"
+                            android:textColor="@color/gray_600"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:id="@+id/tvClearHistory"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Xóa tất cả"
+                            android:textSize="12sp"
+                            android:textColor="@color/primary"
+                            android:padding="8dp" />
+                    </LinearLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvSearchHistory"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                </LinearLayout>
+
             </FrameLayout>
 
             <!-- Loading Shimmer — mirrors the 3 real sections below -->

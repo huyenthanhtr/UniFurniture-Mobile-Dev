@@ -25,7 +25,9 @@ import com.unifurniture.mobile.data.model.CategoryDto;
 import com.unifurniture.mobile.data.model.ProductDto;
 import com.unifurniture.mobile.databinding.FragmentProductListBinding;
 import com.unifurniture.mobile.ui.adapter.ProductCardAdapter;
+import com.unifurniture.mobile.ui.adapter.SearchHistoryAdapter;
 import com.unifurniture.mobile.ui.adapter.SearchSuggestionAdapter;
+import com.unifurniture.mobile.util.SearchHistoryManager;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +41,8 @@ public class ProductListFragment extends Fragment {
     private Runnable searchRunnable;
     private TextWatcher searchWatcher;
     private SearchSuggestionAdapter suggestionAdapter;
+    private SearchHistoryManager historyManager;
+    private SearchHistoryAdapter historyAdapter;
 
     @Nullable
     @Override
@@ -53,6 +57,7 @@ public class ProductListFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         viewModel = new ViewModelProvider(this).get(ProductListViewModel.class);
 
+        historyManager = new SearchHistoryManager(requireContext());
         setupRecyclerView();
         handleArguments();  // populate etSearch BEFORE watcher is attached
         setupSearch();
@@ -87,6 +92,7 @@ public class ProductListFragment extends Fragment {
             if (search != null) {
                 binding.etSearch.setText(search);
                 viewModel.search(search);
+                historyManager.add(search);
                 filterApplied = true;
             }
             if (categoryId != null) {
@@ -134,9 +140,11 @@ public class ProductListFragment extends Fragment {
     }
 
     private void setupSearch() {
+        // Suggestions
         binding.rvSuggestions.setLayoutManager(new LinearLayoutManager(requireContext()));
         suggestionAdapter = new SearchSuggestionAdapter(product -> {
             hideSuggestions();
+            hideSearchHistory();
             InputMethodManager imm = (InputMethodManager) requireContext()
                     .getSystemService(Context.INPUT_METHOD_SERVICE);
             if (imm != null) imm.hideSoftInputFromWindow(binding.etSearch.getWindowToken(), 0);
@@ -147,8 +155,59 @@ public class ProductListFragment extends Fragment {
         });
         binding.rvSuggestions.setAdapter(suggestionAdapter);
 
+        // History
+        historyAdapter = new SearchHistoryAdapter(new SearchHistoryAdapter.OnItemListener() {
+            @Override
+            public void onQueryClick(String query) {
+                hideSearchHistory();
+                binding.etSearch.removeTextChangedListener(searchWatcher);
+                binding.etSearch.setText(query);
+                binding.etSearch.setSelection(query.length());
+                binding.etSearch.addTextChangedListener(searchWatcher);
+                historyManager.add(query);
+                viewModel.search(query);
+                syncSortChip();
+                InputMethodManager imm = (InputMethodManager) requireContext()
+                        .getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null) imm.hideSoftInputFromWindow(binding.etSearch.getWindowToken(), 0);
+            }
+            @Override
+            public void onDeleteClick(String query) {
+                historyManager.remove(query);
+                refreshHistory();
+            }
+        });
+        binding.rvSearchHistory.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.rvSearchHistory.setAdapter(historyAdapter);
+
+        binding.tvClearHistory.setOnClickListener(v -> {
+            historyManager.clear();
+            hideSearchHistory();
+        });
+
         binding.etSearch.setOnFocusChangeListener((v, hasFocus) -> {
-            if (!hasFocus) hideSuggestions();
+            if (hasFocus && binding.etSearch.getText().toString().trim().isEmpty()) {
+                showSearchHistory();
+            } else if (!hasFocus) {
+                hideSearchHistory();
+                // Do NOT hideSuggestions() here — focus loss fires before suggestion
+                // click completes, causing the tap to miss. Suggestions hide via
+                // onTextChanged (empty) or suggestion tap handler.
+            }
+        });
+
+        // Save to history on IME submit
+        binding.etSearch.setOnEditorActionListener((v, actionId, event) -> {
+            String query = binding.etSearch.getText().toString().trim();
+            if (!query.isEmpty()) {
+                historyManager.add(query);
+                hideSuggestions();
+                hideSearchHistory();
+                InputMethodManager imm = (InputMethodManager) requireContext()
+                        .getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null) imm.hideSoftInputFromWindow(binding.etSearch.getWindowToken(), 0);
+            }
+            return false;
         });
 
         searchHandler = new Handler(Looper.getMainLooper());
@@ -165,22 +224,45 @@ public class ProductListFragment extends Fragment {
 
                 if (query.isEmpty()) {
                     hideSuggestions();
+                    showSearchHistory();
                     binding.progressBar.setVisibility(View.GONE);
                     searchRunnable = () -> { viewModel.search(""); syncSortChip(); };
                     searchHandler.postDelayed(searchRunnable, 300);
                     return;
                 }
 
-                // Immediate feedback: show spinner + client-side suggestions
+                hideSearchHistory();
                 binding.progressBar.setVisibility(View.VISIBLE);
                 showClientSideSuggestions(query);
 
-                // Debounced API call to update the grid
                 searchRunnable = () -> { viewModel.search(query); syncSortChip(); };
                 searchHandler.postDelayed(searchRunnable, 300);
             }
         };
         binding.etSearch.addTextChangedListener(searchWatcher);
+    }
+
+    private void showSearchHistory() {
+        List<String> history = historyManager.getAll();
+        if (history.isEmpty()) {
+            hideSearchHistory();
+            return;
+        }
+        historyAdapter.submitList(history);
+        binding.layoutSearchHistory.setVisibility(View.VISIBLE);
+    }
+
+    private void hideSearchHistory() {
+        binding.layoutSearchHistory.setVisibility(View.GONE);
+    }
+
+    private void refreshHistory() {
+        List<String> history = historyManager.getAll();
+        if (history.isEmpty()) {
+            hideSearchHistory();
+        } else {
+            historyAdapter.submitList(new ArrayList<>(history));
+        }
     }
 
     private void showClientSideSuggestions(String query) {
