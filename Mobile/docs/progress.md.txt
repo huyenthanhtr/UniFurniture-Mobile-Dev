@@ -1,10 +1,10 @@
 # UniFurniture Mobile — Progress Tracker
 
-Last updated: 2026-06-01 (review bugs fixed — rvReviews LayoutManager + ReviewDto @SerializedName)
+Last updated: 2026-06-01 (P3 #14 shimmer skeletons done)
 Branch: feature/home
 Owner of this file: Như Ngọc
 
-> **2026-06-01:** P1 ✅ P2 ✅. P3 done: #11 #12 #13 #15 #16 #17. Bugs fixed: rvReviews LayoutManager + ReviewDto camelCase mismatch + Glide placeholder. Next: #14 (shimmer) → #18 (search history).
+> **2026-06-01:** P1 ✅ P2 ✅. P3 done: #11 #12 #13 #14 #15 #16 #17. Bugs fixed: rvReviews LayoutManager + ReviewDto camelCase + Glide placeholder. Next: #18 (search history).
 
 ---
 
@@ -586,6 +586,41 @@ pattern.
 
 ---
 
+### P3 #14 — Home: Shimmer Skeletons
+
+**Status:** ✅ Completed 2026-06-01
+
+#### Implementation summary
+
+Thay thế `ShimmerFrameLayout` cũ (chỉ là 1 gray rectangle 120dp) bằng skeleton có hình dạng khớp với 3 section thật:
+
+- **Danh mục skeleton**: 5 item, mỗi item gồm circle 64dp (category image) + text stub 56×10dp bên dưới — khớp với `item_category.xml` (80×100dp)
+- **Sản phẩm nổi bật skeleton**: 3 rectangle 160×260dp — khớp với `item_product_card.xml`
+- **Bộ sưu tập skeleton**: 4 rectangle 140×90dp — khớp với `item_collection.xml`
+- Mỗi section có header stub (gray rectangle thay cho "Danh mục" / "Sản phẩm nổi bật" / "Bộ sưu tập")
+
+Real content được bọc trong `layoutContent` (`visibility="gone"` mặc định). Loading observer toggle shimmer ↔ content: khi loading → `startShimmer()` + hide `layoutContent`; khi xong → `stopShimmer()` + show `layoutContent`.
+
+#### Modified / created files
+
+| File | Action |
+|---|---|
+| `res/drawable/bg_shimmer_rect.xml` | CREATED — gray_200 rounded rect 8dp |
+| `res/drawable/bg_shimmer_circle.xml` | CREATED — gray_200 oval (dùng cho category image stub) |
+| `res/layout/fragment_home.xml` | MODIFIED — thay shimmer cũ bằng skeleton 3-section; wrap 3 real sections trong `layoutContent` |
+| `ui/home/HomeFragment.java` | MODIFIED — loading observer gọi `startShimmer()`/`stopShimmer()` + toggle `layoutContent` |
+
+#### Testing checklist
+
+- [ ] Mở Home → shimmer hiện ngay trước khi data về
+- [ ] Skeleton có 3 section: circles (category), cards (product), cards (collection)
+- [ ] Shimmer animation chạy (ánh sáng trượt ngang)
+- [ ] Data load xong → shimmer tắt, content thật hiện
+- [ ] SwipeRefresh → shimmer hiện lại trong lúc reload
+- [ ] Không crash khi xoay màn hình
+
+---
+
 ### Bug — Review section không hiển thị nội dung / ảnh
 
 **Status:** ✅ Fixed 2026-06-01
@@ -646,8 +681,7 @@ Khi file ảnh không tồn tại trên server (upload từ máy khác), Glide n
 
 - [x] **Banner/Image Slider** ✅ Completed 2026-05-31
 - [x] **Collections section** ✅ Completed 2026-06-01
-- [ ] **Proper shimmer skeletons** — Replace single gray rectangle with skeleton
-      layouts shaped like actual category cards and product cards
+- [x] **Proper shimmer skeletons** ✅ Completed 2026-06-01
 
 ### Product List
 
@@ -707,7 +741,7 @@ Khi file ảnh không tồn tại trên server (upload từ máy khác), Glide n
 | 11 | ~~ProductDetail: Stock status per variant~~ | ✅ **DONE** 2026-06-01 |
 | 12 | ~~ProductDetail: Sold count~~ | ✅ **DONE** 2026-06-01 |
 | 13 | ~~ProductDetail: Recommendations~~ | ✅ **DONE** 2026-06-01 |
-| 14 | Home: Proper shimmer skeletons | Loading UX quality |
+| 14 | ~~Home: Proper shimmer skeletons~~ | ✅ **DONE** 2026-06-01 |
 | 15 | ~~ProductDetail: Review images~~ | ✅ **DONE** 2026-06-01 |
 | 16 | ~~ProductDetail: Admin reply on review~~ | ✅ **DONE** 2026-06-01 |
 | 17 | ~~ProductDetail: Fix deprecated back nav~~ | ✅ Already done (navigateUp()) |
@@ -717,12 +751,12 @@ Khi file ảnh không tồn tại trên server (upload từ máy khác), Glide n
 
 ## Next Recommended Task
 
-**P3 #14 — Home: Shimmer skeletons** → sau đó **P3 #18 — Search history**
+**P3 #18 — Search: Search history**
 
-Largest remaining feature in scope. Requires a new `FilterBottomSheetFragment extends
-BottomSheetDialogFragment` with:
-- Multi-select category chips (data already in `ProductListViewModel.getCategories()`)
-- Price range slider (`minPrice` / `maxPrice` — API already accepts these params)
-- Star rating filter (client-side only — backend does not support `minRating` param)
+Lưu recent searches vào `SharedPreferences`. Hiện danh sách khi search bar focused + query rỗng. Tap item → điền query và search. Có nút xóa từng item và xóa tất cả.
 
-See `decisions.md` Technical Recommendations section for implementation guidance.
+Implementation hints:
+- Key: `search_history` trong SharedPreferences, lưu dạng JSON array (max 10 items)
+- Áp dụng cho cả Home `SearchView` lẫn ProductList `EditText`
+- Dùng `SearchSuggestionAdapter` hoặc adapter riêng — cần thêm icon clock (lịch sử) vs icon search (gợi ý)
+- Trigger: `setOnQueryTextFocusChangeListener` — khi focus và text rỗng → show history

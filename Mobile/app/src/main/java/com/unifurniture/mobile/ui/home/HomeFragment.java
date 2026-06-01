@@ -180,8 +180,17 @@ public class HomeFragment extends Fragment {
             collectionAdapter.submitList(items);
         });
 
-        viewModel.isLoading().observe(getViewLifecycleOwner(), loading ->
-                binding.shimmerLayout.setVisibility(loading ? View.VISIBLE : View.GONE));
+        viewModel.isLoading().observe(getViewLifecycleOwner(), loading -> {
+            if (loading) {
+                binding.shimmerLayout.setVisibility(View.VISIBLE);
+                binding.shimmerLayout.startShimmer();
+                binding.layoutContent.setVisibility(View.GONE);
+            } else {
+                binding.shimmerLayout.stopShimmer();
+                binding.shimmerLayout.setVisibility(View.GONE);
+                binding.layoutContent.setVisibility(View.VISIBLE);
+            }
+        });
 
         viewModel.getSearchSuggestions().observe(getViewLifecycleOwner(), products -> {
             if (products != null && !products.isEmpty()) {

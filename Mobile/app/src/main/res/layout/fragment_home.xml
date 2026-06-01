@@ -70,95 +70,193 @@
 
             </FrameLayout>
 
-            <!-- Loading Shimmer -->
+            <!-- Loading Shimmer — mirrors the 3 real sections below -->
             <com.facebook.shimmer.ShimmerFrameLayout
                 android:id="@+id/shimmerLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone">
-                <View
+
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="120dp"
-                    android:background="@color/gray_200"
-                    android:layout_margin="16dp" />
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="16dp">
+
+                    <!-- Danh mục header stub -->
+                    <View
+                        android:layout_width="80dp"
+                        android:layout_height="18dp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@drawable/bg_shimmer_rect" />
+
+                    <!-- Category skeleton row: 5 items × (64dp circle + text stub) -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="8dp"
+                        android:paddingStart="16dp">
+
+                        <LinearLayout android:layout_width="80dp" android:layout_height="100dp" android:orientation="vertical" android:gravity="center" android:padding="4dp">
+                            <View android:layout_width="64dp" android:layout_height="64dp" android:background="@drawable/bg_shimmer_circle" />
+                            <View android:layout_width="56dp" android:layout_height="10dp" android:layout_marginTop="6dp" android:background="@drawable/bg_shimmer_rect" />
+                        </LinearLayout>
+                        <LinearLayout android:layout_width="80dp" android:layout_height="100dp" android:orientation="vertical" android:gravity="center" android:padding="4dp">
+                            <View android:layout_width="64dp" android:layout_height="64dp" android:background="@drawable/bg_shimmer_circle" />
+                            <View android:layout_width="56dp" android:layout_height="10dp" android:layout_marginTop="6dp" android:background="@drawable/bg_shimmer_rect" />
+                        </LinearLayout>
+                        <LinearLayout android:layout_width="80dp" android:layout_height="100dp" android:orientation="vertical" android:gravity="center" android:padding="4dp">
+                            <View android:layout_width="64dp" android:layout_height="64dp" android:background="@drawable/bg_shimmer_circle" />
+                            <View android:layout_width="56dp" android:layout_height="10dp" android:layout_marginTop="6dp" android:background="@drawable/bg_shimmer_rect" />
+                        </LinearLayout>
+                        <LinearLayout android:layout_width="80dp" android:layout_height="100dp" android:orientation="vertical" android:gravity="center" android:padding="4dp">
+                            <View android:layout_width="64dp" android:layout_height="64dp" android:background="@drawable/bg_shimmer_circle" />
+                            <View android:layout_width="56dp" android:layout_height="10dp" android:layout_marginTop="6dp" android:background="@drawable/bg_shimmer_rect" />
+                        </LinearLayout>
+                        <LinearLayout android:layout_width="80dp" android:layout_height="100dp" android:orientation="vertical" android:gravity="center" android:padding="4dp">
+                            <View android:layout_width="64dp" android:layout_height="64dp" android:background="@drawable/bg_shimmer_circle" />
+                            <View android:layout_width="56dp" android:layout_height="10dp" android:layout_marginTop="6dp" android:background="@drawable/bg_shimmer_rect" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <!-- Sản phẩm nổi bật header stub -->
+                    <View
+                        android:layout_width="140dp"
+                        android:layout_height="18dp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="16dp"
+                        android:background="@drawable/bg_shimmer_rect" />
+
+                    <!-- Product card skeleton row: 3 cards 160×260dp -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="8dp"
+                        android:paddingStart="16dp">
+
+                        <View android:layout_width="160dp" android:layout_height="260dp" android:layout_margin="6dp" android:background="@drawable/bg_shimmer_rect" />
+                        <View android:layout_width="160dp" android:layout_height="260dp" android:layout_margin="6dp" android:background="@drawable/bg_shimmer_rect" />
+                        <View android:layout_width="160dp" android:layout_height="260dp" android:layout_margin="6dp" android:background="@drawable/bg_shimmer_rect" />
+
+                    </LinearLayout>
+
+                    <!-- Bộ sưu tập header stub -->
+                    <View
+                        android:layout_width="100dp"
+                        android:layout_height="18dp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="16dp"
+                        android:background="@drawable/bg_shimmer_rect" />
+
+                    <!-- Collection skeleton row: 4 cards 140×90dp -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="8dp"
+                        android:paddingStart="16dp">
+
+                        <View android:layout_width="140dp" android:layout_height="90dp" android:layout_marginEnd="8dp" android:background="@drawable/bg_shimmer_rect" />
+                        <View android:layout_width="140dp" android:layout_height="90dp" android:layout_marginEnd="8dp" android:background="@drawable/bg_shimmer_rect" />
+                        <View android:layout_width="140dp" android:layout_height="90dp" android:layout_marginEnd="8dp" android:background="@drawable/bg_shimmer_rect" />
+                        <View android:layout_width="140dp" android:layout_height="90dp" android:layout_marginEnd="8dp" android:background="@drawable/bg_shimmer_rect" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
             </com.facebook.shimmer.ShimmerFrameLayout>
 
-            <!-- Categories Section -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:text="Danh mục"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/black" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvCategories"
-                android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:layout_marginTop="8dp"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:clipToPadding="false"
-                android:orientation="horizontal" />
-
-            <!-- Featured Products -->
+            <!-- Real content — hidden while shimmer shows -->
             <LinearLayout
+                android:id="@+id/layoutContent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginTop="16dp">
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <!-- Categories Section -->
                 <TextView
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Sản phẩm nổi bật"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:text="Danh mục"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="@color/black" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvCategories"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:layout_marginTop="8dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:clipToPadding="false"
+                    android:orientation="horizontal" />
+
+                <!-- Featured Products -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="16dp">
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Sản phẩm nổi bật"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/black" />
+                    <TextView
+                        android:id="@+id/btnViewAll"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Xem tất cả ›"
+                        android:textColor="@color/primary"
+                        android:padding="8dp" />
+                </LinearLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvFeaturedProducts"
+                    android:layout_width="match_parent"
+                    android:layout_height="280dp"
+                    android:layout_marginTop="8dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:clipToPadding="false"
+                    android:orientation="horizontal" />
+
+                <!-- Collections Section -->
                 <TextView
-                    android:id="@+id/btnViewAll"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Xem tất cả ›"
-                    android:textColor="@color/primary"
-                    android:padding="8dp" />
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:text="Bộ sưu tập"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/black" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvCollections"
+                    android:layout_width="match_parent"
+                    android:layout_height="110dp"
+                    android:layout_marginTop="8dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:clipToPadding="false"
+                    android:orientation="horizontal" />
+
             </LinearLayout>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvFeaturedProducts"
-                android:layout_width="match_parent"
-                android:layout_height="280dp"
-                android:layout_marginTop="8dp"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:clipToPadding="false"
-                android:orientation="horizontal" />
-
-            <!-- Collections Section -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:text="Bộ sưu tập"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/black" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvCollections"
-                android:layout_width="match_parent"
-                android:layout_height="110dp"
-                android:layout_marginTop="8dp"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:clipToPadding="false"
-                android:orientation="horizontal" />
 
             <View android:layout_width="match_parent"
                 android:layout_height="80dp" />

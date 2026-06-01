@@ -387,6 +387,37 @@ analysed or built. One entry per feature, added before implementation begins.
 
 ---
 
+### [P3 #14] Home: Shimmer Skeletons
+
+**Date recorded:** 2026-06-01
+**Status:** ✅ Completed 2026-06-01
+
+---
+
+#### Decision: Skeleton shapes khớp kích thước item thật, không dùng generic placeholder
+
+**What was decided:** Mỗi section có skeleton riêng khớp với kích thước item thật:
+- Category: circle 64dp + text stub 56×10dp (khớp `item_category.xml`)
+- Product card: rectangle 160×260dp (khớp `item_product_card.xml`)
+- Collection card: rectangle 140×90dp (khớp `item_collection.xml`)
+
+**Why:** Generic placeholder (1 gray box) không giúp user hình dung layout sẽ ra sao → gây layout shift bất ngờ khi content xuất hiện. Skeleton đúng hình dạng giảm visual jump và trông professional hơn.
+
+---
+
+#### Decision: Wrap real content trong `layoutContent`, toggle shimmer ↔ content
+
+**What was decided:** 3 real sections (categories, products, collections) được bọc trong `LinearLayout id="layoutContent"`. Loading observer toggle: shimmer VISIBLE + `startShimmer()` ↔ layoutContent VISIBLE + `stopShimmer()`.
+
+**Why:**
+- Một toggle duy nhất thay vì hide/show từng view riêng lẻ (6+ views) → ít code hơn, ít bug hơn.
+- `layoutContent` mặc định `visibility="gone"` trong XML — đảm bảo shimmer luôn hiện trước khi data đến, không bao giờ flash content rỗng.
+- Pattern này nhất quán và dễ mở rộng nếu sau này thêm section mới vào Home.
+
+**Tại sao không dùng ViewSwitcher / ViewFlipper:** Overkill — chỉ cần toggle visibility đơn giản, không cần animation chuyển cảnh giữa shimmer và content.
+
+---
+
 ### [P1 #1] Home: Banner / Image Slider
 
 **Date recorded:** 2026-05-31
