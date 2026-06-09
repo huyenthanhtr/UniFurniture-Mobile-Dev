@@ -2,14 +2,20 @@ package com.unifurniture.mobile.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import com.unifurniture.mobile.data.model.CustomerDto;
+import com.unifurniture.mobile.data.model.ProfileDto;
 import com.google.gson.Gson;
 
+/**
+ * Session manager — stores the logged-in Profile (not token + Customer).
+ *
+ * Server does NOT issue JWTs. Authentication is verified on the server by
+ * matching the hashed password. On the client we simply persist the
+ * ProfileDto returned by /auth/login or /auth/verify-otp.
+ */
 public class SessionManager {
 
     private static final String PREF_NAME = "unifurniture_session";
-    private static final String KEY_TOKEN = "token";
-    private static final String KEY_CUSTOMER = "customer";
+    private static final String KEY_PROFILE = "profile";
     private static final String KEY_CART_ID = "cart_id";
 
     private static SessionManager instance;
@@ -28,36 +34,40 @@ public class SessionManager {
         return instance;
     }
 
-    // Token
-    public void saveToken(String token) {
-        prefs.edit().putString(KEY_TOKEN, token).apply();
+    // ── Profile ─────────────────────────────────────────────────────────────
+    public void saveProfile(ProfileDto profile) {
+        prefs.edit().putString(KEY_PROFILE, gson.toJson(profile)).apply();
     }
 
-    public String getToken() {
-        return prefs.getString(KEY_TOKEN, null);
+    public ProfileDto getProfile() {
+        String json = prefs.getString(KEY_PROFILE, null);
+        if (json == null) return null;
+        return gson.fromJson(json, ProfileDto.class);
+    }
+
+    /**
+     * profile._id — used as account_id throughout the API
+     * (orders, wishlist, loyalty, cart customer_id).
+     */
+    public String getProfileId() {
+        ProfileDto p = getProfile();
+        return p != null ? p.id : null;
+    }
+
+    /**
+     * Alias: many existing call-sites use getCustomerId().
+     * After migration the value equals profile._id (which the server
+     * uses as customer_id / account_id interchangeably).
+     */
+    public String getCustomerId() {
+        return getProfileId();
     }
 
     public boolean isLoggedIn() {
-        return getToken() != null && getCustomer() != null;
+        return getProfile() != null;
     }
 
-    // Customer
-    public void saveCustomer(CustomerDto customer) {
-        prefs.edit().putString(KEY_CUSTOMER, gson.toJson(customer)).apply();
-    }
-
-    public CustomerDto getCustomer() {
-        String json = prefs.getString(KEY_CUSTOMER, null);
-        if (json == null) return null;
-        return gson.fromJson(json, CustomerDto.class);
-    }
-
-    public String getCustomerId() {
-        CustomerDto c = getCustomer();
-        return c != null ? c.id : null;
-    }
-
-    // Cart ID cache
+    // ── Cart ID cache ───────────────────────────────────────────────────────
     public void saveCartId(String cartId) {
         prefs.edit().putString(KEY_CART_ID, cartId).apply();
     }
@@ -66,7 +76,7 @@ public class SessionManager {
         return prefs.getString(KEY_CART_ID, null);
     }
 
-    // Logout - clear all session data
+    // ── Logout ──────────────────────────────────────────────────────────────
     public void logout() {
         prefs.edit().clear().apply();
     }

@@ -104,36 +104,24 @@ public class ProductRepository {
         return result;
     }
 
-    public LiveData<List<ProductDto>> getProductRecommendations(String slug, String userId) {
-        MutableLiveData<List<ProductDto>> result = new MutableLiveData<>();
-        apiService.getProductRecommendations(slug, userId)
-                .enqueue(new Callback<java.util.Map<String, List<ProductDto>>>() {
-                    @Override
-                    public void onResponse(retrofit2.Call<java.util.Map<String, List<ProductDto>>> call,
-                                           retrofit2.Response<java.util.Map<String, List<ProductDto>>> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            List<ProductDto> items = response.body().get("items");
-                            result.setValue(items != null ? items : new java.util.ArrayList<>());
-                        } else {
-                            result.setValue(null);
-                        }
-                    }
-                    @Override
-                    public void onFailure(retrofit2.Call<java.util.Map<String, List<ProductDto>>> call, Throwable t) {
-                        result.setValue(null);
-                    }
-                });
-        return result;
-    }
-
-    public LiveData<List<CategoryDto>> getCategories() {
-        MutableLiveData<List<CategoryDto>> result = new MutableLiveData<>();
-        apiService.getCategories(1, 100, "active")
+    public LiveData<ApiListResponse<CategoryDto>> getCategories() {
+        MutableLiveData<ApiListResponse<CategoryDto>> result = new MutableLiveData<>();
+        apiService.getCategories()
                 .enqueue(new Callback<List<CategoryDto>>() {
                     @Override
                     public void onResponse(Call<List<CategoryDto>> call,
                                            Response<List<CategoryDto>> response) {
-                        result.setValue(response.isSuccessful() ? response.body() : null);
+                        if (response.isSuccessful() && response.body() != null) {
+                            ApiListResponse<CategoryDto> wrapped = new ApiListResponse<>();
+                            wrapped.items = response.body();
+                            wrapped.total = response.body().size();
+                            wrapped.limit = response.body().size();
+                            wrapped.page = 1;
+                            wrapped.totalPages = 1;
+                            result.setValue(wrapped);
+                        } else {
+                            result.setValue(null);
+                        }
                     }
                     @Override
                     public void onFailure(Call<List<CategoryDto>> call, Throwable t) {
@@ -143,14 +131,24 @@ public class ProductRepository {
         return result;
     }
 
-    public LiveData<List<CollectionDto>> getCollections() {
-        MutableLiveData<List<CollectionDto>> result = new MutableLiveData<>();
-        apiService.getCollections(1, 100, "active")
+    public LiveData<ApiListResponse<CollectionDto>> getCollections() {
+        MutableLiveData<ApiListResponse<CollectionDto>> result = new MutableLiveData<>();
+        apiService.getCollections()
                 .enqueue(new Callback<List<CollectionDto>>() {
                     @Override
                     public void onResponse(Call<List<CollectionDto>> call,
                                            Response<List<CollectionDto>> response) {
-                        result.setValue(response.isSuccessful() ? response.body() : null);
+                        if (response.isSuccessful() && response.body() != null) {
+                            ApiListResponse<CollectionDto> wrapped = new ApiListResponse<>();
+                            wrapped.items = response.body();
+                            wrapped.total = response.body().size();
+                            wrapped.limit = response.body().size();
+                            wrapped.page = 1;
+                            wrapped.totalPages = 1;
+                            result.setValue(wrapped);
+                        } else {
+                            result.setValue(null);
+                        }
                     }
                     @Override
                     public void onFailure(Call<List<CollectionDto>> call, Throwable t) {

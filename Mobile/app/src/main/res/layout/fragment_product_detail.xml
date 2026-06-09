@@ -31,12 +31,12 @@
                 android:src="@drawable/ic_back"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:tint="@color/white"
-                android:contentDescription="@string/back_desc" />
+                android:contentDescription="@string/str_back" />
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/product_detail_title"
+                android:text="@string/str_product_detail"
                 android:textColor="@color/white"
                 android:textSize="17sp"
                 android:textStyle="bold"
@@ -201,7 +201,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/choose_variant"
+                android:text="@string/str_select_variant"
                 android:textStyle="bold"
                 android:textSize="15sp" />
             <com.google.android.material.chip.ChipGroup
@@ -230,7 +230,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/short_description"
+                android:text="@string/str_short_desc"
                 android:textStyle="bold"
                 android:textSize="15sp" />
             <TextView
@@ -253,7 +253,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/full_description"
+                android:text="@string/str_detailed_desc"
                 android:textStyle="bold"
                 android:textSize="15sp" />
             <TextView
@@ -318,11 +318,9 @@
                 android:id="@+id/tvNoReviews"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/no_reviews"
-                android:textSize="13sp"
-                android:textColor="@color/gray_600"
-                android:layout_marginTop="8dp"
-                android:visibility="gone" />
+                android:text="@string/str_reviews"
+                android:textStyle="bold"
+                android:textSize="15sp" />
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvReviews"
                 android:layout_width="match_parent"
@@ -435,7 +433,7 @@
             android:id="@+id/btnAddToCart"
             android:layout_width="match_parent"
             android:layout_height="52dp"
-            android:text="@string/add_to_cart"
+            android:text="@string/str_add_to_cart"
             style="@style/Widget.UniFurniture.Button.Primary" />
 
     </LinearLayout>

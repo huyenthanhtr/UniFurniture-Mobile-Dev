@@ -15,39 +15,14 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/primary"
-            android:padding="16dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-            <TextView
-                android:id="@+id/tvTitle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/products_title"
-                android:textColor="@color/white"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/tvProductCount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/white"
-                android:alpha="0.7"
-                android:textSize="13sp" />
-            <ImageButton
-                android:id="@+id/btnToggleLayout"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:layout_marginStart="12dp"
-                android:src="@drawable/ic_view_list"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/toggle_view_desc" />
-        </LinearLayout>
-
-        <!-- Search bar -->
-        <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_weight="1"
+            android:text="@string/str_nav_products"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/tvProductCount"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@color/primary"
             android:paddingStart="12dp"
@@ -90,192 +65,32 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingStart="16dp"
-                android:paddingEnd="4dp"
-                android:paddingTop="8dp"
-                android:paddingBottom="4dp">
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/recent_searches"
-                    android:textSize="12sp"
-                    android:textColor="@color/gray_600"
-                    android:textStyle="bold" />
-                <TextView
-                    android:id="@+id/tvClearHistory"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/clear_all"
-                    android:textSize="12sp"
-                    android:textColor="@color/primary"
-                    android:padding="8dp" />
-            </LinearLayout>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvSearchHistory"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-        </LinearLayout>
-
-        <!-- Sort Chips -->
-        <HorizontalScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:scrollbars="none"
-            android:background="@color/white">
-            <com.google.android.material.chip.ChipGroup
+                android:text="@string/str_sort_newest"
+                style="@style/Widget.MaterialComponents.Chip.Choice" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipBestSelling"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="8dp"
-                app:singleSelection="true">
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipNewest"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/sort_newest"
-                    android:checked="true"
-                    style="@style/Widget.MaterialComponents.Chip.Choice" />
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipBestSelling"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/sort_best_selling"
-                    style="@style/Widget.MaterialComponents.Chip.Choice" />
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipPriceLow"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/sort_price_low"
-                    style="@style/Widget.MaterialComponents.Chip.Choice" />
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipPriceHigh"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/sort_price_high"
-                    style="@style/Widget.MaterialComponents.Chip.Choice" />
-            </com.google.android.material.chip.ChipGroup>
-        </HorizontalScrollView>
-
-        <!-- Active filter chips (shown when any filter is active) -->
-        <HorizontalScrollView
-            android:id="@+id/scrollActiveFilters"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:scrollbars="none"
-            android:background="@color/surface"
-            android:visibility="gone">
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/chipGroupActiveFilters"
+                android:text="@string/str_sort_best_selling"
+                style="@style/Widget.MaterialComponents.Chip.Choice" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipPriceLow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp" />
-        </HorizontalScrollView>
-
-        <!-- Shimmer skeleton — shown during initial load -->
-        <com.facebook.shimmer.ShimmerFrameLayout
-            android:id="@+id/shimmerLayout"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:visibility="gone">
-
-            <LinearLayout
-                android:layout_width="match_parent"
+                android:text="@string/str_sort_price_low"
+                style="@style/Widget.MaterialComponents.Chip.Choice" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipPriceHigh"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="8dp">
+                android:text="@string/str_sort_price_high"
+                style="@style/Widget.MaterialComponents.Chip.Choice" />
+        </com.google.android.material.chip.ChipGroup>
+    </HorizontalScrollView>
 
-                <!-- Row 1 -->
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-                    <View android:layout_width="0dp" android:layout_height="260dp" android:layout_weight="1" android:layout_margin="6dp" android:background="@drawable/bg_shimmer_rect" />
-                    <View android:layout_width="0dp" android:layout_height="260dp" android:layout_weight="1" android:layout_margin="6dp" android:background="@drawable/bg_shimmer_rect" />
-                </LinearLayout>
-                <!-- Row 2 -->
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-                    <View android:layout_width="0dp" android:layout_height="260dp" android:layout_weight="1" android:layout_margin="6dp" android:background="@drawable/bg_shimmer_rect" />
-                    <View android:layout_width="0dp" android:layout_height="260dp" android:layout_weight="1" android:layout_margin="6dp" android:background="@drawable/bg_shimmer_rect" />
-                </LinearLayout>
-
-            </LinearLayout>
-
-        </com.facebook.shimmer.ShimmerFrameLayout>
-
-        <!-- Progress (for filter/sort reload, not initial) -->
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:visibility="gone" />
-
-        <!-- Product Grid / Empty State -->
-        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-            android:id="@+id/swipeRefresh"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rvProducts"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="8dp"
-                    android:clipToPadding="false" />
-
-                <LinearLayout
-                    android:id="@+id/layoutEmpty"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:padding="32dp"
-                    android:visibility="gone">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/empty_products"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/gray_800" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/empty_products_hint"
-                        android:textSize="14sp"
-                        android:textColor="@color/gray_600"
-                        android:gravity="center" />
-
-                </LinearLayout>
-
-            </FrameLayout>
-
-        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
-        <ProgressBar
-            android:id="@+id/progressBarLoadMore"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:layout_gravity="center_horizontal"
-            android:visibility="gone" />
-
-    </LinearLayout>
-
-    <!-- Filter FAB + badge wrapper -->
-    <FrameLayout
+    <!-- Progress -->
+    <ProgressBar
+        android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"

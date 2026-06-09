@@ -172,7 +172,7 @@ public class ProductDetailFragment extends Fragment {
             binding.tvDescription.setText(product.description);
             binding.tvShortDesc.setText(product.shortDescription);
             if (product.warrantyMonths != null && product.warrantyMonths > 0) {
-                binding.tvWarranty.setText(getString(R.string.warranty, product.warrantyMonths));
+                binding.tvWarranty.setText(getString(R.string.str_warranty_format, product.warrantyMonths));
                 binding.tvWarranty.setVisibility(View.VISIBLE);
             }
             int soldCount = product.sold != null ? product.sold : 0;
@@ -237,14 +237,9 @@ public class ProductDetailFragment extends Fragment {
         });
 
         viewModel.getReviews().observe(getViewLifecycleOwner(), summary -> {
-            if (summary == null || summary.totalReviews == 0) {
-                binding.layoutRatingRow.setVisibility(View.GONE);
-                binding.tvNoRating.setVisibility(View.VISIBLE);
-                binding.tvNoReviews.setVisibility(View.VISIBLE);
-                binding.rvReviews.setVisibility(View.GONE);
-            } else {
-                binding.layoutRatingRow.setVisibility(View.VISIBLE);
-                binding.tvNoRating.setVisibility(View.GONE);
+            if (summary != null) {
+                binding.tvRating.setText(String.format("%.1f", summary.averageRating));
+                binding.tvReviewCount.setText(getString(R.string.str_reviews_count_format, summary.totalReviews));
                 binding.ratingBar.setRating((float) summary.averageRating);
                 binding.tvRating.setText(String.format("%.1f", summary.averageRating));
                 binding.tvReviewCount.setText(getString(R.string.review_count, summary.totalReviews));
@@ -263,21 +258,9 @@ public class ProductDetailFragment extends Fragment {
             }
         });
 
-        viewModel.getAddToCartResult().observe(getViewLifecycleOwner(), cart -> {
-            if (cart != null) {
-                // Button feedback: green + checkmark text for 1.5s
-                binding.btnAddToCart.setEnabled(false);
-                binding.btnAddToCart.setText(R.string.btn_added);
-                binding.btnAddToCart.setBackgroundTintList(ColorStateList.valueOf(
-                        ContextCompat.getColor(requireContext(), R.color.success)));
-                cartRestoreHandler.removeCallbacksAndMessages(null);
-                cartRestoreHandler.postDelayed(() -> {
-                    if (binding == null) return;
-                    binding.btnAddToCart.setEnabled(true);
-                    binding.btnAddToCart.setText(R.string.add_to_cart);
-                    binding.btnAddToCart.setBackgroundTintList(ColorStateList.valueOf(
-                            ContextCompat.getColor(requireContext(), R.color.primary)));
-                }, 1500);
+        viewModel.getAddToCartResult().observe(getViewLifecycleOwner(), success -> {
+            if (Boolean.TRUE.equals(success)) {
+                Toast.makeText(requireContext(), R.string.str_added_to_cart_success, Toast.LENGTH_SHORT).show();
             }
         });
 

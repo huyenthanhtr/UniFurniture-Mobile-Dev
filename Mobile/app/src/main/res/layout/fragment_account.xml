@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:background="@color/primary"
         android:padding="16dp"
-        android:text="@string/account_title"
+        android:text="@string/str_nav_account"
         android:textColor="@color/white"
         android:textSize="18sp"
         android:textStyle="bold" />
@@ -34,7 +34,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/not_logged_in"
+            android:text="@string/str_not_logged_in"
             android:textSize="17sp"
             android:textColor="@color/gray_800"
             android:layout_marginTop="12dp" />
@@ -42,7 +42,7 @@
             android:id="@+id/btnLoginPrompt"
             android:layout_width="match_parent"
             android:layout_height="52dp"
-            android:text="@string/login_or_register"
+            android:text="@string/str_login_or_register"
             android:layout_marginTop="24dp"
             style="@style/Widget.UniFurniture.Button.Primary" />
     </LinearLayout>
@@ -99,7 +99,7 @@
                 android:id="@+id/itemOrders"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:text="@string/my_orders"
+                android:text="@string/str_my_orders"
                 android:textSize="15sp"
                 android:paddingHorizontal="20dp"
                 android:gravity="center_vertical"
@@ -111,7 +111,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:text="@string/favorites"
+                android:text="@string/str_favorite_products"
                 android:textSize="15sp"
                 android:paddingHorizontal="20dp"
                 android:gravity="center_vertical"
@@ -124,7 +124,7 @@
                 android:id="@+id/btnLogout"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
-                android:text="@string/logout"
+                android:text="@string/str_logout"
                 android:layout_margin="16dp"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 app:strokeColor="@color/error"

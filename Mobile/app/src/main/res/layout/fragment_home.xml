@@ -34,84 +34,21 @@
                     android:id="@+id/bannerDotsIndicator"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="bottom|center_horizontal"
-                    android:layout_marginBottom="10dp"
-                    app:dotsColor="#80FFFFFF"
-                    app:selectedDotColor="@color/accent"
-                    app:dotsSize="5dp"
-                    app:dotsSpacing="3dp"
-                    android:visibility="gone" />
+                    android:layout_gravity="center"
+                    android:text="@string/str_app_name"
+                    android:textColor="@color/white"
+                    android:textSize="28sp"
+                    android:textStyle="bold" />
             </FrameLayout>
 
             <!-- Search Bar + Suggestions -->
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <androidx.appcompat.widget.SearchView
-                    android:id="@+id/searchView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="16dp"
-                    android:background="@drawable/bg_search"
-                    app:queryHint="@string/search_hint"
-                    app:iconifiedByDefault="false" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rvSearchSuggestions"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginTop="56dp"
-                    android:background="@color/white"
-                    android:elevation="8dp"
-                    android:visibility="gone" />
-
-                <!-- Search History overlay (shown when focused + empty) -->
-                <LinearLayout
-                    android:id="@+id/layoutSearchHistory"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginTop="56dp"
-                    android:background="@color/white"
-                    android:elevation="8dp"
-                    android:orientation="vertical"
-                    android:visibility="gone">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:paddingStart="16dp"
-                        android:paddingEnd="4dp"
-                        android:paddingTop="8dp"
-                        android:paddingBottom="4dp">
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/recent_searches"
-                            android:textSize="12sp"
-                            android:textColor="@color/gray_600"
-                            android:textStyle="bold" />
-                        <TextView
-                            android:id="@+id/tvClearHistory"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/clear_all"
-                            android:textSize="12sp"
-                            android:textColor="@color/primary"
-                            android:padding="8dp" />
-                    </LinearLayout>
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/rvSearchHistory"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:background="@drawable/bg_search"
+                app:queryHint="@string/str_search_products_hint"
+                app:iconifiedByDefault="false" />
 
                 </LinearLayout>
 
@@ -218,7 +155,28 @@
 
             </com.facebook.shimmer.ShimmerFrameLayout>
 
-            <!-- Real content — hidden while shimmer shows -->
+            <!-- Categories Section -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/str_categories"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/black" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvCategories"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_marginTop="8dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:clipToPadding="false"
+                android:orientation="horizontal" />
+
+            <!-- Featured Products -->
             <LinearLayout
                 android:id="@+id/layoutContent"
                 android:layout_width="match_parent"
@@ -230,9 +188,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/categories"
+                    android:layout_weight="1"
+                    android:text="@string/str_featured_products"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="@color/black" />
@@ -286,12 +243,10 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
-                    android:text="@string/collections"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/black" />
+                    android:text="@string/str_view_all"
+                    android:textColor="@color/primary"
+                    android:padding="8dp" />
+            </LinearLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvCollections"

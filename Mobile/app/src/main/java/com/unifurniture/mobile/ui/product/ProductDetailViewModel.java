@@ -4,7 +4,6 @@ import android.app.Application;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import com.unifurniture.mobile.UniFurnitureApp;
 import com.unifurniture.mobile.data.model.*;
@@ -20,7 +19,7 @@ public class ProductDetailViewModel extends AndroidViewModel {
     private final MutableLiveData<ApiListResponse<ProductImageDto>> images = new MutableLiveData<>();
     private final MutableLiveData<ApiListResponse<ProductVariantDto>> variants = new MutableLiveData<>();
     private final MutableLiveData<ReviewSummaryDto> reviews = new MutableLiveData<>();
-    private final MutableLiveData<CartDto> addToCartResult = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> addToCartResult = new MutableLiveData<>();
     private final MutableLiveData<Boolean> loading = new MutableLiveData<>(false);
     private final MutableLiveData<String> error = new MutableLiveData<>();
     private final MutableLiveData<java.util.List<ProductDto>> recommendations = new MutableLiveData<>();
@@ -57,13 +56,12 @@ public class ProductDetailViewModel extends AndroidViewModel {
         productRepo.getProductReviews(productId).observeForever(reviews::setValue);
     }
 
-    private void loadRecommendations(String slug) {
-        String userId = SessionManager.getInstance(getApplication()).getCustomerId();
-        productRepo.getProductRecommendations(slug, userId)
-                .observeForever(recommendations::setValue);
-    }
-
-    public void addToCart(String variantId, int quantity) {
+    /**
+     * Add to cart:
+     * 1. Get active cart (to obtain cart_id)
+     * 2. Upsert item with cart_id, variant_id, quantity, unit_price
+     */
+    public void addToCart(String variantId) {
         SessionManager session = SessionManager.getInstance(getApplication());
         String customerId = session.getCustomerId();
         ProductDto p = product.getValue();
@@ -71,15 +69,46 @@ public class ProductDetailViewModel extends AndroidViewModel {
             error.setValue("Vui lòng đăng nhập để thêm vào giỏ hàng");
             return;
         }
-        cartRepo.addToCart(customerId, p.id, variantId, quantity)
-                .observeForever(addToCartResult::setValue);
+
+        // Get the selected variant's price
+        double unitPrice = p.minPrice != null ? p.minPrice : 0;
+        ApiListResponse<ProductVariantDto> variantList = variants.getValue();
+        if (variantList != null && variantList.items != null && variantId != null) {
+            for (ProductVariantDto v : variantList.items) {
+                if (variantId.equals(v.id) && v.price != null) {
+                    unitPrice = v.price;
+                    break;
+                }
+            }
+        }
+
+        final double finalPrice = unitPrice;
+
+        // First ensure we have a cart
+        String cachedCartId = session.getCartId();
+        if (cachedCartId != null) {
+            // Use cached cart ID
+            cartRepo.upsertCartItem(cachedCartId, variantId, 1, finalPrice)
+                    .observeForever(item -> addToCartResult.setValue(item != null));
+        } else {
+            // Load cart to get cart_id
+            cartRepo.getActiveCart(customerId).observeForever(cart -> {
+                if (cart != null && cart.getCartId() != null) {
+                    session.saveCartId(cart.getCartId());
+                    cartRepo.upsertCartItem(cart.getCartId(), variantId, 1, finalPrice)
+                            .observeForever(item -> addToCartResult.setValue(item != null));
+                } else {
+                    error.setValue("Không thể tải giỏ hàng");
+                }
+            });
+        }
     }
 
     public LiveData<ProductDto> getProduct() { return product; }
     public LiveData<ApiListResponse<ProductImageDto>> getImages() { return images; }
     public LiveData<ApiListResponse<ProductVariantDto>> getVariants() { return variants; }
     public LiveData<ReviewSummaryDto> getReviews() { return reviews; }
-    public LiveData<CartDto> getAddToCartResult() { return addToCartResult; }
+    public LiveData<Boolean> getAddToCartResult() { return addToCartResult; }
     public LiveData<Boolean> isLoading() { return loading; }
     public LiveData<String> getError() { return error; }
     public LiveData<java.util.List<ProductDto>> getRecommendations() { return recommendations; }

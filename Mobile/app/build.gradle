@@ -2,11 +2,7 @@ plugins {
     id 'com.android.application'
 }
 
-Properties properties = new Properties()
-if (project.rootProject.file('local.properties').exists()) {
-    properties.load(project.rootProject.file('local.properties').newDataInputStream())
-}
-def apiBaseUrl = properties.getProperty("api.base.url", "http://10.0.2.2:3000/api/")
+def apiBaseUrl = "https://unifur-git-454662189896.europe-west1.run.app/api/"
 
 android {
     namespace 'com.unifurniture.mobile'
