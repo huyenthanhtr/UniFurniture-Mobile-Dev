@@ -26,6 +26,8 @@ public class ProductDto {
     public String categoryId;
     @SerializedName("collection_id")
     public String collectionId;
+    @SerializedName("average_rating")
+    public Double averageRating;
 
     // Helper: get best image URL
     public String getImageUrl() {

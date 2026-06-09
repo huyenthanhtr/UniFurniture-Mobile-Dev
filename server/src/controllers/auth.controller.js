@@ -123,8 +123,8 @@ async function verifyOtp(req, res) {
 
 async function login(req, res) {
     try {
-        let { emailOrPhone, password } = req.body;
-        emailOrPhone = normalizePhone(emailOrPhone);
+        let { emailOrPhone, phone, password } = req.body;
+        emailOrPhone = normalizePhone(emailOrPhone || phone);
 
         if (!emailOrPhone || !password) {
             return res.status(400).json({ message: "Information required" });
@@ -148,7 +148,17 @@ async function login(req, res) {
             return res.status(401).json({ message: "Mật khẩu sai. Vui lòng thử lại." });
         }
 
-        return res.status(200).json({ message: "Đăng nhập thành công", profile });
+        return res.status(200).json({
+            message: "Đăng nhập thành công",
+            token: profile._id.toString(),
+            customer: {
+                _id: profile._id,
+                id: profile._id,
+                name: profile.full_name,
+                phone: profile.phone,
+                email: profile.email
+            }
+        });
 
     } catch (err) {
         console.error(err);

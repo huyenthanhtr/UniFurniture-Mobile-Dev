@@ -6,6 +6,7 @@
     android:background="@color/surface">
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/layoutBottomBar">
@@ -116,13 +117,17 @@
                     android:visibility="gone" />
             </LinearLayout>
 
-            <!-- Rating -->
+            <!-- Rating row (tappable → scroll to reviews) -->
             <LinearLayout
+                android:id="@+id/layoutRatingRow"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:layout_marginTop="8dp">
+                android:layout_marginTop="8dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true">
                 <RatingBar
                     android:id="@+id/ratingBar"
                     android:layout_width="wrap_content"
@@ -135,17 +140,44 @@
                     android:id="@+id/tvRating"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="0.0"
                     android:textSize="13sp"
                     android:layout_marginStart="4dp" />
                 <TextView
                     android:id="@+id/tvReviewCount"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:textSize="13sp"
                     android:textColor="@color/gray_600"
                     android:layout_marginStart="4dp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="›"
+                    android:textSize="16sp"
+                    android:textColor="@color/gray_600" />
             </LinearLayout>
+
+            <!-- No rating (standalone, same indent as tvSoldCount) -->
+            <TextView
+                android:id="@+id/tvNoRating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/no_rating"
+                android:textSize="13sp"
+                android:textColor="@color/gray_600"
+                android:visibility="gone" />
+
+            <!-- Sold count -->
+            <TextView
+                android:id="@+id/tvSoldCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textSize="13sp"
+                android:textColor="@color/gray_600"
+                android:visibility="gone" />
 
             <!-- Warranty -->
             <TextView
@@ -177,6 +209,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp" />
+            <TextView
+                android:id="@+id/tvStockStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
         </LinearLayout>
 
         <!-- Short Description -->
@@ -227,13 +267,55 @@
 
         <!-- Reviews -->
         <LinearLayout
+            android:id="@+id/layoutReviewsSection"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp"
             android:layout_marginTop="8dp"
             android:background="@color/white">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/reviews"
+                    android:textStyle="bold"
+                    android:textSize="15sp" />
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroupReviewSort"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:singleSelection="true"
+                    app:selectionRequired="true"
+                    android:visibility="gone">
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipSortNewest"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/review_sort_newest"
+                        android:checked="true" />
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipSortHighRating"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/review_sort_high_rating" />
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipSortLowRating"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/review_sort_low_rating" />
+                </com.google.android.material.chip.ChipGroup>
+            </LinearLayout>
             <TextView
+                android:id="@+id/tvNoReviews"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/str_reviews"
@@ -247,6 +329,33 @@
                 android:layout_marginTop="8dp" />
         </LinearLayout>
 
+        <!-- Recommendations -->
+        <LinearLayout
+            android:id="@+id/layoutRecommendations"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginTop="8dp"
+            android:background="@color/white"
+            android:visibility="gone">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/related_products"
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:textColor="@color/black" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvRecommendations"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:clipToPadding="false"
+                android:paddingEnd="8dp"
+                android:orientation="horizontal" />
+        </LinearLayout>
+
         <!-- Bottom Spacer -->
         <View android:layout_width="match_parent" android:layout_height="90dp" />
 
@@ -254,7 +363,7 @@
 
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Bottom Bar with Add To Cart button -->
+    <!-- Bottom Bar with quantity + Add To Cart button -->
     <LinearLayout
         android:id="@+id/layoutBottomBar"
         android:layout_width="match_parent"
@@ -262,8 +371,63 @@
         android:layout_alignParentBottom="true"
         android:background="@color/white"
         android:elevation="8dp"
-        android:orientation="horizontal"
-        android:padding="12dp">
+        android:orientation="vertical"
+        android:paddingHorizontal="12dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="12dp">
+
+        <!-- Quantity row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingBottom="8dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/quantity"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:textColor="@color/black" />
+
+            <Button
+                android:id="@+id/btnDecrease"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:text="-"
+                android:textSize="18sp"
+                android:textColor="@color/primary"
+                android:padding="0dp"
+                android:background="@drawable/bg_quantity_btn_outline" />
+
+            <TextView
+                android:id="@+id/tvQuantity"
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:text="1"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:gravity="center" />
+
+            <Button
+                android:id="@+id/btnIncrease"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:text="+"
+                android:textSize="18sp"
+                android:textColor="@color/white"
+                android:padding="0dp"
+                android:background="@drawable/bg_quantity_btn_filled" />
+
+        </LinearLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnAddToCart"

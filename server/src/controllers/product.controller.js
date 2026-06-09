@@ -125,6 +125,8 @@ async function getProducts(req, res, next) {
       q,
       exclude,
       fields,
+      minPrice,
+      maxPrice,
     } = req.query;
 
     const pageNum = Math.max(parseInt(page, 10) || 1, 1);
@@ -142,6 +144,13 @@ async function getProducts(req, res, next) {
           ? { category_id: categoryIds.length > 1 ? { $in: categoryIds } : categoryIds[0] }
           : { _id: { $in: [] } }
       );
+    }
+
+    if (minPrice || maxPrice) {
+      const priceFilter = {};
+      if (minPrice) priceFilter.$gte = parseFloat(minPrice);
+      if (maxPrice) priceFilter.$lte = parseFloat(maxPrice);
+      andConditions.push({ min_price: priceFilter });
     }
 
     if (collection) {
