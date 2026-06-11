@@ -1,92 +1,139 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="12dp"
-    android:background="@color/white"
-    android:layout_marginBottom="8dp">
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="0dp">
 
-    <ImageView
-        android:id="@+id/ivProduct"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:scaleType="centerCrop"
-        android:contentDescription="@string/str_product" />
-
-    <LinearLayout
-        android:layout_width="0dp"
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:layout_marginStart="12dp">
-        <TextView
-            android:id="@+id/tvName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:textColor="@color/black"
-            android:maxLines="2"
-            android:ellipsize="end" />
-        <TextView
-            android:id="@+id/tvVariant"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="12sp"
-            android:textColor="@color/gray_600"
-            android:layout_marginTop="2dp"
-            android:visibility="gone" />
-        <TextView
-            android:id="@+id/tvPrice"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:textColor="@color/primary"
-            android:layout_marginTop="4dp" />
-    </LinearLayout>
+        android:padding="12dp">
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center">
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardProductImage"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#F0F0F0">
+            <ImageView
+                android:id="@+id/ivProduct"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/placeholder_product" />
+        </com.google.android.material.card.MaterialCardView>
+
         <ImageButton
             android:id="@+id/btnRemove"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:src="@android:drawable/ic_menu_delete"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:src="@drawable/ic_delete"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:layout_marginBottom="8dp"
-            android:contentDescription="@string/str_delete" />
-        <LinearLayout
+            app:tint="@color/gray_400"
+            android:contentDescription="@string/content_desc_delete" />
+
+        <TextView
+            android:id="@+id/tvName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/cardProductImage"
+            android:layout_toStartOf="@id/btnRemove"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="8dp"
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:text="Product Name" />
+
+        <TextView
+            android:id="@+id/tvVariant"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/cardProductImage"
+            android:layout_below="@id/tvName"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="6dp"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="4dp"
+            android:background="@drawable/bg_quantity_selector"
+            android:drawableEnd="@drawable/ic_arrow_drop_down"
+            android:drawablePadding="6dp"
+            android:gravity="center_vertical"
+            android:textSize="12sp"
+            android:textColor="@color/gray_600"
+            android:clickable="true"
+            android:focusable="true"
+            android:text="Color: Wood" />
+
+        <TextView
+            android:id="@+id/tvPrice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/cardProductImage"
+            android:layout_toStartOf="@+id/layoutQuantity"
+            android:layout_below="@id/tvVariant"
+            android:layout_alignBottom="@+id/layoutQuantity"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="8dp"
+            android:gravity="bottom"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary"
+            android:text="1.000.000 ₫" />
+
+        <LinearLayout
+            android:id="@+id/layoutQuantity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@id/tvVariant"
+            android:layout_marginTop="12dp"
             android:orientation="horizontal"
-            android:gravity="center_vertical">
-            <com.google.android.material.button.MaterialButton
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_quantity_selector"
+            android:padding="2dp">
+
+            <ImageButton
                 android:id="@+id/btnMinus"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:text="-"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:padding="0dp" />
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/ic_minus"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="@color/gray_600" />
+
             <TextView
                 android:id="@+id/tvQuantity"
-                android:layout_width="32dp"
+                android:layout_width="36dp"
                 android:layout_height="wrap_content"
                 android:text="1"
                 android:gravity="center"
-                android:textSize="14sp" />
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnPlus"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:text="+"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:padding="0dp" />
-        </LinearLayout>
-    </LinearLayout>
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:textStyle="bold" />
 
-</LinearLayout>
+            <ImageButton
+                android:id="@+id/btnPlus"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/ic_plus"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="@color/gray_600" />
+        </LinearLayout>
+
+    </RelativeLayout>
+</com.google.android.material.card.MaterialCardView>

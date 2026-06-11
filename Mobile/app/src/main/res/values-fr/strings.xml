@@ -125,4 +125,71 @@
 
     <!-- Recently viewed -->
     <string name="recently_viewed">Vus récemment</string>
+    <string name="added_to_favorites">Ajouté aux favoris</string>
+    <string name="removed_from_favorites">Retiré des favoris</string>
+    <string name="login_required_favorite">Veuillez vous connecter pour ajouter aux favoris</string>
+    <string name="login_required_cart">Veuillez vous connecter pour ajouter au panier</string>
+    <string name="please_select_variant">Veuillez choisir une couleur / variante</string>
+    <string name="login_required_checkout">Veuillez vous connecter pour passer à la caisse</string>
+    <string name="wishlist_add_error">Impossible d\'ajouter aux favoris</string>
+    <string name="wishlist_remove_error">Impossible de retirer des favoris</string>
+    <string name="error_network">Erreur réseau : %1$s</string>
+    <string name="error_unknown">Une erreur inconnue est survenue</string>
+
+    <!-- Voucher -->
+    <string name="voucher_title">Bons de réduction</string>
+    <string name="empty_vouchers">Vous n\'avez pas encore de bons de réduction.</string>
+    <string name="label_discount">REMISE</string>
+    <string name="btn_use">Utiliser</string>
+    <string name="voucher_expiry">Expire le : %1$s</string>
+    <string name="voucher_discount_amount">Remise %1$s</string>
+    <string name="voucher_condition">Appliqué pour les commandes à partir de %1$s.</string>
+    <string name="voucher_upsell">Achetez pour %1$s de plus pour appliquer</string>
+    <string name="select_voucher">Sélectionner un bon</string>
+    <string name="voucher_wallet">Portefeuille de bons</string>
+    <string name="empty_voucher_storage">Le stockage de bons est vide</string>
+    <string name="voucher_discount_label">Remise du bon</string>
+    <string name="content_desc_remove_voucher">Supprimer le bon</string>
+
+    <!-- Notifications -->
+    <string name="notification_title">Notifications</string>
+    <string name="no_notifications">Pas de notifications</string>
+    <string name="new_notification_hint">Les nouvelles notifications apparaîtront ici.</string>
+    <string name="content_desc_mark_all_read">Tout marquer comme lu</string>
+    <string name="label_orders">Commandes</string>
+    <string name="label_all">Tout</string>
+    <string name="label_account">Compte</string>
+
+    <!-- Wishlist -->
+    <string name="empty_wishlist">La liste de souhaits est vide</string>
+
+    <!-- Feedback & UI -->
+    <string name="view_cart">Voir le panier</string>
+    <string name="add_to_cart_success">Ajouté au panier avec succès</string>
+    <string name="add_to_cart_error">Impossible d\'ajouter au panier. Veuillez réessayer.</string>
+    <string name="content_desc_delete">Supprimer</string>
+    <string name="close">Fermer</string>
+    <string name="subtotal">Sous-total</string>
+    <string name="login_upsell">Connectez-vous pour recevoir des offres</string>
+    <string name="content_desc_logo">Logo</string>
+    <string name="content_desc_product_image">Image du produit</string>
+    <string name="content_desc_collection">Collection</string>
+
+    <!-- Toasts & Messages -->
+    <string name="toast_no_other_variants">Le produit n\'a pas d\'autres variantes</string>
+    <string name="toast_product_not_found">Informations produit introuvables</string>
+    <string name="toast_voucher_removed_min_spend">Bon supprimé en raison du montant minimum d\'achat</string>
+    <string name="toast_voucher_saved_upsell">Bon enregistré. Achetez plus pour appliquer !</string>
+    <string name="toast_voucher_applied">Bon appliqué : %1$s</string>
+    <string name="toast_order_id">Commande : %1$s</string>
+    <string name="toast_mark_all_read">Tout a été marqué comme lu</string>
+    <string name="toast_login_required_orders">Veuillez vous connecter pour voir les commandes</string>
+
+    <!-- Formats & Limits -->
+    <string name="image_indicator_format">%1$d/%2$d</string>
+    <string name="price_range_format">%1$s - %2$s</string>
+    <string name="min_quantity_value">1</string>
+    <string name="max_quantity_value">99</string>
+    <string name="login_required_orders_hint">Connectez-vous pour enregistrer l\'historique des achats</string>
+    <string name="guest">Invité</string>
 </resources>

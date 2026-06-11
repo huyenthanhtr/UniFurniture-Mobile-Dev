@@ -104,24 +104,36 @@ public class ProductRepository {
         return result;
     }
 
-    public LiveData<ApiListResponse<CategoryDto>> getCategories() {
-        MutableLiveData<ApiListResponse<CategoryDto>> result = new MutableLiveData<>();
-        apiService.getCategories()
+    public LiveData<List<ProductDto>> getProductRecommendations(String slug, String userId) {
+        MutableLiveData<List<ProductDto>> result = new MutableLiveData<>();
+        apiService.getProductRecommendations(slug, userId)
+                .enqueue(new Callback<java.util.Map<String, List<ProductDto>>>() {
+                    @Override
+                    public void onResponse(retrofit2.Call<java.util.Map<String, List<ProductDto>>> call,
+                                           retrofit2.Response<java.util.Map<String, List<ProductDto>>> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            List<ProductDto> items = response.body().get("items");
+                            result.setValue(items != null ? items : new java.util.ArrayList<>());
+                        } else {
+                            result.setValue(null);
+                        }
+                    }
+                    @Override
+                    public void onFailure(retrofit2.Call<java.util.Map<String, List<ProductDto>>> call, Throwable t) {
+                        result.setValue(null);
+                    }
+                });
+        return result;
+    }
+
+    public LiveData<List<CategoryDto>> getCategories() {
+        MutableLiveData<List<CategoryDto>> result = new MutableLiveData<>();
+        apiService.getCategories(1, 100, "active")
                 .enqueue(new Callback<List<CategoryDto>>() {
                     @Override
                     public void onResponse(Call<List<CategoryDto>> call,
                                            Response<List<CategoryDto>> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            ApiListResponse<CategoryDto> wrapped = new ApiListResponse<>();
-                            wrapped.items = response.body();
-                            wrapped.total = response.body().size();
-                            wrapped.limit = response.body().size();
-                            wrapped.page = 1;
-                            wrapped.totalPages = 1;
-                            result.setValue(wrapped);
-                        } else {
-                            result.setValue(null);
-                        }
+                        result.setValue(response.isSuccessful() ? response.body() : null);
                     }
                     @Override
                     public void onFailure(Call<List<CategoryDto>> call, Throwable t) {
@@ -131,30 +143,74 @@ public class ProductRepository {
         return result;
     }
 
-    public LiveData<ApiListResponse<CollectionDto>> getCollections() {
-        MutableLiveData<ApiListResponse<CollectionDto>> result = new MutableLiveData<>();
-        apiService.getCollections()
+    public LiveData<List<CollectionDto>> getCollections() {
+        MutableLiveData<List<CollectionDto>> result = new MutableLiveData<>();
+        apiService.getCollections(1, 100, "active")
                 .enqueue(new Callback<List<CollectionDto>>() {
                     @Override
                     public void onResponse(Call<List<CollectionDto>> call,
                                            Response<List<CollectionDto>> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            ApiListResponse<CollectionDto> wrapped = new ApiListResponse<>();
-                            wrapped.items = response.body();
-                            wrapped.total = response.body().size();
-                            wrapped.limit = response.body().size();
-                            wrapped.page = 1;
-                            wrapped.totalPages = 1;
-                            result.setValue(wrapped);
-                        } else {
-                            result.setValue(null);
-                        }
+                        result.setValue(response.isSuccessful() ? response.body() : null);
                     }
                     @Override
                     public void onFailure(Call<List<CollectionDto>> call, Throwable t) {
                         result.setValue(null);
                     }
                 });
+        return result;
+    }
+
+    // ── Wishlist ──────────────────────────────────────────────────────────────
+
+    public LiveData<List<WishlistItemDto>> getWishlist(String customerId) {
+        MutableLiveData<List<WishlistItemDto>> result = new MutableLiveData<>();
+        apiService.getWishlist(customerId).enqueue(new Callback<ApiListResponse<WishlistItemDto>>() {
+            @Override
+            public void onResponse(Call<ApiListResponse<WishlistItemDto>> call, Response<ApiListResponse<WishlistItemDto>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    result.setValue(response.body().items);
+                } else {
+                    result.setValue(null);
+                }
+            }
+            @Override
+            public void onFailure(Call<ApiListResponse<WishlistItemDto>> call, Throwable t) {
+                result.setValue(null);
+            }
+        });
+        return result;
+    }
+
+    public LiveData<WishlistItemDto> addToWishlist(String customerId, String productId) {
+        MutableLiveData<WishlistItemDto> result = new MutableLiveData<>();
+        java.util.Map<String, String> body = new java.util.HashMap<>();
+        body.put("customer_id", customerId);
+        body.put("product_id", productId);
+        apiService.addToWishlist(body).enqueue(new Callback<WishlistItemDto>() {
+            @Override
+            public void onResponse(Call<WishlistItemDto> call, Response<WishlistItemDto> response) {
+                result.setValue(response.isSuccessful() ? response.body() : null);
+            }
+            @Override
+            public void onFailure(Call<WishlistItemDto> call, Throwable t) {
+                result.setValue(null);
+            }
+        });
+        return result;
+    }
+
+    public LiveData<Boolean> removeFromWishlist(String wishlistItemId) {
+        MutableLiveData<Boolean> result = new MutableLiveData<>();
+        apiService.removeFromWishlist(wishlistItemId).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                result.setValue(response.isSuccessful());
+            }
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                result.setValue(false);
+            }
+        });
         return result;
     }
 }

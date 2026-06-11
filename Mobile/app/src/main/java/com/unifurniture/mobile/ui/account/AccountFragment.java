@@ -8,10 +8,13 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import com.unifurniture.mobile.data.model.ProfileDto;
+
+import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.databinding.FragmentAccountBinding;
 import com.unifurniture.mobile.ui.auth.AuthActivity;
 import com.unifurniture.mobile.util.SessionManager;
+
+import android.widget.Toast;
 
 public class AccountFragment extends Fragment {
 
@@ -31,34 +34,59 @@ public class AccountFragment extends Fragment {
         SessionManager session = SessionManager.getInstance(requireContext());
 
         if (!session.isLoggedIn()) {
-            binding.layoutGuest.setVisibility(View.VISIBLE);
-            binding.layoutUser.setVisibility(View.GONE);
+            binding.tvUserName.setText(R.string.guest);
+            binding.tvUserPhone.setText(R.string.login_required_orders_hint);
+            binding.btnLoginPrompt.setVisibility(View.VISIBLE);
+            binding.btnLogout.setVisibility(View.GONE);
+            
             binding.btnLoginPrompt.setOnClickListener(v ->
                     startActivity(new Intent(requireContext(), AuthActivity.class)));
-            return;
+            
+            binding.itemOrders.setOnClickListener(v -> 
+                    Toast.makeText(requireContext(), R.string.toast_login_required_orders, Toast.LENGTH_SHORT).show());
+        } else {
+            binding.btnLoginPrompt.setVisibility(View.GONE);
+            binding.btnLogout.setVisibility(View.VISIBLE);
+            
+            var customer = session.getCustomer();
+            binding.tvUserName.setText(customer.name != null ? customer.name : getString(R.string.guest_customer));
+            binding.tvUserPhone.setText(customer.phone);
+            
+            binding.itemOrders.setOnClickListener(v -> {
+                // Navigate to order list
+                requireActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(android.R.id.content, new OrderListFragment())
+                        .addToBackStack(null)
+                        .commit();
+            });
+            
+            binding.btnLogout.setOnClickListener(v -> {
+                session.logout();
+                startActivity(new Intent(requireContext(), AuthActivity.class));
+                requireActivity().finish();
+            });
         }
 
-        binding.layoutGuest.setVisibility(View.GONE);
-        binding.layoutUser.setVisibility(View.VISIBLE);
+        binding.itemWishlist.setOnClickListener(v ->
+                androidx.navigation.Navigation.findNavController(requireView()).navigate(R.id.wishlistFragment));
 
-        ProfileDto profile = session.getProfile();
-        binding.tvUserName.setText(profile.getDisplayName());
-        binding.tvUserPhone.setText(profile.phone != null ? profile.phone : "");
+        binding.itemNotifications.setOnClickListener(v ->
+                androidx.navigation.Navigation.findNavController(requireView()).navigate(R.id.notificationFragment));
 
-        binding.itemOrders.setOnClickListener(v -> {
-            // Navigate to order list
-            requireActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(android.R.id.content, new OrderListFragment())
-                    .addToBackStack(null)
-                    .commit();
+        binding.itemVouchers.setOnClickListener(v -> {
+            Bundle bundle = new Bundle();
+            bundle.putDouble("subtotal", 0.0); // open as wallet, see all vouchers
+            androidx.navigation.Navigation.findNavController(requireView()).navigate(R.id.voucherListFragment, bundle);
         });
 
-        binding.btnLogout.setOnClickListener(v -> {
-            session.logout();
-            startActivity(new Intent(requireContext(), AuthActivity.class));
-            requireActivity().finish();
-        });
+        updateNotificationBadge();
+    }
+
+    private void updateNotificationBadge() {
+        if (binding == null) return;
+        boolean hasUnread = com.unifurniture.mobile.util.NotificationManager.getInstance(requireContext()).hasUnreadNotifications();
+        binding.viewNotificationBadge.setVisibility(hasUnread ? View.VISIBLE : View.GONE);
     }
 
     @Override

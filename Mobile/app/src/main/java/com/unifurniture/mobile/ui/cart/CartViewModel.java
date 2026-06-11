@@ -7,7 +7,6 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import com.unifurniture.mobile.UniFurnitureApp;
 import com.unifurniture.mobile.data.model.CartDto;
-import com.unifurniture.mobile.data.model.CartItemDto;
 import com.unifurniture.mobile.data.repository.CartRepository;
 import com.unifurniture.mobile.util.SessionManager;
 
@@ -27,43 +26,106 @@ public class CartViewModel extends AndroidViewModel {
     public void loadCart() {
         SessionManager session = SessionManager.getInstance(getApplication());
         String customerId = session.getCustomerId();
-        if (customerId == null) {
+        String cartId = session.getCartId();
+        
+        if (customerId == null && cartId == null) {
             cart.setValue(null);
             return;
         }
+        
         loading.setValue(true);
-        repository.getActiveCart(customerId).observeForever(c -> {
-            cart.setValue(c);
-            if (c != null && c.getCartId() != null) {
-                session.saveCartId(c.getCartId());
+        repository.getActiveCart(customerId, cartId).observeForever(c -> {
+            if (c != null && c.id != null) {
+                session.saveCartId(c.id);
             }
+            cart.setValue(c);
             loading.setValue(false);
         });
     }
 
     public void updateQuantity(String cartItemId, int quantity) {
+        if (cartItemId == null || cartItemId.isEmpty()) {
+            return;
+        }
         if (quantity <= 0) {
             removeItem(cartItemId);
             return;
         }
         repository.updateCartItemQuantity(cartItemId, quantity)
-                .observeForever(success -> {
-                    if (Boolean.TRUE.equals(success)) loadCart();
+                .observeForever(c -> {
+                    if (c != null && c.id != null) {
+                        SessionManager.getInstance(getApplication()).saveCartId(c.id);
+                    }
+                    cart.setValue(c);
                 });
     }
 
     public void removeItem(String cartItemId) {
-        repository.removeCartItem(cartItemId)
-                .observeForever(success -> {
-                    if (Boolean.TRUE.equals(success)) loadCart();
+        if (cartItemId == null || cartItemId.isEmpty()) {
+            return;
+        }
+        repository.removeCartItem(cartItemId).observeForever(c -> {
+            if (c != null && c.id != null) {
+                SessionManager.getInstance(getApplication()).saveCartId(c.id);
+            }
+            cart.setValue(c);
+        });
+    }
+
+    public void updateCartItemVariant(String cartItemId, String variantId) {
+        if (cartItemId == null || cartItemId.isEmpty() || variantId == null || variantId.isEmpty()) {
+            return;
+        }
+        loading.setValue(true);
+        repository.updateCartItemVariant(cartItemId, variantId).observeForever(c -> {
+            if (c != null && c.id != null) {
+                SessionManager.getInstance(getApplication()).saveCartId(c.id);
+            }
+            cart.setValue(c);
+            loading.setValue(false);
+        });
+    }
+
+    public LiveData<java.util.List<com.unifurniture.mobile.data.model.ProductVariantDto>> getProductVariants(String productId) {
+        MutableLiveData<java.util.List<com.unifurniture.mobile.data.model.ProductVariantDto>> result = new MutableLiveData<>();
+        if (productId == null || productId.isEmpty()) {
+            result.setValue(new java.util.ArrayList<>());
+            return result;
+        }
+        UniFurnitureApp.getInstance().getApiService().getProductVariants(productId, "active", 100)
+                .enqueue(new retrofit2.Callback<com.unifurniture.mobile.data.model.ApiListResponse<com.unifurniture.mobile.data.model.ProductVariantDto>>() {
+                    @Override
+                    public void onResponse(
+                            @NonNull retrofit2.Call<com.unifurniture.mobile.data.model.ApiListResponse<com.unifurniture.mobile.data.model.ProductVariantDto>> call,
+                            @NonNull retrofit2.Response<com.unifurniture.mobile.data.model.ApiListResponse<com.unifurniture.mobile.data.model.ProductVariantDto>> response
+                    ) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            result.setValue(response.body().items);
+                        } else {
+                            result.setValue(new java.util.ArrayList<>());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(
+                            @NonNull retrofit2.Call<com.unifurniture.mobile.data.model.ApiListResponse<com.unifurniture.mobile.data.model.ProductVariantDto>> call,
+                            @NonNull Throwable t
+                    ) {
+                        result.setValue(new java.util.ArrayList<>());
+                    }
                 });
+        return result;
     }
 
     public double getTotal() {
         CartDto c = cart.getValue();
         if (c == null || c.items == null) return 0;
         double total = 0;
-        for (CartItemDto item : c.items) total += item.getTotalPrice();
+        for (var item : c.items) {
+            if (item != null) {
+                total += item.getTotalPrice();
+            }
+        }
         return total;
     }
 

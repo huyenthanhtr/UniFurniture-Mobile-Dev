@@ -18,6 +18,7 @@ public class OtpFragment extends Fragment {
 
     private FragmentOtpBinding binding;
     private AuthViewModel viewModel;
+    private String pendingPhone;
 
     @Nullable
     @Override
@@ -31,13 +32,6 @@ public class OtpFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         viewModel = new ViewModelProvider(requireActivity()).get(AuthViewModel.class);
-
-        // Pre-fill phone from the pending registration
-        viewModel.getPendingPhone().observe(getViewLifecycleOwner(), phone -> {
-            if (phone != null && binding.etPhone.getText().toString().trim().isEmpty()) {
-                binding.etPhone.setText(phone);
-            }
-        });
 
         binding.btnVerify.setOnClickListener(v -> {
             String phone = binding.etPhone.getText().toString().trim();
@@ -53,10 +47,23 @@ public class OtpFragment extends Fragment {
         });
 
         viewModel.getAuthResult().observe(getViewLifecycleOwner(), result -> {
-            if (result != null && result.profile != null) {
-                // OTP verified — save profile to session and go to main
+            if (result != null && result.token != null) {
                 SessionManager session = SessionManager.getInstance(requireContext());
-                session.saveProfile(result.profile);
+                session.saveToken(result.token);
+                session.saveCustomer(result.customer);
+
+                // Merge local wishlist to server
+                java.util.Set<String> localWishlist = session.getLocalWishlist();
+                if (!localWishlist.isEmpty() && result.customer != null) {
+                    com.unifurniture.mobile.data.repository.ProductRepository productRepo =
+                            new com.unifurniture.mobile.data.repository.ProductRepository(
+                                    com.unifurniture.mobile.UniFurnitureApp.getInstance().getApiService());
+                    for (String productId : localWishlist) {
+                        productRepo.addToWishlist(result.customer.id, productId);
+                    }
+                    session.clearLocalWishlist();
+                }
+
                 startActivity(new Intent(requireContext(), MainActivity.class));
                 requireActivity().finish();
             }

@@ -1,5 +1,6 @@
 package com.unifurniture.mobile.ui.product;
 
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,6 +16,12 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.core.text.HtmlCompat;
+import androidx.viewpager2.widget.ViewPager2;
+import com.unifurniture.mobile.util.GlideImageGetter;
+import com.unifurniture.mobile.ui.auth.AuthActivity;
+import com.unifurniture.mobile.util.SessionManager;
+import com.google.android.material.snackbar.Snackbar;
 import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.BuildConfig;
 import com.unifurniture.mobile.data.model.ProductDto;
@@ -27,7 +34,6 @@ import com.unifurniture.mobile.util.FormatUtil;
 import com.unifurniture.mobile.util.RecentlyViewedManager;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,15 +92,95 @@ public class ProductDetailFragment extends Fragment {
             }
         });
 
-        binding.btnAddToCart.setOnClickListener(v -> viewModel.addToCart(selectedVariantId, quantity));
+        binding.tvQuantity.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(android.text.Editable s) {
+                String val = s.toString().trim();
+                if (!val.isEmpty()) {
+                    try {
+                        int parsed = Integer.parseInt(val);
+                        if (parsed >= 1 && parsed <= 99) {
+                            quantity = parsed;
+                        } else if (parsed > 99) {
+                            quantity = 99;
+                            binding.tvQuantity.setText(getString(R.string.max_quantity_value));
+                            binding.tvQuantity.setSelection(2);
+                        }
+                    } catch (NumberFormatException e) {
+                        // Ignore
+                    }
+                }
+            }
+        });
+
+        binding.tvQuantity.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) {
+                String val = binding.tvQuantity.getText().toString().trim();
+                if (val.isEmpty() || val.equals("0")) {
+                    quantity = 1;
+                    binding.tvQuantity.setText(getString(R.string.min_quantity_value));
+                }
+            }
+        });
+
+        binding.btnAddToCart.setOnClickListener(v -> {
+            var response = viewModel.getVariants().getValue();
+            if (response != null && response.items != null && !response.items.isEmpty()) {
+                if (selectedVariantId == null) {
+                    Toast.makeText(requireContext(), R.string.please_select_variant, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            }
+            viewModel.addToCart(selectedVariantId, quantity);
+        });
         binding.btnBack.setOnClickListener(v ->
                 Navigation.findNavController(requireView()).navigateUp());
+        binding.btnFavorite.setOnClickListener(v -> viewModel.toggleWishlist());
     }
 
     private void setupImageSlider() {
         sliderAdapter = new ImageSliderAdapter(requireContext(), new ArrayList<>());
         binding.viewPagerImages.setAdapter(sliderAdapter);
-        binding.dotsIndicator.attachTo(binding.viewPagerImages);
+        
+        // Premium zoom-out and fade page transformer
+        binding.viewPagerImages.setPageTransformer((page, position) -> {
+            float absPosition = Math.abs(position);
+            if (position < -1) {
+                page.setAlpha(0f);
+            } else if (position <= 1) {
+                float scaleFactor = Math.max(0.85f, 1 - absPosition * 0.15f);
+                page.setScaleX(scaleFactor);
+                page.setScaleY(scaleFactor);
+                page.setAlpha(Math.max(0.5f, 1 - absPosition * 0.5f));
+            } else {
+                page.setAlpha(0f);
+            }
+        });
+
+        binding.viewPagerImages.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                updateImageIndicator(position);
+            }
+        });
+    }
+
+    private void updateImageIndicator(int position) {
+        if (binding == null) return;
+        int total = sliderAdapter.getItemCount();
+        if (total <= 1) {
+            binding.tvImageIndicator.setVisibility(View.GONE);
+        } else {
+            binding.tvImageIndicator.setVisibility(View.VISIBLE);
+            binding.tvImageIndicator.setText(getString(R.string.image_indicator_format, position + 1, total));
+        }
     }
 
     private void setupReviews() {
@@ -169,10 +255,19 @@ public class ProductDetailFragment extends Fragment {
                     binding.tvDiscount.setVisibility(View.VISIBLE);
                 }
             }
-            binding.tvDescription.setText(product.description);
-            binding.tvShortDesc.setText(product.shortDescription);
+            if (product.description != null && !product.description.isEmpty()) {
+                binding.tvDescription.setText(cleanHtmlNewlines(HtmlCompat.fromHtml(product.description, HtmlCompat.FROM_HTML_MODE_COMPACT, new GlideImageGetter(binding.tvDescription), null)));
+            } else {
+                binding.tvDescription.setText("");
+            }
+            if (product.shortDescription != null && !product.shortDescription.isEmpty()) {
+                binding.tvShortDesc.setText(cleanHtmlNewlines(HtmlCompat.fromHtml(product.shortDescription, HtmlCompat.FROM_HTML_MODE_COMPACT, new GlideImageGetter(binding.tvShortDesc), null)));
+                binding.tvShortDesc.setVisibility(View.VISIBLE);
+            } else {
+                binding.tvShortDesc.setVisibility(View.GONE);
+            }
             if (product.warrantyMonths != null && product.warrantyMonths > 0) {
-                binding.tvWarranty.setText(getString(R.string.str_warranty_format, product.warrantyMonths));
+                binding.tvWarranty.setText(getString(R.string.warranty, product.warrantyMonths));
                 binding.tvWarranty.setVisibility(View.VISIBLE);
             }
             int soldCount = product.sold != null ? product.sold : 0;
@@ -187,6 +282,7 @@ public class ProductDetailFragment extends Fragment {
                 List<String> fallback = new ArrayList<>();
                 fallback.add(thumb);
                 sliderAdapter.updateImages(fallback);
+                updateImageIndicator(0);
             }
         });
 
@@ -203,43 +299,102 @@ public class ProductDetailFragment extends Fragment {
                 if (thumb != null && !thumb.isEmpty()) urls.add(thumb);
             }
             sliderAdapter.updateImages(urls);
-            binding.dotsIndicator.setVisibility(urls.size() > 1 ? View.VISIBLE : View.GONE);
+            updateImageIndicator(binding.viewPagerImages.getCurrentItem());
         });
 
         viewModel.getVariants().observe(getViewLifecycleOwner(), response -> {
             if (response != null && response.items != null && !response.items.isEmpty()) {
                 variantStock.clear();
+                double min = Double.MAX_VALUE;
+                double max = Double.MIN_VALUE;
                 for (var variant : response.items) {
                     if (variant.id != null) variantStock.put(variant.id, variant.stockQuantity);
+                    if (variant.price != null) {
+                        if (variant.price < min) min = variant.price;
+                        if (variant.price > max) max = variant.price;
+                    }
                 }
-                selectedVariantId = response.items.get(0).id;
+
+                // Display min-max price range initially
+                if (min != Double.MAX_VALUE && max != Double.MIN_VALUE) {
+                    if (min < max) {
+                        binding.tvPrice.setText(getString(R.string.price_range_format, FormatUtil.formatCurrency(min), FormatUtil.formatCurrency(max)));
+                        binding.tvOriginalPrice.setVisibility(View.GONE);
+                        binding.tvDiscount.setVisibility(View.GONE);
+                    } else {
+                        binding.tvPrice.setText(FormatUtil.formatCurrency(min));
+                        ProductDto product = viewModel.getProduct().getValue();
+                        if (product != null && product.compareAtPrice != null && product.compareAtPrice > min) {
+                            binding.tvOriginalPrice.setText(FormatUtil.formatCurrency(product.compareAtPrice));
+                            binding.tvOriginalPrice.setPaintFlags(binding.tvOriginalPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
+                            binding.tvOriginalPrice.setVisibility(View.VISIBLE);
+                            String badge = FormatUtil.discountBadge(min, product.compareAtPrice);
+                            if (badge != null) {
+                                binding.tvDiscount.setText(badge);
+                                binding.tvDiscount.setVisibility(View.VISIBLE);
+                            }
+                        } else {
+                            binding.tvOriginalPrice.setVisibility(View.GONE);
+                            binding.tvDiscount.setVisibility(View.GONE);
+                        }
+                    }
+                }
+
+                selectedVariantId = null;
                 binding.chipGroupVariants.removeAllViews();
                 for (var variant : response.items) {
                     com.google.android.material.chip.Chip chip =
                             new com.google.android.material.chip.Chip(requireContext());
-                    chip.setText(variant.color != null ? variant.color :
-                            (variant.variantName != null ? variant.variantName : variant.name));
+                    
+                    String chipText = FormatUtil.getVariantLabel(variant);
+                    chip.setText(chipText);
                     chip.setCheckable(true);
                     chip.setOnCheckedChangeListener((btn, checked) -> {
                         if (checked) {
                             selectedVariantId = variant.id;
                             updateStockStatus(variant.id);
+                            
+                            // Dynamic price update upon variant selection
+                            if (variant.price != null) {
+                                binding.tvPrice.setText(FormatUtil.formatCurrency(variant.price));
+                                if (variant.compareAtPrice != null && variant.compareAtPrice > variant.price) {
+                                    binding.tvOriginalPrice.setText(FormatUtil.formatCurrency(variant.compareAtPrice));
+                                    binding.tvOriginalPrice.setPaintFlags(binding.tvOriginalPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
+                                    binding.tvOriginalPrice.setVisibility(View.VISIBLE);
+                                    String badge = FormatUtil.discountBadge(variant.price, variant.compareAtPrice);
+                                    if (badge != null) {
+                                        binding.tvDiscount.setText(badge);
+                                        binding.tvDiscount.setVisibility(View.VISIBLE);
+                                    }
+                                } else {
+                                    binding.tvOriginalPrice.setVisibility(View.GONE);
+                                    binding.tvDiscount.setVisibility(View.GONE);
+                                }
+                            }
                         }
                     });
                     binding.chipGroupVariants.addView(chip);
                 }
-                if (binding.chipGroupVariants.getChildCount() > 0) {
+                
+                // If there's only 1 variant, select it by default.
+                if (response.items.size() == 1 && binding.chipGroupVariants.getChildCount() > 0) {
                     ((com.google.android.material.chip.Chip)
                             binding.chipGroupVariants.getChildAt(0)).setChecked(true);
+                } else {
+                    updateStockStatus(null);
                 }
-                updateStockStatus(selectedVariantId);
             }
         });
 
         viewModel.getReviews().observe(getViewLifecycleOwner(), summary -> {
-            if (summary != null) {
-                binding.tvRating.setText(String.format("%.1f", summary.averageRating));
-                binding.tvReviewCount.setText(getString(R.string.str_reviews_count_format, summary.totalReviews));
+            if (summary == null || summary.totalReviews == 0) {
+                binding.layoutRatingRow.setVisibility(View.GONE);
+                binding.tvNoRating.setVisibility(View.VISIBLE);
+                binding.tvNoReviews.setVisibility(View.VISIBLE);
+                binding.rvReviews.setVisibility(View.GONE);
+            } else {
+                binding.layoutRatingRow.setVisibility(View.VISIBLE);
+                binding.tvNoRating.setVisibility(View.GONE);
                 binding.ratingBar.setRating((float) summary.averageRating);
                 binding.tvRating.setText(String.format("%.1f", summary.averageRating));
                 binding.tvReviewCount.setText(getString(R.string.review_count, summary.totalReviews));
@@ -258,9 +413,46 @@ public class ProductDetailFragment extends Fragment {
             }
         });
 
-        viewModel.getAddToCartResult().observe(getViewLifecycleOwner(), success -> {
-            if (Boolean.TRUE.equals(success)) {
-                Toast.makeText(requireContext(), R.string.str_added_to_cart_success, Toast.LENGTH_SHORT).show();
+        viewModel.getAddToCartResult().observe(getViewLifecycleOwner(), cart -> {
+            if (cart != null) {
+                // Show premium success dialog popup
+                android.app.Dialog dialog = new android.app.Dialog(requireContext());
+                dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+                dialog.setContentView(R.layout.dialog_add_to_cart_success);
+                
+                if (dialog.getWindow() != null) {
+                    dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+                }
+                
+                dialog.findViewById(R.id.btnViewCart).setOnClickListener(v -> {
+                    dialog.dismiss();
+                    Navigation.findNavController(requireView()).navigate(R.id.cartFragment);
+                });
+                
+                dialog.findViewById(R.id.btnDismiss).setOnClickListener(v -> {
+                    dialog.dismiss();
+                });
+                
+                dialog.show();
+
+                // Button feedback tạm thời
+                binding.btnAddToCart.setEnabled(false);
+                binding.btnAddToCart.setText(R.string.btn_added);
+                binding.btnAddToCart.setBackgroundTintList(ColorStateList.valueOf(
+                        ContextCompat.getColor(requireContext(), R.color.success)));
+                cartRestoreHandler.removeCallbacksAndMessages(null);
+                cartRestoreHandler.postDelayed(() -> {
+                    if (binding == null) return;
+                    binding.btnAddToCart.setEnabled(true);
+                    binding.btnAddToCart.setText(R.string.add_to_cart);
+                    binding.btnAddToCart.setBackgroundTintList(ColorStateList.valueOf(
+                            ContextCompat.getColor(requireContext(), R.color.primary)));
+                }, 1500);
+            } else {
+                // Nếu result là null nhưng không có lỗi set trong LiveData error
+                if (viewModel.getError().getValue() == null) {
+                    Toast.makeText(requireContext(), R.string.add_to_cart_error, Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -274,6 +466,79 @@ public class ProductDetailFragment extends Fragment {
                 binding.layoutRecommendations.setVisibility(View.VISIBLE);
             }
         });
+
+        viewModel.getIsFavorite().observe(getViewLifecycleOwner(), isFavorite -> {
+            binding.btnFavorite.setImageResource(isFavorite ?
+                    R.drawable.ic_favorite_filled : R.drawable.ic_favorite_border);
+            if (isFavorite) {
+                binding.btnFavorite.setColorFilter(null); // Keep red from drawable
+            } else {
+                binding.btnFavorite.setColorFilter(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.black));
+            }
+        });
+
+        viewModel.getSnackbarMessage().observe(getViewLifecycleOwner(), message -> {
+            if (message != null) {
+                com.google.android.material.snackbar.Snackbar.make(binding.getRoot(), message, com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show();
+                viewModel.clearSnackbarMessage();
+            }
+        });
+    }
+
+    private String stripHtml(String html) {
+        if (html == null) return "";
+        return HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_LEGACY).toString().trim();
+    }
+
+    private CharSequence trimSpanned(CharSequence s) {
+        if (s == null) return "";
+        int start = 0;
+        int end = s.length();
+        while (start < end && Character.isWhitespace(s.charAt(start))) {
+            start++;
+        }
+        while (end > start && Character.isWhitespace(s.charAt(end - 1))) {
+            end--;
+        }
+        if (start == 0 && end == s.length()) {
+            return s;
+        }
+        return s.subSequence(start, end);
+    }
+
+    private CharSequence cleanHtmlNewlines(CharSequence s) {
+        if (s == null) return "";
+        CharSequence trimmed = trimSpanned(s);
+        if (trimmed.length() == 0) return trimmed;
+        android.text.SpannableStringBuilder builder = new android.text.SpannableStringBuilder(trimmed);
+        
+        // Compress consecutive newlines before any ImageSpan to exactly 1 newline
+        android.text.style.ImageSpan[] spans = builder.getSpans(0, builder.length(), android.text.style.ImageSpan.class);
+        if (spans != null) {
+            for (android.text.style.ImageSpan span : spans) {
+                int start = builder.getSpanStart(span);
+                int newlineCount = 0;
+                int i = start - 1;
+                while (i >= 0 && builder.charAt(i) == '\n') {
+                    newlineCount++;
+                    i--;
+                }
+                if (newlineCount > 1) {
+                    builder.delete(i + 2, start);
+                }
+            }
+        }
+        
+        // Also compress any general 3+ consecutive newlines in the text to 2 newlines (1 empty line)
+        int len = builder.length();
+        for (int i = 0; i < len - 2; i++) {
+            if (builder.charAt(i) == '\n' && builder.charAt(i + 1) == '\n' && builder.charAt(i + 2) == '\n') {
+                builder.delete(i + 2, i + 3);
+                len--;
+                i--;
+            }
+        }
+        return builder;
     }
 
     private void updateStockStatus(String variantId) {

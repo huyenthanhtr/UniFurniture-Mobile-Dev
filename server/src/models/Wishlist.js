@@ -2,7 +2,7 @@
 
 const WishlistSchema = new mongoose.Schema(
   {
-    profile_id: { type: mongoose.Schema.Types.ObjectId, ref: "Profile", required: true, index: true },
+    customer_id: { type: mongoose.Schema.Types.ObjectId, ref: "Customer", required: true, index: true },
     account_name: { type: String, trim: true, default: "" },
     account_phone: { type: String, trim: true, default: "" },
     product_id: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true, index: true },
@@ -15,8 +15,8 @@ const WishlistSchema = new mongoose.Schema(
   { timestamps: true, collection: "wishlists" }
 );
 
-WishlistSchema.index({ profile_id: 1, product_id: 1 }, { unique: true });
-WishlistSchema.index({ profile_id: 1, createdAt: -1 });
-WishlistSchema.index({ profile_id: 1, account_phone: 1 });
+WishlistSchema.index({ customer_id: 1, product_id: 1 }, { unique: true });
+WishlistSchema.index({ customer_id: 1, createdAt: -1 });
+WishlistSchema.index({ customer_id: 1, account_phone: 1 });
 
 module.exports = mongoose.model("Wishlist", WishlistSchema, "wishlists");

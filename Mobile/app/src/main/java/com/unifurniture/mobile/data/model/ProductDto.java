@@ -31,9 +31,17 @@ public class ProductDto {
 
     // Helper: get best image URL
     public String getImageUrl() {
-        if (thumbnail != null && !thumbnail.isEmpty()) return thumbnail;
-        if (thumbnailUrl != null && !thumbnailUrl.isEmpty()) return thumbnailUrl;
-        return "";
+        String url = "";
+        if (thumbnail != null && !thumbnail.isEmpty()) {
+            url = thumbnail;
+        } else if (thumbnailUrl != null && !thumbnailUrl.isEmpty()) {
+            url = thumbnailUrl;
+        }
+        
+        if (url.startsWith("//")) {
+            url = "https:" + url;
+        }
+        return url;
     }
 
     // Helper: discount badge text

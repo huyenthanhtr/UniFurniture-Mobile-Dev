@@ -7,8 +7,13 @@ const {
 
 const router = express.Router();
 
-router.get('/profiles/:profileId', listWishlist);
-router.post('/profiles/:profileId/items', upsertWishlistItem);
-router.delete('/profiles/:profileId/items/:productId', removeWishlistItem);
+// Match Mobile ApiService: @GET("wishlist") @Query("customer_id")
+router.get('/', listWishlist);
+
+// Match Mobile ApiService: @POST("wishlist") @Body { customer_id, product_id, ... }
+router.post('/', upsertWishlistItem);
+
+// Match Mobile ApiService: @DELETE("wishlist/:id")
+router.delete('/:id', removeWishlistItem);
 
 module.exports = router;

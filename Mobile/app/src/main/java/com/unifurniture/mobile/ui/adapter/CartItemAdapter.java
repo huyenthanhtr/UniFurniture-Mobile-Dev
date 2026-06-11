@@ -1,5 +1,6 @@
 package com.unifurniture.mobile.ui.adapter;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.data.model.CartItemDto;
+import com.unifurniture.mobile.data.model.ProductDto;
+import com.unifurniture.mobile.data.model.ProductVariantDto;
 import com.unifurniture.mobile.databinding.ItemCartBinding;
 import com.unifurniture.mobile.util.FormatUtil;
 
@@ -23,25 +26,39 @@ public class CartItemAdapter extends ListAdapter<CartItemDto, CartItemAdapter.Vi
         void onRemove(CartItemDto item);
     }
 
+    public interface OnVariantClickListener {
+        void onVariantClick(CartItemDto item);
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(CartItemDto item);
+    }
+
     private final OnQuantityChangeListener quantityListener;
     private final OnRemoveListener removeListener;
+    private final OnVariantClickListener variantClickListener;
+    private final OnItemClickListener itemClickListener;
 
-    public CartItemAdapter(OnQuantityChangeListener quantityListener, OnRemoveListener removeListener) {
+    public CartItemAdapter(OnQuantityChangeListener quantityListener, OnRemoveListener removeListener, OnVariantClickListener variantClickListener, OnItemClickListener itemClickListener) {
         super(DIFF_CALLBACK);
         this.quantityListener = quantityListener;
         this.removeListener = removeListener;
+        this.variantClickListener = variantClickListener;
+        this.itemClickListener = itemClickListener;
     }
 
     private static final DiffUtil.ItemCallback<CartItemDto> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<CartItemDto>() {
                 @Override
                 public boolean areItemsTheSame(@NonNull CartItemDto a, @NonNull CartItemDto b) {
-                    return a.id.equals(b.id);
+                    return java.util.Objects.equals(a.id, b.id);
                 }
                 @Override
                 public boolean areContentsTheSame(@NonNull CartItemDto a, @NonNull CartItemDto b) {
-                    return a.id.equals(b.id) &&
-                            java.util.Objects.equals(a.quantity, b.quantity);
+                    return java.util.Objects.equals(a.id, b.id) &&
+                            java.util.Objects.equals(a.quantity, b.quantity) &&
+                            java.util.Objects.equals(a.getVariantId(), b.getVariantId()) &&
+                            java.util.Objects.equals(a.getUnitPrice(), b.getUnitPrice());
                 }
             };
 
@@ -55,7 +72,7 @@ public class CartItemAdapter extends ListAdapter<CartItemDto, CartItemAdapter.Vi
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.bind(getItem(position), quantityListener, removeListener);
+        holder.bind(getItem(position), quantityListener, removeListener, variantClickListener, itemClickListener);
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -67,27 +84,42 @@ public class CartItemAdapter extends ListAdapter<CartItemDto, CartItemAdapter.Vi
         }
 
         void bind(CartItemDto item, OnQuantityChangeListener quantityListener,
-                  OnRemoveListener removeListener) {
-            // Product info — from nested variant → product
-            binding.tvName.setText(item.getProductName());
-            String imageUrl = item.getImageUrl();
-            if (imageUrl != null && !imageUrl.isEmpty()) {
-                Glide.with(binding.getRoot())
-                        .load(imageUrl)
-                        .placeholder(R.drawable.placeholder_product)
-                        .centerCrop()
-                        .into(binding.ivProduct);
+                  OnRemoveListener removeListener, OnVariantClickListener variantClickListener,
+                  OnItemClickListener itemClickListener) {
+            // Product info
+            ProductDto product = item.getProduct();
+            if (product != null) {
+                binding.tvName.setText(product.name);
+                Context context = binding.getRoot().getContext();
+                if (context != null) {
+                    Glide.with(context)
+                            .load(product.getImageUrl())
+                            .placeholder(R.drawable.placeholder_product)
+                            .centerCrop()
+                            .into(binding.ivProduct);
+                }
+                
+                binding.cardProductImage.setOnClickListener(v -> {
+                    if (itemClickListener != null) itemClickListener.onItemClick(item);
+                });
+                binding.tvName.setOnClickListener(v -> {
+                    if (itemClickListener != null) itemClickListener.onItemClick(item);
+                });
+            } else {
+                binding.tvName.setText("");
+                binding.ivProduct.setImageResource(R.drawable.placeholder_product);
+                binding.cardProductImage.setOnClickListener(null);
+                binding.tvName.setOnClickListener(null);
             }
-
-            String colorLabel = item.getColorLabel();
-            if (colorLabel != null && !colorLabel.isEmpty()) {
-                binding.tvVariant.setText(binding.getRoot().getContext().getString(R.string.str_color_format, colorLabel));
+            ProductVariantDto variant = item.getVariant();
+            if (variant != null) {
+                binding.tvVariant.setText(FormatUtil.getVariantLabel(variant));
                 binding.tvVariant.setVisibility(View.VISIBLE);
             } else {
                 binding.tvVariant.setVisibility(View.GONE);
             }
 
-            binding.tvPrice.setText(FormatUtil.formatCurrency(item.getEffectivePrice()));
+            binding.tvPrice.setText(FormatUtil.formatCurrency(item.getUnitPrice()));
             binding.tvQuantity.setText(String.valueOf(item.quantity != null ? item.quantity : 1));
 
             binding.btnMinus.setOnClickListener(v -> {
@@ -99,6 +131,11 @@ public class CartItemAdapter extends ListAdapter<CartItemDto, CartItemAdapter.Vi
                 quantityListener.onChange(item, qty + 1);
             });
             binding.btnRemove.setOnClickListener(v -> removeListener.onRemove(item));
+            binding.tvVariant.setOnClickListener(v -> {
+                if (variantClickListener != null) {
+                    variantClickListener.onVariantClick(item);
+                }
+            });
         }
     }
 }

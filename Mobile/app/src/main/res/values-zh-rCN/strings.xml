@@ -125,4 +125,71 @@
 
     <!-- Recently viewed -->
     <string name="recently_viewed">最近浏览</string>
+    <string name="added_to_favorites">已加入收藏</string>
+    <string name="removed_from_favorites">已从收藏中移除</string>
+    <string name="login_required_favorite">请先登录以加入收藏</string>
+    <string name="login_required_cart">请先登录以加入购物车</string>
+    <string name="please_select_variant">请选择颜色/规格</string>
+    <string name="login_required_checkout">请先登录以结算</string>
+    <string name="wishlist_add_error">无法加入收藏</string>
+    <string name="wishlist_remove_error">无法移除收藏</string>
+    <string name="error_network">网络错误：%1$s</string>
+    <string name="error_unknown">发生未知错误</string>
+
+    <!-- Voucher -->
+    <string name="voucher_title">优惠券</string>
+    <string name="empty_vouchers">您暂无优惠券。</string>
+    <string name="label_discount">折扣</string>
+    <string name="btn_use">使用</string>
+    <string name="voucher_expiry">有效期至：%1$s</string>
+    <string name="voucher_discount_amount">优惠 %1$s</string>
+    <string name="voucher_condition">适用于满 %1$s 的订单。</string>
+    <string name="voucher_upsell">再购买 %1$s 即可使用</string>
+    <string name="select_voucher">选择优惠券</string>
+    <string name="voucher_wallet">优惠券包</string>
+    <string name="empty_voucher_storage">优惠券包为空</string>
+    <string name="voucher_discount_label">优惠券折扣</string>
+    <string name="content_desc_remove_voucher">移除优惠券</string>
+
+    <!-- Notifications -->
+    <string name="notification_title">通知</string>
+    <string name="no_notifications">暂无通知</string>
+    <string name="new_notification_hint">新通知将在此显示。</string>
+    <string name="content_desc_mark_all_read">全部标记为已读</string>
+    <string name="label_orders">订单</string>
+    <string name="label_all">全部</string>
+    <string name="label_account">账户</string>
+
+    <!-- Wishlist -->
+    <string name="empty_wishlist">收藏夹为空</string>
+
+    <!-- Feedback & UI -->
+    <string name="view_cart">查看购物车</string>
+    <string name="add_to_cart_success">已成功加入购物车</string>
+    <string name="add_to_cart_error">无法加入购物车，请重试。</string>
+    <string name="content_desc_delete">删除</string>
+    <string name="close">关闭</string>
+    <string name="subtotal">小计</string>
+    <string name="login_upsell">登录以获取更多优惠</string>
+    <string name="content_desc_logo">标志</string>
+    <string name="content_desc_product_image">商品图片</string>
+    <string name="content_desc_collection">系列</string>
+
+    <!-- Toasts & Messages -->
+    <string name="toast_no_other_variants">该商品没有其他规格</string>
+    <string name="toast_product_not_found">未找到商品信息</string>
+    <string name="toast_voucher_removed_min_spend">由于未达最低消费金额，优惠券已被移除</string>
+    <string name="toast_voucher_saved_upsell">优惠券已保存。请购买更多商品以使用！</string>
+    <string name="toast_voucher_applied">已应用优惠券：%1$s</string>
+    <string name="toast_order_id">订单号：%1$s</string>
+    <string name="toast_mark_all_read">已将所有通知标记为已读</string>
+    <string name="toast_login_required_orders">请登录以查看订单</string>
+
+    <!-- Formats & Limits -->
+    <string name="image_indicator_format">%1$d/%2$d</string>
+    <string name="price_range_format">%1$s - %2$s</string>
+    <string name="min_quantity_value">1</string>
+    <string name="max_quantity_value">99</string>
+    <string name="login_required_orders_hint">登录以保存购买历史</string>
+    <string name="guest">游客</string>
 </resources>

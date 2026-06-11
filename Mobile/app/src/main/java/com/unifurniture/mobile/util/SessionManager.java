@@ -2,21 +2,17 @@ package com.unifurniture.mobile.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import com.unifurniture.mobile.data.model.ProfileDto;
+import com.unifurniture.mobile.data.model.CustomerDto;
 import com.google.gson.Gson;
 
-/**
- * Session manager — stores the logged-in Profile (not token + Customer).
- *
- * Server does NOT issue JWTs. Authentication is verified on the server by
- * matching the hashed password. On the client we simply persist the
- * ProfileDto returned by /auth/login or /auth/verify-otp.
- */
 public class SessionManager {
 
     private static final String PREF_NAME = "unifurniture_session";
-    private static final String KEY_PROFILE = "profile";
+    private static final String KEY_TOKEN = "token";
+    private static final String KEY_CUSTOMER = "customer";
+    private static final String KEY_CUSTOMER_ID = "customer_id_raw";
     private static final String KEY_CART_ID = "cart_id";
+    private static final String KEY_LOCAL_WISHLIST = "local_wishlist";
 
     private static SessionManager instance;
     private final SharedPreferences prefs;
@@ -34,40 +30,45 @@ public class SessionManager {
         return instance;
     }
 
-    // ── Profile ─────────────────────────────────────────────────────────────
-    public void saveProfile(ProfileDto profile) {
-        prefs.edit().putString(KEY_PROFILE, gson.toJson(profile)).apply();
+    // Token
+    public void saveToken(String token) {
+        prefs.edit().putString(KEY_TOKEN, token).apply();
     }
 
-    public ProfileDto getProfile() {
-        String json = prefs.getString(KEY_PROFILE, null);
-        if (json == null) return null;
-        return gson.fromJson(json, ProfileDto.class);
-    }
-
-    /**
-     * profile._id — used as account_id throughout the API
-     * (orders, wishlist, loyalty, cart customer_id).
-     */
-    public String getProfileId() {
-        ProfileDto p = getProfile();
-        return p != null ? p.id : null;
-    }
-
-    /**
-     * Alias: many existing call-sites use getCustomerId().
-     * After migration the value equals profile._id (which the server
-     * uses as customer_id / account_id interchangeably).
-     */
-    public String getCustomerId() {
-        return getProfileId();
+    public String getToken() {
+        return prefs.getString(KEY_TOKEN, null);
     }
 
     public boolean isLoggedIn() {
-        return getProfile() != null;
+        return getToken() != null;
     }
 
-    // ── Cart ID cache ───────────────────────────────────────────────────────
+    // Customer
+    public void saveCustomer(CustomerDto customer) {
+        if (customer != null) {
+            prefs.edit().putString(KEY_CUSTOMER_ID, customer.id).apply();
+        }
+        prefs.edit().putString(KEY_CUSTOMER, gson.toJson(customer)).apply();
+    }
+
+    public void saveCustomerId(String customerId) {
+        prefs.edit().putString(KEY_CUSTOMER_ID, customerId).apply();
+    }
+
+    public CustomerDto getCustomer() {
+        String json = prefs.getString(KEY_CUSTOMER, null);
+        if (json == null) return null;
+        return gson.fromJson(json, CustomerDto.class);
+    }
+
+    public String getCustomerId() {
+        String rawId = prefs.getString(KEY_CUSTOMER_ID, null);
+        if (rawId != null) return rawId;
+        CustomerDto c = getCustomer();
+        return c != null ? c.id : null;
+    }
+
+    // Cart ID cache
     public void saveCartId(String cartId) {
         prefs.edit().putString(KEY_CART_ID, cartId).apply();
     }
@@ -76,7 +77,32 @@ public class SessionManager {
         return prefs.getString(KEY_CART_ID, null);
     }
 
-    // ── Logout ──────────────────────────────────────────────────────────────
+    // Local Wishlist (for guest users)
+    public void addToLocalWishlist(String productId) {
+        java.util.Set<String> wishlist = getLocalWishlist();
+        wishlist.add(productId);
+        prefs.edit().putStringSet(KEY_LOCAL_WISHLIST, wishlist).apply();
+    }
+
+    public void removeFromLocalWishlist(String productId) {
+        java.util.Set<String> wishlist = getLocalWishlist();
+        wishlist.remove(productId);
+        prefs.edit().putStringSet(KEY_LOCAL_WISHLIST, wishlist).apply();
+    }
+
+    public boolean isInLocalWishlist(String productId) {
+        return getLocalWishlist().contains(productId);
+    }
+
+    public java.util.Set<String> getLocalWishlist() {
+        return new java.util.HashSet<>(prefs.getStringSet(KEY_LOCAL_WISHLIST, new java.util.HashSet<>()));
+    }
+
+    public void clearLocalWishlist() {
+        prefs.edit().remove(KEY_LOCAL_WISHLIST).apply();
+    }
+
+    // Logout - clear all session data
     public void logout() {
         prefs.edit().clear().apply();
     }
