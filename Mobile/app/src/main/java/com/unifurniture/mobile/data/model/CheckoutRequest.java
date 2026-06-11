@@ -14,6 +14,8 @@ public class CheckoutRequest {
     public String shippingName;
     @SerializedName("shipping_phone")
     public String shippingPhone;
+    @SerializedName("shipping_email")
+    public String shippingEmail;
     @SerializedName("shipping_address")
     public String shippingAddress;
     @SerializedName("province")
@@ -21,9 +23,17 @@ public class CheckoutRequest {
     @SerializedName("district")
     public String district;
     @SerializedName("payment_method")
-    public String paymentMethod = "cod";
+    public String paymentMethod = "COD";
+    @SerializedName("shipping_method")
+    public String shippingMethod;
     @SerializedName("coupon_code")
     public String couponCode;
+    @SerializedName("coupon_discount")
+    public double couponDiscount;
+    @SerializedName("total_amount")
+    public double totalAmount;
+    @SerializedName("deposit_amount")
+    public double depositAmount;
     @SerializedName("items")
     public List<Item> items;
 

@@ -21,6 +21,9 @@ public interface ApiService {
     @POST("auth/forgot-password")
     Call<AuthResponse> forgotPassword(@Body Map<String, String> body);
 
+    @POST("auth/reset-password")
+    Call<AuthResponse> resetPassword(@Body Map<String, String> body);
+
     // ── Products ──────────────────────────────────────────────────────────────
     @GET("products")
     Call<ApiListResponse<ProductDto>> getProducts(
@@ -110,6 +113,9 @@ public interface ApiService {
             @Body Map<String, String> body
     );
 
+    @POST("orders/{id}/demo-transfer-timeout")
+    Call<Map<String, Object>> completeDemoTransfer(@Path("id") String orderId);
+
     // ── Order Tracking ────────────────────────────────────────────────────────
     @GET("orders")
     Call<ApiListResponse<OrderDto>> trackOrderByCode(
@@ -145,4 +151,10 @@ public interface ApiService {
     // ── Customers ─────────────────────────────────────────────────────────────
     @GET("customers/{id}")
     Call<CustomerDto> getCustomer(@Path("id") String customerId);
+
+    @GET("customer-address")
+    Call<ApiListResponse<CustomerAddressDto>> getCustomerAddresses(
+            @Query("customer_id") String customerId,
+            @Query("limit") int limit
+    );
 }

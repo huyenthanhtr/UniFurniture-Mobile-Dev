@@ -56,13 +56,6 @@ public class CartFragment extends Fragment {
         });
 
         binding.btnCheckout.setOnClickListener(v -> {
-            // Verify if logged in
-            if (!SessionManager.getInstance(requireContext()).isLoggedIn()) {
-                Toast.makeText(requireContext(), getString(R.string.login_required_checkout), Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(requireContext(), AuthActivity.class));
-                return;
-            }
-
             Bundle bundle = new Bundle();
             String couponCode = VoucherManager.getInstance(requireContext()).getSelectedVoucherCode();
             if (couponCode != null) {

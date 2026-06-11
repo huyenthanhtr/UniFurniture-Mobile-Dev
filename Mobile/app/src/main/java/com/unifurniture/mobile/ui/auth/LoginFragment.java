@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.databinding.FragmentLoginBinding;
 import com.unifurniture.mobile.ui.MainActivity;
 import com.unifurniture.mobile.util.SessionManager;
@@ -78,8 +79,8 @@ public class LoginFragment extends Fragment {
                 // Add welcome notification
                 com.unifurniture.mobile.util.NotificationManager.getInstance(requireContext())
                         .addNotification(
-                                "Chào mừng trở lại!",
-                                "Đăng nhập thành công. Hãy khám phá những sản phẩm nội thất cao cấp dành riêng cho bạn.",
+                                getString(R.string.login_welcome),
+                                getString(R.string.login_success_msg),
                                 "account",
                                 null
                         );
