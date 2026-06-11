@@ -1,0 +1,32 @@
+﻿import { Routes } from '@angular/router';
+import { ArViewer } from './pages/ar-viewer/ar-viewer';
+import { ProductComponent } from './pages/product/product';
+import { ProductDetailComponent } from './pages/product-detail/product-detail';
+import { CategoryPageComponent } from './pages/category-page/category-page';
+import { PromotionsPageComponent } from './pages/promotions/promotions';
+import { PolicyPageComponent } from './pages/policy/policy';
+import { AboutPageComponent } from './pages/about/about';
+import { CommunityPageComponent } from './pages/community/community';
+import { OrderTrackingComponent } from './pages/order-tracking/order-tracking';
+import { CheckoutSuccessComponent } from './pages/checkout-success/checkout-success';
+import { AccountComponent } from './pages/account/account';
+
+export const routes: Routes = [
+  { path: 'ar', component: ArViewer },
+  { path: 'ar-viewer', component: ArViewer },
+  { path: 'products', component: ProductComponent },
+  { path: 'products/:slug', component: ProductDetailComponent },
+  { path: 'danh-muc', component: CategoryPageComponent },
+  { path: 'khuyen-mai', component: PromotionsPageComponent },
+  { path: 'chinh-sach/:slug', component: PolicyPageComponent },
+  { path: 've-unifurniture', component: AboutPageComponent },
+  { path: 'cong-dong', component: CommunityPageComponent },
+  { path: 'cua-hang', redirectTo: 'cong-dong', pathMatch: 'full' },
+  { path: 'tra-cuu-van-don', component: OrderTrackingComponent },
+  { path: 'tai-khoan', component: AccountComponent },
+  { path: 'tai-khoan/don-hang', component: AccountComponent, data: { tab: 'orders' } },
+  { path: 'checkout', loadComponent: () => import('./pages/checkout/checkout').then(m => m.CheckoutComponent) },
+  { path: 'checkout-payment', loadComponent: () => import('./pages/checkout/components/checkout-payment-qr/checkout-payment-qr').then(m => m.CheckoutPaymentQrComponent) },
+  { path: 'checkout-success', component: CheckoutSuccessComponent }
+];
+

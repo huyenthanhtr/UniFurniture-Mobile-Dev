@@ -1,0 +1,10 @@
+<div class="product-grid">
+  <ng-container *ngIf="products && products.length > 0; else emptyState">
+    <app-product-card *ngFor="let product of products; trackBy: trackById" [product]="product">
+    </app-product-card>
+  </ng-container>
+
+  <ng-template #emptyState>
+    <p class="empty-state">Không có sản phẩm.</p>
+  </ng-template>
+</div>

@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">UniFurniture</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_products">Products</string>
+    <string name="nav_cart">Cart</string>
+    <string name="nav_account">Account</string>
+
+    <!-- Auth -->
+    <string name="login">Login</string>
+    <string name="login_subtitle">Login</string>
+    <string name="register">Register</string>
+    <string name="register_title">Create Account</string>
+    <string name="phone">Phone Number</string>
+    <string name="password">Password</string>
+    <string name="full_name">Full Name</string>
+    <string name="no_account">Don\'t have an account? Sign up</string>
+    <string name="have_account">Already have an account? Login</string>
+    <string name="otp_title">OTP Verification</string>
+    <string name="otp_subtitle">Enter the OTP sent via SMS</string>
+    <string name="otp_code">OTP Code</string>
+    <string name="btn_verify">Verify</string>
+
+    <!-- Cart -->
+    <string name="cart_title">Cart</string>
+    <string name="empty_cart">Cart is empty</string>
+    <string name="login_to_shop">Login to shop</string>
+    <string name="total">Total</string>
+    <string name="checkout">Checkout</string>
+
+    <!-- Account -->
+    <string name="account_title">Account</string>
+    <string name="not_logged_in">You are not logged in</string>
+    <string name="login_or_register">Login / Register</string>
+    <string name="my_orders">My Orders</string>
+    <string name="favorites">Favorites</string>
+    <string name="logout">Logout</string>
+
+    <!-- Checkout -->
+    <string name="checkout_title">Order</string>
+    <string name="back">Back</string>
+    <string name="shipping_info">Shipping Information</string>
+    <string name="recipient_name">Recipient Name</string>
+    <string name="delivery_address">Delivery Address</string>
+    <string name="payment_method">Payment Method</string>
+    <string name="cod">Cash on Delivery (COD)</string>
+    <string name="bank_transfer">Bank Transfer</string>
+    <string name="place_order">Place Order</string>
+    <string name="order_success">Order placed successfully!</string>
+    <string name="order_failed">Order failed. Please try again.</string>
+    <string name="fill_required">Please fill in all required fields</string>
+
+    <!-- Home -->
+    <string name="search_hint">Search products…</string>
+    <string name="recent_searches">Recent Searches</string>
+    <string name="clear_all">Clear all</string>
+    <string name="categories">Categories</string>
+    <string name="featured_products">Featured Products</string>
+    <string name="view_all">View all ›</string>
+    <string name="collections">Collections</string>
+
+    <!-- Product List -->
+    <string name="products_title">Products</string>
+    <string name="toggle_view_desc">Toggle view</string>
+    <string name="sort_newest">Newest</string>
+    <string name="sort_best_selling">Best Selling</string>
+    <string name="sort_price_low">Price Low</string>
+    <string name="sort_price_high">Price High</string>
+    <string name="empty_products">No products found</string>
+    <string name="empty_products_hint">Try changing filters or search terms</string>
+    <string name="filter_desc">Filter products</string>
+    <string name="showing_products">Showing %1$d / %2$d products</string>
+
+    <!-- Product Detail -->
+    <string name="product_detail_title">Product Detail</string>
+    <string name="back_desc">Go back</string>
+    <string name="choose_variant">Choose color / style</string>
+    <string name="short_description">Short Description</string>
+    <string name="full_description">Description</string>
+    <string name="reviews">Reviews</string>
+    <string name="no_rating">No reviews yet</string>
+    <string name="no_reviews">No reviews yet</string>
+    <string name="related_products">Related Products</string>
+    <string name="quantity">Quantity</string>
+    <string name="add_to_cart">Add to Cart</string>
+    <string name="warranty">Warranty: %1$d months</string>
+    <string name="sold_count">Sold: %1$s</string>
+    <string name="review_count">(%1$d reviews)</string>
+    <string name="added_to_cart">Added to cart!</string>
+    <string name="in_stock">In Stock</string>
+    <string name="out_of_stock">Out of Stock</string>
+    <string name="shop_reply">Reply from store</string>
+    <string name="guest_customer">Customer</string>
+
+    <!-- Filter -->
+    <string name="filter_title">Filter Products</string>
+    <string name="filter_category">Category</string>
+    <string name="price_range">Price Range (VND)</string>
+    <string name="price_from">From</string>
+    <string name="price_to">To</string>
+    <string name="min_rating">Minimum Rating</string>
+    <string name="filter_all">All</string>
+    <string name="rating_3_up">3★ and above</string>
+    <string name="rating_4_up">4★ and above</string>
+    <string name="rating_5">5★</string>
+    <string name="clear_filter">Clear Filters</string>
+    <string name="apply_filter">Apply</string>
+
+    <!-- Common -->
+    <string name="loading">Loading…</string>
+    <string name="delete_item">Delete</string>
+    <string name="no_orders">You have no orders yet</string>
+    <string name="my_orders_title">My Orders</string>
+    <string name="app_tagline">Smart Furniture</string>
+
+    <!-- Add to cart feedback -->
+    <string name="btn_added">✓ Added</string>
+
+    <!-- Review sort -->
+    <string name="review_sort_newest">Newest</string>
+    <string name="review_sort_high_rating">Highest Rating</string>
+    <string name="review_sort_low_rating">Lowest Rating</string>
+
+    <!-- Recently viewed -->
+    <string name="recently_viewed">Recently Viewed</string>
+    <string name="added_to_favorites">Đã thêm vào yêu thích</string>
+    <string name="removed_from_favorites">Đã xóa khỏi yêu thích</string>
+    <string name="login_required_favorite">Please login to add to favorites</string>
+    <string name="login_required_cart">Please login to add to cart</string>
+    <string name="please_select_variant">Please select a color/variant</string>
+    <string name="login_required_checkout">Please login to checkout</string>
+    <string name="wishlist_add_error">Could not add to favorites</string>
+    <string name="wishlist_remove_error">Could not remove from favorites</string>
+    <string name="error_network">Network error: %1$s</string>
+    <string name="error_unknown">An unknown error occurred</string>
+
+    <!-- Voucher -->
+    <string name="voucher_title">Vouchers</string>
+    <string name="empty_vouchers">You don\'t have any vouchers yet.</string>
+    <string name="label_discount">DISCOUNT</string>
+    <string name="btn_use">Use</string>
+    <string name="voucher_expiry">Expiry: %1$s</string>
+    <string name="voucher_discount_amount">Discount %1$s</string>
+    <string name="voucher_condition">Applied for orders from %1$s.</string>
+    <string name="voucher_upsell">Buy %1$s more to apply</string>
+    <string name="select_voucher">Select voucher</string>
+    <string name="voucher_wallet">Voucher Wallet</string>
+    <string name="empty_voucher_storage">Voucher storage is empty</string>
+    <string name="voucher_discount_label">Voucher discount</string>
+    <string name="content_desc_remove_voucher">Remove voucher</string>
+
+    <!-- Notifications -->
+    <string name="notification_title">Notifications</string>
+    <string name="no_notifications">No notifications</string>
+    <string name="new_notification_hint">New notifications will appear here when there is activity.</string>
+    <string name="content_desc_mark_all_read">Mark all as read</string>
+    <string name="label_orders">Orders</string>
+    <string name="label_all">All</string>
+    <string name="label_account">Account</string>
+
+    <!-- Wishlist -->
+    <string name="empty_wishlist">Wishlist is empty</string>
+
+    <!-- Feedback & UI -->
+    <string name="view_cart">View Cart</string>
+    <string name="add_to_cart_success">Added to cart successfully</string>
+    <string name="add_to_cart_error">Could not add to cart. Please try again.</string>
+    <string name="content_desc_delete">Delete</string>
+    <string name="close">Close</string>
+    <string name="subtotal">Subtotal</string>
+    <string name="login_upsell">Login to receive offers</string>
+    <string name="content_desc_logo">Logo</string>
+    <string name="content_desc_product_image">Product Image</string>
+    <string name="content_desc_collection">Collection</string>
+
+    <!-- Toasts & Messages -->
+    <string name="toast_no_other_variants">Product has no other variants</string>
+    <string name="toast_product_not_found">Product information not found</string>
+    <string name="toast_voucher_removed_min_spend">Voucher removed due to minimum spend requirement</string>
+    <string name="toast_voucher_saved_upsell">Voucher saved. Buy more to apply!</string>
+    <string name="toast_voucher_applied">Applied voucher: %1$s</string>
+    <string name="toast_order_id">Order: %1$s</string>
+    <string name="toast_mark_all_read">Marked all as read</string>
+    <string name="toast_login_required_orders">Please login to view orders</string>
+    <string name="image_indicator_format">%1$d/%2$d</string>
+    <string name="price_range_format">%1$s - %2$s</string>
+    <string name="min_quantity_value">1</string>
+    <string name="max_quantity_value">99</string>
+    <string name="login_required_orders_hint">Login to save purchase history</string>
+    <string name="guest">Guest</string>
+</resources>
