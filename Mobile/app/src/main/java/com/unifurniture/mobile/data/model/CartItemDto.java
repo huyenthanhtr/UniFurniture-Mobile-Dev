@@ -1,121 +1,96 @@
 package com.unifurniture.mobile.data.model;
 
+import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
+import java.util.Map;
 
-/**
- * Cart item as returned by server.
- *
- * IMPORTANT: Server populates variant_id as a nested object containing the
- * variant document with product_id also populated as a nested product.
- *
- * Shape from server:
- *   {
- *     _id,
- *     cart_id,
- *     variant_id: {          // populated ProductVariant
- *       _id, name, variant_name, sku, color, price, compare_at_price, stock_quantity,
- *       product_id: {        // populated Product
- *         _id, name, slug, thumbnail, thumbnail_url
- *       }
- *     },
- *     quantity,
- *     unit_price
- *   }
- */
 public class CartItemDto {
     @SerializedName("_id")
     public String id;
     @SerializedName("cart_id")
     public String cartId;
+    @SerializedName("product_id")
+    public String productId;
     @SerializedName("variant_id")
-    public CartVariant variant;
+    public Object variantIdRaw;
     public Integer quantity;
     @SerializedName("unit_price")
-    public Double unitPrice;
+    public Double price;
+    public ProductDto product;
+    public ProductVariantDto variant;
 
-    // ── Nested populated variant ─────────────────────────────────────────────
-    public static class CartVariant {
-        @SerializedName("_id")
-        public String id;
-        public String name;
-        @SerializedName("variant_name")
-        public String variantName;
-        public String sku;
-        public String color;
-        public Double price;
-        @SerializedName("compare_at_price")
-        public Double compareAtPrice;
-        @SerializedName("stock_quantity")
-        public Integer stockQuantity;
-        @SerializedName("product_id")
-        public CartProduct product;
-    }
+    private transient boolean normalized;
 
-    // ── Nested populated product ─────────────────────────────────────────────
-    public static class CartProduct {
-        @SerializedName("_id")
-        public String id;
-        public String name;
-        public String slug;
-        public String thumbnail;
-        @SerializedName("thumbnail_url")
-        public String thumbnailUrl;
-
-        public String getImageUrl() {
-            if (thumbnail != null && !thumbnail.isEmpty()) return thumbnail;
-            if (thumbnailUrl != null && !thumbnailUrl.isEmpty()) return thumbnailUrl;
-            return "";
+    public String getVariantId() {
+        if (variantIdRaw == null) {
+            return null;
         }
-    }
-
-    // ── Helpers ──────────────────────────────────────────────────────────────
-
-    /** Get display name: variant's product name or variant name */
-    public String getProductName() {
-        if (variant != null && variant.product != null && variant.product.name != null) {
-            return variant.product.name;
+        if (variantIdRaw instanceof String) {
+            return (String) variantIdRaw;
         }
-        if (variant != null && variant.name != null) return variant.name;
-        return "Sản phẩm";
-    }
-
-    /** Get display image URL */
-    public String getImageUrl() {
-        if (variant != null && variant.product != null) {
-            return variant.product.getImageUrl();
+        if (variantIdRaw instanceof Map) {
+            Object id = ((Map<?, ?>) variantIdRaw).get("_id");
+            if (id != null) {
+                return id.toString();
+            }
+            id = ((Map<?, ?>) variantIdRaw).get("id");
+            if (id != null) {
+                return id.toString();
+            }
         }
-        return "";
-    }
-
-    /** Get variant color label */
-    public String getColorLabel() {
-        if (variant != null && variant.color != null && !variant.color.isEmpty()) {
-            return variant.color;
-        }
-        if (variant != null && variant.variantName != null) return variant.variantName;
         return null;
     }
 
-    /** Get unit price — prefer unitPrice field, fallback to variant price */
-    public double getEffectivePrice() {
-        if (unitPrice != null && unitPrice > 0) return unitPrice;
-        if (variant != null && variant.price != null) return variant.price;
-        return 0;
+    public ProductDto getProduct() {
+        normalizeVariantData();
+        return product;
     }
 
-    /** Total price = unit price × quantity */
+    public ProductVariantDto getVariant() {
+        normalizeVariantData();
+        return variant;
+    }
+
+    public double getUnitPrice() {
+        if (price != null) {
+            return price;
+        }
+        ProductVariantDto v = getVariant();
+        return (v != null && v.price != null) ? v.price : 0;
+    }
+
     public double getTotalPrice() {
+        double unitPrice = getUnitPrice();
         int qty = quantity != null ? quantity : 1;
-        return getEffectivePrice() * qty;
+        return unitPrice * qty;
     }
 
-    /** Get variant ID string */
-    public String getVariantId() {
-        return variant != null ? variant.id : null;
-    }
+    private void normalizeVariantData() {
+        if (normalized) return;
+        normalized = true;
 
-    /** Get product ID string */
-    public String getProductId() {
-        return (variant != null && variant.product != null) ? variant.product.id : null;
+        if (variantIdRaw instanceof Map) {
+            Map<?, ?> rawMap = (Map<?, ?>) variantIdRaw;
+            Gson gson = new Gson();
+            String json = gson.toJson(rawMap);
+            variant = gson.fromJson(json, ProductVariantDto.class);
+
+            Object rawProduct = rawMap.get("product_id");
+            if (rawProduct instanceof Map) {
+                product = gson.fromJson(gson.toJson(rawProduct), ProductDto.class);
+                if (product != null && variant != null) {
+                    variant.productId = product.id;
+                }
+            } else if (rawProduct instanceof String) {
+                if (variant != null) {
+                    variant.productId = rawProduct.toString();
+                }
+            }
+        }
+
+        if (product == null && productId != null) {
+            product = new ProductDto();
+            product.id = productId;
+        }
     }
 }

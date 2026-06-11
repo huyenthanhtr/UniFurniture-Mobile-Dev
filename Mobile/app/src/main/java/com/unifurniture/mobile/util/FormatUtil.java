@@ -3,8 +3,45 @@ package com.unifurniture.mobile.util;
 import android.text.format.DateFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
+import com.unifurniture.mobile.data.model.ProductVariantDto;
 
 public class FormatUtil {
+
+    public static String getVariantLabel(ProductVariantDto variant) {
+        if (variant == null) return "Mặc định";
+        
+        String color = (variant.color != null) ? variant.color.trim() : "";
+        
+        String spec = "";
+        if (variant.variantName != null && !variant.variantName.trim().isEmpty() && !variant.variantName.equals("undefined")) {
+            spec = variant.variantName.trim();
+        } else if (variant.name != null && !variant.name.trim().isEmpty() && !variant.name.equals("undefined")) {
+            spec = variant.name.trim();
+        } else if (variant.label != null && !variant.label.trim().isEmpty() && !variant.label.equals("undefined")) {
+            spec = variant.label.trim();
+        }
+
+        if (spec.startsWith("Combo Bàn Ăn ")) {
+            spec = spec.substring("Combo Bàn Ăn ".length());
+        }
+
+        if (!color.isEmpty() && !spec.isEmpty()) {
+            if (color.equalsIgnoreCase(spec)) {
+                return color;
+            } else if (spec.toLowerCase().contains(color.toLowerCase())) {
+                return spec;
+            } else if (color.toLowerCase().contains(spec.toLowerCase())) {
+                return color;
+            }
+            return color + " - " + spec;
+        } else if (!color.isEmpty()) {
+            return color;
+        } else if (!spec.isEmpty()) {
+            return spec;
+        } else {
+            return "Mặc định";
+        }
+    }
 
     private static final NumberFormat VND_FORMAT = NumberFormat.getNumberInstance(new Locale("vi", "VN"));
 

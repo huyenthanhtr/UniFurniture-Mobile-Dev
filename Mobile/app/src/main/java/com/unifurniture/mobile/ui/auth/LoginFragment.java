@@ -47,15 +47,6 @@ public class LoginFragment extends Fragment {
                     .commit();
         });
 
-        binding.tvForgotPassword.setOnClickListener(v -> {
-            // Navigate to forgot password
-            requireActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(android.R.id.content, new ForgotFragment())
-                    .addToBackStack(null)
-                    .commit();
-        });
-
         // Observers
         viewModel.isLoading().observe(getViewLifecycleOwner(), loading -> {
             binding.btnLogin.setEnabled(!loading);
@@ -67,10 +58,32 @@ public class LoginFragment extends Fragment {
         });
 
         viewModel.getAuthResult().observe(getViewLifecycleOwner(), result -> {
-            if (result != null && result.profile != null) {
-                // Login success — save profile to session
+            if (result != null && result.token != null) {
                 SessionManager session = SessionManager.getInstance(requireContext());
-                session.saveProfile(result.profile);
+                session.saveToken(result.token);
+                session.saveCustomer(result.customer);
+
+                // Merge local wishlist to server
+                java.util.Set<String> localWishlist = session.getLocalWishlist();
+                if (!localWishlist.isEmpty() && result.customer != null) {
+                    com.unifurniture.mobile.data.repository.ProductRepository productRepo = 
+                        new com.unifurniture.mobile.data.repository.ProductRepository(
+                            com.unifurniture.mobile.UniFurnitureApp.getInstance().getApiService());
+                    for (String productId : localWishlist) {
+                        productRepo.addToWishlist(result.customer.id, productId);
+                    }
+                    session.clearLocalWishlist();
+                }
+
+                // Add welcome notification
+                com.unifurniture.mobile.util.NotificationManager.getInstance(requireContext())
+                        .addNotification(
+                                "Chào mừng trở lại!",
+                                "Đăng nhập thành công. Hãy khám phá những sản phẩm nội thất cao cấp dành riêng cho bạn.",
+                                "account",
+                                null
+                        );
+
                 // Go to MainActivity
                 startActivity(new Intent(requireContext(), MainActivity.class));
                 requireActivity().finish();

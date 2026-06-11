@@ -14,10 +14,16 @@ public class ImageSliderAdapter extends RecyclerView.Adapter<ImageSliderAdapter.
 
     private final Context context;
     private List<String> imageUrls;
+    private final boolean isBanner;
 
     public ImageSliderAdapter(Context context, List<String> imageUrls) {
+        this(context, imageUrls, false);
+    }
+
+    public ImageSliderAdapter(Context context, List<String> imageUrls, boolean isBanner) {
         this.context = context;
         this.imageUrls = imageUrls;
+        this.isBanner = isBanner;
     }
 
     public void updateImages(List<String> newUrls) {
@@ -28,21 +34,31 @@ public class ImageSliderAdapter extends RecyclerView.Adapter<ImageSliderAdapter.
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        PhotoView photoView = new PhotoView(context);
-        photoView.setLayoutParams(new ViewGroup.LayoutParams(
+        android.widget.ImageView imageView;
+        if (isBanner) {
+            imageView = new android.widget.ImageView(context);
+            imageView.setScaleType(android.widget.ImageView.ScaleType.CENTER_CROP);
+        } else {
+            imageView = new com.github.chrisbanes.photoview.PhotoView(context);
+        }
+        imageView.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
-        return new ViewHolder(photoView);
+        return new ViewHolder(imageView);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Glide.with(context)
+        com.bumptech.glide.RequestBuilder<android.graphics.drawable.Drawable> builder = Glide.with(context)
                 .load(imageUrls.get(position))
                 .placeholder(R.drawable.placeholder_product)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .centerCrop()
-                .into((PhotoView) holder.itemView);
+                .diskCacheStrategy(DiskCacheStrategy.ALL);
+        if (isBanner) {
+            builder.centerCrop();
+        } else {
+            builder.fitCenter();
+        }
+        builder.into(holder.imageView);
     }
 
     @Override
@@ -51,8 +67,10 @@ public class ImageSliderAdapter extends RecyclerView.Adapter<ImageSliderAdapter.
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        ViewHolder(@NonNull PhotoView itemView) {
+        final android.widget.ImageView imageView;
+        ViewHolder(@NonNull android.widget.ImageView itemView) {
             super(itemView);
+            this.imageView = itemView;
         }
     }
 }

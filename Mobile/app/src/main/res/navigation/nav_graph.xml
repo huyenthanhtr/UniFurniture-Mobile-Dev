@@ -59,4 +59,19 @@
         android:name="com.unifurniture.mobile.ui.account.AccountFragment"
         android:label="Tài khoản" />
 
+    <fragment
+        android:id="@+id/wishlistFragment"
+        android:name="com.unifurniture.mobile.ui.product.WishlistFragment"
+        android:label="Yêu thích" />
+
+    <fragment
+        android:id="@+id/notificationFragment"
+        android:name="com.unifurniture.mobile.ui.account.NotificationFragment"
+        android:label="Thông báo" />
+
+    <fragment
+        android:id="@+id/voucherListFragment"
+        android:name="com.unifurniture.mobile.ui.cart.VoucherListFragment"
+        android:label="Kho Voucher" />
+
 </navigation>

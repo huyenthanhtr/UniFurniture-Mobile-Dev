@@ -123,7 +123,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupBanner() {
-        bannerAdapter = new ImageSliderAdapter(requireContext(), new ArrayList<>());
+        bannerAdapter = new ImageSliderAdapter(requireContext(), new ArrayList<>(), true);
         binding.bannerViewPager.setAdapter(bannerAdapter);
         binding.bannerDotsIndicator.attachTo(binding.bannerViewPager);
 

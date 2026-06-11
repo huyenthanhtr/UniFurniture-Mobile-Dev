@@ -21,11 +21,11 @@
             android:src="@drawable/ic_back"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:tint="@color/white"
-            android:contentDescription="@string/str_back" />
+            android:contentDescription="@string/back_desc" />
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/str_order"
+            android:text="@string/checkout_title"
             android:textColor="@color/white"
             android:textSize="17sp"
             android:textStyle="bold"
@@ -45,7 +45,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/str_shipping_info"
+                android:text="@string/shipping_info"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:layout_marginBottom="12dp" />
@@ -53,7 +53,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/str_shipping_name_hint"
+                android:hint="@string/recipient_name"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etName"
@@ -65,7 +65,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/str_phone"
+                android:hint="@string/phone"
                 android:layout_marginTop="12dp"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
                 <com.google.android.material.textfield.TextInputEditText
@@ -78,7 +78,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/str_shipping_address_hint"
+                android:hint="@string/delivery_address"
                 android:layout_marginTop="12dp"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
                 <com.google.android.material.textfield.TextInputEditText
@@ -92,7 +92,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/str_payment_method"
+                android:text="@string/payment_method"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:layout_marginTop="20dp"
@@ -105,13 +105,13 @@
                     android:id="@+id/rbCod"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/str_payment_cod"
+                    android:text="@string/cod"
                     android:checked="true" />
                 <RadioButton
                     android:id="@+id/rbBank"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/str_payment_bank"
+                    android:text="@string/bank_transfer"
                     android:layout_marginTop="8dp" />
             </RadioGroup>
 
@@ -131,7 +131,7 @@
         android:id="@+id/btnPlaceOrder"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:text="@string/str_confirm_order"
+        android:text="@string/place_order"
         android:layout_margin="16dp"
         style="@style/Widget.UniFurniture.Button.Primary" />
 

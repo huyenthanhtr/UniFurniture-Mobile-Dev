@@ -18,13 +18,99 @@ public class CartRepository {
         this.apiService = apiService;
     }
 
-    /**
-     * GET /cart/active?customer_id=...
-     * Server returns: { cart: {...}, items: [...] }
-     */
-    public LiveData<CartDto> getActiveCart(String customerId) {
+    public LiveData<CartDto> getActiveCart(String customerId, String cartId) {
         MutableLiveData<CartDto> result = new MutableLiveData<>();
-        apiService.getActiveCart(customerId).enqueue(new Callback<CartDto>() {
+        // Gửi cả 2 định danh nếu có để server xử lý logic merge giỏ hàng
+        apiService.getActiveCart(customerId, cartId).enqueue(new Callback<CartDto>() {
+            @Override
+            public void onResponse(Call<CartDto> call, Response<CartDto> response) {
+                if (response.isSuccessful()) {
+                    result.setValue(response.body());
+                } else {
+                    android.util.Log.e("CartRepo", "Get active cart failed with code: " + response.code());
+                    result.setValue(null);
+                }
+            }
+            @Override
+            public void onFailure(Call<CartDto> call, Throwable t) {
+                result.setValue(null);
+            }
+        });
+        return result;
+    }
+
+    public LiveData<CartDto> addToCart(String customerId, String cartId, String variantId, int quantity, MutableLiveData<String> errorMsg) {
+        MutableLiveData<CartDto> result = new MutableLiveData<>();
+        
+        android.util.Log.d("CartRepo", "addToCart Request Parameters:");
+        android.util.Log.d("CartRepo", "  customer_id: " + (customerId != null ? customerId : "null"));
+        android.util.Log.d("CartRepo", "  cart_id: " + (cartId != null ? cartId : "null"));
+        android.util.Log.d("CartRepo", "  variant_id: " + (variantId != null ? variantId : "null"));
+        android.util.Log.d("CartRepo", "  quantity: " + quantity);
+
+        if (variantId == null || variantId.isEmpty()) {
+            if (errorMsg != null) errorMsg.setValue("Vui lòng chọn loại sản phẩm");
+            return result;
+        }
+
+        Map<String, Object> body = new HashMap<>();
+        if (customerId != null && !customerId.isEmpty()) {
+            body.put("customer_id", customerId);
+        }
+        if (cartId != null && !cartId.isEmpty()) {
+            body.put("cart_id", cartId);
+        }
+        body.put("variant_id", variantId);
+        body.put("quantity", Math.max(1, quantity));
+
+        String jsonPayload = new com.google.gson.Gson().toJson(body);
+        android.util.Log.d("CartRepo", "Final Add to Cart Payload: " + jsonPayload);
+
+        apiService.upsertCartItem(body).enqueue(new Callback<CartDto>() {
+            @Override
+            public void onResponse(Call<CartDto> call, Response<CartDto> response) {
+                if (response.isSuccessful()) {
+                    android.util.Log.d("CartRepo", "Add to cart success: " + new com.google.gson.Gson().toJson(response.body()));
+                    result.setValue(response.body());
+                } else {
+                    String msg = "Error " + response.code();
+                    try {
+                        String errorBody = response.errorBody() != null ? response.errorBody().string() : null;
+                        android.util.Log.e("CartRepo", "Add to cart Error Body: " + errorBody);
+                        if (errorBody != null && !errorBody.isEmpty()) {
+                            java.util.Map map = new com.google.gson.Gson().fromJson(errorBody, java.util.Map.class);
+                            if (map != null && map.get("message") != null) {
+                                msg = map.get("message").toString();
+                            } else {
+                                msg = errorBody;
+                            }
+                        }
+                    } catch (Exception e) {
+                        android.util.Log.e("CartRepo", "Error parsing error body", e);
+                    }
+                    android.util.Log.e("CartRepo", "Add to cart failed message: " + msg);
+                    if (errorMsg != null) errorMsg.setValue(msg);
+                    result.setValue(null);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<CartDto> call, Throwable t) {
+                android.util.Log.e("CartRepo", "Add to cart network failure", t);
+                // We'll handle localized network error in the ViewModel/Activity or pass a generic one
+                if (errorMsg != null) errorMsg.setValue("Network error: " + t.getMessage());
+                result.setValue(null);
+            }
+        });
+        return result;
+    }
+
+    public LiveData<CartDto> updateCartItemQuantity(String cartItemId, int quantity) {
+        MutableLiveData<CartDto> result = new MutableLiveData<>();
+        Map<String, Object> body = new HashMap<>();
+        body.put("quantity", quantity);
+
+        apiService.updateCartItem(cartItemId, body).enqueue(new Callback<CartDto>() {
             @Override
             public void onResponse(Call<CartDto> call, Response<CartDto> response) {
                 result.setValue(response.isSuccessful() ? response.body() : null);
@@ -37,74 +123,34 @@ public class CartRepository {
         return result;
     }
 
-    /**
-     * POST /cart/items/upsert
-     * Server expects: { cart_id, variant_id, quantity, unit_price }
-     * Server returns: single populated CartItemDto
-     *
-     * After upsert, we reload the full cart to update the UI.
-     */
-    public LiveData<CartItemDto> upsertCartItem(String cartId, String variantId,
-                                                 int quantity, double unitPrice) {
-        MutableLiveData<CartItemDto> result = new MutableLiveData<>();
+    public LiveData<CartDto> updateCartItemVariant(String cartItemId, String variantId) {
+        MutableLiveData<CartDto> result = new MutableLiveData<>();
         Map<String, Object> body = new HashMap<>();
-        body.put("cart_id", cartId);
         body.put("variant_id", variantId);
-        body.put("quantity", quantity);
-        body.put("unit_price", unitPrice);
 
-        apiService.upsertCartItem(body).enqueue(new Callback<CartItemDto>() {
+        apiService.updateCartItem(cartItemId, body).enqueue(new Callback<CartDto>() {
             @Override
-            public void onResponse(Call<CartItemDto> call, Response<CartItemDto> response) {
+            public void onResponse(Call<CartDto> call, Response<CartDto> response) {
                 result.setValue(response.isSuccessful() ? response.body() : null);
             }
             @Override
-            public void onFailure(Call<CartItemDto> call, Throwable t) {
+            public void onFailure(Call<CartDto> call, Throwable t) {
                 result.setValue(null);
             }
         });
         return result;
     }
 
-    /**
-     * PATCH /cart/items/:id
-     * Server expects: { quantity }
-     * Server returns: { merged, item }  — we just signal success
-     */
-    public LiveData<Boolean> updateCartItemQuantity(String cartItemId, int quantity) {
-        MutableLiveData<Boolean> result = new MutableLiveData<>();
-        Map<String, Integer> body = new HashMap<>();
-        body.put("quantity", quantity);
-
-        apiService.updateCartItem(cartItemId, body).enqueue(new Callback<Map<String, Object>>() {
+    public LiveData<CartDto> removeCartItem(String cartItemId) {
+        MutableLiveData<CartDto> result = new MutableLiveData<>();
+        apiService.deleteCartItem(cartItemId).enqueue(new Callback<CartDto>() {
             @Override
-            public void onResponse(Call<Map<String, Object>> call,
-                                   Response<Map<String, Object>> response) {
-                result.setValue(response.isSuccessful());
+            public void onResponse(Call<CartDto> call, Response<CartDto> response) {
+                result.setValue(response.isSuccessful() ? response.body() : null);
             }
             @Override
-            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                result.setValue(false);
-            }
-        });
-        return result;
-    }
-
-    /**
-     * DELETE /cart/items/:id
-     * Server returns: { success, deleted }
-     */
-    public LiveData<Boolean> removeCartItem(String cartItemId) {
-        MutableLiveData<Boolean> result = new MutableLiveData<>();
-        apiService.deleteCartItem(cartItemId).enqueue(new Callback<Map<String, Object>>() {
-            @Override
-            public void onResponse(Call<Map<String, Object>> call,
-                                   Response<Map<String, Object>> response) {
-                result.setValue(response.isSuccessful());
-            }
-            @Override
-            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                result.setValue(false);
+            public void onFailure(Call<CartDto> call, Throwable t) {
+                result.setValue(null);
             }
         });
         return result;

@@ -1,13 +1,48 @@
-﻿const mongoose = require("mongoose");
+const mongoose = require("mongoose");
 const Wishlist = require("../models/Wishlist");
 const Product = require("../models/Product");
 const ProductImage = require("../models/ProductImage");
-const Profile = require("../models/Profile");
+const Customer = require("../models/Customer");
 
 function asObjectId(value) {
   const raw = String(value || "").trim();
   if (!raw || !mongoose.Types.ObjectId.isValid(raw)) return null;
   return new mongoose.Types.ObjectId(raw);
+}
+
+async function resolveOrCreateCustomerId(idRaw) {
+  const id = asObjectId(idRaw);
+  if (!id) return null;
+
+  // 1. Try to find if this is a Profile ID
+  const profile = await mongoose.model("Profile").findById(id);
+  if (profile) {
+    if (profile.customer_id && mongoose.Types.ObjectId.isValid(String(profile.customer_id))) {
+      return profile.customer_id;
+    }
+    // No Customer document linked to this Profile yet, create one!
+    const CustomerModel = mongoose.model("Customer");
+    const { generateCustomerCode } = require("../utils/code-generator");
+    const customerCode = await generateCustomerCode();
+    const customer = await CustomerModel.create({
+      customer_code: customerCode,
+      full_name: profile.full_name || "Member",
+      phone: profile.phone || "",
+      customer_type: "member",
+      status: "active"
+    });
+    profile.customer_id = customer._id;
+    await profile.save();
+    return customer._id;
+  }
+
+  // 2. Otherwise, check if it's already a Customer ID
+  const customerDoc = await mongoose.model("Customer").findById(id).select("_id").lean();
+  if (customerDoc) {
+    return customerDoc._id;
+  }
+
+  return null;
 }
 
 function toMoney(value, fallback = 0) {
@@ -19,7 +54,7 @@ function toMoney(value, fallback = 0) {
 function mapWishlistItem(doc) {
   return {
     _id: String(doc?._id || ""),
-    profile_id: String(doc?.profile_id || ""),
+    customer_id: String(doc?.customer_id || ""),
     account_name: String(doc?.account_name || ""),
     account_phone: String(doc?.account_phone || ""),
     product_id: String(doc?.product_id || ""),
@@ -52,141 +87,87 @@ async function resolveImageUrl(productId, preferredUrl) {
   return String(imageDoc?.image_url || "").trim();
 }
 
-async function getProfileById(profileId) {
-  return Profile.findById(profileId).select("full_name phone").lean();
-}
-
-function normalizeAccountSnapshot(profile) {
-  return {
-    account_name: String(profile?.full_name || "").trim(),
-    account_phone: String(profile?.phone || "").trim(),
-  };
-}
-
-async function backfillWishlistAccountSnapshot(profileId, accountSnapshot) {
-  const accountName = String(accountSnapshot?.account_name || "").trim();
-  const accountPhone = String(accountSnapshot?.account_phone || "").trim();
-
-  if (!accountName && !accountPhone) return;
-
-  await Wishlist.updateMany(
-    {
-      profile_id: profileId,
-      $or: [
-        { account_name: { $exists: false } },
-        { account_name: "" },
-        { account_phone: { $exists: false } },
-        { account_phone: "" },
-      ],
-    },
-    {
-      $set: {
-        account_name: accountName,
-        account_phone: accountPhone,
-      },
-    }
-  );
-}
-
 async function listWishlist(req, res) {
   try {
-    const profileId = asObjectId(req.params.profileId);
-    if (!profileId) {
-      return res.status(400).json({ message: "profileId không hợp lệ." });
+    const customerId = await resolveOrCreateCustomerId(req.query.customer_id);
+    if (!customerId) {
+      return res.status(400).json({ message: "customer_id is required." });
     }
 
-    const profile = await getProfileById(profileId);
-    if (!profile) {
-      return res.status(404).json({ message: "Không tìm thấy tài khoản." });
-    }
-
-    const accountSnapshot = normalizeAccountSnapshot(profile);
-    await backfillWishlistAccountSnapshot(profileId, accountSnapshot);
-
-    const items = await Wishlist.find({ profile_id: profileId }).sort({ createdAt: -1 }).lean();
+    const items = await Wishlist.find({ customer_id: customerId }).sort({ createdAt: -1 }).lean();
     return res.json({
-      items: items.map((item) =>
-        mapWishlistItem({
-          ...item,
-          account_name: item?.account_name || accountSnapshot.account_name,
-          account_phone: item?.account_phone || accountSnapshot.account_phone,
-        })
-      ),
+      items: items.map(mapWishlistItem),
     });
   } catch (error) {
-    return res.status(500).json({ message: "Không thể tải danh sách yêu thích.", error: error.message });
+    return res.status(500).json({ message: "Cannot load wishlist.", error: error.message });
   }
 }
 
 async function upsertWishlistItem(req, res) {
   try {
-    const profileId = asObjectId(req.params.profileId);
-    if (!profileId) {
-      return res.status(400).json({ message: "profileId không hợp lệ." });
-    }
-
-    const profile = await getProfileById(profileId);
-    if (!profile) {
-      return res.status(404).json({ message: "Không tìm thấy tài khoản." });
-    }
-
+    const customerId = await resolveOrCreateCustomerId(req.body?.customer_id);
     const productId = asObjectId(req.body?.product_id);
-    if (!productId) {
-      return res.status(400).json({ message: "product_id không hợp lệ." });
+
+    if (!customerId || !productId) {
+      return res.status(400).json({ message: "customer_id and product_id are required." });
     }
 
-    const product = await Product.findById(productId)
-      .select("name slug min_price")
-      .lean();
+    const [customer, product] = await Promise.all([
+      Customer.findById(customerId).select("full_name phone").lean(),
+      Product.findById(productId).select("name slug min_price").lean()
+    ]);
 
+    if (!customer) {
+      return res.status(404).json({ message: "Customer not found." });
+    }
     if (!product) {
-      return res.status(404).json({ message: "Không tìm thấy sản phẩm." });
+      return res.status(404).json({ message: "Product not found." });
     }
 
     const salePrice = toMoney(req.body?.sale_price, product.min_price || 0);
     const listedPrice = toMoney(req.body?.price, Math.max(salePrice, product.min_price || 0));
     const imageUrl = await resolveImageUrl(productId, req.body?.image_url);
 
-    const accountSnapshot = normalizeAccountSnapshot(profile);
     const payload = {
-      account_name: accountSnapshot.account_name,
-      account_phone: accountSnapshot.account_phone,
+      account_name: customer.full_name || "Guest",
+      account_phone: customer.phone || "",
       product_slug: String(req.body?.product_slug || product.slug || "").trim(),
-      name: String(req.body?.name || product.name || "Sản phẩm").trim() || "Sản phẩm",
+      name: String(req.body?.name || product.name || "Sản phẩm").trim(),
       image_url: imageUrl,
       sale_price: salePrice,
       price: listedPrice,
     };
 
     const item = await Wishlist.findOneAndUpdate(
-      { profile_id: profileId, product_id: productId },
+      { customer_id: customerId, product_id: productId },
       { $set: payload },
       { upsert: true, new: true, setDefaultsOnInsert: true }
     ).lean();
 
-    return res.status(201).json({ item: mapWishlistItem(item) });
+    return res.status(201).json(mapWishlistItem(item));
   } catch (error) {
-    return res.status(500).json({ message: "Không thể thêm vào danh sách yêu thích.", error: error.message });
+    console.error(error);
+    return res.status(500).json({ message: "Cannot add to wishlist.", error: error.message });
   }
 }
 
 async function removeWishlistItem(req, res) {
   try {
-    const profileId = asObjectId(req.params.profileId);
-    const productId = asObjectId(req.params.productId);
+    const { id } = req.params;
+    const itemId = asObjectId(id);
 
-    if (!profileId || !productId) {
-      return res.status(400).json({ message: "profileId hoặc productId không hợp lệ." });
+    if (!itemId) {
+      return res.status(400).json({ message: "Invalid item ID." });
     }
 
-    const result = await Wishlist.deleteOne({ profile_id: profileId, product_id: productId });
-    if (!result.deletedCount) {
-      return res.status(404).json({ message: "Sản phẩm không tồn tại trong danh sách yêu thích." });
+    const result = await Wishlist.findByIdAndDelete(itemId);
+    if (!result) {
+      return res.status(404).json({ message: "Item not found in wishlist." });
     }
 
     return res.json({ success: true });
   } catch (error) {
-    return res.status(500).json({ message: "Không thể xóa khỏi danh sách yêu thích.", error: error.message });
+    return res.status(500).json({ message: "Cannot remove from wishlist.", error: error.message });
   }
 }
 

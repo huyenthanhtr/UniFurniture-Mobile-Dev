@@ -125,4 +125,68 @@
 
     <!-- Recently viewed -->
     <string name="recently_viewed">Đã xem gần đây</string>
+    <string name="added_to_favorites">Đã thêm vào yêu thích</string>
+    <string name="removed_from_favorites">Đã xóa khỏi yêu thích</string>
+    <string name="login_required_favorite">Vui lòng đăng nhập để thêm vào yêu thích</string>
+    <string name="login_required_cart">Vui lòng đăng nhập để thêm vào giỏ hàng</string>
+    <string name="please_select_variant">Vui lòng chọn màu sắc / phân loại</string>
+    <string name="login_required_checkout">Vui lòng đăng nhập để thanh toán</string>
+    <string name="wishlist_add_error">Không thể thêm vào yêu thích</string>
+    <string name="wishlist_remove_error">Không thể xóa khỏi yêu thích</string>
+    <string name="error_network">Lỗi kết nối: %1$s</string>
+    <string name="error_unknown">Đã xảy ra lỗi không xác định</string>
+
+    <!-- Voucher -->
+    <string name="voucher_title">Mã giảm giá (Voucher)</string>
+    <string name="empty_vouchers">Bạn chưa sở hữu hoặc đã dùng hết các mã ưu đãi.</string>
+    <string name="label_discount">GIẢM GIÁ</string>
+    <string name="btn_use">Sử dụng</string>
+    <string name="voucher_expiry">Hạn dùng: %1$s</string>
+    <string name="voucher_discount_amount">Giảm %1$s</string>
+    <string name="voucher_condition">Áp dụng cho đơn hàng từ %1$s trở lên.</string>
+    <string name="voucher_upsell">Mua thêm %1$s để áp dụng</string>
+    <string name="select_voucher">Chọn mã giảm giá</string>
+    <string name="voucher_wallet">Ví Voucher</string>
+    <string name="empty_voucher_storage">Kho voucher trống</string>
+    <string name="voucher_discount_label">Giảm giá voucher</string>
+    <string name="content_desc_remove_voucher">Xóa mã giảm giá</string>
+
+    <!-- Notifications -->
+    <string name="notification_title">Thông báo</string>
+    <string name="no_notifications">Không có thông báo</string>
+    <string name="new_notification_hint">Thông báo mới sẽ xuất hiện ở đây khi có hoạt động.</string>
+    <string name="content_desc_mark_all_read">Đánh dấu tất cả đã đọc</string>
+    <string name="label_orders">Đơn hàng</string>
+    <string name="label_all">Tất cả</string>
+
+    <!-- Wishlist -->
+    <string name="empty_wishlist">Danh sách yêu thích trống</string>
+
+    <!-- Feedback & UI -->
+    <string name="view_cart">Xem giỏ hàng</string>
+    <string name="add_to_cart_success">Thêm vào giỏ hàng thành công</string>
+    <string name="add_to_cart_error">Không thể thêm vào giỏ hàng. Vui lòng thử lại.</string>
+    <string name="content_desc_delete">Xóa</string>
+    <string name="close">Đóng</string>
+    <string name="subtotal">Tạm tính</string>
+    <string name="login_upsell">Đăng nhập để nhận ưu đãi</string>
+    <string name="content_desc_logo">Logo</string>
+    <string name="content_desc_product_image">Hình ảnh sản phẩm</string>
+    <string name="content_desc_collection">Bộ sưu tập</string>
+
+    <!-- Toasts & Messages -->
+    <string name="toast_no_other_variants">Sản phẩm không có phân loại khác</string>
+    <string name="toast_product_not_found">Không tìm thấy thông tin sản phẩm</string>
+    <string name="toast_voucher_removed_min_spend">Mã giảm giá đã bị hủy do giá trị đơn hàng tối thiểu không đủ</string>
+    <string name="toast_voucher_saved_upsell">Đã lưu mã. Vui lòng mua thêm sản phẩm để áp dụng!</string>
+    <string name="toast_voucher_applied">Đã áp dụng mã: %1$s</string>
+    <string name="toast_order_id">Đơn hàng: %1$s</string>
+    <string name="toast_mark_all_read">Đã đánh dấu tất cả là đã đọc</string>
+    <string name="toast_login_required_orders">Vui lòng đăng nhập để xem đơn hàng</string>
+    <string name="image_indicator_format">%1$d/%2$d</string>
+    <string name="price_range_format">%1$s - %2$s</string>
+    <string name="min_quantity_value">1</string>
+    <string name="max_quantity_value">99</string>
+    <string name="login_required_orders_hint">Đăng nhập để lưu lịch sử mua hàng</string>
+    <string name="guest">Khách</string>
 </resources>
