@@ -72,4 +72,40 @@ public class AuthRepository {
         });
         return result;
     }
+
+    public LiveData<AuthResponse> forgotPassword(String phone) {
+        MutableLiveData<AuthResponse> result = new MutableLiveData<>();
+        Map<String, String> body = new HashMap<>();
+        body.put("phone", phone);
+        apiService.forgotPassword(body).enqueue(new Callback<AuthResponse>() {
+            @Override
+            public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
+                result.setValue(response.isSuccessful() ? response.body() : null);
+            }
+            @Override
+            public void onFailure(Call<AuthResponse> call, Throwable t) {
+                result.setValue(null);
+            }
+        });
+        return result;
+    }
+
+    public LiveData<AuthResponse> resetPassword(String phone, String otp, String newPassword) {
+        MutableLiveData<AuthResponse> result = new MutableLiveData<>();
+        Map<String, String> body = new HashMap<>();
+        body.put("phone", phone);
+        body.put("otp", otp);
+        body.put("password", newPassword);
+        apiService.resetPassword(body).enqueue(new Callback<AuthResponse>() {
+            @Override
+            public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
+                result.setValue(response.isSuccessful() ? response.body() : null);
+            }
+            @Override
+            public void onFailure(Call<AuthResponse> call, Throwable t) {
+                result.setValue(null);
+            }
+        });
+        return result;
+    }
 }

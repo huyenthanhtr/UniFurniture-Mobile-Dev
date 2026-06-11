@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.databinding.FragmentRegisterBinding;
 
 public class RegisterFragment extends Fragment {
@@ -50,7 +51,7 @@ public class RegisterFragment extends Fragment {
         viewModel.getAuthResult().observe(getViewLifecycleOwner(), result -> {
             if (result != null) {
                 Toast.makeText(requireContext(),
-                        "Đăng ký thành công! Nhập OTP xác thực.", Toast.LENGTH_LONG).show();
+                        getString(R.string.register_success_otp), Toast.LENGTH_LONG).show();
                 // Navigate to OTP screen
                 requireActivity().getSupportFragmentManager()
                         .beginTransaction()

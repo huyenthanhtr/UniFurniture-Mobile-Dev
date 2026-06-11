@@ -11,8 +11,11 @@
     <!-- Auth -->
     <string name="login">Connexion</string>
     <string name="login_subtitle">Connexion</string>
+    <string name="login_welcome">Bon retour !</string>
+    <string name="login_success_msg">Connexion réussie. Découvrez des meubles haut de gamme juste pour vous.</string>
     <string name="register">S\'inscrire</string>
     <string name="register_title">Créer un compte</string>
+    <string name="register_success_otp">Inscription réussie ! Veuillez entrer le code OTP.</string>
     <string name="phone">Numéro de téléphone</string>
     <string name="password">Mot de passe</string>
     <string name="full_name">Nom complet</string>
@@ -49,6 +52,8 @@
     <string name="bank_transfer">Virement bancaire</string>
     <string name="place_order">Confirmer la commande</string>
     <string name="order_success">Commande passée avec succès !</string>
+    <string name="order_success_notif_title">Commande réussie !</string>
+    <string name="order_success_notif_msg">Votre commande %1$s a été reçue.</string>
     <string name="order_failed">Échec de la commande. Réessayez.</string>
     <string name="fill_required">Veuillez remplir tous les champs requis</string>
 
@@ -89,6 +94,8 @@
     <string name="sold_count">Vendu : %1$s</string>
     <string name="review_count">(%1$d avis)</string>
     <string name="added_to_cart">Ajouté au panier !</string>
+    <string name="product_default_name">Produit</string>
+    <string name="variant_default_name">Défaut</string>
     <string name="in_stock">En stock</string>
     <string name="out_of_stock">Rupture de stock</string>
     <string name="shop_reply">Réponse de la boutique</string>
@@ -135,6 +142,10 @@
     <string name="wishlist_remove_error">Impossible de retirer des favoris</string>
     <string name="error_network">Erreur réseau : %1$s</string>
     <string name="error_unknown">Une erreur inconnue est survenue</string>
+    <string name="error_fill_info">Veuillez remplir toutes les informations</string>
+    <string name="error_login_failed">Numéro de téléphone ou mot de passe invalide</string>
+    <string name="error_phone_not_found">Le numéro de téléphone n\'existe pas</string>
+    <string name="error_invalid_otp_forgot">Code OTP invalide ou expiré</string>
 
     <!-- Voucher -->
     <string name="voucher_title">Bons de réduction</string>
@@ -192,4 +203,68 @@
     <string name="max_quantity_value">99</string>
     <string name="login_required_orders_hint">Connectez-vous pour enregistrer l\'historique des achats</string>
     <string name="guest">Invité</string>
+    <!-- Checkout Advanced -->
+    <string name="shipping_email">E-mail de livraison (Optionnel)</string>
+    <string name="province">Province / Région</string>
+    <string name="district">District / Ville</string>
+    <string name="shipping_method">Mode de livraison</string>
+    <string name="giao_khong_lap">Livraison standard (Sans installation)</string>
+    <string name="giao_va_lap">Livraison &amp; Assemblage (Recommandé)</string>
+    <string name="deposit_required_alert">Les commandes de 10 000 000 VND ou plus nécessitent un acompte de 10%%. Le paiement COD est désactivé.</string>
+    <string name="order_summary">Résumé de la commande</string>
+    <string name="shipping_fee">Frais de livraison</string>
+    <string name="deposit_amount_label">Acompte requis (10%%)</string>
+    <string name="remaining_amount">Solde restant (COD)</string>
+    <string name="qr_payment_title">Paiement par VietQR</string>
+    <string name="bank_name_label">Banque</string>
+    <string name="account_name_label">Titulaire du compte</string>
+    <string name="account_number_label">Numéro de compte</string>
+    <string name="transfer_amount_label">Montant</string>
+    <string name="transfer_message_label">Description du transfert</string>
+    <string name="copy">Copier</string>
+    <string name="copied">Copié dans le presse-papiers</string>
+    <string name="timer_title">Compte à rebours de paiement: </string>
+    <string name="payment_timeout">Vérification du résultat du paiement…</string>
+    <string name="cancel_payment">Annuler le paiement</string>
+    <string name="cancel_payment_confirm_title">Annuler le paiement?</string>
+    <string name="cancel_payment_confirm_msg">Êtes-vous sûr de vouloir annuler le paiement de cette commande?</string>
+    <string name="order_success_title">Merci!</string>
+    <string name="order_success_desc">Votre commande a été passée avec succès.</string>
+    <string name="order_success_ref">Référence de commande: %1$s</string>
+    <string name="go_home">Continuer vos achats</string>
+    <string name="invalid_phone">Numéro de téléphone invalide. Doit comporter 10 chiffres commençant par 0.</string>
+    <string name="invalid_email">Format d\'e-mail invalide.</string>
+    <string name="invalid_province">Veuillez entrer une province valide.</string>
+    <string name="invalid_district">Veuillez entrer un district valide.</string>
+    <!-- Forgot Password -->
+    <string name="str_forgot_title">Mot de passe oublié</string>
+    <string name="str_forgot_phone_instruction">Entrez votre numéro de téléphone enregistré pour recevoir un code OTP.</string>
+    <string name="str_phone">Numéro de téléphone</string>
+    <string name="str_send_otp">Envoyer OTP</string>
+    <string name="str_forgot_otp_instruction">Entrez le code OTP envoyé sur votre téléphone.</string>
+    <string name="str_hint_otp">Code de vérification OTP</string>
+    <string name="str_verify_otp_btn">Vérifier l\'OTP</string>
+    <string name="str_forgot_newpass_instruction">Définissez un nouveau mot de passe pour votre compte.</string>
+    <string name="str_forgot_newpass_hint">Nouveau mot de passe</string>
+    <string name="str_forgot_confirmpass_hint">Confirmer le nouveau mot de passe</string>
+    <string name="str_reset_password_btn">Réinitialiser le mot de passe</string>
+    <string name="str_remembered_password">Retour à la connexion</string>
+
+    <!-- Checkout Labels -->
+    <string name="label_shipping_name">Nom du destinataire <font color="#FF0000">*</font></string>
+    <string name="label_shipping_phone">Numéro de téléphone <font color="#FF0000">*</font></string>
+    <string name="label_shipping_address">Adresse de livraison <font color="#FF0000">*</font></string>
+    <string name="label_shipping_province">Province / Région <font color="#FF0000">*</font></string>
+    <string name="label_shipping_district">District / Ville <font color="#FF0000">*</font></string>
+    <string name="label_shipping_email">E-mail de notification (Optionnel)</string>
+    <string name="shipping_method_warning">Désolé, cette zone ne prend actuellement en charge que la livraison standard (Sans installation).</string>
+    <string name="free">Gratuit</string>
+
+    <!-- Checkout New -->
+    <string name="saved_address_label">Adresse enregistrée</string>
+    <string name="select_address_hint">-- Sélectionner une adresse --</string>
+    <string name="add_new_address">+ Ajouter une adresse</string>
+    <string name="applied_voucher">Appliqué: %1$s</string>
+    <string name="order_reference_label">CODE DE RÉFÉRENCE DE LA COMMANDE</string>
+    <string name="qr_instruction">Utilisez votre application bancaire pour scanner le code QR pour payer</string>
 </resources>

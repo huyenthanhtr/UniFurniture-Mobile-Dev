@@ -10,4 +10,9 @@ public class CheckoutResponse {
     public String message;
     @SerializedName("payment_url")
     public String paymentUrl;
+    @SerializedName("total_amount")
+    public Double totalAmount;
+    @SerializedName("deposit_amount")
+    public Double depositAmount;
+    public String status;
 }

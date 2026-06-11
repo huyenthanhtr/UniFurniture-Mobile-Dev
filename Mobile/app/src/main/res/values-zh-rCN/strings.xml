@@ -11,8 +11,11 @@
     <!-- Auth -->
     <string name="login">登录</string>
     <string name="login_subtitle">登录</string>
+    <string name="login_welcome">欢迎回来！</string>
+    <string name="login_success_msg">登录成功。为您探索高端家具产品。</string>
     <string name="register">注册</string>
     <string name="register_title">创建账户</string>
+    <string name="register_success_otp">注册成功！请输入验证码。</string>
     <string name="phone">手机号码</string>
     <string name="password">密码</string>
     <string name="full_name">姓名</string>
@@ -49,6 +52,8 @@
     <string name="bank_transfer">银行转账</string>
     <string name="place_order">确认下单</string>
     <string name="order_success">下单成功！</string>
+    <string name="order_success_notif_title">下单成功！</string>
+    <string name="order_success_notif_msg">您的订单 %1$s 已被接收。</string>
     <string name="order_failed">下单失败，请重试。</string>
     <string name="fill_required">请填写所有必填信息</string>
 
@@ -89,6 +94,8 @@
     <string name="sold_count">已售：%1$s</string>
     <string name="review_count">（%1$d 条评价）</string>
     <string name="added_to_cart">已加入购物车！</string>
+    <string name="product_default_name">商品</string>
+    <string name="variant_default_name">默认</string>
     <string name="in_stock">有货</string>
     <string name="out_of_stock">缺货</string>
     <string name="shop_reply">店家回复</string>
@@ -135,6 +142,10 @@
     <string name="wishlist_remove_error">无法移除收藏</string>
     <string name="error_network">网络错误：%1$s</string>
     <string name="error_unknown">发生未知错误</string>
+    <string name="error_fill_info">请填写所有信息</string>
+    <string name="error_login_failed">手机号或密码错误</string>
+    <string name="error_phone_not_found">该手机号不存在</string>
+    <string name="error_invalid_otp_forgot">验证码无效或已过期</string>
 
     <!-- Voucher -->
     <string name="voucher_title">优惠券</string>
@@ -192,4 +203,68 @@
     <string name="max_quantity_value">99</string>
     <string name="login_required_orders_hint">登录以保存购买历史</string>
     <string name="guest">游客</string>
+    <!-- Checkout Advanced -->
+    <string name="shipping_email">收件人邮箱 (选填)</string>
+    <string name="province">省 / 直辖市</string>
+    <string name="district">区 / 县</string>
+    <string name="shipping_method">配送方式</string>
+    <string name="giao_khong_lap">标准配送 (不包含安装)</string>
+    <string name="giao_va_lap">配送及组装 (推荐)</string>
+    <string name="deposit_required_alert">订单金额满 10,000,000 VND 需预付 10%% 定金。已停用货到付款 (COD)。</string>
+    <string name="order_summary">订单汇总</string>
+    <string name="shipping_fee">运费</string>
+    <string name="deposit_amount_label">应付定金 (10%%)</string>
+    <string name="remaining_amount">货到付款余额</string>
+    <string name="qr_payment_title">VietQR 扫码支付</string>
+    <string name="bank_name_label">银行</string>
+    <string name="account_name_label">账户名称</string>
+    <string name="account_number_label">账号</string>
+    <string name="transfer_amount_label">转账金额</string>
+    <string name="transfer_message_label">转账备注</string>
+    <string name="copy">复制</string>
+    <string name="copied">已复制到剪贴板</string>
+    <string name="timer_title">支付倒计时: </string>
+    <string name="payment_timeout">正在检查支付结果…</string>
+    <string name="cancel_payment">取消支付</string>
+    <string name="cancel_payment_confirm_title">取消支付？</string>
+    <string name="cancel_payment_confirm_msg">您确定要取消此订单支付吗？</string>
+    <string name="order_success_title">谢谢您！</string>
+    <string name="order_success_desc">您的订单已成功提交。</string>
+    <string name="order_success_ref">订单编号: %1$s</string>
+    <string name="go_home">继续购物</string>
+    <string name="invalid_phone">手机号码无效。必须是0开头的10位数字。</string>
+    <string name="invalid_email">邮箱格式无效。</string>
+    <string name="invalid_province">请输入省份/直辖市。</string>
+    <string name="invalid_district">请输入区县。</string>
+    <!-- Forgot Password -->
+    <string name="str_forgot_title">忘记密码</string>
+    <string name="str_forgot_phone_instruction">输入您的注册手机号码以获取OTP验证码。</string>
+    <string name="str_phone">手机号码</string>
+    <string name="str_send_otp">发送 OTP</string>
+    <string name="str_forgot_otp_instruction">输入发送到您手机的OTP验证码。</string>
+    <string name="str_hint_otp">OTP 验证码</string>
+    <string name="str_verify_otp_btn">验证 OTP</string>
+    <string name="str_forgot_newpass_instruction">为您的账户设置新密码。</string>
+    <string name="str_forgot_newpass_hint">新密码</string>
+    <string name="str_forgot_confirmpass_hint">确认新密码</string>
+    <string name="str_reset_password_btn">重置密码</string>
+    <string name="str_remembered_password">返回登录</string>
+
+    <!-- Checkout Labels -->
+    <string name="label_shipping_name">收件人姓名 <font color="#FF0000">*</font></string>
+    <string name="label_shipping_phone">手机号码 <font color="#FF0000">*</font></string>
+    <string name="label_shipping_address">收货地址 <font color="#FF0000">*</font></string>
+    <string name="label_shipping_province">省 / 直辖市 <font color="#FF0000">*</font></string>
+    <string name="label_shipping_district">区 / 县 <font color="#FF0000">*</font></string>
+    <string name="label_shipping_email">接收通知的邮箱 (可选)</string>
+    <string name="shipping_method_warning">对不起，该地区目前仅支持标准配送（不含安装）。</string>
+    <string name="free">免费</string>
+
+    <!-- Checkout New -->
+    <string name="saved_address_label">已保存地址</string>
+    <string name="select_address_hint">-- 选择已保存地址 --</string>
+    <string name="add_new_address">+ 添加新地址</string>
+    <string name="applied_voucher">已应用：%1$s</string>
+    <string name="order_reference_label">订单查询码</string>
+    <string name="qr_instruction">使用银行应用扫描二维码支付</string>
 </resources>

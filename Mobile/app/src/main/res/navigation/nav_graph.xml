@@ -7,12 +7,12 @@
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.unifurniture.mobile.ui.home.HomeFragment"
-        android:label="Trang chủ" />
+        android:label="@string/nav_home" />
 
     <fragment
         android:id="@+id/productListFragment"
         android:name="com.unifurniture.mobile.ui.product.ProductListFragment"
-        android:label="Sản phẩm">
+        android:label="@string/nav_products">
         <argument
             android:name="search"
             app:argType="string"
@@ -38,7 +38,7 @@
     <fragment
         android:id="@+id/productDetailFragment"
         android:name="com.unifurniture.mobile.ui.product.ProductDetailFragment"
-        android:label="Chi tiết sản phẩm">
+        android:label="@string/product_detail_title">
         <argument
             android:name="slug"
             app:argType="string" />
@@ -47,31 +47,64 @@
     <fragment
         android:id="@+id/cartFragment"
         android:name="com.unifurniture.mobile.ui.cart.CartFragment"
-        android:label="Giỏ hàng" />
+        android:label="@string/cart_title" />
 
     <fragment
         android:id="@+id/checkoutFragment"
         android:name="com.unifurniture.mobile.ui.checkout.CheckoutFragment"
-        android:label="Thanh toán" />
+        android:label="@string/checkout_title" />
 
     <fragment
         android:id="@+id/accountFragment"
         android:name="com.unifurniture.mobile.ui.account.AccountFragment"
-        android:label="Tài khoản" />
+        android:label="@string/account_title" />
 
     <fragment
         android:id="@+id/wishlistFragment"
         android:name="com.unifurniture.mobile.ui.product.WishlistFragment"
-        android:label="Yêu thích" />
+        android:label="@string/favorites" />
 
     <fragment
         android:id="@+id/notificationFragment"
         android:name="com.unifurniture.mobile.ui.account.NotificationFragment"
-        android:label="Thông báo" />
+        android:label="@string/notification_title" />
 
     <fragment
         android:id="@+id/voucherListFragment"
         android:name="com.unifurniture.mobile.ui.cart.VoucherListFragment"
-        android:label="Kho Voucher" />
+        android:label="@string/voucher_title" />
+
+    <fragment
+        android:id="@+id/paymentQrFragment"
+        android:name="com.unifurniture.mobile.ui.checkout.PaymentQrFragment"
+        android:label="@string/qr_payment_title">
+        <argument
+            android:name="order_id"
+            app:argType="string" />
+        <argument
+            android:name="order_code"
+            app:argType="string" />
+        <argument
+            android:name="total_amount"
+            app:argType="float" />
+        <argument
+            android:name="deposit_amount"
+            app:argType="float" />
+        <argument
+            android:name="require_deposit"
+            app:argType="boolean" />
+        <argument
+            android:name="shipping_phone"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/orderSuccessFragment"
+        android:name="com.unifurniture.mobile.ui.checkout.OrderSuccessFragment"
+        android:label="@string/order_success_title">
+        <argument
+            android:name="order_code"
+            app:argType="string" />
+    </fragment>
 
 </navigation>
