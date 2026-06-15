@@ -56,9 +56,7 @@ public class ProductCardAdapter extends ListAdapter<ProductDto, ProductCardAdapt
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ViewGroup.LayoutParams lp = holder.itemView.getLayoutParams();
         if (lp != null) {
-            lp.width = columns == 1
-                    ? ViewGroup.LayoutParams.MATCH_PARENT
-                    : (int) (160 * holder.itemView.getResources().getDisplayMetrics().density);
+            lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
             holder.itemView.setLayoutParams(lp);
         }
         holder.bind(getItem(position), listener);
