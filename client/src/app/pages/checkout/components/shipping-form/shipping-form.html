@@ -1,0 +1,231 @@
+﻿<div class="card shadow-sm mb-4">
+  <div class="card-body px-4 py-4">
+    <h6 class="fw-bold mb-4">Thông tin giao hàng</h6>
+
+    <div *ngIf="isLoggedIn" class="saved-address-box mb-3">
+      <div class="saved-address-header">
+        <strong>Sổ địa chỉ đã lưu</strong>
+        <span *ngIf="loadingSavedAddresses" class="small text-muted">Đang tải...</span>
+      </div>
+
+      <div *ngIf="savedAddressError" class="required-star mb-2">{{ savedAddressError }}</div>
+
+      <div *ngIf="!loadingSavedAddresses && savedAddresses.length > 0" class="saved-address-actions">
+        <select
+          class="form-select saved-address-select"
+          [class.saved-address-select--default]="isDefaultSavedAddressSelected()"
+          [ngModel]="selectedSavedAddressId"
+          (ngModelChange)="onSavedAddressChange($event)"
+        >
+          <option value="">Chọn địa chỉ đã lưu</option>
+          <option
+            *ngFor="let item of savedAddresses"
+            [value]="item._id"
+            [class.saved-address-option--default]="isDefaultSavedAddress(item)"
+          >
+            {{ item.fullName }} - {{ item.phone }} - {{ item.address }}, {{ item.district }}, {{ item.province }}
+            {{ item.isDefault ? '(Mặc định)' : '' }}
+          </option>
+        </select>
+      </div>
+
+      <div class="saved-address-tools" *ngIf="!loadingSavedAddresses">
+        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="useManualAddressEntry()">
+          Nhập địa chỉ mới
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-primary" (click)="openAddressBook()">
+          Quản lý sổ địa chỉ
+        </button>
+      </div>
+
+      <div *ngIf="!loadingSavedAddresses && savedAddresses.length === 0" class="small text-muted">
+        Bạn chưa có địa chỉ lưu sẵn. Hãy nhập mới bên dưới.
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <input
+        type="text"
+        class="form-control"
+        [class.required-invalid]="isInvalid('fullName')"
+        placeholder="Nhập họ và tên"
+        [value]="form.fullName"
+        (input)="patch('fullName', $any($event.target).value)"
+        (blur)="markTouched('fullName')"
+      />
+      <div *ngIf="isInvalid('fullName')" class="required-star">* Bắt buộc</div>
+    </div>
+
+    <div class="mb-3">
+      <div class="input-group">
+        <span class="input-group-text flag-prefix">🇻🇳</span>
+        <input
+          type="tel"
+          class="form-control"
+          [class.required-invalid]="isPhoneInvalid()"
+          placeholder="Số điện thoại"
+          [value]="form.phone"
+          (input)="patch('phone', $any($event.target).value)"
+          (blur)="markTouched('phone')"
+        />
+      </div>
+      <div *ngIf="isPhoneInvalid()" class="required-star">{{ phoneErrorMessage() }}</div>
+    </div>
+
+    <div class="mb-3">
+      <input
+        type="email"
+        class="form-control"
+        [class.required-invalid]="isEmailInvalid()"
+        placeholder="Email (tùy chọn)"
+        [value]="form.email"
+        (input)="patch('email', $any($event.target).value)"
+        (blur)="markTouched('email')"
+      />
+      <div *ngIf="isEmailInvalid()" class="required-star">* Email không đúng định dạng</div>
+    </div>
+
+    <div class="address-row mb-3">
+      <div class="country-chip">
+        <span>🇻🇳</span>
+        <span>Việt Nam</span>
+      </div>
+
+      <select
+        class="form-select"
+        [class.required-invalid]="isInvalid('province')"
+        [ngModel]="form.province"
+        (ngModelChange)="onProvinceChange($event)"
+        (blur)="markTouched('province')"
+      >
+        <option value="">Chọn Tỉnh/TP</option>
+        <option *ngIf="form.province && !hasProvinceOption(form.province)" [value]="form.province">
+          {{ form.province }}
+        </option>
+        <option *ngFor="let item of provinces" [value]="item.value">{{ item.label }}</option>
+      </select>
+
+      <select
+        class="form-select"
+        [class.required-invalid]="isInvalid('district')"
+        [disabled]="!form.province || loadingDistricts"
+        [ngModel]="form.district"
+        (ngModelChange)="onDistrictChange($event)"
+        (blur)="markTouched('district')"
+      >
+        <option value="">{{ loadingDistricts ? 'Đang tải Quận/Huyện...' : 'Chọn Quận/Huyện' }}</option>
+        <option *ngIf="form.district && !hasDistrictOption(form.district)" [value]="form.district">
+          {{ form.district }}
+        </option>
+        <option *ngFor="let item of districtOptions" [value]="item.value">{{ item.label }}</option>
+      </select>
+    </div>
+
+    <div *ngIf="isInvalid('province') || isInvalid('district')" class="required-star mb-2">* Tỉnh/TP và Quận/Huyện là bắt buộc</div>
+
+    <div class="mb-3">
+      <input
+        type="text"
+        class="form-control"
+        [class.required-invalid]="isInvalid('address')"
+        placeholder="Địa chỉ chi tiết: số nhà, tên đường..."
+        [value]="form.address"
+        (input)="onAddressChange($any($event.target).value)"
+        (blur)="markTouched('address')"
+      />
+      <div *ngIf="isInvalid('address')" class="required-star">* Bắt buộc</div>
+
+      <div *ngIf="addressTouched && shippingZone" class="zone-badge mt-2">
+        <ng-container [ngSwitch]="shippingZone">
+          <span *ngSwitchCase="'GIAO_VA_LAP'" class="badge badge-success">
+            <i class="bi bi-check-circle me-1"></i>Khu vực hỗ trợ giao hàng và lắp đặt tại nhà
+          </span>
+          <span *ngSwitchCase="'GIAO_KHONG_LAP'" class="badge badge-warning">
+            <i class="bi bi-info-circle me-1"></i>Khu vực chỉ hỗ trợ giao hàng, không lắp đặt
+          </span>
+          <span *ngSwitchCase="'NGOAI_VUNG'" class="badge badge-warning">
+            <i class="bi bi-info-circle me-1"></i>Ngoài vùng gần TP.HCM, chỉ hỗ trợ giao hàng
+          </span>
+        </ng-container>
+      </div>
+    </div>
+
+    <div class="mb-2">
+      <textarea
+        class="form-control"
+        rows="2"
+        placeholder="Ghi chú đơn hàng (tùy chọn)..."
+        [value]="form.note"
+        (input)="patch('note', $any($event.target).value)"
+      ></textarea>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="shouldShowShippingMethod && shippingZone !== 'NGOAI_VUNG'" class="card shadow-sm mb-4">
+  <div class="card-body px-4 py-4">
+    <h6 class="fw-bold mb-3">Phương thức giao hàng</h6>
+
+    <div
+      *ngIf="shippingZone === 'GIAO_VA_LAP'"
+      class="shipping-option"
+      [class.selected]="form.shippingMethod === 'GIAO_VA_LAP'"
+      (click)="selectShipping('GIAO_VA_LAP')"
+    >
+      <div class="d-flex align-items-start gap-3">
+        <i class="bi bi-truck fs-5 text-primary mt-1"></i>
+        <div class="flex-grow-1">
+          <div class="fw-semibold">Giao hàng và lắp đặt</div>
+          <div class="small text-muted">Dự kiến 3 ngày làm việc • 9h00 - 16h00 • Thứ 2 - Thứ 7</div>
+        </div>
+        <span class="badge bg-success-subtle text-success">Đã gồm phí</span>
+      </div>
+    </div>
+
+    <div
+      class="shipping-option mt-2"
+      [class.selected]="form.shippingMethod === 'GIAO_KHONG_LAP'"
+      (click)="selectShipping('GIAO_KHONG_LAP')"
+    >
+      <div class="d-flex align-items-start gap-3">
+        <i class="bi bi-box-seam fs-5 text-primary mt-1"></i>
+        <div class="flex-grow-1">
+          <div class="fw-semibold">Giao hàng (không lắp đặt)</div>
+          <div class="small text-muted">Dự kiến 3 ngày làm việc • 9h00 - 16h00 • Thứ 2 - Thứ 7</div>
+        </div>
+        <span class="badge bg-success-subtle text-success">Đã gồm phí</span>
+      </div>
+    </div>
+
+    <ul class="small text-muted mt-3 mb-0 shipping-policy-list">
+      <li>Phí giao hàng đã tính trong giá sản phẩm trên website.</li>
+      <li>Hỗ trợ dời lịch giao hàng tối đa 1 lần, vui lòng báo trước 24 giờ.</li>
+      <li>Lắp đặt theo tiêu chuẩn hãng, không nhận hàng mộc ngoài tiêu chuẩn.</li>
+      <li>Hotline hỗ trợ: <strong>0123 456 789</strong>.</li>
+    </ul>
+  </div>
+</div>
+
+<div *ngIf="shouldShowShippingMethod && shippingZone === 'NGOAI_VUNG'" class="card shadow-sm mb-4">
+  <div class="card-body px-4 py-3">
+    <h6 class="fw-bold mb-3">Phương thức giao hàng</h6>
+    <div class="shipping-option selected">
+      <div class="d-flex align-items-start gap-3">
+        <i class="bi bi-box-seam fs-5 text-primary mt-1"></i>
+        <div class="flex-grow-1">
+          <div class="fw-semibold">Giao hàng (không lắp đặt)</div>
+          <div class="small text-muted">Dự kiến 3 ngày làm việc • 9h00 - 16h00 • Thứ 2 - Thứ 7</div>
+          <div class="small text-muted">Khu vực xa TP.HCM hoặc ngoài phạm vi hỗ trợ lắp đặt.</div>
+        </div>
+        <span class="badge bg-success-subtle text-success ms-auto">Đã gồm phí</span>
+      </div>
+    </div>
+
+    <ul class="small text-muted mt-3 mb-0 shipping-policy-list">
+      <li>Phí giao hàng đã tính trong giá sản phẩm trên website.</li>
+      <li>Hỗ trợ dời lịch giao hàng tối đa 1 lần, vui lòng báo trước 24 giờ.</li>
+      <li>Lắp đặt theo tiêu chuẩn hãng, không nhận hàng mộc ngoài tiêu chuẩn.</li>
+      <li>Hotline hỗ trợ: <strong>0123 456 789</strong>.</li>
+    </ul>
+  </div>
+</div>

@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/swipeRefresh"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/surface">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Header Banner Slider -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="200dp">
+                <androidx.viewpager2.widget.ViewPager2
+                    android:id="@+id/bannerViewPager"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:overScrollMode="never" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:layout_gravity="bottom"
+                    android:background="@drawable/bg_banner_gradient" />
+                <com.tbuonomo.viewpagerdotsindicator.DotsIndicator
+                    android:id="@+id/bannerDotsIndicator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|center_horizontal"
+                    android:layout_marginBottom="10dp"
+                    app:dotsColor="#80FFFFFF"
+                    app:selectedDotColor="@color/accent"
+                    app:dotsSize="5dp"
+                    app:dotsSpacing="3dp"
+                    android:visibility="gone" />
+            </FrameLayout>
+
+            <!-- Search Bar + Suggestions -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <androidx.appcompat.widget.SearchView
+                    android:id="@+id/searchView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="16dp"
+                    android:background="@drawable/bg_search"
+                    app:queryHint="@string/search_hint"
+                    app:iconifiedByDefault="false" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvSearchSuggestions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="56dp"
+                    android:background="@color/white"
+                    android:elevation="8dp"
+                    android:visibility="gone" />
+
+                <!-- Search History overlay (shown when focused + empty) -->
+                <LinearLayout
+                    android:id="@+id/layoutSearchHistory"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="56dp"
+                    android:background="@color/white"
+                    android:elevation="8dp"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="4dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="4dp">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/recent_searches"
+                            android:textSize="12sp"
+                            android:textColor="@color/gray_600"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:id="@+id/tvClearHistory"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/clear_all"
+                            android:textSize="12sp"
+                            android:textColor="@color/primary"
+                            android:padding="8dp" />
+                    </LinearLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvSearchHistory"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                </LinearLayout>
+
+            </FrameLayout>
+
+            <!-- Loading Shimmer — mirrors the 3 real sections below -->
+            <com.facebook.shimmer.ShimmerFrameLayout
+                android:id="@+id/shimmerLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="16dp">
+
+                    <!-- Danh mục header stub -->
+                    <View
+                        android:layout_width="80dp"
+                        android:layout_height="18dp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@drawable/bg_shimmer_rect" />
+
+                    <!-- Category skeleton row: 5 items × (64dp circle + text stub) -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="8dp"
+                        android:paddingStart="16dp">
+
+                        <LinearLayout android:layout_width="88dp" android:layout_height="110dp" android:orientation="vertical" android:gravity="center" android:padding="4dp">
+                            <View android:layout_width="68dp" android:layout_height="68dp" android:background="@drawable/bg_shimmer_circle" />
+                            <View android:layout_width="56dp" android:layout_height="10dp" android:layout_marginTop="6dp" android:background="@drawable/bg_shimmer_rect" />
+                        </LinearLayout>
+                        <LinearLayout android:layout_width="88dp" android:layout_height="110dp" android:orientation="vertical" android:gravity="center" android:padding="4dp">
+                            <View android:layout_width="68dp" android:layout_height="68dp" android:background="@drawable/bg_shimmer_circle" />
+                            <View android:layout_width="56dp" android:layout_height="10dp" android:layout_marginTop="6dp" android:background="@drawable/bg_shimmer_rect" />
+                        </LinearLayout>
+                        <LinearLayout android:layout_width="88dp" android:layout_height="110dp" android:orientation="vertical" android:gravity="center" android:padding="4dp">
+                            <View android:layout_width="68dp" android:layout_height="68dp" android:background="@drawable/bg_shimmer_circle" />
+                            <View android:layout_width="56dp" android:layout_height="10dp" android:layout_marginTop="6dp" android:background="@drawable/bg_shimmer_rect" />
+                        </LinearLayout>
+                        <LinearLayout android:layout_width="88dp" android:layout_height="110dp" android:orientation="vertical" android:gravity="center" android:padding="4dp">
+                            <View android:layout_width="68dp" android:layout_height="68dp" android:background="@drawable/bg_shimmer_circle" />
+                            <View android:layout_width="56dp" android:layout_height="10dp" android:layout_marginTop="6dp" android:background="@drawable/bg_shimmer_rect" />
+                        </LinearLayout>
+                        <LinearLayout android:layout_width="88dp" android:layout_height="110dp" android:orientation="vertical" android:gravity="center" android:padding="4dp">
+                            <View android:layout_width="68dp" android:layout_height="68dp" android:background="@drawable/bg_shimmer_circle" />
+                            <View android:layout_width="56dp" android:layout_height="10dp" android:layout_marginTop="6dp" android:background="@drawable/bg_shimmer_rect" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <!-- Sản phẩm nổi bật header stub -->
+                    <View
+                        android:layout_width="140dp"
+                        android:layout_height="18dp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="16dp"
+                        android:background="@drawable/bg_shimmer_rect" />
+
+                    <!-- Product card skeleton row: 3 cards 160×260dp -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="8dp"
+                        android:paddingStart="16dp">
+
+                        <View android:layout_width="160dp" android:layout_height="260dp" android:layout_margin="6dp" android:background="@drawable/bg_shimmer_rect" />
+                        <View android:layout_width="160dp" android:layout_height="260dp" android:layout_margin="6dp" android:background="@drawable/bg_shimmer_rect" />
+                        <View android:layout_width="160dp" android:layout_height="260dp" android:layout_margin="6dp" android:background="@drawable/bg_shimmer_rect" />
+
+                    </LinearLayout>
+
+                    <!-- Bộ sưu tập header stub -->
+                    <View
+                        android:layout_width="100dp"
+                        android:layout_height="18dp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="16dp"
+                        android:background="@drawable/bg_shimmer_rect" />
+
+                    <!-- Collection skeleton row: 4 cards 140×90dp -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="8dp"
+                        android:paddingStart="16dp">
+
+                        <View android:layout_width="140dp" android:layout_height="90dp" android:layout_marginEnd="8dp" android:background="@drawable/bg_shimmer_rect" />
+                        <View android:layout_width="140dp" android:layout_height="90dp" android:layout_marginEnd="8dp" android:background="@drawable/bg_shimmer_rect" />
+                        <View android:layout_width="140dp" android:layout_height="90dp" android:layout_marginEnd="8dp" android:background="@drawable/bg_shimmer_rect" />
+                        <View android:layout_width="140dp" android:layout_height="90dp" android:layout_marginEnd="8dp" android:background="@drawable/bg_shimmer_rect" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </com.facebook.shimmer.ShimmerFrameLayout>
+
+            <!-- Real content — hidden while shimmer shows -->
+            <LinearLayout
+                android:id="@+id/layoutContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <!-- Categories Section -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/categories"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/black" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvCategories"
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp"
+                    android:layout_marginTop="8dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:clipToPadding="false"
+                    android:orientation="horizontal" />
+
+                <!-- Featured Products -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="16dp">
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/featured_products"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/black" />
+                    <TextView
+                        android:id="@+id/btnViewAll"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/view_all"
+                        android:textColor="@color/primary"
+                        android:padding="8dp" />
+                </LinearLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvFeaturedProducts"
+                    android:layout_width="match_parent"
+                    android:layout_height="280dp"
+                    android:layout_marginTop="8dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:clipToPadding="false"
+                    android:orientation="horizontal" />
+
+                <!-- Collections Section -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/collections"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/black" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvCollections"
+                    android:layout_width="match_parent"
+                    android:layout_height="110dp"
+                    android:layout_marginTop="8dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:clipToPadding="false"
+                    android:orientation="horizontal" />
+
+                <!-- Recently Viewed Section -->
+                <LinearLayout
+                    android:id="@+id/layoutRecentlyViewed"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="16dp"
+                        android:text="@string/recently_viewed"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/black" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvRecentlyViewed"
+                        android:layout_width="match_parent"
+                        android:layout_height="180dp"
+                        android:layout_marginTop="8dp"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:clipToPadding="false"
+                        android:orientation="horizontal" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <View android:layout_width="match_parent"
+                android:layout_height="80dp" />
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

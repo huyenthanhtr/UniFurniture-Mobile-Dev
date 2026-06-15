@@ -1,0 +1,1189 @@
+# UniFurniture Mobile — Technical Decisions & Conventions
+
+Last updated: 2026-06-01 (i18n + UI/UX improvements)
+Branch: feature/home
+Owner of this file: Như Ngọc
+
+---
+
+## Architecture
+
+### Pattern: MVVM + Repository
+
+```
+Fragment / Activity
+    ↓  observes LiveData
+ViewModel  (AndroidViewModel)
+    ↓  calls
+Repository
+    ↓  calls
+ApiService  (Retrofit interface)
+    ↓  HTTP
+Node.js Backend  (:3000/api/)
+```
+
+Fragments own no business logic. They only:
+1. Inflate layout via ViewBinding
+2. Pass user events to ViewModel methods
+3. Observe LiveData and update views
+
+ViewModels own state and call repositories. They never reference Android views or
+Fragments directly.
+
+Repositories call `ApiService`, wrap callbacks with `MutableLiveData`, and return
+`LiveData<T>` to ViewModels.
+
+---
+
+### Navigation: Single Activity per context
+
+- `SplashActivity` — launcher, routes after 1.8s
+- `AuthActivity` — hosts Login / Register / OTP fragments (not yet using NavComponent)
+- `MainActivity` — hosts all main-app fragments via Jetpack NavComponent + `nav_graph.xml`
+- Bottom navigation menu IDs (`homeFragment`, `productListFragment`, etc.) match
+  fragment destination IDs in `nav_graph.xml` exactly — required for `NavigationUI`
+  to highlight the correct tab
+
+Cross-fragment navigation uses `Navigation.findNavController(view).navigate(R.id.dest, args)`.
+Safe Args is NOT used — arguments are passed via `Bundle` manually.
+
+---
+
+### Application class: `UniFurnitureApp`
+
+The `Application` subclass holds and exposes the `ApiService` singleton.
+ViewModels access it via `UniFurnitureApp.getInstance().getApiService()`.
+
+There is **no dependency injection framework** (no Hilt, no Dagger).
+All dependencies are wired manually in ViewModel constructors.
+
+---
+
+### API Configuration
+
+The base URL is set at build time via `local.properties`:
+
+```
+# local.properties
+api.base.url=http://192.168.x.x:3000/api/
+```
+
+It is injected into `BuildConfig.API_BASE_URL` and consumed by `ApiClient`.
+The emulator default is `http://10.0.2.2:3000/api/`.
+Never hardcode an IP address — always use `local.properties`.
+
+---
+
+## Coding Conventions
+
+### File naming
+- Java classes: `PascalCase` (e.g., `ProductListFragment.java`)
+- Layout XML: `snake_case` mirroring class name (`fragment_product_list.xml`,
+  `item_product_card.xml`, `activity_main.xml`)
+- Drawable: `ic_` prefix for icons, `bg_` for backgrounds, `placeholder_` for
+  placeholder images
+
+### ViewBinding
+All layouts use ViewBinding (`buildFeatures { viewBinding true }`).
+- Fragments: inflate in `onCreateView`, null in `onDestroyView`
+- Pattern:
+  ```java
+  private FragmentHomeBinding binding;
+
+  public View onCreateView(...) {
+      binding = FragmentHomeBinding.inflate(inflater, container, false);
+      return binding.getRoot();
+  }
+
+  public void onDestroyView() {
+      super.onDestroyView();
+      binding = null;
+  }
+  ```
+
+### ListAdapter + DiffUtil
+All RecyclerView adapters extend `ListAdapter<T, VH>` with an inner `DiffUtil.ItemCallback`.
+Use `submitList()` to update data — never call `notifyDataSetChanged()` directly.
+Current implementations use only `_id` equality for `areContentsTheSame`; update
+this if fine-grained diff is needed.
+
+### LiveData pattern in Repositories
+Repositories wrap Retrofit callbacks in `MutableLiveData` and return `LiveData`:
+```java
+public LiveData<ProductDto> getProductDetail(String slug) {
+    MutableLiveData<ProductDto> result = new MutableLiveData<>();
+    apiService.getProductBySlug(slug).enqueue(new Callback<ProductDto>() {
+        public void onResponse(...) { result.setValue(...); }
+        public void onFailure(...)  { result.setValue(null); }
+    });
+    return result;
+}
+```
+On failure, repositories post `null` — ViewModels and Fragments must null-check before use.
+
+### ViewModel LiveData observation
+ViewModels use `observeForever` when chaining repository calls inside the ViewModel
+itself (not recommended long-term but consistent throughout the project — do not
+deviate). Fragments observe with `getViewLifecycleOwner()`.
+
+### String IDs in DTO
+MongoDB `_id` fields are mapped with `@SerializedName("_id") public String id;`
+across all DTOs. Always use `.id` in code — never `._id`.
+
+### `@SerializedName` chỉ dùng khi JSON key KHÁC tên field Java
+
+**Rule:** Chỉ thêm `@SerializedName` khi JSON key thực sự khác với tên field. Nếu server trả về camelCase và field Java cũng là camelCase thì **không cần annotation** — Gson tự map theo tên field.
+
+**Why:** `ReviewDto` ban đầu dùng `@SerializedName("customer_name")` cho field `customerName`. Server trả về `"customerName"` (camelCase) → Gson tìm key `"customer_name"` → không có → field = null → hiện "Khách hàng" thay vì tên thật. Bug ẩn, không crash, khó phát hiện.
+
+**Trường hợp cần `@SerializedName`:**
+- MongoDB `_id` → `@SerializedName("_id") public String id`
+- Server snake_case thật sự: `short_description` → `@SerializedName("short_description") public String shortDescription`
+- Server key có ký tự đặc biệt hoặc keyword Java
+
+**Trước khi viết DTO mới:** Kiểm tra response thật bằng Postman/Logcat để xác nhận server trả về snake_case hay camelCase. Không giả định.
+
+### Currency formatting
+Always use `FormatUtil.formatCurrency(Double)` — never format VND manually.
+It handles null (returns "Liên hệ") and formats with dots as thousands separator.
+
+### Discount badge
+Always use `FormatUtil.discountBadge(minPrice, compareAtPrice)` — returns null if
+no discount, returns `-XX%` string if discounted. Check for null before setting visibility.
+
+---
+
+## Reusable Components
+
+### Adapters (already exist — reuse, do not recreate)
+
+| Adapter | Item type | Key method |
+|---|---|---|
+| `ProductCardAdapter` | `ProductDto` | `submitList(List<ProductDto>)` |
+| `CategoryAdapter` | `CategoryDto` | `submitList(List<CategoryDto>)` |
+| `ImageSliderAdapter` | `List<String>` (URLs) | `updateImages(List<String>)` |
+| `ReviewAdapter` | `ReviewDto` | `submitList(List<ReviewDto>)` |
+
+`ProductCardAdapter` is shared between `HomeFragment` (horizontal) and
+`ProductListFragment` (grid). The same adapter handles both layouts because
+`item_product_card.xml` is fixed at 160dp wide — suitable for horizontal scroll
+and grid with 2 columns.
+
+For a new `CollectionAdapter`, follow the same `ListAdapter + DiffUtil` pattern
+as `CategoryAdapter` — it is the closest equivalent.
+
+### Utilities
+
+| Class | Method | Use |
+|---|---|---|
+| `FormatUtil` | `formatCurrency(Double)` | All price displays |
+| `FormatUtil` | `discountBadge(Double, Double)` | Discount badge text |
+| `FormatUtil` | `formatSold(int)` | Sold count display (e.g. "1.2k") |
+| `SessionManager` | `getCustomerId()` | Required for cart/order/wishlist API calls |
+| `SessionManager` | `isLoggedIn()` | Guard for auth-required actions |
+| `SessionManager` | `getToken()` | If auth header needs to be added to requests |
+
+### Repository methods already implemented
+
+`ProductRepository`:
+- `getProducts(page, limit, search, categories, collection, sortBy, order)`
+- `getProductDetail(slug)`
+- `getProductImages(productId)`
+- `getProductVariants(productId)`
+- `getProductReviews(productId)` — returns `LiveData<ReviewSummaryDto>`
+- `getCategories()`
+- `getCollections()`
+
+`CartRepository`:
+- `getActiveCart(customerId)`
+- `addToCart(customerId, productId, variantId, quantity)`
+- `updateCartItemQuantity(cartItemId, quantity)`
+- `removeCartItem(cartItemId)`
+
+No new repositories are needed for Như Ngọc's scope. All required API calls are
+already wired.
+
+---
+
+## Implementation Constraints
+
+### Room is declared but unused
+`androidx.room:room-runtime:2.6.1` is in `build.gradle` but no `@Database`,
+`@Dao`, or `@Entity` classes exist yet. It was declared "for offline cart cache"
+in a comment. Do not use Room in the Discovery scope (Home/ProductList/Detail) —
+those screens fetch live data only.
+
+### No auth header on API calls
+`ApiClient` does not attach a `Bearer` token header. Current API endpoints in the
+Discovery scope (products, categories, collections, reviews) are public and do not
+require auth. Cart/wishlist endpoints need `customer_id` as a query param instead
+of a header. This is consistent with existing usage — do not add an auth interceptor
+unless an endpoint returns 401.
+
+### Product rating is not a direct filter param on the API
+The `GET /products` endpoint does not accept a `minRating` query param based on
+current `ApiService` definitions. A rating filter on the ProductList screen must
+be applied client-side (filter the returned list in the ViewModel) unless the
+server endpoint is extended. Confirm with backend owner before adding a server param.
+
+### `observeForever` memory leak risk
+ViewModels use `observeForever` for chained calls (e.g., `loadProduct` triggers
+`loadImages`, `loadVariants`, `loadReviews`). This is an existing pattern in the
+project — follow it for consistency, but be aware it can cause leaks if the
+ViewModel is not cleared. Do not add new `observeForever` calls in Fragments.
+
+### Deprecated back navigation
+`ProductDetailFragment` calls `requireActivity().onBackPressed()`, deprecated
+since API 33 (Android 13). The minimum SDK is 26 so it still compiles, but the
+replacement is:
+```java
+requireActivity().getOnBackPressedDispatcher().onBackPressed();
+```
+Fix this when touching `ProductDetailFragment`.
+
+### `ProductListFragment` has no inline search bar
+Search only reaches `ProductListFragment` via navigation arguments from Home.
+If a user lands on Products via the bottom nav tab, there is no way to search
+from within that screen. A search `EditText` or `SearchView` in the toolbar of
+`ProductListFragment` is needed to fully satisfy the Search requirement.
+
+### `ImageSliderAdapter` does not use `DiffUtil`
+It uses plain `notifyDataSetChanged()` in `updateImages()`. This is fine for the
+image slider (small, replaced all at once) — do not change this adapter, but do
+not use this pattern in new adapters.
+
+### `AuthActivity` was missing its initial fragment transaction
+`AuthActivity.onCreate()` called `setContentView()` but never showed any fragment,
+resulting in a blank white screen. Fixed by adding:
+```java
+if (savedInstanceState == null) {
+    getSupportFragmentManager()
+        .beginTransaction()
+        .replace(android.R.id.content, new LoginFragment())
+        .commit();
+}
+```
+All auth fragment navigation (Login → Register → OTP) uses `android.R.id.content`
+as the container — the initial transaction must use the same container for consistency.
+
+### VMware on host machine breaks Android emulator's `10.0.2.2` routing
+On machines with VMware installed, the standard emulator shortcut `10.0.2.2`
+(which normally maps to host's `localhost`) times out. Root cause: VMware's virtual
+network adapters (`VMnet1`, `VMnet8`) interfere with QEMU's virtual network routing.
+
+**Workaround confirmed working (2026-05-31):**
+Set `api.base.url` in `Mobile/local.properties` to the host machine's WiFi adapter IP:
+```
+api.base.url=http://192.168.1.12:3000/api/
+```
+Find the correct IP with `ipconfig` — use the `IPv4 Address` under `Wireless LAN adapter Wi-Fi`,
+not any VMware adapter. This IP changes when the network changes, so each team member
+must set their own value. `local.properties` is gitignored — never commit it.
+
+`adb reverse tcp:3000 tcp:3000` also works as an alternative but resets on every
+emulator restart; the WiFi IP approach is more stable for development.
+
+### Server `POST /api/auth/login` had two API mismatches with the mobile app
+Discovered 2026-05-31 during first login test. Two issues:
+
+**Issue 1 — Field name:** App sent `{"phone": "..."}`, server expected `{"emailOrPhone": "..."}`,
+causing a `400 Information required` response.
+
+**Issue 2 — Response format:** Server returned `{ message, profile }`, but the app's
+`AuthViewModel` checks `response.token != null` and `LoginFragment` calls
+`session.saveCustomer(result.customer)`. Without `token` and `customer` keys, login
+appeared to fail silently.
+
+**Fix applied to `server/src/controllers/auth.controller.js`:**
+- `login()` now reads `emailOrPhone || phone` so both field names are accepted
+- Successful login returns `{ token: profile._id, customer: { _id, name, phone, email } }`
+
+**Note:** The `token` is currently the MongoDB `_id` string — not a signed JWT.
+This is sufficient for development and guest-mode testing, but Khải should replace
+it with a proper `jsonwebtoken`-signed token before the project is demoed, since
+`SessionManager` uses the token presence to determine login state.
+
+---
+
+## Technical Recommendations
+
+### 1. Banner slider: reuse CollectionDto.bannerUrl
+`HomeViewModel` already calls `getCollections()` and exposes `getCollections()`
+LiveData. Use the Collection items' `bannerUrl` field as banner images. Reuse
+`ImageSliderAdapter` directly (do not subclass) + `ViewPager2` + `Handler`
+auto-scroll loop. Full decision record is in the "Feature Decisions" section below.
+
+### 2. Filter bottom sheet: use Material BottomSheetDialogFragment
+Create `FilterBottomSheetFragment extends BottomSheetDialogFragment`. Pass the
+current filter state in via a static factory method. Communicate selected filters
+back to `ProductListFragment` via a shared ViewModel scoped to the Activity, or
+via a listener interface. Do not use Fragment result API here — the ViewModel
+approach is consistent with the rest of the project.
+
+### 3. Pagination: append, do not replace
+`ProductListViewModel` currently replaces the `products` LiveData on every load.
+For pagination, maintain a running `List<ProductDto>` in the ViewModel and
+merge pages:
+```java
+List<ProductDto> allProducts = new ArrayList<>(current);
+allProducts.addAll(newPage.items);
+products.setValue(new ApiListResponse<>(allProducts, newPage.total));
+```
+Detect end of data with `allProducts.size() >= total`.
+
+### 4. Real-time search: Handler debounce
+In `HomeFragment.onQueryTextChange`, post a delayed `Runnable` (300ms) to the
+main `Handler`. Remove pending callbacks on each new keystroke before posting the
+new one. Navigate to `ProductListFragment` only on submit; for autocomplete,
+show results inline in a `RecyclerView` beneath the search bar.
+
+### 5. Grid/List toggle: swap LayoutManager
+Keep a boolean `isGrid` in `ProductListFragment`. On toggle:
+```java
+binding.rvProducts.setLayoutManager(
+    isGrid ? new GridLayoutManager(requireContext(), 2)
+           : new LinearLayoutManager(requireContext()));
+adapter.notifyDataSetChanged();
+```
+The same `ProductCardAdapter` works in both modes — the card width is fixed at
+160dp which fills a grid cell well but may look odd in list view. Consider a
+separate `item_product_list.xml` for full-width list rows.
+
+### 6. Quantity selector: standalone layout component
+Add a `+/-` row to `fragment_product_detail.xml` between the variant chips and
+the bottom bar. Track quantity as an `int` local field in the Fragment (not in
+the ViewModel — it is transient UI state). Pass it to `viewModel.addToCart`.
+
+### 7. Recommendations: extend ProductDetailViewModel
+Add a `MutableLiveData<List<ProductDto>> recommendations` field.
+After `loadProduct` resolves, call:
+```java
+productRepo.getRecommendations(slug, userId).observeForever(recommendations::setValue);
+```
+`getProductRecommendations` in `ApiService` already returns `Map<String, List<ProductDto>>` —
+extract the `"recommendations"` key from the map.
+
+---
+
+## Navigation Conventions
+
+### Bundle navigation over Safe Args
+
+**Decision:** All cross-fragment navigation uses `Bundle` + `Navigation.findNavController().navigate(R.id.dest, bundle)`. Safe Args is not used.
+
+**Why:**
+- The initial scaffold (Khải Đào, commit `17e9ba3`) established Bundle navigation throughout. Every call site — `HomeFragment` (search, category tap, "View All"), `ProductDetailFragment` (back button) — uses `getArguments().getString("key")` to read args.
+- Safe Args requires the `androidx.navigation.safeargs` Gradle plugin and generates a `*Directions` class per destination. Introducing it mid-project would require migrating all existing navigation call sites or mixing two patterns in the same codebase — both options add churn with no functional gain for this project's scope.
+- For this project (student demo, single developer per feature scope, no deep link requirements), Bundle navigation is fully sufficient.
+
+**Rule:** Always add new navigation arguments to `nav_graph.xml` as declared `<argument>` elements even when using Bundle navigation. This keeps the nav graph as the authoritative record of what arguments a destination accepts, even though the declarations have no runtime effect without Safe Args.
+
+---
+
+## Feature Decisions
+
+This section records implementation decisions for specific features as they are
+analysed or built. One entry per feature, added before implementation begins.
+
+---
+
+### [P3 #18] Search: Search History
+
+**Date recorded:** 2026-06-01
+**Status:** ✅ Completed 2026-06-01
+
+---
+
+#### Decision: Focus listener chỉ quản lý history, không ẩn suggestions
+
+**What was decided:** `onFocusChangeListener` (cả Home lẫn ProductList) khi `hasFocus=false` chỉ gọi `hideSearchHistory()`. **Không** gọi `hideSuggestions()` / `hideSearchSuggestions()`.
+
+**Why:** Khi user tap vào `rvSuggestions` / `rvSearchSuggestions`, EditText mất focus trước khi click event của RecyclerView item kịp fire (focus change = ACTION_DOWN, click = ACTION_UP). Nếu `hideSuggestions()` được gọi ở focus lost → view thành `GONE` → click event bị huỷ → suggestion không tap được được.
+
+Suggestions tự ẩn qua 2 path an toàn:
+1. `onTextChanged` khi query empty → `hideSuggestions()`
+2. Suggestion click handler → `hideSuggestions()` trước khi navigate
+
+**Rule:** Bất cứ khi nào thêm `OnFocusChangeListener` vào một EditText có suggestion overlay — đừng ẩn suggestion trong `hasFocus=false`. Chỉ ẩn các UI state mà không phải target của touch event đang xảy ra.
+
+---
+
+#### Decision: `SearchHistoryManager` dùng Gson + SharedPreferences, không dùng Room
+
+**Why:** History là data đơn giản (list of strings, max 10 items). Room là overkill — cần Schema, DAO, migration. SharedPreferences + Gson.toJson đủ dùng, zero boilerplate, và Gson đã có sẵn trong project (dependency của Retrofit).
+
+---
+
+### [P3 #14] Home: Shimmer Skeletons
+
+**Date recorded:** 2026-06-01
+**Status:** ✅ Completed 2026-06-01
+
+---
+
+#### Decision: Skeleton shapes khớp kích thước item thật, không dùng generic placeholder
+
+**What was decided:** Mỗi section có skeleton riêng khớp với kích thước item thật:
+- Category: circle 64dp + text stub 56×10dp (khớp `item_category.xml`)
+- Product card: rectangle 160×260dp (khớp `item_product_card.xml`)
+- Collection card: rectangle 140×90dp (khớp `item_collection.xml`)
+
+**Why:** Generic placeholder (1 gray box) không giúp user hình dung layout sẽ ra sao → gây layout shift bất ngờ khi content xuất hiện. Skeleton đúng hình dạng giảm visual jump và trông professional hơn.
+
+---
+
+#### Decision: Wrap real content trong `layoutContent`, toggle shimmer ↔ content
+
+**What was decided:** 3 real sections (categories, products, collections) được bọc trong `LinearLayout id="layoutContent"`. Loading observer toggle: shimmer VISIBLE + `startShimmer()` ↔ layoutContent VISIBLE + `stopShimmer()`.
+
+**Why:**
+- Một toggle duy nhất thay vì hide/show từng view riêng lẻ (6+ views) → ít code hơn, ít bug hơn.
+- `layoutContent` mặc định `visibility="gone"` trong XML — đảm bảo shimmer luôn hiện trước khi data đến, không bao giờ flash content rỗng.
+- Pattern này nhất quán và dễ mở rộng nếu sau này thêm section mới vào Home.
+
+**Tại sao không dùng ViewSwitcher / ViewFlipper:** Overkill — chỉ cần toggle visibility đơn giản, không cần animation chuyển cảnh giữa shimmer và content.
+
+---
+
+### [P1 #1] Home: Banner / Image Slider
+
+**Date recorded:** 2026-05-31
+**Status:** ✅ Completed 2026-05-31 — manually tested, all 8 items passed
+
+---
+
+#### Decision: Reuse `ImageSliderAdapter` without modification
+
+**What was decided:** Use `ImageSliderAdapter` exactly as it exists today. Do not
+create a subclass (`BannerAdapter`) and do not modify the existing class.
+
+**Why:**
+- `ImageSliderAdapter` already does exactly what the banner needs: it accepts
+  `List<String>` image URLs and renders each as a full-bleed `CENTER_CROP`
+  `ImageView` inside a `ViewPager2`. The `updateImages(List<String>)` method
+  refreshes data correctly.
+- It is already proven working in `ProductDetailFragment` for the product image
+  slider — the same layout pattern (ViewPager2 inside a fixed-height FrameLayout
+  with DotsIndicator overlay) is used there verbatim.
+- Creating a subclass would introduce a parallel class with identical behaviour,
+  violating the project rule "avoid duplicate implementations" (see `decisions.md`
+  Rules section).
+- The adapter creates `ImageView` instances programmatically, so there is no layout
+  XML to change — only `fragment_home.xml` and `HomeFragment.java` are touched.
+
+**Trade-off acknowledged:** Because `ImageSliderAdapter` creates plain `ImageView`s
+with no layout file, it is not possible to add a text overlay (e.g., collection
+name) to each banner slide without modifying the adapter. This is acceptable for
+the current task. If text overlays are required in a future iteration, the approach
+would be: create `item_banner.xml` (ImageView + TextView), change `onCreateViewHolder`
+to inflate it, and add a parallel `updateBanners(List<CollectionDto>)` method.
+
+---
+
+#### Decision: Extract `bannerUrl` list in the Fragment, not the ViewModel
+
+**What was decided:** The Fragment (`HomeFragment`) filters `CollectionDto` items
+to a `List<String>` of non-null `bannerUrl` values and passes that list to the
+adapter. The ViewModel is not changed.
+
+**Why:**
+- The ViewModel already exposes the full `ApiListResponse<CollectionDto>` via
+  `getCollections()`. Adding a second LiveData for banner URLs alone would duplicate
+  state unnecessarily.
+- URL extraction (`c.bannerUrl != null && !c.bannerUrl.isEmpty()`) is a view-layer
+  concern — it determines what to *display*, not what to *store*.
+- The same `getCollections()` observer will be reused for the Collections section
+  (P1 #2), which needs the full `CollectionDto` objects (id, name, slug). Keeping
+  one observer that feeds both the banner and the collections row minimises API
+  calls and code duplication.
+
+---
+
+#### Decision: Implement auto-scroll with `Handler` + `Runnable`, not `Timer`
+
+**What was decided:** Use `new Handler(Looper.getMainLooper())` with a self-posting
+`Runnable` for the 3.5-second auto-scroll cycle.
+
+**Why:**
+- `Handler` posts to the main thread directly — no `runOnUiThread` wrapper needed.
+- `Timer` / `ScheduledExecutorService` run on background threads; updating
+  `ViewPager2.setCurrentItem()` from a background thread causes a
+  `CalledFromWrongThreadException`.
+- `Handler.removeCallbacks(runnable)` is the correct, well-documented cancellation
+  mechanism and integrates cleanly with the Fragment lifecycle.
+- This is the conventional Android pattern for auto-scrolling banners and requires
+  no additional dependencies.
+
+---
+
+#### Lifecycle management for auto-scroll — rules and rationale
+
+The `Handler` + `Runnable` pair must be managed across three Fragment lifecycle
+events. Failing to do so causes either a memory leak or a `NullPointerException`
+after `binding` is set to null in `onDestroyView`.
+
+| Lifecycle event | Action | Reason |
+|---|---|---|
+| `onViewCreated` | Create `Handler` and `Runnable`; do NOT post yet | Adapter has no data yet; posting before data loads wastes cycles |
+| After `bannerAdapter.updateImages(urls)` | `handler.postDelayed(runnable, 3500)` | Only start after data is confirmed present and count > 1 |
+| `onPause` | `handler.removeCallbacks(runnable)` | Fragment is backgrounded (user switches apps or receives a call); scroll should stop |
+| `onResume` | `handler.postDelayed(runnable, 3500)` if `count > 1` | Fragment returns to foreground; scroll resumes |
+| `onDestroyView` | `handler.removeCallbacks(runnable)` | View is destroyed on navigation; `binding` will be null on next `Runnable` fire without this guard, causing NPE |
+
+**Critical constraint:** The `Runnable` references `binding.bannerViewPager` to
+call `setCurrentItem`. If `onDestroyView` nulls `binding` before `removeCallbacks`
+is called, the next `Runnable` fire crashes. `removeCallbacks` must always be
+called before `binding = null`.
+
+**Correct `onDestroyView` order:**
+```java
+public void onDestroyView() {
+    super.onDestroyView();
+    if (autoScrollHandler != null) {
+        autoScrollHandler.removeCallbacks(autoScrollRunnable);  // ← before null
+    }
+    binding = null;  // ← after removeCallbacks
+}
+```
+
+**`onResume` guard:**
+```java
+public void onResume() {
+    super.onResume();
+    if (bannerAdapter != null && bannerAdapter.getItemCount() > 1) {
+        autoScrollHandler.postDelayed(autoScrollRunnable, 3500);
+    }
+}
+```
+The `bannerAdapter != null` guard handles the case where `onResume` fires before
+`onViewCreated` has set up the adapter (e.g., after process restore).
+
+---
+
+#### Layout approach: mirror `fragment_product_detail.xml`
+
+The `ProductDetailFragment` already uses `ViewPager2` + `DotsIndicator` inside a
+`FrameLayout`. The same structure is used for the Home banner with height changed
+from 300dp to 200dp. This means the pattern is already verified on-device — no
+new layout patterns are being introduced.
+
+```
+FrameLayout  (match_parent × 200dp)
+  ├── ViewPager2   id="bannerViewPager"   (match_parent × match_parent)
+  └── DotsIndicator  id="bannerDotsIndicator"
+        layout_gravity="bottom|center_horizontal"
+        layout_marginBottom="8dp"
+```
+
+`DotsIndicator` version 5.0 is already in `build.gradle` and its `attachTo(ViewPager2)`
+API is confirmed working. No version change required.
+
+---
+
+#### Decision: Fix `GET /categories` and `GET /collections` to return `List<T>` not `ApiListResponse<T>`
+
+**Discovered:** 2026-05-31 during banner testing (categories and banner both blank)
+
+**Root cause:** Both server controllers (`getAllCategories`, `getAllCollections`) return
+a plain JSON array `[...]`. The Android `ApiService` declared
+`Call<ApiListResponse<CategoryDto>>` / `Call<ApiListResponse<CollectionDto>>`, which
+expects `{ items: [...], total: N }`. Gson threw a `JsonSyntaxException` silently →
+`onFailure` called → LiveData set to `null` → nothing rendered.
+
+**Fix applied:** Changed return types to `Call<List<T>>` in `ApiService`,
+`LiveData<List<T>>` in `ProductRepository`, `MutableLiveData<List<T>>` in
+`HomeViewModel` and `ProductListViewModel`.
+
+**Why not fix the server instead:** The web admin's `AdminCollections` component
+does `this.collections = data` expecting a raw array. Wrapping the server response
+in `{ items, total }` would break the admin UI. The mobile-side fix is the safer
+change with zero cross-team impact.
+
+**Rule going forward:** Before adding a new `ApiService` endpoint that returns a
+list, check the actual server response shape with Postman first. Do not assume all
+list endpoints return `ApiListResponse`.
+
+---
+
+#### Decision: Banner UI polish — gradient overlay + styled DotsIndicator + disk cache
+
+**Date:** 2026-05-31
+
+**Gradient overlay:**
+Added a 60dp `View` with `bg_banner_gradient.xml` (transparent → 33% black, top to
+bottom) anchored to the bottom of the banner `FrameLayout`. This ensures dots remain
+readable against any banner image without darkening the full slide.
+
+**DotsIndicator styling:**
+- `app:dotsColor="#80FFFFFF"` — inactive dots: 50% white
+- `app:selectedDotColor="@color/accent"` — active dot: `#D4A853` gold (confirmed
+  correct attribute name for `dotsindicator:5.0`; `dotsSelectedColor` does NOT exist
+  in this version and causes a resource-linking error)
+- `app:dotsSize="5dp"` / `app:dotsSpacing="3dp"` — smaller and tighter than library
+  defaults (8dp / 4dp) for a cleaner look on the 200dp banner
+
+**Glide disk cache:**
+Added `diskCacheStrategy(DiskCacheStrategy.ALL)` to `ImageSliderAdapter.onBindViewHolder`.
+This caches both the original and transformed (centre-cropped) bitmap to disk.
+After the first network load, subsequent app opens show banner images instantly
+without waiting for a network round-trip. Applies to all `ImageSliderAdapter` usages
+(home banner and product detail images).
+
+---
+
+### [P1 #2] Home: Collections Section
+
+**Date recorded:** 2026-06-01
+**Status:** ⚙️ Implemented 2026-06-01 — awaiting manual test
+
+---
+
+#### Decision: Follow `CategoryAdapter` pattern exactly for `CollectionAdapter`
+
+**What was decided:** `CollectionAdapter` is a structural copy of `CategoryAdapter`:
+`ListAdapter<CollectionDto, VH>` + inner `DiffUtil.ItemCallback` + inner
+`OnCollectionClickListener` interface + `ViewBinding` in the ViewHolder.
+
+**Why:**
+- `CategoryAdapter` is the only existing horizontal-list adapter for entity cards in
+  this project. It is proven working (categories render correctly on Home). Deviating
+  from its structure for collections would introduce two inconsistent patterns in the
+  same adapter package with no benefit.
+- `ListAdapter` + `DiffUtil` is the project-wide convention for all RecyclerView
+  adapters (documented in `decisions.md` "ListAdapter + DiffUtil" section). Using it
+  here maintains that consistency.
+- The `OnClickListener` as an inner interface (rather than a lambda in the Fragment) is
+  consistent with `CategoryAdapter`, `ProductCardAdapter`, and `ReviewAdapter`. All
+  three use the same interface pattern.
+
+**One structural difference from `CategoryAdapter`:** `CollectionAdapter` constructor
+accepts an additional `String serverHost` parameter. This is required because
+`CollectionDto.bannerUrl` is stored as `http://localhost:3000/uploads/...` by the
+server and must be rewritten to the actual host before Glide can load it on the
+emulator. The rewrite pattern (`url.replace("http://localhost:3000", serverHost)`) is
+identical to the one already in `HomeFragment`'s banner observer. `serverHost` is
+computed once in `HomeFragment.setupRecyclerViews()` as
+`BuildConfig.API_BASE_URL.replace("/api/", "")` and injected at construction time.
+
+**Why not rewrite in the Fragment before `submitList()`:** `submitList()` takes
+`List<CollectionDto>` — the DTO objects. Rewriting would require mutating DTO fields
+in place (bad: DTOs are data-layer objects, not view-layer objects) or creating wrapper
+objects (overkill for one field). Injecting `serverHost` into the adapter is the
+minimal, clean solution.
+
+**Why `CategoryAdapter`'s `category.imageUrl` does not need the same rewrite:**
+`CategoryDto.imageUrl` is served from the same server but the emulator + WiFi-IP
+workaround (`local.properties`) is already in effect for all API calls via `ApiClient`.
+Category images load via the same base URL path. The `bannerUrl` specifically stores
+the full `http://localhost:3000/...` origin URL (set by the upload middleware at
+create/update time), which is why only `bannerUrl` needs rewriting.
+
+---
+
+---
+
+### [P2 #9] ProductList: Grid/List Toggle
+
+**Date recorded:** 2026-06-01
+**Status:** ✅ Completed 2026-06-01
+
+#### Decision: GridLayoutManager(1) + setColumns() trong adapter thay vì LinearLayoutManager
+
+**What was decided:** List mode dùng `GridLayoutManager(1)` kết hợp `adapter.setColumns(1)` để set
+`lp.width = MATCH_PARENT` trong `onBindViewHolder`. Không dùng `LinearLayoutManager`.
+
+**Why:**
+- `GridLayoutManager` với span=1 force child width bằng RecyclerView width — nhưng chỉ khi child
+  dùng `match_parent`. Card có `layout_width="160dp"` nên GridLayoutManager không override được.
+- `LinearLayoutManager` cũng không giúp được vì lý do tương tự.
+- Fix đúng: cập nhật `LayoutParams.width` trực tiếp trong `onBindViewHolder` theo `columns` state.
+  Khi `columns=1` → `MATCH_PARENT`, khi `columns=2` → reset về `160dp_px`.
+- `notifyDataSetChanged()` trong `setColumns()` trigger rebind toàn bộ visible items với LayoutParams mới.
+
+**Tại sao không ảnh hưởng HomeFragment:** `ProductCardAdapter` ở Home là instance riêng, `columns`
+default = 2, luôn set về 160dp → hành vi không thay đổi.
+
+---
+
+### [P2 #8] ProductList: Empty State
+
+**Date recorded:** 2026-06-01
+**Status:** ✅ Completed 2026-06-01
+
+#### Decision: Bọc RecyclerView trong FrameLayout thay vì dùng ViewSwitcher
+
+**What was decided:** `SwipeRefreshLayout` → `FrameLayout` → (`RecyclerView` + `LinearLayout` empty state),
+toggle visibility trong Fragment observer.
+
+**Why:** `SwipeRefreshLayout` chỉ nhận đúng 1 direct child. `FrameLayout` là lớp bọc tối giản nhất
+để chứa 2 view chồng lên nhau — không cần `ViewSwitcher`, `ViewFlipper`, hay `ViewStub`. Toggle
+`VISIBLE`/`GONE` trực tiếp trong observer đủ đơn giản cho use case này.
+
+---
+
+### [P2 #10] ProductList: Sort Chip Active State
+
+**Date recorded:** 2026-06-01
+**Status:** ✅ Completed 2026-06-01
+
+#### Decision: syncSortChip() đọc ViewModel state, không track chip state trong Fragment
+
+**What was decided:** Thêm `getCurrentSortBy()` / `getCurrentOrder()` vào ViewModel. Fragment gọi
+`syncSortChip()` để set checked state của 4 chip dựa theo ViewModel — không dùng biến boolean
+riêng trong Fragment để track chip nào đang active.
+
+**Why:** ViewModel là single source of truth cho sort state. Nếu Fragment tự track (biến `activeChip`
+v.v.), state có thể lệch với ViewModel sau khi `clearFilters()` hoặc config change. Đọc thẳng từ
+ViewModel đảm bảo chip luôn sync đúng.
+
+**Khi nào gọi `syncSortChip()`:**
+- Cuối `onViewCreated()` — initial state khi Fragment tạo mới
+- Sau `onFiltersCleared()` — `clearFilters()` reset sort về `createdAt/desc`, chip phải theo
+
+Không cần gọi khi user tap chip vì `ChipGroup.singleSelection="true"` tự handle visual khi user tương tác.
+
+---
+
+### [P1 #5] ProductDetail: Quantity Selector
+
+**Date recorded:** 2026-06-01
+**Status:** ✅ Completed 2026-06-01
+
+---
+
+#### Decision: Đặt quantity row trong bottom bar, không phải scroll content
+
+**What was decided:** Row `Số lượng / − / 1 / +` đặt trong `layoutBottomBar` (fixed, non-scrollable)
+ngay trên nút "Thêm vào giỏ", không đặt trong `NestedScrollView`.
+
+**Why:**
+- Ban đầu đặt giữa Variants và Short Description trong scroll area. Vì image slider 300dp + product
+  info + variants, người dùng phải cuộn khá xa mới thấy. Thực tế người dùng không biết cần cuộn →
+  không tìm thấy nút.
+- Bottom bar luôn hiển thị bất kể vị trí scroll. Đặt quantity cạnh nút Add to Cart là đúng về mặt
+  UX — hai hành động liên quan trực tiếp với nhau.
+- `decisions.md` khuyến nghị "between variant chips and bottom bar" — bottom bar là vị trí
+  phù hợp nhất với nghĩa đó.
+
+---
+
+#### Decision: Dùng plain `Button` + custom drawable thay vì `MaterialButton` cho nút `−` / `+`
+
+**What was decided:** Nút `−` và `+` dùng `android.widget.Button` (standard) với
+`android:background="@drawable/bg_quantity_btn_outline"` và `bg_quantity_btn_filled`
+thay vì `MaterialButton`.
+
+**Why:**
+- `MaterialButton` có attribute `insetLeft/Right/Top/Bottom` để loại bỏ internal insets
+  (cần thiết để thu nhỏ button xuống 36×36dp), nhưng các attribute này **không khai báo được
+  trong layout XML** — chỉ dùng được trong `<style>` resource.
+- Dùng trực tiếp `app:insetLeft` trong layout gây build error:
+  `attribute insetLeft (aka com.unifurniture.mobile:insetLeft) not found`.
+- Plain `Button` với `android:background` custom drawable không có internal insets mặc định →
+  co về đúng 36×36dp mà không cần workaround.
+- Hai file drawable (`bg_quantity_btn_outline.xml`, `bg_quantity_btn_filled.xml`) là shape
+  rectangles với `cornerRadius="8dp"` — nhất quán về bo góc với các UI element khác trong project.
+
+---
+
+#### Decision: `quantity` là local field trong Fragment, không vào ViewModel
+
+**Why:** Quantity là transient UI state — nó reset về 1 mỗi khi Fragment được tạo lại, đúng với
+expected behavior. Không có lý do gì để persist nó qua config changes hay expose qua LiveData.
+`ProductDetailViewModel.addToCart(variantId, quantity)` nhận quantity như một parameter tại thời
+điểm gọi — đây là pattern đúng cho one-shot action.
+
+---
+
+### [P2 #7] Search: Real-time Debounce + Suggestions
+
+**Date recorded:** 2026-06-01
+**Status:** ✅ Completed 2026-06-01
+
+---
+
+#### Decision: Suggestion tap → ProductDetail, không phải ProductList search
+
+**What was decided:** Khi user tap vào một suggestion, navigate thẳng vào `ProductDetailFragment` bằng `product.slug`. Không dùng `product.name` làm search query sang ProductList.
+
+**Why:** Full product name làm `?q=` param → server không match được (search quá specific) → empty state → UX tệ. Navigate bằng `slug` đảm bảo luôn ra đúng sản phẩm.
+
+**Rule:** `SearchSuggestionAdapter` nhận `List<ProductDto>` (không phải `List<String>`), listener trả về `ProductDto` để caller tự quyết định navigate ProductDetail hay ProductList.
+
+---
+
+#### Decision: `startsWith` thay vì `contains` cho client-side suggestion matching
+
+**What was decided:** Client-side filter (ProductList) dùng `normalizedName.startsWith(normalizedQuery)` sau khi strip dấu. Không dùng `contains`.
+
+**Why:** `contains` khiến gõ "tu" suggest cả "Bộ bàn ghế **tủ** bếp" — tên bắt đầu bằng "Bộ" trông rất lạ và không liên quan với query. `startsWith` cho UX autocomplete đúng hơn: suggestions chỉ là completions của những gì đang gõ.
+
+**Note:** Grid kết quả (dùng API `?q=`) vẫn dùng full-text search của server — không bị ảnh hưởng bởi quyết định này.
+
+---
+
+#### Decision: Home search dùng API call, ProductList dùng client-side filter
+
+**What was decided:**
+- **Home**: `HomeViewModel.searchForSuggestions(query)` gọi `GET /products?q=query&limit=8` → `searchSuggestions` LiveData → Fragment observe và show
+- **ProductList**: `showClientSideSuggestions()` filter từ `viewModel.getProducts().getValue()` ngay lập tức, sau đó API results cập nhật thêm
+
+**Why:**
+- Home chỉ có 10 featured products → client-side filter quá ít, nhiều query không ra gì
+- ProductList đang có sẵn full product list từ current page → client-side filter nhanh và immediate, đủ dùng cho suggestions
+- Không cần thêm API call mới trong ProductList (đã có debounced search cho grid update)
+
+---
+
+#### Decision: Strip dấu tiếng Việt (NFD normalize) trước khi so sánh
+
+**What was decided:** Normalize text bằng `Normalizer.Form.NFD` rồi xóa combining marks trước khi so sánh. Áp dụng cho cả query và product name.
+
+**Why:** User gõ "tu" (không dấu) → cần match "Tủ" (có dấu). NFD decompose "ủ" thành "u" + combining grave, sau đó xóa combining → "u". So sánh "tu".startsWith("tu") = true.
+
+---
+
+### [P2 #6] ProductList: Pagination / Infinite Scroll
+
+**Date recorded:** 2026-06-01
+**Status:** ✅ Completed 2026-06-01
+
+---
+
+#### Decision: Infinite scroll (append) thay vì page numbers hoặc "Xem thêm" button
+
+**What was decided:** Dùng `RecyclerView.OnScrollListener` trigger load page tiếp theo tự động
+khi user cuộn gần cuối list. Không dùng page number bar, không dùng "Xem thêm" button.
+
+**Why:**
+- Infinite scroll là pattern chuẩn cho product listing trên mobile — Shopee, Tiki, Lazada đều dùng.
+- Ngón cái cuộn tự nhiên hơn là bấm button thêm bước.
+- Page number bar chiếm diện tích màn hình, khó bấm trên mobile.
+- "Xem thêm" button phù hợp hơn cho desktop hoặc khi dataset nhỏ.
+
+**Trade-off acknowledged:** User không biết đang ở "đâu" trong kết quả.
+Fix: `tvProductCount` hiển thị `"Hiển thị X / Y sản phẩm"` để cung cấp context vị trí.
+
+---
+
+#### Decision: `hasMore = response.page < response.totalPages`
+
+**What was decided:** Dùng server metadata `page` và `totalPages` để xác định còn trang tiếp
+theo không. Không dùng `response.items.size() >= PAGE_SIZE`.
+
+**Why:**
+- `totalPages` là ground truth từ server, chính xác hơn.
+- `items.size() < PAGE_SIZE` có thể false-negative nếu server trả đúng PAGE_SIZE item ở trang
+  cuối (ví dụ tổng 40 item, PAGE_SIZE=20, trang 2 trả đúng 20 → `size() >= 20` nhưng không có
+  trang 3). Với `page < totalPages`, case này được xử lý đúng.
+- Khi `currentMinRating > 0`, rating filter được apply client-side nên số item hiển thị < số
+  item server trả về. Dùng `totalPages` đảm bảo pagination dựa trên server count, không bị
+  ảnh hưởng bởi client-side filter.
+
+---
+
+#### Decision: `allProducts` là accumulated list trong ViewModel, không phải trong Fragment
+
+**What was decided:** ViewModel giữ `List<ProductDto> allProducts` và post toàn bộ list
+mỗi lần fetch. Fragment chỉ `adapter.submitList(response.items)` như bình thường.
+
+**Why:**
+- Fragment không nên giữ state — đúng với MVVM pattern của project.
+- `ListAdapter + DiffUtil` tự xử lý animation khi list mới có thêm item ở cuối —
+  không cần Fragment biết gì về pagination logic.
+- Nếu Fragment giữ list, config change (rotate screen) sẽ mất data vì Fragment bị recreate.
+  ViewModel survive config change, `allProducts` vẫn còn.
+
+---
+
+### [P1 #3] ProductList: Filter Bottom Sheet
+
+**Date recorded:** 2026-06-01
+**Status:** ⚙️ Implemented 2026-06-01 — awaiting manual test
+
+---
+
+#### Decision: Listener interface for filter result communication
+
+**What was decided:** `FilterBottomSheetFragment` defines an inner interface
+`OnFiltersAppliedListener` with two methods: `onFiltersApplied(categoryId, minPrice, maxPrice, minRating)`
+and `onFiltersCleared()`. `ProductListFragment` sets an anonymous instance via
+`sheet.setOnFiltersAppliedListener(...)` before calling `sheet.show(...)`.
+
+**Why:**
+- The decisions doc explicitly recommends either a shared ViewModel or a listener interface —
+  and rules out Fragment result API. The listener interface is the simpler of the two options:
+  no extra ViewModel class needed, no `ViewModelProvider` scope gymnastics, and the coupling
+  is explicit and local to `showFilterSheet()`.
+- A shared ViewModel would be appropriate if the filter state needed to survive across the
+  full Activity lifetime and be read by multiple fragments. Here only `ProductListFragment`
+  reads the result — one call site, one consumer.
+- This pattern is consistent with `CategoryAdapter.OnCategoryClickListener`,
+  `CollectionAdapter.OnCollectionClickListener`, and `ProductCardAdapter.OnProductClickListener`
+  already in the project.
+
+---
+
+#### Decision: Pass categories as parallel ArrayLists, not Parcelable DTOs
+
+**What was decided:** `FilterBottomSheetFragment.newInstance()` accepts
+`ArrayList<String> categoryIds` and `ArrayList<String> categoryNames` rather than
+`ArrayList<CategoryDto>`.
+
+**Why:**
+- `CategoryDto` is not `Parcelable` and adding `implements Parcelable` would touch a shared
+  data-layer class for a single UI concern.
+- Only `id` and `name` are needed in the bottom sheet. Passing the full DTO would be wasteful.
+- `Bundle.putStringArrayList()` is a first-class Bundle method — no serialization overhead,
+  survives process death correctly.
+
+**Trade-off:** `ProductListFragment.showFilterSheet()` must iterate `viewModel.getCategories().getValue()`
+at tap time to build the two lists. `getValue()` may return null if the LiveData has not
+yet been set (categories still loading). In that case the sheet opens with only the "Tất cả"
+chip — acceptable degradation (user can dismiss and retry once the list loads).
+
+---
+
+#### Decision: Dynamically generated chip IDs via `View.generateViewId()`
+
+**What was decided:** Each category chip gets `chip.setId(View.generateViewId())` before
+being added to the `ChipGroup`.
+
+**Why:**
+- `ChipGroup.getCheckedChipId()` returns the view ID of the selected chip.
+- Chips without an explicit ID have `getId() == View.NO_ID (-1)`. Multiple chips with
+  `NO_ID` make `getCheckedChipId()` ambiguous and `ChipGroup.check(id)` non-functional.
+- `View.generateViewId()` is available since API 17 (minSdk = 26 ✓) and is the
+  standard Android pattern for runtime-assigned unique IDs.
+
+---
+
+#### Decision: "Tất cả" chip represents no category filter
+
+**What was decided:** The first chip added to the category `ChipGroup` is a hardcoded
+"Tất cả" chip with `tag = null`. Its tag is read in `applyAndDismiss()` and the null
+value is passed as `categoryId` to `viewModel.applyFilters()`, which interprets
+`null` as "no category filter".
+
+**Why:**
+- Without a "Tất cả" chip, there is no way for the user to explicitly remove a previously
+  set category filter via the bottom sheet (they would have to use "Xóa bộ lọc" which
+  also clears price and rating).
+- `ChipGroup` with `singleSelection="true"` does allow deselecting the current chip by
+  tapping it again (since `selectionRequired` is not set). But this is a hidden gesture —
+  most users expect a visible "All" option.
+- `tag = null` distinguishes "Tất cả" from real categories without needing a sentinel
+  ID string.
+
+---
+
+#### Decision: CoordinatorLayout as root for `fragment_product_list.xml`
+
+**What was decided:** The root element of `fragment_product_list.xml` was changed from
+`LinearLayout` to `CoordinatorLayout`. The original `LinearLayout` becomes a direct child
+filling the full parent. The `FloatingActionButton` is a sibling of the `LinearLayout`.
+
+**Why:**
+- `FloatingActionButton` must float over content, requiring a parent that supports overlapping
+  children (i.e., not `LinearLayout` or `ConstraintLayout` with match constraints).
+- `CoordinatorLayout` is the recommended parent for FABs in Material Design — it enables
+  built-in behaviors like FAB moving up when a Snackbar appears, which may be useful later.
+- All existing ViewBinding references (`binding.tvTitle`, `binding.rvProducts`, etc.) remain
+  valid — ViewBinding traverses the full view hierarchy regardless of nesting depth.
+
+---
+
+### [Bug] BottomNavigationView Home Tab — Navigation 2.7.6 Multiple Back Stacks
+
+**Date recorded:** 2026-06-01
+**Status:** ✅ Fixed 2026-06-01
+
+---
+
+#### Symptom
+
+Home tab in `BottomNavigationView` never responds to taps from any screen.
+Products / Cart / Account tabs work. No crash. No application code modifies the
+Home menu item at runtime. Appeared after P1 #1/P1 #2 made the navigation paths
+more prominent, but the root cause predates those changes (original scaffold).
+
+#### Working Theory: Navigation 2.7.6 `saveState`/`restoreState` Cycle
+
+`NavigationUI.setupWithNavController` (Navigation 2.7.6) auto-enables multiple back
+stacks. When any tab is tapped, `onNavDestinationSelected` builds:
+
+```java
+NavOptions options = new NavOptions.Builder()
+    .setLaunchSingleTop(true)
+    .setRestoreState(true)
+    .setPopUpTo(graph.findStartDestination().id, false, /*saveState=*/ true)
+    .build();
+navController.navigate(item.getItemId(), null, options);
+```
+
+For Products / Cart / Account: navigate target ≠ `popUpTo` target (`homeFragment`).
+`saveState` saves under key=target; `restoreState` looks up key=target. Different keys
+→ normal behavior ✓.
+
+For Home tab: navigate target (`homeFragment`) == `popUpTo` target (`homeFragment`).
+Both save and restore use key=`homeFragment`. `popUpTo` saves the current stack under
+key=`homeFragment`; `restoreState` immediately finds and restores that same state,
+reverting the navigation. Net effect: zero visible change from every screen.
+
+#### Proposed Fix (pending diagnostic confirmation)
+
+Replace `NavigationUI.setupWithNavController` in `MainActivity.java` with a manual
+`setOnItemSelectedListener` using plain `popUpTo` **without** `saveState`/`restoreState`:
+
+```java
+binding.bottomNavigation.setOnItemSelectedListener(item -> {
+    NavOptions options = new NavOptions.Builder()
+        .setLaunchSingleTop(true)
+        .setPopUpTo(R.id.homeFragment, false)
+        .build();
+    try {
+        navController.navigate(item.getItemId(), null, options);
+        return true;
+    } catch (IllegalArgumentException e) {
+        return false;
+    }
+});
+navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+    Menu menu = binding.bottomNavigation.getMenu();
+    for (int i = 0; i < menu.size(); i++) {
+        MenuItem menuItem = menu.getItem(i);
+        if (menuItem.getItemId() == destination.getId()) {
+            menuItem.setChecked(true);
+            break;
+        }
+    }
+});
+```
+
+This removes the `saveState`/`restoreState` cycle while preserving:
+- Correct back stack pop when switching tabs
+- Visual tab highlighting on destination change
+- `launchSingleTop` to prevent duplicate destinations
+
+Only `MainActivity.java` changes. No nav_graph, fragment, or adapter changes.
+
+#### Confirmed by Logcat (2026-06-01)
+
+```
+CLICK: itemId=2131230971 homeId=2131230971 match=true
+onNavDestinationSelected returned: false   ← always, for every Home tap
+```
+
+Listener fires ✓. Navigation fails inside `onNavDestinationSelected` because
+`NavController.navigate(homeFragment, navOptions{saveState=true, restoreState=true,
+popUpTo(homeFragment)})` throws `IllegalArgumentException`. Exception is caught by
+NavigationUI's try-catch; `false` returned; BottomNav does not select Home.
+
+---
+
+#### Decision: Use `MaterialCardView` for `item_collection.xml`
+
+**What was decided:** `item_collection.xml` uses `MaterialCardView` as the root, not
+`LinearLayout` or plain `FrameLayout`.
+
+**Why:** `item_product_card.xml` already uses `MaterialCardView` with
+`cardCornerRadius="12dp"` and `cardElevation="2dp"`. Using the same root for collection
+cards gives visual consistency (same rounded-corner, same elevation shadow) without
+adding any new dependency — Material Components is already in `build.gradle`.
+
+**Card dimensions:** 140dp wide × 90dp tall (landscape ratio, slightly wider than
+category cards at 80dp, proportional to a banner image aspect ratio).
+
+---
+
+## Multi-language Support (i18n)
+
+### Decision: English là default, Vietnamese là values-vi
+
+**Date recorded:** 2026-06-01
+
+**What was decided:** `res/values/strings.xml` chứa English (default fallback). Các ngôn ngữ khác đặt trong `values-vi/`, `values-zh-rCN/`, `values-fr/`. Android tự chọn file theo locale thiết bị; không khớp → fallback về English.
+
+**Why:** Thầy yêu cầu "tiếng Anh mặc định trước". Default folder (`values/`) là fallback cuối cùng của Android — đặt EN ở đây đảm bảo app không bị crash khi chạy ở locale chưa hỗ trợ.
+
+**Rule:** Thêm string mới → thêm vào cả 4 file (`values`, `values-vi`, `values-zh-rCN`, `values-fr`). Không được hardcode text tiếng Việt trực tiếp trong layout XML hay Java — luôn dùng `@string/` hoặc `getString()`.
+
+---
+
+### Decision: Format strings dùng `%1$d` / `%1$s` cho dynamic text
+
+**What was decided:** Strings có tham số dùng format `%1$d` (int), `%1$s` (String), `%2$d`... Ví dụ: `"Showing %1$d / %2$d products"`. Trong Java: `getString(R.string.showing_products, count, total)`.
+
+**Why:** Android `getString(int resId, Object... args)` yêu cầu format này. Không nối chuỗi trong code (`"Hiển thị " + count + "..."`), vì dịch thuật thay đổi thứ tự từ giữa các ngôn ngữ.
+
+---
+
+## UI/UX Improvements
+
+### Decision: Filter FAB badge dùng FrameLayout wrapper, không dùng BadgeDrawable
+
+**Date recorded:** 2026-06-01
+
+**What was decided:** Bọc FAB trong `FrameLayout` (child của CoordinatorLayout), thêm `TextView tvFilterBadge` (20×20dp oval đỏ) với `layout_gravity="top|end"`. Không dùng `BadgeDrawable` của Material.
+
+**Why:** `BadgeDrawable` được thiết kế cho `BottomNavigationView` và `TabLayout` — không có API public để attach vào FAB. Cách `FrameLayout` wrapper đơn giản hơn, không cần library thêm, và Snackbar behavior không dùng trong màn hình này nên mất FAB behavior là chấp nhận được.
+
+---
+
+### Decision: ProductList shimmer chỉ hiện khi initial load (adapter rỗng)
+
+**Date recorded:** 2026-06-01
+
+**What was decided:** Check `adapter.getItemCount() == 0` trong `isLoading()` observer. Nếu true → show shimmer, hide `swipeRefresh`. Nếu false (reload sau filter/sort) → chỉ show `progressBar` nhỏ, giữ nguyên list đang hiển thị.
+
+**Why:** Shimmer khi đã có data gây layout jump khó chịu. User đang xem list, bỗng mất hết thay bằng skeleton → trải nghiệm tệ hơn không có shimmer. Shimmer phù hợp nhất cho trạng thái "màn hình trắng chưa có gì".
+
+---
+
+### Decision: Active filter chips xóa từng filter riêng lẻ, không clear all
+
+**What was decided:** Mỗi chip active (category / price range / rating) có nút ×. Tap × gọi `viewModel.applyFilters()` với chỉ param tương ứng set null, các param khác giữ nguyên.
+
+**Why:** "Xóa bộ lọc" trong bottom sheet clear tất cả — hành vi đúng khi user muốn reset hoàn toàn. Nhưng chip × cần granular: user có thể muốn giữ filter rating mà xóa filter category. Hai UI element, hai hành vi khác nhau — nhất quán với mental model của user.
+
+---
+
+### Decision: Add to Cart feedback dùng `cartRestoreHandler` là field, không tạo Handler mới mỗi lần
+
+**Date recorded:** 2026-06-01
+
+**What was decided:** `cartRestoreHandler` là field của Fragment, khởi tạo 1 lần. Gọi `removeCallbacksAndMessages(null)` trước `postDelayed` để hủy lần trước (nếu user tap Add to Cart liên tiếp nhanh). Cancel trong `onDestroyView`.
+
+**Why:** Nếu tạo Handler mới mỗi lần observe, và user tap nhiều lần, sẽ có nhiều Runnable pending → button restore nhiều lần lệch nhau. `removeCallbacksAndMessages` reset sạch trước khi post mới.
+
+---
+
+### Decision: PhotoView thay thế hoàn toàn ImageView trong ImageSliderAdapter
+
+**Date recorded:** 2026-06-01
+
+**What was decided:** `PhotoView` extends `ImageView` → drop-in replacement. Glide vẫn `.into(photoView)` bình thường. Không cần tạo subclass hay wrapper.
+
+**Why:** `PhotoView` compatible với `ViewPager2` — library đã xử lý touch conflict giữa scroll của ViewPager2 và pinch gesture của PhotoView. Không cần config thêm gì. `centerCrop` vẫn là scaleType default ban đầu; sau khi zoom PhotoView tự handle scale.
+
+---
+
+### Decision: RecentlyViewedManager lưu full Item object (4 fields), không chỉ productId
+
+**Date recorded:** 2026-06-01
+
+**What was decided:** Lưu `{id, slug, name, imageUrl}` vào SharedPreferences thay vì chỉ lưu `productId`. Adapter hiện thị trực tiếp không cần API call.
+
+**Why:** Nếu chỉ lưu productId, cần fetch lại từng sản phẩm để lấy name và image → thêm N API calls, thêm complexity. 4 fields nhỏ (tổng ~400 bytes × 10 items ≈ 4KB) hoàn toàn phù hợp SharedPreferences. Pattern giống `SearchHistoryManager` trong project.
+
+**Khi nào refresh:** `onResume` của HomeFragment — đảm bảo list cập nhật ngay khi user back từ ProductDetail, không cần LiveData hay event bus.
+
+---
+
+### Decision: Sort reviews là client-side, không request API mới
+
+**Date recorded:** 2026-06-01
+
+**What was decided:** `allReviews: List<ReviewDto>` lưu list gốc trong Fragment. `sortReviews(mode)` sort một **bản sao** (`new ArrayList<>(allReviews)`) rồi `submitList()`. List gốc không mutate → có thể re-sort bất kỳ lúc nào mà không cần fetch lại.
+
+**Why:** API `GET /reviews/product/:id` đã trả về toàn bộ reviews (không có pagination riêng cho reviews). Client-side sort là đủ và không tốn thêm request. Sort theo `createdAt` String ISO 8601 hoạt động đúng vì format `YYYY-MM-DDTHH:mm:ss` sortable lexicographically.

@@ -1,0 +1,19 @@
+﻿<div class="product-sort">
+  <div class="sort-dropdown" [class.is-open]="isOpen">
+    <button type="button" class="sort-trigger" (click)="toggleDropdown()">
+      <span class="sort-value">{{ getSelectedLabel() }}</span>
+    </button>
+
+    <div class="sort-menu" *ngIf="isOpen">
+      <button
+        type="button"
+        class="sort-option"
+        *ngFor="let option of sortOptions"
+        [class.is-selected]="selectedSort === option.value"
+        (click)="selectSort(option.value)"
+      >
+        {{ option.label }}
+      </button>
+    </div>
+  </div>
+</div>

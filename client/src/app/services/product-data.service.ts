@@ -1,0 +1,933 @@
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { catchError, forkJoin, map, Observable, of, shareReplay, switchMap, timeout } from 'rxjs';
+
+interface ApiListResponse<T> {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages?: number;
+  items: T[];
+}
+
+type ApiListOrArrayResponse<T> = ApiListResponse<T> | T[];
+
+export interface ProductModel3D {
+  _id: string;
+  product_id: string;
+  variant_id?: string;
+  file_id: string;
+  filename: string;
+  status: string;
+}
+
+export interface ProductDocument {
+  _id: string;
+  name: string;
+  slug?: string;
+  status: string;
+  thumbnail?: string;
+  thumbnail_url?: string;
+  min_price?: number;
+  compare_at_price?: number;
+  sold?: number;
+  sku?: string;
+  description?: string;
+  short_description?: string;
+  size?: unknown;
+  material?: unknown;
+  warranty_months?: number;
+  category_id?: string;
+  collection_id?: string;
+  colors?: Array<{
+    name?: string;
+    hex?: string;
+  }>;
+}
+
+interface CategoryDocument {
+  _id: string;
+  name: string;
+  slug: string;
+  room?: string;
+  status?: string;
+  image_url?: string;
+}
+
+interface CollectionDocument {
+  _id: string;
+  name: string;
+  slug: string;
+  status?: string;
+  banner_url?: string;
+}
+
+interface ProductImageDocument {
+  _id: string;
+  product_id?: string;
+  variant_id?: string;
+  image_url?: string;
+  is_primary?: boolean;
+  sort_order?: number;
+}
+
+export interface ProductVariantDocument {
+  _id: string;
+  product_id?: string;
+  name?: string;
+  variant_name?: string;
+  label?: string;
+  sku?: string;
+  color?: string;
+  price?: number;
+  compare_at_price?: number;
+  stock_quantity?: number;
+  variant_status?: string;
+}
+
+export interface ColorSwatch {
+  name: string;
+  hex: string;
+  price?: number | null;
+  originalPrice?: number | null;
+  imageUrl?: string;
+  sku?: string;
+  variants?: ProductVariantDocument[];
+}
+
+export interface ImageWithVariant {
+  url: string;
+  variant_id?: string;
+}
+
+export interface ProductDetailData {
+  id: string;
+  name: string;
+  slug?: string;
+  sku: string;
+  price: number | null;
+  originalPrice: number | null;
+  shortDescription: string;
+  description: string;
+  sizeText: string;
+  materialText: string;
+  warrantyMonths: number | null;
+  colors: ColorSwatch[];
+  variants: ProductVariantDocument[];
+  images: ImageWithVariant[];
+  stock_quantity?: number;
+}
+
+export interface ProductReviewItem {
+  _id: string;
+  rating: number;
+  content: string;
+  images: string[];
+  videos: string[];
+  createdAt: string;
+  customerName: string;
+  productName?: string;
+  reply: {
+    content: string;
+    repliedAt: string | null;
+  } | null;
+}
+
+export interface ProductReviewSummary {
+  productId: string;
+  totalReviews: number;
+  averageRating: number;
+  items: ProductReviewItem[];
+}
+
+/** Client-side mirror of server color-map.utils.js */
+const COLOR_MAP: Record<string, string> = {
+  'beige': '#f0e6d3',
+  'combo màu tự nhiên đệm be': '#d9c5a5',
+  'nâu be': '#a0785a',
+  'sofa nệm be': '#d9c5a5',
+  'cam': '#e8722a',
+  'camel': '#c19a6b',
+  'combo nâu': '#6f4e37',
+  'màu nâu': '#6f4e37',
+  'màu nâu/xám': '#8b7d7b',
+  'màu nâu/nệm xám': '#8b7d7b',
+  'nâu': '#6f4e37',
+  'nau': '#6f4e37',
+  'nâu phối trắng': '#a07855',
+  'giường màu trắng 1m6': '#f0f0f0',
+  'giường màu trắng 1m8': '#f0f0f0',
+  'giường trắng 1m6': '#f0f0f0',
+  'giường trắng 1m8': '#f0f0f0',
+  'màu trắng': '#f0f0f0',
+  'trắng': '#f0f0f0',
+  'trắng - xám': '#d0d0d0',
+  'gỗ phối trắng': '#e8ddd0',
+  'giường tự nhiên 1m6': '#c8a97e',
+  'màu tự nhiên': '#c8a97e',
+  'olive': '#808000',
+  'sofa nệm xám': '#9e9e9e',
+  'xám': '#9e9e9e',
+  'xanh dương': '#1565c0',
+  'đen': '#1a1a1a',
+};
+
+function getColorHex(name: string): string {
+  const key = (name || '').trim().toLowerCase().normalize('NFC');
+  return COLOR_MAP[key] || '#cccccc';
+}
+
+export interface ProductListItem {
+  id: string;
+  slug: string;
+  name: string;
+  price: number | null;
+  originalPrice: number | null;
+  imageUrl: string;
+  discountBadge: string | null;
+  averageRating: number;
+  reviewsCount: number;
+  soldCount: number;
+  colors: ColorSwatch[];
+  categoryId: string | null;
+  collectionId: string | null;
+  sizeText: string;
+  materialText: string;
+}
+
+export interface ProductListResponse {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  items: ProductListItem[];
+}
+
+export interface TaxonomyItem {
+  id: string;
+  name: string;
+  slug: string;
+  room?: string;
+  imageUrl?: string;
+}
+
+export interface ProductQueryOptions {
+  sortBy?: 'suggested' | 'price' | 'createdAt' | 'bestSelling' | 'updatedAt' | 'min_price';
+  order?: 'asc' | 'desc';
+  categoryIds?: string[];
+  collectionId?: string;
+  search?: string;
+  fields?: string;
+  userId?: string;
+}
+
+export interface TopColorOption {
+  value: string;
+  label: string;
+  hex?: string;
+}
+
+
+
+const FALLBACK_IMAGE_URL =
+  'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&q=80&w=900';
+
+@Injectable({ providedIn: 'root' })
+export class ProductDataService {
+  private readonly http = inject(HttpClient);
+  private readonly apiBaseUrl = 'http://localhost:3000/api';
+  private categoriesCache$?: Observable<TaxonomyItem[]>;
+  private collectionsCache$?: Observable<TaxonomyItem[]>;
+  private collectionCategoryLinksCache$?: Observable<Record<string, string[]>>;
+
+  getProducts(page = 1, limit = 24, options: ProductQueryOptions = {}): Observable<ProductListResponse> {
+    let params = new HttpParams().set('page', String(page)).set('limit', String(limit));
+    params = params.set('status', 'active');
+
+    const resolvedSortBy = options.sortBy || 'createdAt';
+    const resolvedOrder = options.order || 'desc';
+    const sortPrefix = resolvedOrder === 'asc' ? '' : '-';
+    let sortField: string;
+    if (resolvedSortBy === 'bestSelling') {
+      sortField = 'sold';
+    } else if (resolvedSortBy === 'price') {
+      sortField = 'min_price';
+    } else {
+      sortField = resolvedSortBy;
+    }
+    params = params.set('sortBy', sortField).set('order', resolvedOrder);
+
+    if (options.collectionId) {
+      params = params.set('collection', options.collectionId);
+    }
+
+    if (options.categoryIds && options.categoryIds.length > 0) {
+      const categoryParam = options.categoryIds.map((value) => value.trim()).filter(Boolean).join(',');
+      if (categoryParam) {
+        params = params.set('categories', categoryParam).set('category', categoryParam);
+      }
+    }
+
+    if (options.userId) {
+      params = params.set('user_id', options.userId);
+    }
+
+    if (options.search) {
+      const keyword = options.search.trim();
+      if (keyword) {
+        params = params.set('q', keyword);
+      }
+    }
+
+    const listFields =
+      options.fields || 'name,slug,status,thumbnail,thumbnail_url,min_price,compare_at_price,sold,category_id,collection_id,size,material';
+    const fieldSet = new Set(
+      String(listFields)
+        .split(',')
+        .map((value) => value.trim())
+        .filter(Boolean),
+    );
+    fieldSet.add('slug');
+    params = params.set('fields', Array.from(fieldSet).join(','));
+
+    return this.http
+      .get<ApiListResponse<ProductDocument>>(`${this.apiBaseUrl}/products`, { params })
+      .pipe(
+        timeout(15000),
+        map((response) => {
+          const items = (response.items || [])
+            .filter((product) => {
+              const status = String(product.status || '').toLowerCase();
+              return !status || status === 'active';
+            })
+            .map((product) => {
+              const price = this.toNullableNumber(product.min_price);
+              const originalPrice = this.toNullableNumber(product.compare_at_price);
+
+              const rawColors = Array.isArray((product as any).colors) ? (product as any).colors : [];
+              return {
+                id: product._id,
+                slug: product.slug?.trim() || product._id,
+                name: product.name || 'San pham',
+                price,
+                originalPrice,
+                imageUrl: product.thumbnail?.trim() || product.thumbnail_url?.trim() || FALLBACK_IMAGE_URL,
+                discountBadge: this.getDiscountBadge(price, originalPrice),
+                averageRating: 0,
+                reviewsCount: 0,
+                soldCount: this.toNullableNumber(product.sold) ?? 0,
+                colors: rawColors.filter((c: any) => c && c.name && c.hex) as ColorSwatch[],
+                categoryId: product.category_id || null,
+                collectionId: product.collection_id || null,
+                sizeText: this.valueToSizeText(product.size),
+                materialText: this.valueToText(product.material),
+              };
+            });
+
+          return {
+            page: response.page || page,
+            limit: response.limit || limit,
+            total: response.total,
+            totalPages: Math.max(Math.ceil(response.total / (response.limit || limit)), 1),
+            items,
+          };
+        }),
+        switchMap((response) =>
+          this.attachReviewSummaries(response.items).pipe(
+            map((items) => ({
+              ...response,
+              items,
+            })),
+          ),
+        ),
+      );
+  }
+
+  getCategories(limit = 300): Observable<TaxonomyItem[]> {
+    if (!this.categoriesCache$) {
+      this.categoriesCache$ = this.http
+        .get<ApiListOrArrayResponse<CategoryDocument>>(`${this.apiBaseUrl}/categories`, {
+          params: { page: '1', limit: String(limit), sort: 'name', status: 'active' },
+        })
+        .pipe(
+          timeout(15000),
+          map((response) => {
+            const items = Array.isArray(response) ? response : response.items || [];
+            return items
+              .filter((item) => !this.isInactiveStatus(item?.status))
+              .map((item) => this.toTaxonomyItem(item));
+          }),
+          shareReplay(1),
+        );
+    }
+    return this.categoriesCache$;
+  }
+
+  getCollections(limit = 120): Observable<TaxonomyItem[]> {
+    if (!this.collectionsCache$) {
+      this.collectionsCache$ = this.http
+        .get<ApiListOrArrayResponse<CollectionDocument>>(`${this.apiBaseUrl}/collections`, {
+          params: { page: '1', limit: String(limit), sort: 'name', status: 'active' },
+        })
+        .pipe(
+          timeout(15000),
+          map((response) => {
+            const items = Array.isArray(response) ? response : response.items || [];
+            return items
+              .filter((item) => !this.isInactiveStatus(item?.status))
+              .map((item) => this.toTaxonomyItem(item));
+          }),
+          shareReplay(1),
+        );
+    }
+    return this.collectionsCache$;
+  }
+
+  getCollectionCategoryLinks(limit = 2000): Observable<Record<string, string[]>> {
+    if (!this.collectionCategoryLinksCache$) {
+      this.collectionCategoryLinksCache$ = this.http
+        .get<ApiListResponse<ProductDocument>>(`${this.apiBaseUrl}/products`, {
+          params: { page: '1', limit: String(limit), fields: 'collection_id,category_id,status', status: 'active' },
+        })
+        .pipe(
+          timeout(15000),
+          map((response) => {
+            const relation = new Map<string, Set<string>>();
+
+            for (const product of response.items || []) {
+              if (String(product.status || '').toLowerCase() !== 'active') {
+                continue;
+              }
+              const collectionId = String(product.collection_id || '').trim();
+              const categoryId = String(product.category_id || '').trim();
+              if (!collectionId || !categoryId) {
+                continue;
+              }
+
+              if (!relation.has(collectionId)) {
+                relation.set(collectionId, new Set<string>());
+              }
+              relation.get(collectionId)?.add(categoryId);
+            }
+
+            const normalized: Record<string, string[]> = {};
+            for (const [collectionId, categorySet] of relation.entries()) {
+              normalized[collectionId] = Array.from(categorySet);
+            }
+            return normalized;
+          }),
+          catchError(() => of({})),
+          shareReplay(1),
+        );
+    }
+    return this.collectionCategoryLinksCache$;
+  }
+
+  getProductList(limit = 24): Observable<ProductListItem[]> {
+    return this.getProducts(1, limit).pipe(map((response) => response.items));
+  }
+
+  getTopColorOptions(top = 10, limitPerPage = 200): Observable<TopColorOption[]> {
+    return this.http
+      .get<ApiListResponse<ProductDocument>>(`${this.apiBaseUrl}/products`, {
+        params: { page: '1', limit: String(limitPerPage), fields: 'colors,status', status: 'active' },
+      })
+      .pipe(
+        timeout(15000),
+        switchMap((firstPage) => {
+          const totalPagesFromResponse =
+            typeof firstPage.totalPages === 'number' && firstPage.totalPages > 0
+              ? firstPage.totalPages
+              : Math.max(Math.ceil((firstPage.total || 0) / Math.max(firstPage.limit || limitPerPage, 1)), 1);
+          const totalPages = Math.min(totalPagesFromResponse, 10);
+
+          if (totalPages <= 1) {
+            return of([firstPage]);
+          }
+
+          const requests: Observable<ApiListResponse<ProductDocument>>[] = [];
+          for (let page = 2; page <= totalPages; page += 1) {
+            requests.push(
+              this.http
+                .get<ApiListResponse<ProductDocument>>(`${this.apiBaseUrl}/products`, {
+                  params: { page: String(page), limit: String(limitPerPage), fields: 'colors,status', status: 'active' },
+                })
+                .pipe(
+                  timeout(15000),
+                  catchError(() => of(this.emptyListResponse<ProductDocument>())),
+                ),
+            );
+          }
+
+          return forkJoin([of(firstPage), ...requests]);
+        }),
+        map((responses) => this.buildTopColorOptions(responses.flatMap((response) => response.items || []), top)),
+        catchError(() => of([])),
+      );
+  }
+
+  getProductRecommendations(slug: string, userId?: string): Observable<ProductListItem[]> {
+    let params = new HttpParams();
+    if (userId) {
+      params = params.set('user_id', userId);
+    }
+
+    return this.http
+      .get<{ items: ProductDocument[] }>(`${this.apiBaseUrl}/products/${slug}/recommendations`, { params })
+      .pipe(
+        timeout(15000),
+        map((response) => {
+          return (response.items || [])
+            .filter((product) => !this.isInactiveStatus(product?.status))
+            .map((product) => {
+            const price = this.toNullableNumber(product.min_price);
+            const originalPrice = this.toNullableNumber(product.compare_at_price);
+
+            return {
+              id: product._id,
+              name: product.name || 'Sản phẩm',
+              slug: product.slug?.trim() || product._id,
+              price,
+              originalPrice,
+              imageUrl: product.thumbnail?.trim() || product.thumbnail_url?.trim() || FALLBACK_IMAGE_URL,
+              discountBadge: this.getDiscountBadge(price, originalPrice),
+              averageRating: 0,
+              reviewsCount: 0,
+              soldCount: this.toNullableNumber(product.sold) ?? 0,
+              colors: [],
+              categoryId: product.category_id || null,
+              collectionId: product.collection_id || null,
+              sizeText: this.valueToSizeText(product.size),
+              materialText: this.valueToText(product.material),
+            };
+          });
+        }),
+        switchMap((items) => this.attachReviewSummaries(items)),
+        catchError(() => of([]))
+      );
+  }
+
+  getProductDetail(productSlug: string): Observable<ProductDetailData> {
+    return this.http
+      .get<ProductDocument>(`${this.apiBaseUrl}/products/${productSlug}`)
+      .pipe(
+        timeout(15000),
+        switchMap((product) => {
+          if (this.isInactiveStatus(product?.status)) {
+            throw new Error('Product is inactive');
+          }
+
+          const productId = String(product?._id || '').trim() || String(productSlug || '').trim();
+          return forkJoin({
+            product: of(product),
+            images: this.http
+              .get<ApiListResponse<ProductImageDocument>>(`${this.apiBaseUrl}/product-images`, {
+                params: { product_id: productId, limit: '200', sort: 'sort_order' },
+              })
+              .pipe(
+                timeout(15000),
+                catchError(() => of(this.emptyListResponse<ProductImageDocument>())),
+              ),
+            variants: this.http
+              .get<ApiListResponse<ProductVariantDocument>>(`${this.apiBaseUrl}/product-variants`, {
+                params: { product_id: productId, variant_status: 'active', limit: '200', sort: 'price' },
+              })
+              .pipe(
+                timeout(15000),
+                catchError(() => of(this.emptyListResponse<ProductVariantDocument>())),
+              ),
+          });
+        }),
+        map(({ product, images, variants }) => {
+          const visibleVariants = (variants.items || []).filter(
+            (variant) => !this.isInactiveStatus(variant?.variant_status),
+          );
+          const preferredVariant = this.pickPreferredVariant(visibleVariants);
+          const mappedImages = this.sortImages(images.items)
+            .map((image) => ({ url: image.image_url?.trim() || '', variant_id: image.variant_id }))
+            .filter((img) => img.url.length > 0);
+
+          // Ensure unique URLs while keeping the first associated variant_id
+          const uniqueImages: ImageWithVariant[] = [];
+          const seenUrls = new Set<string>();
+          for (const img of mappedImages) {
+            if (!seenUrls.has(img.url)) {
+              uniqueImages.push(img);
+              seenUrls.add(img.url);
+            }
+          }
+
+          return {
+            id: product._id,
+            name: product.name || 'San pham',
+            slug: product.slug?.trim() || product._id,
+            sku: preferredVariant?.sku?.trim() || product.sku?.trim() || '',
+            price: this.toNullableNumber(preferredVariant?.price) ?? this.toNullableNumber(product.min_price),
+            originalPrice:
+              this.toNullableNumber(preferredVariant?.compare_at_price) ??
+              this.toNullableNumber(product.compare_at_price),
+            stock_quantity: preferredVariant?.stock_quantity ?? (product as any).stock_quantity,
+            shortDescription: product.short_description || '',
+            description: product.description || '',
+            sizeText: this.valueToSizeText(product.size),
+            materialText: this.valueToText(product.material),
+            warrantyMonths: this.toNullableNumber(product.warranty_months),
+            colors: this.extractColors(visibleVariants, images.items, product),
+            variants: visibleVariants,
+            images: uniqueImages.length > 0 ? uniqueImages : [{ url: product.thumbnail?.trim() || FALLBACK_IMAGE_URL }],
+          };
+        }),
+      );
+  }
+
+  getProductModels(productId: string): Observable<ProductModel3D[]> {
+    return this.http.get<ProductModel3D[]>(`${this.apiBaseUrl}/product-models-3d/product/${productId}`).pipe(
+      timeout(10000),
+      catchError(() => of([]))
+    );
+  }
+
+  getProductReviews(productId: string): Observable<ProductReviewSummary> {
+    return this.http
+      .get<ProductReviewSummary>(`${this.apiBaseUrl}/reviews/product/${productId}`)
+      .pipe(
+        timeout(10000),
+        catchError(() =>
+          of({
+            productId,
+            totalReviews: 0,
+            averageRating: 0,
+            items: [],
+          }),
+        ),
+      );
+  }
+
+  getProductStockFromApi(productId: string, variantId?: string): Observable<number | undefined> {
+    const normalizedVariantId = String(variantId || '').trim();
+
+    if (normalizedVariantId) {
+      return this.http
+        .get<ProductVariantDocument>(`${this.apiBaseUrl}/product-variants/${normalizedVariantId}`)
+        .pipe(
+          timeout(10000),
+          map((variant) => {
+            const stock = this.toNullableNumber(variant?.stock_quantity);
+            return stock === null ? undefined : stock;
+          }),
+          catchError(() => of(undefined)),
+        );
+    }
+
+    return this.http
+      .get<ProductDocument>(`${this.apiBaseUrl}/products/${productId}`)
+      .pipe(
+        timeout(10000),
+        map((product) => {
+          const stock = this.toNullableNumber((product as any).stock_quantity);
+          return stock === null ? undefined : stock;
+        }),
+        catchError(() => of(undefined)),
+      );
+  }
+
+  getAllProductModels(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiBaseUrl}/product-models-3d`).pipe(
+      timeout(10000),
+      catchError(() => of([]))
+    );
+  }
+
+  getFeaturedReviews(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiBaseUrl}/reviews/featured`).pipe(
+      timeout(10000),
+      catchError(() => of([]))
+    );
+  }
+
+  getModelFileUrl(fileId: string): string {
+    return `${this.apiBaseUrl}/product-models-3d/file/${fileId}`;
+  }
+
+  private attachReviewSummaries(items: ProductListItem[]): Observable<ProductListItem[]> {
+    if (!items.length) {
+      return of(items);
+    }
+
+    return forkJoin(
+      items.map((item) =>
+        this.getProductReviews(item.id).pipe(
+          map((summary) => ({
+            id: item.id,
+            averageRating: this.toSafeRating(summary.averageRating),
+            reviewsCount: this.toSafeCount(summary.totalReviews),
+          })),
+        ),
+      ),
+    ).pipe(
+      map((summaries) => {
+        const summaryMap = new Map(summaries.map((summary) => [summary.id, summary]));
+        return items.map((item) => {
+          const summary = summaryMap.get(item.id);
+          return {
+            ...item,
+            averageRating: summary?.averageRating ?? 0,
+            reviewsCount: summary?.reviewsCount ?? 0,
+          };
+        });
+      }),
+    );
+  }
+
+  private emptyListResponse<T>(): ApiListResponse<T> {
+    return { page: 1, limit: 0, total: 0, items: [] };
+  }
+
+  private toSafeRating(value: unknown): number {
+    const rating = typeof value === 'number' ? value : Number(value);
+    if (!Number.isFinite(rating)) {
+      return 0;
+    }
+    return Math.max(0, Math.min(5, rating));
+  }
+
+  private toSafeCount(value: unknown): number {
+    const count = typeof value === 'number' ? value : Number(value);
+    if (!Number.isFinite(count) || count < 0) {
+      return 0;
+    }
+    return Math.trunc(count);
+  }
+
+  private pickPreferredVariant(variants: ProductVariantDocument[]): ProductVariantDocument | null {
+    if (!variants.length) {
+      return null;
+    }
+
+    const pricedVariants = variants.filter((variant) => typeof variant.price === 'number');
+    if (!pricedVariants.length) {
+      return variants[0];
+    }
+
+    return pricedVariants.reduce((selected, current) => {
+      if ((selected.price ?? Number.MAX_SAFE_INTEGER) <= (current.price ?? Number.MAX_SAFE_INTEGER)) {
+        return selected;
+      }
+      return current;
+    });
+  }
+
+  private sortImages(images: ProductImageDocument[]): ProductImageDocument[] {
+    return [...images].sort((left, right) => {
+      if (Boolean(left.is_primary) !== Boolean(right.is_primary)) {
+        return left.is_primary ? -1 : 1;
+      }
+      return (left.sort_order ?? Number.MAX_SAFE_INTEGER) - (right.sort_order ?? Number.MAX_SAFE_INTEGER);
+    });
+  }
+
+  private extractColors(variants: ProductVariantDocument[], images: ProductImageDocument[], product: ProductDocument): ColorSwatch[] {
+    const seen = new Map<string, ColorSwatch>();
+    const productFallbackImg = product.thumbnail?.trim() || product.thumbnail_url?.trim() || FALLBACK_IMAGE_URL;
+
+    for (const variant of variants) {
+      const name = variant.color?.trim() || '';
+      if (name) {
+        if (!seen.has(name)) {
+          // find best image for this variant
+          const variantImages = images.filter(img => img.variant_id === variant._id);
+          const primaryImage = variantImages.find(img => img.is_primary) || variantImages[0];
+          const imageUrl = primaryImage?.image_url?.trim() || productFallbackImg;
+
+          seen.set(name, {
+            name,
+            hex: getColorHex(name),
+            price: this.toNullableNumber(variant.price),
+            originalPrice: this.toNullableNumber(variant.compare_at_price),
+            sku: variant.sku?.trim() || product.sku?.trim() || '',
+            imageUrl,
+            variants: [],
+          });
+        }
+
+        // Add variant to the color
+        seen.get(name)!.variants!.push(variant);
+      }
+    }
+    return Array.from(seen.values());
+  }
+
+  private buildTopColorOptions(products: ProductDocument[], top: number): TopColorOption[] {
+    const counter = new Map<string, { count: number; label: string; hex?: string }>();
+
+    for (const product of products) {
+      const colors = Array.isArray(product.colors) ? product.colors : [];
+      for (const color of colors) {
+        const rawName = String(color?.name || '').trim();
+        if (!rawName) {
+          continue;
+        }
+
+        const key = this.toColorKey(rawName);
+        if (!key) {
+          continue;
+        }
+
+        const previous = counter.get(key);
+        const label = this.toColorLabel(key, rawName);
+        const hex = this.toColorHex(key, color?.hex);
+
+        counter.set(key, {
+          count: (previous?.count || 0) + 1,
+          label: previous?.label || label,
+          hex: previous?.hex || hex,
+        });
+      }
+    }
+
+    return Array.from(counter.entries())
+      .sort((left, right) => right[1].count - left[1].count)
+      .slice(0, top)
+      .map(([value, meta]) => ({
+        value,
+        label: meta.label,
+        hex: meta.hex,
+      }));
+  }
+
+  private toColorKey(name: string): string {
+    const normalized = this.normalizeText(name).replace(/\s+/g, ' ').trim();
+    if (!normalized) {
+      return '';
+    }
+
+    if (normalized.includes('trang')) return 'trang';
+    if (normalized.includes('xam')) return 'xam';
+    if (normalized.includes('nau')) return 'nau';
+    if (normalized.includes('tu nhien')) return 'tu nhien';
+    if (normalized.includes('den')) return 'den';
+    if (normalized.includes('xanh duong')) return 'xanh duong';
+    if (normalized.includes('xanh')) return 'xanh';
+    if (normalized.includes('beige') || normalized === 'be') return 'beige';
+    if (normalized.includes('camel')) return 'camel';
+    if (normalized.includes('olive')) return 'olive';
+    if (normalized.includes('cam')) return 'cam';
+    return normalized;
+  }
+
+  private toColorLabel(key: string, rawName: string): string {
+    const labels: Record<string, string> = {
+      trang: 'Trắng',
+      xam: 'Xám',
+      nau: 'Nâu',
+      'tu nhien': 'Màu tự nhiên',
+      den: 'Đen',
+      'xanh duong': 'Xanh dương',
+      xanh: 'Xanh',
+      beige: 'Beige',
+      camel: 'Camel',
+      olive: 'Olive',
+      cam: 'Cam',
+    };
+    return labels[key] || rawName.trim();
+  }
+
+  private toColorHex(key: string, rawHex?: string): string {
+    const normalizedHex = String(rawHex || '').trim();
+    if (/^#[0-9a-fA-F]{6}$/.test(normalizedHex) && normalizedHex.toLowerCase() !== '#f0f0f0') {
+      return normalizedHex;
+    }
+
+    const palette: Record<string, string> = {
+      trang: '#f5f5f4',
+      xam: '#9ca3af',
+      nau: '#8b5e3c',
+      'tu nhien': '#c8a97e',
+      den: '#111827',
+      'xanh duong': '#5b8cc0',
+      xanh: '#6f96bf',
+      beige: '#e8dcc7',
+      camel: '#c19a6b',
+      olive: '#808000',
+      cam: '#e58a4e',
+    };
+
+    return palette[key] || '#d1d5db';
+  }
+
+  private getDiscountBadge(price: number | null, originalPrice: number | null): string | null {
+    if (price === null || originalPrice === null || originalPrice <= price) {
+      return null;
+    }
+
+    const discountPercent = Math.round(((originalPrice - price) / originalPrice) * 100);
+    return discountPercent > 0 ? `-${discountPercent}%` : null;
+  }
+
+  private toNullableNumber(value: unknown): number | null {
+    return typeof value === 'number' && Number.isFinite(value) ? value : null;
+  }
+
+  private toTaxonomyItem(source: CategoryDocument | CollectionDocument): TaxonomyItem {
+    const imageUrl =
+      'image_url' in source
+        ? source.image_url?.trim() || ''
+        : 'banner_url' in source
+          ? source.banner_url?.trim() || ''
+          : '';
+    const room = 'room' in source && typeof source.room === 'string' ? source.room.trim() : '';
+
+    return {
+      id: source._id,
+      name: source.name?.trim() || '',
+      slug: source.slug?.trim() || '',
+      room: room || undefined,
+      imageUrl: imageUrl || undefined,
+    };
+  }
+
+  private isInactiveStatus(value: unknown): boolean {
+    return String(value || '').trim().toLowerCase() === 'inactive';
+  }
+
+  private normalizeText(value: string): string {
+    return String(value || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'D')
+      .toLowerCase()
+      .trim();
+  }
+
+  private valueToText(value: unknown): string {
+    if (typeof value === 'string') {
+      return value.trim();
+    }
+
+    if (Array.isArray(value)) {
+      return value.map((item) => String(item)).join(' x ');
+    }
+
+    if (value && typeof value === 'object') {
+      const entries = Object.entries(value as Record<string, unknown>)
+        .filter(([, itemValue]) => itemValue !== null && itemValue !== undefined && String(itemValue).trim() !== '')
+        .map(([key, itemValue]) => `${key}: ${String(itemValue)}`);
+      return entries.join(' | ');
+    }
+
+    return '';
+  }
+
+  private valueToSizeText(value: unknown): string {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      const objectValue = value as Record<string, unknown>;
+      const dimensions = objectValue['dimensions'];
+      if (typeof dimensions === 'string' && dimensions.trim().length > 0) {
+        return dimensions.trim();
+      }
+    }
+
+    return this.valueToText(value);
+  }
+}

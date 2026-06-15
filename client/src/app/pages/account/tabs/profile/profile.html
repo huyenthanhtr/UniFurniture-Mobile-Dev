@@ -1,0 +1,130 @@
+﻿<div class="tab-section">
+  <div class="camera-overlay" *ngIf="isCameraOpen()">
+    <div class="camera-box">
+      <div class="camera-header">
+        <h3>Chụp ảnh đại diện</h3>
+        <button class="close-btn" (click)="stopCamera()"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <video #videoElement autoplay playsinline></video>
+      <canvas #canvasElement style="display: none;"></canvas>
+      
+      <div class="camera-btns">
+        <button type="button" class="btn-cancel" (click)="stopCamera()">Hủy bỏ</button>
+        <button type="button" class="btn-capture" (click)="capturePhoto()">
+          <i class="bi bi-camera"></i> Chụp ảnh ngay
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="tab-title">Hồ sơ cá nhân</h2>
+
+  <div class="profile-layout">
+    <aside class="profile-avatar-card">
+      <div class="avatar-wrap">
+        <img *ngIf="avatarPreview" [src]="avatarPreview" alt="Avatar" class="avatar-img" />
+        <div *ngIf="!avatarPreview" class="avatar-placeholder">{{ initials }}</div>
+      </div>
+
+      <input #galleryInput type="file" accept="image/*" hidden (change)="onAvatarChange($event)" />
+
+      <div class="avatar-actions">
+        <button type="button" class="btn-upload btn-primary-lux"
+                (click)="galleryInput.click()" [disabled]="uploadingAvatar()">
+          <span *ngIf="!uploadingAvatar()"><i class="bi bi-upload"></i> Tải ảnh lên</span>
+          <span *ngIf="uploadingAvatar()"><span class="spinner-sm"></span> Đang tải...</span>
+        </button>
+
+        <button type="button" class="btn-upload btn-outline-lux"
+                (click)="openRealCamera()" [disabled]="uploadingAvatar()">
+          <i class="bi bi-camera"></i> Chụp ảnh trực tiếp
+        </button>
+      </div>
+    </aside>
+
+    <section class="profile-form-card">
+      <div class="form-group">
+        <label>Số tài khoản</label>
+        <div class="form-control-readonly">
+          <span style="color: #c8923a; font-weight: 700; margin-right: 5px;">VN</span> 
+          +84 {{ profile?.phone || '—' }}
+          <span class="readonly-badge">Đã xác thực</span>
+        </div>
+      </div>
+
+      <div class="form-group" *ngIf="loyalty() as loyaltyInfo">
+        <label>Hạng thành viên</label>
+        <div class="form-control-readonly">
+          <span
+            class="tier-label"
+            [ngClass]="{
+              'tier-label--dong': loyaltyInfo.membership_tier === 'dong',
+              'tier-label--bac': loyaltyInfo.membership_tier === 'bac',
+              'tier-label--vang': loyaltyInfo.membership_tier === 'vang',
+              'tier-label--kim-cuong': loyaltyInfo.membership_tier === 'kim_cuong'
+            }"
+          >
+            {{ loyaltyInfo.membership_tier_label }}
+          </span>
+          <span
+            class="readonly-badge"
+            [ngClass]="{
+              'tier-badge--dong': loyaltyInfo.membership_tier === 'dong',
+              'tier-badge--bac': loyaltyInfo.membership_tier === 'bac',
+              'tier-badge--vang': loyaltyInfo.membership_tier === 'vang',
+              'tier-badge--kim-cuong': loyaltyInfo.membership_tier === 'kim_cuong'
+            }"
+          >
+            {{ loyaltyInfo.loyalty_points_lifetime }} điểm
+          </span>
+        </div>
+        <small class="text-muted" *ngIf="loyaltyInfo.next_tier_label">
+          Cần thêm {{ loyaltyInfo.points_to_next_tier }} điểm để lên hạng {{ loyaltyInfo.next_tier_label }}.
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label for="fullName">Tên tài khoản</label>
+        <input
+          id="fullName"
+          type="text"
+          class="form-input"
+          placeholder="Ví dụ: Nguyễn Văn A"
+          [(ngModel)]="form.fullName"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email liên hệ tài khoản <span style="font-weight: 400; color: #aaa;">(Không bắt buộc)</span></label>
+        <input
+          id="email"
+          type="email"
+          class="form-input"
+          placeholder="nguyenvana@gmail.com"
+          [(ngModel)]="form.email"
+        />
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-save" (click)="save()" [disabled]="saving()">
+          <span *ngIf="!saving()">Lưu thay đổi hồ sơ</span>
+          <span *ngIf="saving()" style="display: flex; align-items: center; gap: 8px; justify-content: center;">
+            <span class="spinner-sm"></span> Đang xử lý...
+          </span>
+        </button>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="profile-modal-backdrop" *ngIf="modalVisible()" (click)="closeModal()">
+  <div class="profile-modal" (click)="$event.stopPropagation()">
+    <div class="profile-modal__icon" [class.is-error]="modalType() === 'error'">
+      <i class="bi bi-x-circle-fill" *ngIf="modalType() === 'error'"></i>
+      <i class="bi bi-check-circle-fill" *ngIf="modalType() === 'success'"></i>
+    </div>
+    <h3 class="profile-modal__title">{{ modalTitle() }}</h3>
+    <p class="profile-modal__message">{{ modalMessage() }}</p>
+    <button type="button" class="profile-modal__btn" (click)="closeModal()">Đóng</button>
+  </div>
+</div>
