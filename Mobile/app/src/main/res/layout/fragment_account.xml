@@ -51,6 +51,7 @@
                         app:strokeWidth="0dp"
                         android:layout_marginEnd="16dp">
                         <ImageView
+                            android:id="@+id/ivUserAvatar"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:src="@drawable/ic_account"
@@ -76,6 +77,16 @@
                             android:textColor="@color/black" />
 
                         <TextView
+                            android:id="@+id/tvUserEmail"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textColor="@color/gray_600"
+                            android:textSize="14sp"
+                            android:layout_marginTop="2dp"
+                            android:visibility="gone" />
+
+                        <TextView
                             android:id="@+id/tvUserPhone"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -84,6 +95,17 @@
                             android:textSize="14sp"
                             android:layout_marginTop="4dp" />
                     </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/btnEditProfile"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:padding="6dp"
+                        android:src="@drawable/ic_edit"
+                        app:tint="@color/primary"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/edit_profile"
+                        android:visibility="gone" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnLoginPrompt"
@@ -117,6 +139,74 @@
                         android:layout_width="match_parent"
                         android:layout_height="56dp"
                         android:text="@string/my_orders"
+                        android:textSize="15sp"
+                        android:paddingHorizontal="20dp"
+                        android:gravity="center_vertical"
+                        android:textColor="@color/black"
+                        android:background="?attr/selectableItemBackground" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/gray_200"
+                        android:layout_marginHorizontal="20dp" />
+
+                    <TextView
+                        android:id="@+id/itemAddresses"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="@string/address_book_title"
+                        android:textSize="15sp"
+                        android:paddingHorizontal="20dp"
+                        android:gravity="center_vertical"
+                        android:textColor="@color/black"
+                        android:background="?attr/selectableItemBackground" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/gray_200"
+                        android:layout_marginHorizontal="20dp" />
+
+                    <TextView
+                        android:id="@+id/itemMyReviews"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="@string/my_reviews"
+                        android:textSize="15sp"
+                        android:paddingHorizontal="20dp"
+                        android:gravity="center_vertical"
+                        android:textColor="@color/black"
+                        android:background="?attr/selectableItemBackground" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/gray_200"
+                        android:layout_marginHorizontal="20dp" />
+
+                    <TextView
+                        android:id="@+id/itemChangePassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="Đổi mật khẩu"
+                        android:textSize="15sp"
+                        android:paddingHorizontal="20dp"
+                        android:gravity="center_vertical"
+                        android:textColor="@color/black"
+                        android:background="?attr/selectableItemBackground" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/gray_200"
+                        android:layout_marginHorizontal="20dp" />
+
+                    <TextView
+                        android:id="@+id/itemOrderTracking"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="@string/order_tracking"
                         android:textSize="15sp"
                         android:paddingHorizontal="20dp"
                         android:gravity="center_vertical"
@@ -186,6 +276,85 @@
                         android:layout_width="match_parent"
                         android:layout_height="56dp"
                         android:text="@string/voucher_wallet"
+                        android:textSize="15sp"
+                        android:paddingHorizontal="20dp"
+                        android:gravity="center_vertical"
+                        android:textColor="@color/black"
+                        android:background="?attr/selectableItemBackground" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Info Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/itemAbout"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="@string/account_about_title"
+                        android:textSize="15sp"
+                        android:paddingHorizontal="20dp"
+                        android:gravity="center_vertical"
+                        android:textColor="@color/black"
+                        android:background="?attr/selectableItemBackground" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/gray_200"
+                        android:layout_marginHorizontal="20dp" />
+
+                    <TextView
+                        android:id="@+id/itemPolicy"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="@string/account_policy_title"
+                        android:textSize="15sp"
+                        android:paddingHorizontal="20dp"
+                        android:gravity="center_vertical"
+                        android:textColor="@color/black"
+                        android:background="?attr/selectableItemBackground" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/gray_200"
+                        android:layout_marginHorizontal="20dp" />
+
+                    <TextView
+                        android:id="@+id/itemCommunity"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="@string/account_community_title"
+                        android:textSize="15sp"
+                        android:paddingHorizontal="20dp"
+                        android:gravity="center_vertical"
+                        android:textColor="@color/black"
+                        android:background="?attr/selectableItemBackground" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/gray_200"
+                        android:layout_marginHorizontal="20dp" />
+
+                    <TextView
+                        android:id="@+id/itemLanguage"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="Ngôn ngữ (Language)"
                         android:textSize="15sp"
                         android:paddingHorizontal="20dp"
                         android:gravity="center_vertical"

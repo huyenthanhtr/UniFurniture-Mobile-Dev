@@ -37,7 +37,7 @@ public class RegisterFragment extends Fragment {
             viewModel.register(phone, password, name);
         });
 
-        binding.tvLogin.setOnClickListener(v -> requireActivity().onBackPressed());
+        binding.tvLogin.setOnClickListener(v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
         viewModel.isLoading().observe(getViewLifecycleOwner(), loading -> {
             binding.btnRegister.setEnabled(!loading);

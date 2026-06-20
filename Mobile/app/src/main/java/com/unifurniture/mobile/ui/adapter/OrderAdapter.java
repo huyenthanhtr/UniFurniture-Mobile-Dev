@@ -12,18 +12,27 @@ import com.unifurniture.mobile.util.FormatUtil;
 
 public class OrderAdapter extends ListAdapter<OrderDto, OrderAdapter.ViewHolder> {
 
-    public OrderAdapter() { super(DIFF_CALLBACK); }
+    public interface OnItemClickListener {
+        void onItemClick(OrderDto order);
+    }
+
+    private final OnItemClickListener listener;
+
+    public OrderAdapter(OnItemClickListener listener) { 
+        super(DIFF_CALLBACK); 
+        this.listener = listener;
+    }
 
     private static final DiffUtil.ItemCallback<OrderDto> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<OrderDto>() {
                 @Override
                 public boolean areItemsTheSame(@NonNull OrderDto a, @NonNull OrderDto b) {
-                    return a.id.equals(b.id);
+                    return java.util.Objects.equals(a.getId(), b.getId());
                 }
                 @Override
                 public boolean areContentsTheSame(@NonNull OrderDto a, @NonNull OrderDto b) {
-                    return a.id.equals(b.id) &&
-                            java.util.Objects.equals(a.status, b.status);
+                    return a.getId().equals(b.getId()) &&
+                            java.util.Objects.equals(a.getStatus(), b.getStatus());
                 }
             };
 
@@ -37,7 +46,13 @@ public class OrderAdapter extends ListAdapter<OrderDto, OrderAdapter.ViewHolder>
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.bind(getItem(position));
+        OrderDto order = getItem(position);
+        holder.bind(order);
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onItemClick(order);
+            }
+        });
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -49,11 +64,18 @@ public class OrderAdapter extends ListAdapter<OrderDto, OrderAdapter.ViewHolder>
         }
 
         void bind(OrderDto order) {
-            binding.tvOrderId.setText("Đơn hàng #" + order.id.substring(Math.max(0, order.id.length() - 8)));
+            String displayCode = order.getOrderCode();
+            if (displayCode == null || displayCode.trim().isEmpty()) {
+                String id = order.getId();
+                displayCode = id != null && !id.isEmpty()
+                        ? "#" + id.substring(Math.max(0, id.length() - 8))
+                        : "-";
+            }
+            binding.tvOrderId.setText(binding.getRoot().getContext().getString(com.unifurniture.mobile.R.string.order_number_format, displayCode));
             binding.tvStatus.setText(order.getStatusLabel());
-            binding.tvTotal.setText(FormatUtil.formatCurrency(order.totalAmount));
-            binding.tvDate.setText(order.createdAt != null ?
-                    order.createdAt.substring(0, Math.min(10, order.createdAt.length())) : "");
+            binding.tvTotal.setText(FormatUtil.formatCurrency(order.getTotalAmount()));
+            binding.tvDate.setText(order.getCreatedAt() != null ?
+                    order.getCreatedAt().substring(0, Math.min(10, order.getCreatedAt().length())) : "");
         }
     }
 }

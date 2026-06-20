@@ -70,6 +70,9 @@ public class HomeFragment extends Fragment {
         binding.btnViewAll.setOnClickListener(v ->
                 Navigation.findNavController(v).navigate(R.id.productListFragment));
 
+        binding.btnViewAllCategories.setOnClickListener(v ->
+                Navigation.findNavController(v).navigate(R.id.categoryFragment));
+
         // Use inner EditText for reliable focus detection
         android.widget.EditText searchInnerEdit = binding.searchView.findViewById(
                 androidx.appcompat.R.id.search_src_text);
@@ -120,6 +123,19 @@ public class HomeFragment extends Fragment {
             viewModel.loadData();
             binding.swipeRefresh.setRefreshing(false);
         });
+
+        // Customer Care / Birthday Popup Mock
+        if (com.unifurniture.mobile.util.SessionManager.getInstance(requireContext()).isLoggedIn()) {
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                if (isAdded() && getContext() != null) {
+                    new android.app.AlertDialog.Builder(requireContext())
+                        .setTitle("🎉 Chúc mừng sinh nhật!")
+                        .setMessage("UniFurniture tặng bạn voucher giảm giá 50% (Mã: BDAY50) nhân dịp sinh nhật của bạn trong tháng này!")
+                        .setPositiveButton("Tuyệt vời", (dialog, which) -> dialog.dismiss())
+                        .show();
+                }
+            }, 3000);
+        }
     }
 
     private void setupBanner() {
@@ -160,6 +176,12 @@ public class HomeFragment extends Fragment {
         binding.rvCategories.setLayoutManager(
                 new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
         binding.rvCategories.setAdapter(categoryAdapter);
+
+        if (binding.btnPromotions != null) {
+            binding.btnPromotions.setOnClickListener(v -> {
+                Navigation.findNavController(requireView()).navigate(R.id.promotionsFragment);
+            });
+        }
 
         // Collections
         String serverHost = BuildConfig.API_BASE_URL.replace("/api/", "");

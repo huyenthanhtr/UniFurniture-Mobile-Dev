@@ -102,7 +102,7 @@ public interface ApiService {
     Call<ApiListResponse<OrderDto>> getOrders(@Query("customer_id") String customerId);
 
     @GET("orders/{id}")
-    Call<OrderDto> getOrderById(@Path("id") String orderId);
+    Call<OrderDetailResponse> getOrderById(@Path("id") String orderId);
 
     @POST("orders")
     Call<CheckoutResponse> createOrder(@Body CheckoutRequest request);
@@ -123,6 +123,9 @@ public interface ApiService {
     );
 
     // ── Reviews ───────────────────────────────────────────────────────────────
+    @GET("reviews")
+    Call<List<ReviewDto>> getReviews(@Query("customer_id") String customerId);
+
     @GET("reviews/product/{productId}")
     Call<ReviewSummaryDto> getProductReviews(@Path("productId") String productId);
 
@@ -148,13 +151,47 @@ public interface ApiService {
             @Body Map<String, String> body
     );
 
+    @POST("profiles/{id}/change-password")
+    Call<Void> changePassword(
+            @Path("id") String profileId,
+            @Body Map<String, String> body
+    );
+
     // ── Customers ─────────────────────────────────────────────────────────────
     @GET("customers/{id}")
     Call<CustomerDto> getCustomer(@Path("id") String customerId);
 
+    // ── Addresses ─────────────────────────────────────────────────────────────
     @GET("customer-address")
     Call<ApiListResponse<CustomerAddressDto>> getCustomerAddresses(
             @Query("customer_id") String customerId,
             @Query("limit") int limit
+    );
+
+    @POST("customer-address")
+    Call<CustomerAddressDto> createCustomerAddress(@Body Map<String, Object> body);
+
+    @PATCH("customer-address/{id}")
+    Call<CustomerAddressDto> updateCustomerAddress(
+            @Path("id") String addressId,
+            @Body Map<String, Object> body
+    );
+
+    @DELETE("customer-address/{id}")
+    Call<Void> deleteCustomerAddress(@Path("id") String addressId);
+
+    // ── Notifications ─────────────────────────────────────────────────────────
+    @GET("notifications")
+    Call<ApiListResponse<NotificationDto>> getNotifications(
+            @Query("customer_id") String customerId,
+            @Query("limit") int limit
+    );
+
+    // ── Vouchers ──────────────────────────────────────────────────────────────
+    @GET("vouchers")
+    Call<ApiListResponse<VoucherDto>> getVouchers(
+            @Query("page") int page,
+            @Query("limit") int limit,
+            @Query("status") String status
     );
 }

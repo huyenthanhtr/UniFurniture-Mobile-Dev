@@ -10,9 +10,11 @@
     <color name="black">#1A1A1A</color>
     <color name="gray_100">#F8F8F8</color>
     <color name="gray_200">#EEEEEE</color>
+    <color name="gray_300">#E0E0E0</color>
     <color name="gray_400">#BDBDBD</color>
     <color name="gray_600">#757575</color>
     <color name="gray_800">#424242</color>
+    <color name="secondary">#D4A853</color>
     <color name="error">#D32F2F</color>
     <color name="success">#388E3C</color>
     <color name="discount_red">#E53935</color>

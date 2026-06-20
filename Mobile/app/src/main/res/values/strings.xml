@@ -271,4 +271,36 @@
     <string name="applied_voucher">Applied: %1$s</string>
     <string name="order_reference_label">ORDER REFERENCE CODE</string>
     <string name="qr_instruction">Use your banking app to scan the QR code to pay</string>
+    <!-- Profile & Account Flow -->
+    <string name="edit_profile">Edit Profile</string>
+    <string name="my_reviews">My Reviews</string>
+    <string name="email">Email</string>
+    <string name="gender">Gender</string>
+    <string name="birthday">Birthday</string>
+    <string name="save_changes">Save Changes</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+    <string name="other">Other</string>
+    <string name="order_tracking">Order Tracking</string>
+    <string name="address_book_title">Address Book</string>
+    <string name="address_book_empty">You have not saved any addresses yet.</string>
+    <string name="default_address">Default</string>
+    <string name="edit_address">Edit Address</string>
+    <string name="address_deleted">Address deleted</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="set_default">Set Default</string>
+    <string name="cancel">Cancel</string>
+    <string name="order_details">Order Details</string>
+    <string name="profile_updated">Profile updated successfully</string>
+    <string name="order_number_format">Order %1$s</string>
+    <string name="order_date_format">Date: %1$s</string>
+    <string name="quantity_format">x%1$d</string>
+    <string name="status_cancelled">Cancelled</string>
+    <string name="account_about_title">About UniFurniture</string>
+    <string name="account_policy_title">Privacy Policy</string>
+    <string name="account_community_title">Community</string>
+    <string name="tracking_code_required">Please enter a tracking code</string>
+    <string name="tracking_not_found">No order found with this code</string>
+    <string name="tracking_lookup_error">Could not look up this order</string>
 </resources>
