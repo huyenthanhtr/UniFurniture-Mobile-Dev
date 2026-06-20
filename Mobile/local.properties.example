@@ -1,0 +1,8 @@
+## File local.properties dùng để cấu hình local của mỗi lập trình viên.
+## KHÔNG ĐƯỢC CHECK-IN FILE NÀY LÊN GIT. Hãy copy file này thành local.properties và chỉnh sửa.
+
+# Đường dẫn SDK Android của bạn (nếu Android Studio chưa tự động cấu hình)
+# sdk.dir=/path/to/your/Android/Sdk
+
+# IP và URL kết nối API (Dùng IP máy tính chạy Node.js backend)
+api.base.url=http://10.0.2.2:3000/api/

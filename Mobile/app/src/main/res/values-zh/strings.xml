@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">UniFurniture</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">首页</string>
+    <string name="nav_products">商品</string>
+    <string name="nav_cart">购物车</string>
+    <string name="nav_account">账户</string>
+
+    <!-- Auth -->
+    <string name="login">登录</string>
+    <string name="login_subtitle">登录</string>
+    <string name="login_welcome">欢迎回来！</string>
+    <string name="login_success_msg">登录成功。为您探索高端家具产品。</string>
+    <string name="register">注册</string>
+    <string name="register_title">创建账户</string>
+    <string name="register_success_otp">注册成功！请输入验证码。</string>
+    <string name="phone">手机号码</string>
+    <string name="password">密码</string>
+    <string name="full_name">姓名</string>
+    <string name="no_account">没有账户？立即注册</string>
+    <string name="have_account">已有账户？登录</string>
+    <string name="otp_title">OTP 验证</string>
+    <string name="otp_subtitle">请输入短信发送的OTP验证码</string>
+    <string name="otp_code">OTP 验证码</string>
+    <string name="btn_verify">验证</string>
+
+    <!-- Cart -->
+    <string name="cart_title">购物车</string>
+    <string name="empty_cart">购物车为空</string>
+    <string name="login_to_shop">登录后购物</string>
+    <string name="total">总计</string>
+    <string name="checkout">结算</string>
+
+    <!-- Account -->
+    <string name="account_title">账户</string>
+    <string name="not_logged_in">您尚未登录</string>
+    <string name="login_or_register">登录 / 注册</string>
+    <string name="my_orders">我的订单</string>
+    <string name="favorites">收藏夹</string>
+    <string name="logout">退出登录</string>
+
+    <!-- Checkout -->
+    <string name="checkout_title">下单</string>
+    <string name="back">返回</string>
+    <string name="shipping_info">收货信息</string>
+    <string name="recipient_name">收件人姓名</string>
+    <string name="delivery_address">收货地址</string>
+    <string name="payment_method">支付方式</string>
+    <string name="cod">货到付款 (COD)</string>
+    <string name="bank_transfer">银行转账</string>
+    <string name="place_order">确认下单</string>
+    <string name="order_success">下单成功！</string>
+    <string name="order_success_notif_title">下单成功！</string>
+    <string name="order_success_notif_msg">您的订单 %1$s 已被接收。</string>
+    <string name="order_failed">下单失败，请重试。</string>
+    <string name="fill_required">请填写所有必填信息</string>
+
+    <!-- Home -->
+    <string name="search_hint">搜索商品…</string>
+    <string name="recent_searches">最近搜索</string>
+    <string name="clear_all">清除全部</string>
+    <string name="categories">分类</string>
+    <string name="featured_products">热门商品</string>
+    <string name="view_all">查看全部 ›</string>
+    <string name="collections">系列</string>
+
+    <!-- Product List -->
+    <string name="products_title">商品</string>
+    <string name="toggle_view_desc">切换视图</string>
+    <string name="sort_newest">最新</string>
+    <string name="sort_best_selling">热销</string>
+    <string name="sort_price_low">价格从低</string>
+    <string name="sort_price_high">价格从高</string>
+    <string name="empty_products">未找到商品</string>
+    <string name="empty_products_hint">请尝试更改筛选条件或搜索关键词</string>
+    <string name="filter_desc">筛选商品</string>
+    <string name="showing_products">显示 %1$d / %2$d 件商品</string>
+
+    <!-- Product Detail -->
+    <string name="product_detail_title">商品详情</string>
+    <string name="back_desc">返回</string>
+    <string name="choose_variant">选择颜色 / 款式</string>
+    <string name="short_description">简短描述</string>
+    <string name="full_description">详细描述</string>
+    <string name="reviews">评价</string>
+    <string name="no_rating">暂无评价</string>
+    <string name="no_reviews">暂无评价</string>
+    <string name="related_products">相关商品</string>
+    <string name="quantity">数量</string>
+    <string name="add_to_cart">加入购物车</string>
+    <string name="warranty">保修 %1$d 个月</string>
+    <string name="sold_count">已售：%1$s</string>
+    <string name="review_count">（%1$d 条评价）</string>
+    <string name="added_to_cart">已加入购物车！</string>
+    <string name="product_default_name">商品</string>
+    <string name="variant_default_name">默认</string>
+    <string name="in_stock">有货</string>
+    <string name="out_of_stock">缺货</string>
+    <string name="shop_reply">店家回复</string>
+    <string name="guest_customer">顾客</string>
+
+    <!-- Filter -->
+    <string name="filter_title">筛选商品</string>
+    <string name="filter_category">分类</string>
+    <string name="price_range">价格区间 (VND)</string>
+    <string name="price_from">最低</string>
+    <string name="price_to">最高</string>
+    <string name="min_rating">最低评分</string>
+    <string name="filter_all">全部</string>
+    <string name="rating_3_up">3★ 及以上</string>
+    <string name="rating_4_up">4★ 及以上</string>
+    <string name="rating_5">5★</string>
+    <string name="clear_filter">清除筛选</string>
+    <string name="apply_filter">应用</string>
+
+    <!-- Common -->
+    <string name="loading">加载中…</string>
+    <string name="delete_item">删除</string>
+    <string name="no_orders">您暂无订单</string>
+    <string name="my_orders_title">我的订单</string>
+    <string name="app_tagline">智能家具</string>
+
+    <!-- Add to cart feedback -->
+    <string name="btn_added">✓ 已加入</string>
+
+    <!-- Review sort -->
+    <string name="review_sort_newest">最新</string>
+    <string name="review_sort_high_rating">评分最高</string>
+    <string name="review_sort_low_rating">评分最低</string>
+
+    <!-- Recently viewed -->
+    <string name="recently_viewed">最近浏览</string>
+    <string name="added_to_favorites">已加入收藏</string>
+    <string name="removed_from_favorites">已从收藏中移除</string>
+    <string name="login_required_favorite">请先登录以加入收藏</string>
+    <string name="login_required_cart">请先登录以加入购物车</string>
+    <string name="please_select_variant">请选择颜色/规格</string>
+    <string name="login_required_checkout">请先登录以结算</string>
+    <string name="wishlist_add_error">无法加入收藏</string>
+    <string name="wishlist_remove_error">无法移除收藏</string>
+    <string name="error_network">网络错误：%1$s</string>
+    <string name="error_unknown">发生未知错误</string>
+    <string name="error_fill_info">请填写所有信息</string>
+    <string name="error_login_failed">手机号或密码错误</string>
+    <string name="error_phone_not_found">该手机号不存在</string>
+    <string name="error_invalid_otp_forgot">验证码无效或已过期</string>
+
+    <!-- Voucher -->
+    <string name="voucher_title">优惠券</string>
+    <string name="empty_vouchers">您暂无优惠券。</string>
+    <string name="label_discount">折扣</string>
+    <string name="btn_use">使用</string>
+    <string name="voucher_expiry">有效期至：%1$s</string>
+    <string name="copy_code">复制代码</string>
+    <string name="copied_to_clipboard">已复制</string>
+    <string name="voucher_discount_amount">优惠 %1$s</string>
+    <string name="voucher_condition">适用于满 %1$s 的订单。</string>
+    <string name="voucher_upsell">再购买 %1$s 即可使用</string>
+    <string name="select_voucher">选择优惠券</string>
+    <string name="voucher_wallet">优惠券包</string>
+    <string name="empty_voucher_storage">优惠券包为空</string>
+    <string name="voucher_discount_label">优惠券折扣</string>
+    <string name="content_desc_remove_voucher">移除优惠券</string>
+
+    <!-- Notifications -->
+    <string name="notification_title">通知</string>
+    <string name="no_notifications">暂无通知</string>
+    <string name="new_notification_hint">新通知将在此显示。</string>
+    <string name="content_desc_mark_all_read">全部标记为已读</string>
+    <string name="label_orders">订单</string>
+    <string name="label_all">全部</string>
+    <string name="label_account">账户</string>
+
+    <!-- Wishlist -->
+    <string name="empty_wishlist">收藏夹为空</string>
+
+    <!-- Feedback & UI -->
+    <string name="view_cart">查看购物车</string>
+    <string name="add_to_cart_success">已成功加入购物车</string>
+    <string name="add_to_cart_error">无法加入购物车，请重试。</string>
+    <string name="content_desc_delete">删除</string>
+    <string name="close">关闭</string>
+    <string name="subtotal">小计</string>
+    <string name="login_upsell">登录以获取更多优惠</string>
+    <string name="content_desc_logo">标志</string>
+    <string name="content_desc_product_image">商品图片</string>
+    <string name="content_desc_collection">系列</string>
+
+    <!-- Toasts & Messages -->
+    <string name="toast_no_other_variants">该商品没有其他规格</string>
+    <string name="toast_product_not_found">未找到商品信息</string>
+    <string name="toast_voucher_removed_min_spend">由于未达最低消费金额，优惠券已被移除</string>
+    <string name="toast_voucher_saved_upsell">优惠券已保存。请购买更多商品以使用！</string>
+    <string name="toast_voucher_applied">已应用优惠券：%1$s</string>
+    <string name="toast_order_id">订单号：%1$s</string>
+    <string name="toast_mark_all_read">已将所有通知标记为已读</string>
+    <string name="toast_login_required_orders">请登录以查看订单</string>
+
+    <!-- Formats & Limits -->
+    <string name="image_indicator_format">%1$d/%2$d</string>
+    <string name="price_range_format">%1$s - %2$s</string>
+    <string name="min_quantity_value">1</string>
+    <string name="max_quantity_value">99</string>
+    <string name="login_required_orders_hint">登录以保存购买历史</string>
+    <string name="guest">游客</string>
+    <!-- Checkout Advanced -->
+    <string name="shipping_email">收件人邮箱 (选填)</string>
+    <string name="province">省 / 直辖市</string>
+    <string name="district">区 / 县</string>
+    <string name="shipping_method">配送方式</string>
+    <string name="giao_khong_lap">标准配送 (不包含安装)</string>
+    <string name="giao_va_lap">配送及组装 (推荐)</string>
+    <string name="deposit_required_alert">订单金额满 10,000,000 VND 需预付 10%% 定金。已停用货到付款 (COD)。</string>
+    <string name="order_summary">订单汇总</string>
+    <string name="shipping_fee">运费</string>
+    <string name="deposit_amount_label">应付定金 (10%%)</string>
+    <string name="remaining_amount">货到付款余额</string>
+    <string name="qr_payment_title">VietQR 扫码支付</string>
+    <string name="bank_name_label">银行</string>
+    <string name="account_name_label">账户名称</string>
+    <string name="account_number_label">账号</string>
+    <string name="transfer_amount_label">转账金额</string>
+    <string name="transfer_message_label">转账备注</string>
+    <string name="copy">复制</string>
+    <string name="copied">已复制到剪贴板</string>
+    <string name="timer_title">支付倒计时: </string>
+    <string name="payment_timeout">正在检查支付结果…</string>
+    <string name="cancel_payment">取消支付</string>
+    <string name="cancel_payment_confirm_title">取消支付？</string>
+    <string name="cancel_payment_confirm_msg">您确定要取消此订单支付吗？</string>
+    <string name="order_success_title">谢谢您！</string>
+    <string name="order_success_desc">您的订单已成功提交。</string>
+    <string name="order_success_ref">订单编号: %1$s</string>
+    <string name="go_home">继续购物</string>
+    <string name="invalid_phone">手机号码无效。必须是0开头的10位数字。</string>
+    <string name="invalid_email">邮箱格式无效。</string>
+    <string name="invalid_province">请输入省份/直辖市。</string>
+    <string name="invalid_district">请输入区县。</string>
+    <!-- Forgot Password -->
+    <string name="str_forgot_title">忘记密码</string>
+    <string name="str_forgot_phone_instruction">输入您的注册手机号码以获取OTP验证码。</string>
+    <string name="str_phone">手机号码</string>
+    <string name="str_send_otp">发送 OTP</string>
+    <string name="str_forgot_otp_instruction">输入发送到您手机的OTP验证码。</string>
+    <string name="str_hint_otp">OTP 验证码</string>
+    <string name="str_verify_otp_btn">验证 OTP</string>
+    <string name="str_forgot_newpass_instruction">为您的账户设置新密码。</string>
+    <string name="str_forgot_newpass_hint">新密码</string>
+    <string name="str_forgot_confirmpass_hint">确认新密码</string>
+    <string name="str_reset_password_btn">重置密码</string>
+    <string name="str_remembered_password">返回登录</string>
+
+    <!-- Checkout Labels -->
+    <string name="label_shipping_name">收件人姓名 <font color="#FF0000">*</font></string>
+    <string name="label_shipping_phone">手机号码 <font color="#FF0000">*</font></string>
+    <string name="label_shipping_address">收货地址 <font color="#FF0000">*</font></string>
+    <string name="label_shipping_province">省 / 直辖市 <font color="#FF0000">*</font></string>
+    <string name="label_shipping_district">区 / 县 <font color="#FF0000">*</font></string>
+    <string name="label_shipping_email">接收通知的邮箱 (可选)</string>
+    <string name="shipping_method_warning">对不起，该地区目前仅支持标准配送（不含安装）。</string>
+    <string name="free">免费</string>
+
+    <!-- Checkout New -->
+    <string name="saved_address_label">已保存地址</string>
+    <string name="select_address_hint">-- 选择已保存地址 --</string>
+    <string name="add_new_address">+ 添加新地址</string>
+    <string name="applied_voucher">已应用：%1$s</string>
+    <string name="order_reference_label">订单查询码</string>
+    <string name="qr_instruction">使用银行应用扫描二维码支付</string>
+    <!-- Profile & Account Flow -->
+    <string name="edit_profile">编辑个人资料</string>
+    <string name="my_reviews">我的评价</string>
+    <string name="email">电子邮箱</string>
+    <string name="gender">性别</string>
+    <string name="birthday">生日</string>
+    <string name="save_changes">保存更改</string>
+    <string name="male">男</string>
+    <string name="female">女</string>
+    <string name="other">其他</string>
+    <string name="order_tracking">订单跟踪</string>
+    <string name="order_details">订单详情</string>
+    <string name="profile_updated">个人资料更新成功</string>
+    <string name="order_number_format">订单 %1$s</string>
+    <string name="order_date_format">日期：%1$s</string>
+    <string name="quantity_format">x%1$d</string>
+    <string name="status_cancelled">已取消</string>
+    <string name="account_about_title">关于 UniFurniture</string>
+    <string name="account_policy_title">隐私政策</string>
+    <string name="account_community_title">社区</string>
+    <string name="tracking_code_required">请输入运单号</string>
+    <string name="tracking_not_found">未找到该编码对应的订单</string>
+    <string name="tracking_lookup_error">无法查询该订单</string>
+    <string name="remember_password">记住密码</string>
+    <string name="back_to_home">返回首页</string>
+    <string name="select_language">选择语言</string>
+    <string name="remember_language_choice">记住我的选择</string>
+    <string name="confirm">确认</string>
+    <string name="language_label">语言</string>
+    <string name="lang_english">English 🇬🇧</string>
+    <string name="lang_vietnamese">Tiếng Việt 🇻🇳</string>
+    <string name="lang_chinese">中文 🇨🇳</string>
+    <string name="lang_french">Français 🇫🇷</string>
+    <string name="email_optional">电子邮件（可选）</string>
+    <string name="confirm_password">确认密码</string>
+    <string name="error_phone_invalid">电话号码必须为9-10位数字</string>
+    <string name="error_password_short">密码至少需要8个字符</string>
+    <string name="error_password_mismatch">两次输入的密码不一致</string>
+    <string name="error_email_invalid">电子邮件格式无效</string>
+    <string name="error_register_failed">注册失败，电话或邮箱可能已被注册。</string>
+    <string name="register_otp_sent">验证码已发送到您的手机</string>
+    <string name="otp_account_created">账户创建成功！您现在可以登录了。</string>
+
+    <!-- Promotions (Home) -->
+    <string name="promotions_title">🔥 热门优惠</string>
+    <string name="coupon_discount_percent">减 %1$d%%</string>
+    <string name="coupon_discount_fixed">减 %1$s</string>
+    <string name="coupon_min_order">满 %1$s 可用</string>
+    <string name="coupon_no_min">无最低消费限制</string>
+
+    <!-- Birthday popup -->
+    <string name="birthday_popup_title">🎉 生日快乐！</string>
+    <string name="birthday_popup_message">UniFurniture 祝您生日快乐，本月为您提供5折优惠券（码：BDAY50）！</string>
+    <string name="birthday_popup_btn">太棒了！</string>
+
+    <!-- Product list -->
+    <string name="load_more">加载更多</string>
+
+    <!-- Voucher stub labels -->
+    <string name="discount_percent_stub">减 %1$d%%</string>
+    <string name="discount_fixed_stub">减 %1$dK</string>
+</resources>

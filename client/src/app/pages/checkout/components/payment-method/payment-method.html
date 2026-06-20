@@ -1,0 +1,57 @@
+﻿<div class="card shadow-sm mb-4">
+  <div class="card-body px-4 py-4">
+    <h6 class="fw-bold mb-4">Phương thức thanh toán</h6>
+
+    <!-- Notice đơn > 10tr -->
+    <div *ngIf="requireDeposit" class="deposit-notice mb-4 p-3 rounded-3 d-flex gap-3 align-items-start">
+      <span class="deposit-icon"><i class="bi bi-exclamation-triangle-fill"></i></span>
+      <div>
+        <div class="fw-semibold text-warning-emphasis">Đơn hàng trên 10 triệu: bắt buộc đặt cọc 10%</div>
+        <div class="small mt-1">
+          Tổng đơn <strong>{{ formatCurrency(total) }}</strong> — sau khi đặt hàng bạn sẽ được
+          hướng dẫn chuyển khoản cọc <strong class="text-danger">{{ formatCurrency(depositAmount) }}</strong>.
+        </div>
+      </div>
+    </div>
+
+    <!-- COD -->
+    <div
+      class="payment-option mb-3"
+      [class.disabled]="codDisabled"
+      [class.selected]="form.paymentMethod === 'COD'"
+      (click)="selectPayment('COD')"
+    >
+      <div class="d-flex align-items-center gap-3">
+        <div class="radio-dot" [class.active]="form.paymentMethod === 'COD'"></div>
+        <span class="method-icon method-icon--cash"><i class="bi bi-cash-coin"></i></span>
+        <div>
+          <div class="fw-semibold">Thanh toán khi nhận hàng (COD)</div>
+          <div class="small text-muted">Thanh toán tiền mặt khi nhận hàng</div>
+          <div *ngIf="codDisabled" class="small text-danger mt-1">
+            Tạm khóa COD — đơn trên 10 triệu bắt buộc chuyển khoản cọc 10%.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chuyển khoản -->
+    <div
+      class="payment-option"
+      [class.selected]="form.paymentMethod === 'CHUYEN_KHOAN'"
+      (click)="selectPayment('CHUYEN_KHOAN')"
+    >
+      <div class="d-flex align-items-center gap-3">
+        <div class="radio-dot" [class.active]="form.paymentMethod === 'CHUYEN_KHOAN'"></div>
+        <span class="method-icon method-icon--bank"><i class="bi bi-bank2"></i></span>
+        <div>
+          <div class="fw-semibold">Chuyển khoản ngân hàng</div>
+          <div class="small text-muted">
+            Thông tin QR và STK sẽ hiển thị sau khi bạn bấm
+            <strong>Đặt hàng</strong>.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

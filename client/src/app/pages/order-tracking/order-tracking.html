@@ -1,0 +1,183 @@
+﻿<div class="tracking-page">
+  <section class="tracking-hero">
+    <div class="tracking-hero__content">
+      <h1>Tra cứu <span>mã vận đơn</span></h1>
+      <p>Không cần đăng nhập. Bạn có thể nhập 1 hoặc nhiều mã (phân tách bằng dấu phẩy hoặc xuống dòng).</p>
+
+      <div class="tracking-search">
+        <textarea
+          rows="2"
+          placeholder="Ví dụ: UF-20260315-AB12, UF-20260310-CN88"
+          [(ngModel)]="searchCode"
+          [disabled]="loading"
+        ></textarea>
+        <button type="button" (click)="searchOrder()" [disabled]="loading">
+          {{ loading ? 'Đang tra cứu...' : 'Tra cứu' }}
+        </button>
+      </div>
+    </div>
+  </section>
+
+
+  <section class="tracking-content" *ngIf="pendingQr">
+    <div class="pending-qr-card">
+
+      <div class="pending-qr-header">
+        <span class="pending-qr-icon"><i class="bi bi-bank2"></i></span>
+        <div>
+          <div class="fw-bold">Đơn hàng đang chờ thanh toán</div>
+          <div class="small text-muted">Mã đơn: <strong>{{ pendingQr.orderCode }}</strong></div>
+        </div>
+        <div class="pending-qr-timer ms-auto" [class.urgent]="pendingQrSecondsLeft <= 60">
+          {{ pendingQrTimerDisplay }}
+        </div>
+      </div>
+
+      <div *ngIf="pendingQr.requireDeposit" class="d-flex gap-3 my-3">
+        <div
+          class="pqr-choice flex-1"
+          [class.selected]="pendingQrChoice === 'deposit'"
+          (click)="pendingQrChoice = 'deposit'"
+        >
+          <div class="radio-dot" [class.active]="pendingQrChoice === 'deposit'"></div>
+          <div>
+            <div class="fw-semibold small">Đặt cọc 10%</div>
+            <div class="fw-bold text-danger">{{ formatCurrency(pendingQr.depositAmount) }}</div>
+          </div>
+        </div>
+        <div
+          class="pqr-choice flex-1"
+          [class.selected]="pendingQrChoice === 'full'"
+          (click)="pendingQrChoice = 'full'"
+        >
+          <div class="radio-dot" [class.active]="pendingQrChoice === 'full'"></div>
+          <div>
+            <div class="fw-semibold small">Thanh toán đủ 100%</div>
+            <div class="fw-bold text-primary">{{ formatCurrency(pendingQr.total) }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pqr-payable my-3">
+        <span class="small text-muted me-2">Số tiền cần chuyển:</span>
+        <strong class="text-danger fs-6">{{ formatCurrency(pendingQrAmount) }}</strong>
+      </div>
+
+      <div class="pqr-bank-row">
+        <img [src]="bankInfo.qrUrl" alt="QR" class="pqr-qr-img" />
+        <table class="pqr-bank-table">
+          <tr>
+            <td class="label">Tên TK</td>
+            <td class="fw-semibold">{{ bankInfo.accountName }}</td>
+          </tr>
+          <tr>
+            <td class="label">Số TK</td>
+            <td>
+              <span class="fw-semibold me-2">{{ bankInfo.accountNumber }}</span>
+              <button class="btn-copy" type="button"
+                (click)="copyPendingQrValue(bankInfo.accountNumber, 'account')">
+                <i class="bi" [ngClass]="pendingQrCopied === 'account' ? 'bi-check2' : 'bi-copy'"></i>
+                {{ pendingQrCopied === 'account' ? 'Đã copy' : 'Copy' }}
+              </button>
+            </td>
+          </tr>
+          <tr>
+            <td class="label">Ngân hàng</td>
+            <td>{{ bankInfo.bankName }}</td>
+          </tr>
+          <tr>
+            <td class="label">Nội dung CK</td>
+            <td>
+              <span class="text-danger fw-semibold me-2">CK {{ pendingQr.orderCode }}</span>
+              <button class="btn-copy" type="button"
+                (click)="copyPendingQrValue('CK ' + pendingQr.orderCode, 'content')">
+                <i class="bi" [ngClass]="pendingQrCopied === 'content' ? 'bi-check2' : 'bi-copy'"></i>
+                {{ pendingQrCopied === 'content' ? 'Đã copy' : 'Copy' }}
+              </button>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="small text-muted mt-3">
+        <i class="bi bi-info-circle me-1"></i>
+        Mã QR còn hiệu lực trong {{ pendingQrTimerDisplay }}. Vui lòng tạo lại phiên thanh toán nếu chưa chuyển khoản.
+      </div>
+
+    </div>
+  </section>
+
+
+  <section class="tracking-content" id="tracking-feedback" *ngIf="errorMessage && !orders.length">
+    <div class="alert error">{{ errorMessage }}</div>
+  </section>
+
+  <section class="tracking-content" id="tracking-results" *ngIf="orders.length">
+    <div class="alert info" *ngIf="infoMessage">{{ infoMessage }}</div>
+    <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+    <div class="order-wrap" *ngFor="let order of orders">
+      <app-tracking-order-summary
+        [order]="order"
+        [timelineSteps]="timelineSteps"
+        [currentStepIndex]="currentStepIndex(order)"
+        [isCancelledOrRefunded]="isCancelledOrRefunded(order)"
+        [canRequestCancel]="canRequestCancel(order)"
+        [showProductCard]="order.backendStatus !== 'completed'"
+        [shopZaloUrl]="shopZaloUrl"
+        (completeOrderClick)="completeOrder(order)"
+        (toggleCancelClick)="toggleCancelForm(order)"
+      />
+
+      <app-tracking-cancel-flow
+        [order]="order"
+        [cancelReasons]="cancelReasons"
+        [cancelSuccess]="cancelSuccessOrderId === order.id"
+        (toggleCancelClick)="toggleCancelForm(order)"
+        (submitCancelClick)="submitCancelRequest(order)"
+        (closeCancelSuccessClick)="closeCancelSuccess()"
+      />
+
+      <app-tracking-review-flow
+        [order]="order"
+        [reviewSubmittingProductKey]="reviewSubmittingProductKey"
+        [reviewInlineErrors]="reviewInlineErrors"
+        [cameraOpen]="cameraOpen"
+        [cameraError]="cameraError"
+        [cameraMode]="cameraMode"
+        [cameraDevices]="cameraDevices"
+        [selectedCameraId]="selectedCameraId"
+        [cameraRecording]="cameraRecording"
+        [cameraRecordedSeconds]="cameraRecordedSeconds"
+        (setRatingClick)="setRating($event.product, $event.value)"
+        (imageSelected)="onImageSelected($event.event, $event.product)"
+        (videoSelected)="onVideoSelected($event.event, $event.product)"
+        (removeImageClick)="removeImageAt($event.product, $event.index)"
+        (removeVideoClick)="removeVideoAt($event.product, $event.index)"
+        (submitSingleReviewClick)="submitSingleReview($event.order, $event.product)"
+        (openCameraImageClick)="openCameraForImage($event)"
+        (openCameraVideoClick)="openCameraForVideo($event)"
+        (closeCameraClick)="closeCamera()"
+        (switchCameraFacingClick)="switchCameraFacing()"
+        (cameraDeviceChangeClick)="onCameraDeviceChange($event)"
+        (capturePhotoClick)="capturePhotoFromCamera()"
+        (startVideoRecordingClick)="startVideoRecording()"
+        (stopVideoRecordingClick)="stopVideoRecording()"
+        (viewProductClick)="viewProductFromHistory($event.product, $event.target)"
+        (buyAgainClick)="buyAgain($event)"
+      />
+    </div>
+  </section>
+</div>
+
+<div class="tracking-toast" *ngIf="toastMessage">{{ toastMessage }}</div>
+
+<div class="review-thanks-modal" *ngIf="reviewThanksOpen">
+  <div class="review-thanks-modal__backdrop" (click)="closeReviewThanks()"></div>
+  <div class="review-thanks-modal__content">
+    <div class="review-thanks-modal__icon"><i class="bi bi-award-fill"></i></div>
+    <h4>{{ reviewThanksTitle }}</h4>
+    <p>{{ reviewThanksMessage }}</p>
+    <button type="button" (click)="closeReviewThanks()"><i class="bi bi-check2-circle"></i>Đóng</button>
+  </div>
+</div>

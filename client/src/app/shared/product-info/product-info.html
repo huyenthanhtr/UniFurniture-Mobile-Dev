@@ -1,0 +1,151 @@
+<div class="info-wrapper">
+  <h1>{{ product.name }}</h1>
+
+  <div class="rating" [class.rating--empty]="reviewsCount === 0">
+    <span class="rating-value" *ngIf="reviewsCount > 0">{{ averageRating | number:'1.1-1' }}</span>
+    <span class="rating-stars">
+      <span class="rating-star" *ngFor="let star of starValues" [class.filled]="star <= roundedAverageRating">&#9733;</span>
+    </span>
+    <span class="rating-count">({{ reviewsCount }})</span>
+  </div>
+
+  <div class="price">
+    <div class="price-values">
+      <span class="sale">
+        <ng-container *ngIf="(selectedVariant?.price ?? selectedColor?.price ?? product.price) !== null; else contactPrice">
+          {{ (selectedVariant?.price ?? selectedColor?.price ?? product.price) | number }}&#273;
+        </ng-container>
+      </span>
+      <span class="old" *ngIf="(selectedVariant?.compare_at_price ?? selectedColor?.originalPrice ?? product.originalPrice) !== null">
+        {{ (selectedVariant?.compare_at_price ?? selectedColor?.originalPrice ?? product.originalPrice) | number }}&#273;
+      </span>
+    </div>
+
+    <button
+      type="button"
+      class="wishlist-btn"
+      [class.wishlist-btn--active]="isWishlisted()"
+      [attr.aria-pressed]="isWishlisted()"
+      [attr.aria-label]="isWishlisted() ? 'Bỏ yêu thích' : 'Thêm yêu thích'"
+      [title]="isWishlisted() ? 'Bỏ yêu thích' : 'Thêm yêu thích'"
+      (click)="toggleWishlist()"
+    >
+      <span aria-hidden="true">{{ isWishlisted() ? '♥' : '♡' }}</span>
+      <span class="wishlist-label">{{ isWishlisted() ? 'Đã yêu thích' : 'Yêu thích' }}</span>
+    </button>
+  </div>
+
+  <div class="section">
+    <div class="label">Màu sắc</div>
+    <ng-container *ngIf="product.colors.length > 0; else noColors">
+      <div class="color-swatches-row">
+        <button
+          *ngFor="let color of product.colors"
+          type="button"
+          class="color-swatch-lg"
+          [class.active]="selectedColor?.name === color.name"
+          [style.background-color]="color.hex"
+          [title]="color.name"
+          (click)="selectColor(color)"
+          [attr.aria-label]="color.name"
+        ></button>
+      </div>
+    </ng-container>
+    <ng-template #noColors>
+      <div>Đang cập nhật</div>
+    </ng-template>
+  </div>
+
+  <div class="section">
+    <div class="label">Kích thước</div>
+    <ng-container *ngIf="hasSizeSelection; else staticSize">
+      <div class="size-options">
+        <button
+          *ngFor="let variant of sizeVariants"
+          type="button"
+          class="size-option-btn"
+          [class.active]="selectedVariant?._id === variant._id"
+          [class.is-disabled]="isVariantUnavailable(variant)"
+          [disabled]="isVariantUnavailable(variant)"
+          (click)="selectVariant(variant)"
+        >
+          {{ getVariantLabel(variant) }}
+        </button>
+      </div>
+      <div class="size-description" *ngIf="formattedSizeDescription">{{ formattedSizeDescription }}</div>
+      <div class="selection-hint" *ngIf="!selectedVariant">Vui lòng chọn kích thước trước khi mua</div>
+    </ng-container>
+    <ng-template #staticSize>
+      <div>{{ displaySizeText }}</div>
+    </ng-template>
+  </div>
+
+  <div class="section" *ngIf="product.materialText">
+    <div class="label">Chất liệu</div>
+    <div>{{ product.materialText }}</div>
+  </div>
+
+  <div class="section" *ngIf="selectedVariant?.sku || selectedColor?.sku || product.sku">
+    <div class="label">SKU</div>
+    <div>{{ selectedVariant?.sku || selectedColor?.sku || product.sku }}</div>
+  </div>
+
+  <div class="quantity">
+    <button type="button" class="qty-btn" [disabled]="isOutOfStock" (click)="decrease()" aria-label="Giảm số lượng">-</button>
+    <input
+      type="number"
+      class="qty-input"
+      [class.qty-input--error]="isQuantityOverStock"
+      [min]="quantityInputMin"
+      step="1"
+      inputmode="numeric"
+      [disabled]="isOutOfStock"
+      [value]="quantityInput"
+      (input)="onQuantityInput($event)"
+      (blur)="onQuantityBlur()"
+      aria-label="Số lượng sản phẩm"
+    />
+    <button
+      type="button"
+      class="qty-btn"
+      [class.qty-btn--disabled]="!canIncreaseQuantity"
+      [disabled]="!canIncreaseQuantity || isOutOfStock"
+      (click)="increase()"
+      aria-label="Tăng số lượng"
+    >+</button>
+  </div>
+
+  <div class="purchase-actions">
+    <p class="add-message" [class.add-message--error]="isDisplayMessageError" *ngIf="displayMessage">{{ displayMessage }}</p>
+    <ng-container *ngIf="!isOutOfStock; else soldOutAction">
+      <button type="button" class="btn-add" (click)="addToCart()">THÊM VÀO GIỎ</button>
+      <button
+        type="button"
+        class="btn-buy"
+        [class.btn-buy--disabled]="isBuyNowDisabled"
+        [disabled]="isBuyNowDisabled"
+        (click)="buyNow()"
+      >MUA NGAY</button>
+    </ng-container>
+    <ng-template #soldOutAction>
+      <button type="button" class="btn-soldout" disabled>HẾT HÀNG</button>
+    </ng-template>
+  </div>
+</div>
+
+<ng-template #contactPrice>Liên hệ</ng-template>
+
+<div class="cart-success-overlay" *ngIf="isAddSuccessPopupOpen" (click)="closeAddSuccessPopup()">
+  <div
+    class="cart-success-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="cart-success-title"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="cart-success-icon" aria-hidden="true">&#10003;</div>
+    <h3 id="cart-success-title">Thêm vào giỏ hàng thành công</h3>
+    <p>Sản phẩm đã được thêm vào giỏ hàng của bạn.</p>
+    <button type="button" class="cart-success-close" (click)="closeAddSuccessPopup()">Đóng</button>
+  </div>
+</div>
