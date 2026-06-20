@@ -140,18 +140,11 @@ public class AccountFragment extends Fragment {
             androidx.navigation.Navigation.findNavController(requireView()).navigate(R.id.contentFragment, bundle);
         });
 
-        binding.itemLanguage.setOnClickListener(v -> {
-            String[] languages = {"Tiếng Việt", "English", "中文", "Français"};
-            String[] codes = {"vi", "en", "zh", "fr"};
-            
-            new android.app.AlertDialog.Builder(requireContext())
-                .setTitle("Select Language")
-                .setItems(languages, (dialog, which) -> {
-                    com.unifurniture.mobile.util.LanguageHelper.setLanguage(requireContext(), codes[which]);
-                    requireActivity().recreate();
-                })
-                .show();
-        });
+        binding.itemLanguage.setOnClickListener(v ->
+                com.unifurniture.mobile.util.LanguageDialog.show(requireContext(), false, (code, changed) -> {
+                    // Sec 2: apply immediately by recreating the activity so the whole UI refreshes.
+                    if (changed) requireActivity().recreate();
+                }));
 
         updateNotificationBadge();
         loadProfileAvatar(session);

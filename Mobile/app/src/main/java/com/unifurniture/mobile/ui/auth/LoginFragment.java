@@ -33,6 +33,18 @@ public class LoginFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         viewModel = new ViewModelProvider(requireActivity()).get(AuthViewModel.class);
 
+        // Sec 6: Guests must always be able to return to Home without logging in.
+        binding.btnBackHome.setOnClickListener(v -> goHome());
+
+        // Sec 5: pre-fill remembered credentials.
+        com.unifurniture.mobile.util.CredentialStore creds =
+                com.unifurniture.mobile.util.CredentialStore.getInstance(requireContext());
+        if (creds.isRemembered()) {
+            binding.cbRememberPassword.setChecked(true);
+            binding.etPhone.setText(creds.getPhone());
+            binding.etPassword.setText(creds.getPassword());
+        }
+
         binding.btnLogin.setOnClickListener(v -> {
             String phone = binding.etPhone.getText().toString().trim();
             String password = binding.etPassword.getText().toString().trim();
@@ -64,6 +76,14 @@ public class LoginFragment extends Fragment {
                 session.saveToken(result.token);
                 session.saveCustomer(result.customer);
 
+                // Sec 5: persist or forget credentials based on the checkbox.
+                if (binding.cbRememberPassword.isChecked()) {
+                    creds.save(binding.etPhone.getText().toString().trim(),
+                            binding.etPassword.getText().toString().trim());
+                } else {
+                    creds.clear();
+                }
+
                 // Merge local wishlist to server
                 java.util.Set<String> localWishlist = session.getLocalWishlist();
                 if (!localWishlist.isEmpty() && result.customer != null) {
@@ -90,6 +110,16 @@ public class LoginFragment extends Fragment {
                 requireActivity().finish();
             }
         });
+    }
+
+    /**
+     * Sec 6: Return the guest to the shopping experience (Home). AuthActivity sits on top of
+     * MainActivity, so finishing it drops the user straight back where they were browsing.
+     */
+    private void goHome() {
+        if (getActivity() != null) {
+            getActivity().finish();
+        }
     }
 
     @Override

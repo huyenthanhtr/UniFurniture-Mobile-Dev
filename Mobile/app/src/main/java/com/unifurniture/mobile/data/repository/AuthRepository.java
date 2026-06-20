@@ -18,38 +18,71 @@ public class AuthRepository {
         this.apiService = apiService;
     }
 
-    public LiveData<AuthResponse> login(String phone, String password) {
+    /** Build an AuthResponse from any HTTP response, carrying the server's message + success flag. */
+    private static AuthResponse toResult(Response<AuthResponse> response) {
+        AuthResponse ar = response.isSuccessful() ? response.body() : parseError(response);
+        if (ar == null) ar = new AuthResponse();
+        ar.success = response.isSuccessful();
+        return ar;
+    }
+
+    private static AuthResponse parseError(Response<AuthResponse> response) {
+        try {
+            if (response.errorBody() != null) {
+                AuthResponse ar = new com.google.gson.Gson()
+                        .fromJson(response.errorBody().charStream(), AuthResponse.class);
+                if (ar != null) return ar;
+            }
+        } catch (Exception ignored) {}
+        return null;
+    }
+
+    private static AuthResponse networkError() {
+        AuthResponse ar = new AuthResponse();
+        ar.success = false;
+        return ar;
+    }
+
+    // Login accepts a phone OR email. The backend reads the `emailOrPhone` key; `phone` is sent too
+    // for compatibility with older server builds.
+    public LiveData<AuthResponse> login(String emailOrPhone, String password) {
         MutableLiveData<AuthResponse> result = new MutableLiveData<>();
         Map<String, String> body = new HashMap<>();
-        body.put("phone", phone);
+        body.put("emailOrPhone", emailOrPhone);
+        body.put("phone", emailOrPhone);
         body.put("password", password);
         apiService.login(body).enqueue(new Callback<AuthResponse>() {
             @Override
             public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
-                result.setValue(response.isSuccessful() ? response.body() : null);
+                result.setValue(toResult(response));
             }
             @Override
             public void onFailure(Call<AuthResponse> call, Throwable t) {
-                result.setValue(null);
+                result.setValue(networkError());
             }
         });
         return result;
     }
 
-    public LiveData<AuthResponse> register(String phone, String password, String name) {
+    // Register matches the web payload: full_name, phone (already formatted), password_hash (raw
+    // password — the server hashes it), and optional email.
+    public LiveData<AuthResponse> register(String phone, String password, String fullName, String email) {
         MutableLiveData<AuthResponse> result = new MutableLiveData<>();
         Map<String, String> body = new HashMap<>();
+        body.put("full_name", fullName);
         body.put("phone", phone);
-        body.put("password", password);
-        body.put("name", name);
+        body.put("password_hash", password);
+        if (email != null && !email.trim().isEmpty()) {
+            body.put("email", email.trim());
+        }
         apiService.register(body).enqueue(new Callback<AuthResponse>() {
             @Override
             public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
-                result.setValue(response.isSuccessful() ? response.body() : null);
+                result.setValue(toResult(response));
             }
             @Override
             public void onFailure(Call<AuthResponse> call, Throwable t) {
-                result.setValue(null);
+                result.setValue(networkError());
             }
         });
         return result;
@@ -63,11 +96,11 @@ public class AuthRepository {
         apiService.verifyOtp(body).enqueue(new Callback<AuthResponse>() {
             @Override
             public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
-                result.setValue(response.isSuccessful() ? response.body() : null);
+                result.setValue(toResult(response));
             }
             @Override
             public void onFailure(Call<AuthResponse> call, Throwable t) {
-                result.setValue(null);
+                result.setValue(networkError());
             }
         });
         return result;

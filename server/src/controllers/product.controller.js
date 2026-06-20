@@ -1,6 +1,40 @@
 const mongoose = require("mongoose");
 const Product = require("../models/Product");
+const ProductTranslation = require("../models/ProductTranslation");
 const ProductVariant = require("../models/ProductVariant");
+
+// Languages we have translated content for in `product_translations`.
+// "vi" is the source (original product docs) so it needs no overlay.
+const TRANSLATABLE_LANGS = new Set(["en"]);
+
+/**
+ * Overlay translated name/short_description/description from `product_translations`
+ * onto product object(s) for the requested language. Original docs are untouched.
+ * Falls back silently to the original (Vietnamese) text when a translation is missing.
+ */
+async function overlayTranslations(items, langRaw) {
+  const lang = String(langRaw || "").trim().toLowerCase();
+  if (!lang || lang === "vi" || !TRANSLATABLE_LANGS.has(lang)) return items;
+
+  const list = Array.isArray(items) ? items : [items];
+  const ids = list.map((p) => p && p._id).filter(Boolean);
+  if (!ids.length) return items;
+
+  const docs = await ProductTranslation.find({
+    product_id: { $in: ids },
+    language_code: lang,
+  }).lean();
+
+  const byId = new Map(docs.map((t) => [String(t.product_id), t]));
+  for (const p of list) {
+    const t = byId.get(String(p._id));
+    if (!t) continue;
+    if (t.name) p.name = t.name;
+    if (t.short_description) p.short_description = t.short_description;
+    if (t.description) p.description = t.description;
+  }
+  return items;
+}
 const ProductImage = require("../models/ProductImage");
 const Category = require("../models/Category");
 const Collection = require("../models/Collection");
@@ -345,6 +379,9 @@ async function getProducts(req, res, next) {
       colors: Array.from(colorsByProduct.get(String(p._id))?.values() || []),
     }));
 
+    // Apply translations for the requested language (e.g. ?lang=en).
+    await overlayTranslations(itemsWithColors, req.query.lang);
+
     res.json({
       page: pageNum,
       limit: limitNum,
@@ -364,6 +401,8 @@ async function getProductById(req, res, next) {
     const doc = await findProductByKey(id);
 
     if (!doc) return res.status(404).json({ error: "Product not found" });
+    // Apply translations for the requested language (e.g. ?lang=en).
+    await overlayTranslations(doc, req.query.lang);
     res.json(doc);
   } catch (err) {
     next(err);

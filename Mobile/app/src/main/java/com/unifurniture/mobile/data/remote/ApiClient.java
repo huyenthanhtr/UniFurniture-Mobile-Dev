@@ -19,7 +19,10 @@ public class ApiClient {
     public static ApiService getInstance() {
         if (INSTANCE == null) {
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+            // Verbose body logging only in debug; release stays quiet and avoids leaking payloads.
+            logging.setLevel(BuildConfig.DEBUG
+                    ? HttpLoggingInterceptor.Level.BODY
+                    : HttpLoggingInterceptor.Level.NONE);
 
             OkHttpClient okHttpClient = new OkHttpClient.Builder()
                     .addInterceptor(logging)
@@ -27,16 +30,39 @@ public class ApiClient {
                         Request original = chain.request();
                         SessionManager session = SessionManager.getInstance(UniFurnitureApp.getInstance());
                         String token = session.getToken();
-                        
+
                         Request.Builder builder = original.newBuilder();
                         if (token != null && !token.isEmpty()) {
                             builder.header("Authorization", "Bearer " + token);
                         }
-                        
-                        // Log the request for debugging
+
+                        // Append the current UI language as ?lang= so the backend can return
+                        // translated product content (name/short_description/description).
+                        // Endpoints that don't use it simply ignore the extra query param.
+                        String lang = com.unifurniture.mobile.util.LanguageHelper
+                                .getLanguage(UniFurnitureApp.getInstance());
+                        if (lang != null && !lang.isEmpty() && original.url().queryParameter("lang") == null) {
+                            builder.url(original.url().newBuilder()
+                                    .addQueryParameter("lang", lang)
+                                    .build());
+                        }
+
+                        // Always log request line (kept lightweight) so release-build failures are traceable.
                         android.util.Log.d("ApiClient", "Request: " + original.method() + " " + original.url());
-                        
-                        return chain.proceed(builder.build());
+
+                        try {
+                            okhttp3.Response response = chain.proceed(builder.build());
+                            if (!response.isSuccessful()) {
+                                android.util.Log.w("ApiClient", "HTTP " + response.code()
+                                        + " for " + original.method() + " " + original.url());
+                            }
+                            return response;
+                        } catch (java.io.IOException e) {
+                            // Network/DNS/TLS failure — the usual cause of empty screens on real devices.
+                            android.util.Log.e("ApiClient", "Request FAILED: " + original.method()
+                                    + " " + original.url() + " baseUrl=" + BuildConfig.API_BASE_URL, e);
+                            throw e;
+                        }
                     })
                     .connectTimeout(30, TimeUnit.SECONDS)
                     .readTimeout(30, TimeUnit.SECONDS)
