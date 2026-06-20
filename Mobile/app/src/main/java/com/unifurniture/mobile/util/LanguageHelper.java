@@ -12,15 +12,33 @@ public class LanguageHelper {
 
     private static final String PREFS_NAME = "LanguagePrefs";
     private static final String KEY_LANGUAGE = "AppLanguage";
+    private static final String KEY_REMEMBER = "RememberLanguage";
+
+    /** Default app language is English (Sec 1). */
+    public static final String DEFAULT_LANGUAGE = "en";
+
+    /** Supported language codes, in display order (English first / default). */
+    public static final String[] SUPPORTED_CODES = {"en", "vi", "zh", "fr"};
+
+    private static SharedPreferences prefs(Context context) {
+        return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+    }
 
     public static void setLanguage(Context context, String languageCode) {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        prefs.edit().putString(KEY_LANGUAGE, languageCode).apply();
+        prefs(context).edit().putString(KEY_LANGUAGE, languageCode).apply();
     }
 
     public static String getLanguage(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        return prefs.getString(KEY_LANGUAGE, "vi"); // Default is Vietnamese
+        return prefs(context).getString(KEY_LANGUAGE, DEFAULT_LANGUAGE);
+    }
+
+    /** Whether the user ticked "Remember my choice" — if true we skip the first-launch popup. */
+    public static void setRemembered(Context context, boolean remembered) {
+        prefs(context).edit().putBoolean(KEY_REMEMBER, remembered).apply();
+    }
+
+    public static boolean isRemembered(Context context) {
+        return prefs(context).getBoolean(KEY_REMEMBER, false);
     }
 
     public static Context updateBaseContextLocale(Context context) {

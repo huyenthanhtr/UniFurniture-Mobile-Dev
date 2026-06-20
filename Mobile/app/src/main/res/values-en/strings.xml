@@ -303,4 +303,23 @@
     <string name="tracking_code_required">Please enter a tracking code</string>
     <string name="tracking_not_found">No order found with this code</string>
     <string name="tracking_lookup_error">Could not look up this order</string>
+    <string name="remember_password">Remember password</string>
+    <string name="back_to_home">Back to Home</string>
+    <string name="select_language">Select Language</string>
+    <string name="remember_language_choice">Remember my choice</string>
+    <string name="confirm">Confirm</string>
+    <string name="language_label">Language</string>
+    <string name="lang_english">English 🇬🇧</string>
+    <string name="lang_vietnamese">Tiếng Việt 🇻🇳</string>
+    <string name="lang_chinese">中文 🇨🇳</string>
+    <string name="lang_french">Français 🇫🇷</string>
+    <string name="email_optional">Email (optional)</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="error_phone_invalid">Phone number must be 9-10 digits</string>
+    <string name="error_password_short">Password must be at least 8 characters</string>
+    <string name="error_password_mismatch">Passwords do not match</string>
+    <string name="error_email_invalid">Invalid email format</string>
+    <string name="error_register_failed">Registration failed. Phone or email may already be registered.</string>
+    <string name="register_otp_sent">OTP code sent to your phone</string>
+    <string name="otp_account_created">Account created! You can now log in.</string>
 </resources>

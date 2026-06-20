@@ -354,7 +354,7 @@
                         android:id="@+id/itemLanguage"
                         android:layout_width="match_parent"
                         android:layout_height="56dp"
-                        android:text="Ngôn ngữ (Language)"
+                        android:text="@string/language_label"
                         android:textSize="15sp"
                         android:paddingHorizontal="20dp"
                         android:gravity="center_vertical"

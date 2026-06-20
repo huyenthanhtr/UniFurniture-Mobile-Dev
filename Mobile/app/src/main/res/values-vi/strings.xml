@@ -287,4 +287,23 @@
     <string name="tracking_code_required">Vui lòng nhập mã vận đơn</string>
     <string name="tracking_not_found">Không tìm thấy đơn hàng với mã này</string>
     <string name="tracking_lookup_error">Lỗi khi tra cứu đơn hàng</string>
+    <string name="remember_password">Ghi nhớ mật khẩu</string>
+    <string name="back_to_home">Về trang chủ</string>
+    <string name="select_language">Chọn ngôn ngữ</string>
+    <string name="remember_language_choice">Ghi nhớ lựa chọn của tôi</string>
+    <string name="confirm">Xác nhận</string>
+    <string name="language_label">Ngôn ngữ</string>
+    <string name="lang_english">English 🇬🇧</string>
+    <string name="lang_vietnamese">Tiếng Việt 🇻🇳</string>
+    <string name="lang_chinese">中文 🇨🇳</string>
+    <string name="lang_french">Français 🇫🇷</string>
+    <string name="email_optional">Email (không bắt buộc)</string>
+    <string name="confirm_password">Xác nhận mật khẩu</string>
+    <string name="error_phone_invalid">Số điện thoại phải có 9-10 chữ số</string>
+    <string name="error_password_short">Mật khẩu phải có ít nhất 8 ký tự</string>
+    <string name="error_password_mismatch">Mật khẩu xác nhận không khớp</string>
+    <string name="error_email_invalid">Định dạng email không hợp lệ</string>
+    <string name="error_register_failed">Đăng ký thất bại. SĐT hoặc email có thể đã được đăng ký.</string>
+    <string name="register_otp_sent">Mã OTP đã được gửi đến số điện thoại của bạn</string>
+    <string name="otp_account_created">Tạo tài khoản thành công! Bạn có thể đăng nhập ngay.</string>
 </resources>

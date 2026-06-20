@@ -19,16 +19,19 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-        new Handler().postDelayed(() -> {
-            // Auto navigate to Main or Auth based on session
-            Intent intent;
-            if (SessionManager.getInstance(this).isLoggedIn()) {
-                intent = new Intent(this, MainActivity.class);
-            } else {
-                intent = new Intent(this, MainActivity.class); // Guest mode OK
-            }
-            startActivity(intent);
-            finish();
-        }, 1800);
+        // Sec 1: on first launch (no remembered choice) show the language picker
+        // immediately; otherwise continue to the app after a short splash.
+        if (!com.unifurniture.mobile.util.LanguageHelper.isRemembered(this)) {
+            com.unifurniture.mobile.util.LanguageDialog.show(this, true, (code, changed) -> goNext());
+        } else {
+            new Handler().postDelayed(this::goNext, 1800);
+        }
+    }
+
+    private void goNext() {
+        // Guest mode is allowed, so we always land on MainActivity. MainActivity's
+        // attachBaseContext re-applies the chosen locale.
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
     }
 }
