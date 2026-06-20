@@ -19,6 +19,7 @@ import com.unifurniture.mobile.data.model.ProductDto;
 import com.unifurniture.mobile.databinding.FragmentHomeBinding;
 import com.unifurniture.mobile.ui.adapter.CategoryAdapter;
 import com.unifurniture.mobile.ui.adapter.CollectionAdapter;
+import com.unifurniture.mobile.ui.adapter.CouponHomeAdapter;
 import com.unifurniture.mobile.ui.adapter.ImageSliderAdapter;
 import com.unifurniture.mobile.ui.adapter.ProductCardAdapter;
 import com.unifurniture.mobile.ui.adapter.RecentlyViewedAdapter;
@@ -46,6 +47,7 @@ public class HomeFragment extends Fragment {
     private SearchHistoryAdapter historyAdapter;
     private RecentlyViewedAdapter recentlyViewedAdapter;
     private RecentlyViewedManager recentlyViewedManager;
+    private CouponHomeAdapter couponHomeAdapter;
 
     @Nullable
     @Override
@@ -72,6 +74,17 @@ public class HomeFragment extends Fragment {
 
         binding.btnViewAllCategories.setOnClickListener(v ->
                 Navigation.findNavController(v).navigate(R.id.categoryFragment));
+
+        // Tint search icon to accent (gold) — same as product list screen
+        int accentColor = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.accent);
+        for (int id : new int[]{
+                androidx.appcompat.R.id.search_button,
+                androidx.appcompat.R.id.search_mag_icon}) {
+            android.widget.ImageView iv = binding.searchView.findViewById(id);
+            if (iv != null) {
+                iv.setColorFilter(accentColor, android.graphics.PorterDuff.Mode.SRC_IN);
+            }
+        }
 
         // Use inner EditText for reliable focus detection
         android.widget.EditText searchInnerEdit = binding.searchView.findViewById(
@@ -124,14 +137,15 @@ public class HomeFragment extends Fragment {
             binding.swipeRefresh.setRefreshing(false);
         });
 
-        // Customer Care / Birthday Popup Mock
+        // Birthday Popup
         if (com.unifurniture.mobile.util.SessionManager.getInstance(requireContext()).isLoggedIn()) {
             new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
                 if (isAdded() && getContext() != null) {
                     new android.app.AlertDialog.Builder(requireContext())
-                        .setTitle("🎉 Chúc mừng sinh nhật!")
-                        .setMessage("UniFurniture tặng bạn voucher giảm giá 50% (Mã: BDAY50) nhân dịp sinh nhật của bạn trong tháng này!")
-                        .setPositiveButton("Tuyệt vời", (dialog, which) -> dialog.dismiss())
+                        .setTitle(getString(R.string.birthday_popup_title))
+                        .setMessage(getString(R.string.birthday_popup_message))
+                        .setPositiveButton(getString(R.string.birthday_popup_btn),
+                                (dialog, which) -> dialog.dismiss())
                         .show();
                 }
             }, 3000);
@@ -162,6 +176,7 @@ public class HomeFragment extends Fragment {
             args.putString("slug", product.slug != null ? product.slug : product.id);
             Navigation.findNavController(requireView()).navigate(R.id.productDetailFragment, args);
         });
+        featuredAdapter.setColumns(0); // carousel mode — don't force MATCH_PARENT width
         binding.rvFeaturedProducts.setLayoutManager(
                 new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
         binding.rvFeaturedProducts.setAdapter(featuredAdapter);
@@ -177,10 +192,17 @@ public class HomeFragment extends Fragment {
                 new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
         binding.rvCategories.setAdapter(categoryAdapter);
 
-        if (binding.btnPromotions != null) {
-            binding.btnPromotions.setOnClickListener(v -> {
-                Navigation.findNavController(requireView()).navigate(R.id.promotionsFragment);
-            });
+        // Promotions coupon carousel
+        couponHomeAdapter = new CouponHomeAdapter();
+        if (binding.rvPromotionCoupons != null) {
+            binding.rvPromotionCoupons.setLayoutManager(
+                    new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+            binding.rvPromotionCoupons.setAdapter(couponHomeAdapter);
+        }
+
+        if (binding.btnViewAllPromotions != null) {
+            binding.btnViewAllPromotions.setOnClickListener(v ->
+                    Navigation.findNavController(requireView()).navigate(R.id.promotionsFragment));
         }
 
         // Collections
@@ -242,6 +264,15 @@ public class HomeFragment extends Fragment {
                 binding.shimmerLayout.stopShimmer();
                 binding.shimmerLayout.setVisibility(View.GONE);
                 binding.layoutContent.setVisibility(View.VISIBLE);
+            }
+        });
+
+        viewModel.getCoupons().observe(getViewLifecycleOwner(), items -> {
+            if (items != null && !items.isEmpty() && couponHomeAdapter != null) {
+                couponHomeAdapter.submitList(items);
+                if (binding.layoutPromotions != null) {
+                    binding.layoutPromotions.setVisibility(View.VISIBLE);
+                }
             }
         });
 
@@ -361,6 +392,9 @@ public class HomeFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         if (autoScrollHandler != null) autoScrollHandler.removeCallbacks(autoScrollRunnable);
+        if (searchHandler != null && searchRunnable != null) {
+            searchHandler.removeCallbacks(searchRunnable);
+        }
         binding = null;
     }
 }

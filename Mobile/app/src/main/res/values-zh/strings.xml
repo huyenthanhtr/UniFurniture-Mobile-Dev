@@ -153,6 +153,8 @@
     <string name="label_discount">折扣</string>
     <string name="btn_use">使用</string>
     <string name="voucher_expiry">有效期至：%1$s</string>
+    <string name="copy_code">复制代码</string>
+    <string name="copied_to_clipboard">已复制</string>
     <string name="voucher_discount_amount">优惠 %1$s</string>
     <string name="voucher_condition">适用于满 %1$s 的订单。</string>
     <string name="voucher_upsell">再购买 %1$s 即可使用</string>
@@ -309,4 +311,23 @@
     <string name="error_register_failed">注册失败，电话或邮箱可能已被注册。</string>
     <string name="register_otp_sent">验证码已发送到您的手机</string>
     <string name="otp_account_created">账户创建成功！您现在可以登录了。</string>
+
+    <!-- Promotions (Home) -->
+    <string name="promotions_title">🔥 热门优惠</string>
+    <string name="coupon_discount_percent">减 %1$d%%</string>
+    <string name="coupon_discount_fixed">减 %1$s</string>
+    <string name="coupon_min_order">满 %1$s 可用</string>
+    <string name="coupon_no_min">无最低消费限制</string>
+
+    <!-- Birthday popup -->
+    <string name="birthday_popup_title">🎉 生日快乐！</string>
+    <string name="birthday_popup_message">UniFurniture 祝您生日快乐，本月为您提供5折优惠券（码：BDAY50）！</string>
+    <string name="birthday_popup_btn">太棒了！</string>
+
+    <!-- Product list -->
+    <string name="load_more">加载更多</string>
+
+    <!-- Voucher stub labels -->
+    <string name="discount_percent_stub">减 %1$d%%</string>
+    <string name="discount_fixed_stub">减 %1$dK</string>
 </resources>

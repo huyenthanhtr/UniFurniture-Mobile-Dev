@@ -19,6 +19,7 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import android.content.res.ColorStateList;
 import com.google.android.material.chip.Chip;
 import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.data.model.ApiListResponse;
@@ -64,14 +65,33 @@ public class ProductListFragment extends Fragment {
         handleArguments();  // populate etSearch BEFORE watcher is attached
         setupSearch();
         observeData();
+        styleChips();
         syncSortChip();
 
         // Sort chips
-        binding.chipNewest.setOnClickListener(v -> viewModel.sortBy("createdAt", "desc"));
-        binding.chipPriceLow.setOnClickListener(v -> viewModel.sortBy("min_price", "asc"));
-        binding.chipPriceHigh.setOnClickListener(v -> viewModel.sortBy("min_price", "desc"));
-        binding.chipBestSelling.setOnClickListener(v -> viewModel.sortBy("sold", "desc"));
+        binding.chipNewest.setOnClickListener(v -> { viewModel.sortBy("createdAt", "desc"); syncSortChip(); });
+        binding.chipPriceLow.setOnClickListener(v -> { viewModel.sortBy("min_price", "asc"); syncSortChip(); });
+        binding.chipPriceHigh.setOnClickListener(v -> { viewModel.sortBy("min_price", "desc"); syncSortChip(); });
+        binding.chipBestSelling.setOnClickListener(v -> { viewModel.sortBy("sold", "desc"); syncSortChip(); });
 
+
+        binding.btnLoadMore.setOnClickListener(v -> viewModel.loadNextPage());
+
+        // Show Load More only when scrolled near the bottom
+        binding.rvProducts.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView rv, int dx, int dy) {
+                GridLayoutManager lm = (GridLayoutManager) rv.getLayoutManager();
+                if (lm == null) return;
+                int lastVisible = lm.findLastVisibleItemPosition();
+                int total = lm.getItemCount();
+                boolean nearEnd = total > 0 && lastVisible >= total - 4;
+                boolean loadingMore = Boolean.TRUE.equals(viewModel.isLoadingMore().getValue());
+                if (nearEnd && viewModel.hasMorePages() && !loadingMore) {
+                    binding.btnLoadMore.setVisibility(View.VISIBLE);
+                }
+            }
+        });
 
         binding.fabFilter.setOnClickListener(v -> showFilterSheet());
         binding.btnToggleLayout.setOnClickListener(v -> toggleLayout());
@@ -120,18 +140,6 @@ public class ProductListFragment extends Fragment {
         });
         binding.rvProducts.setLayoutManager(new GridLayoutManager(requireContext(), 2));
         binding.rvProducts.setAdapter(adapter);
-        binding.rvProducts.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull RecyclerView rv, int dx, int dy) {
-                if (dy <= 0) return;
-                GridLayoutManager lm = (GridLayoutManager) rv.getLayoutManager();
-                if (lm == null) return;
-                int lastVisible = lm.findLastVisibleItemPosition();
-                if (lastVisible >= lm.getItemCount() - 3) {
-                    viewModel.loadNextPage();
-                }
-            }
-        });
     }
 
     private void toggleLayout() {
@@ -310,6 +318,8 @@ public class ProductListFragment extends Fragment {
                 boolean empty = response.items.isEmpty();
                 binding.layoutEmpty.setVisibility(empty ? View.VISIBLE : View.GONE);
                 binding.rvProducts.setVisibility(empty ? View.GONE : View.VISIBLE);
+                // Hide Load More on new results — scroll listener reveals it when user reaches bottom
+                binding.btnLoadMore.setVisibility(View.GONE);
 
                 // Refresh suggestions with API results
                 String query = binding.etSearch.getText().toString().trim();
@@ -336,8 +346,11 @@ public class ProductListFragment extends Fragment {
             }
         });
 
-        viewModel.isLoadingMore().observe(getViewLifecycleOwner(), more ->
-                binding.progressBarLoadMore.setVisibility(more ? View.VISIBLE : View.GONE));
+        viewModel.isLoadingMore().observe(getViewLifecycleOwner(), more -> {
+            binding.progressBarLoadMore.setVisibility(more ? View.VISIBLE : View.GONE);
+            binding.btnLoadMore.setVisibility(
+                    !more && viewModel.hasMorePages() ? View.VISIBLE : View.GONE);
+        });
     }
 
     private void updateFilterBadge() {
@@ -345,12 +358,13 @@ public class ProductListFragment extends Fragment {
         if (viewModel.getCurrentCategoryId() != null) count++;
         if (viewModel.getCurrentMinPrice() != null || viewModel.getCurrentMaxPrice() != null) count++;
         if (viewModel.getCurrentMinRating() > 0) count++;
-        if (count > 0) {
-            binding.tvFilterBadge.setText(String.valueOf(count));
-            binding.tvFilterBadge.setVisibility(View.VISIBLE);
-        } else {
-            binding.tvFilterBadge.setVisibility(View.GONE);
-        }
+        // Thay badge đỏ bằng đổi màu FAB: xanh = không lọc, vàng gold = đang lọc
+        int tint = count > 0
+                ? requireContext().getColor(R.color.accent)
+                : requireContext().getColor(R.color.primary);
+        binding.fabFilter.setBackgroundTintList(
+                android.content.res.ColorStateList.valueOf(tint));
+        binding.tvFilterBadge.setVisibility(View.GONE);
     }
 
     private void updateActiveFilterChips() {
@@ -412,6 +426,30 @@ public class ProductListFragment extends Fragment {
         chip.setCloseIconVisible(true);
         chip.setOnCloseIconClickListener(v -> onRemove.run());
         binding.chipGroupActiveFilters.addView(chip);
+    }
+
+    private void styleChips() {
+        int colorAccent  = requireContext().getColor(R.color.accent);
+        int colorPrimary = requireContext().getColor(R.color.primary);
+        int colorGray200 = requireContext().getColor(R.color.gray_200);
+        int colorWhite   = requireContext().getColor(R.color.white);
+        int colorBlack   = requireContext().getColor(R.color.black);
+
+        ColorStateList bg = new ColorStateList(
+                new int[][]{{android.R.attr.state_checked}, {}},
+                new int[]{colorAccent, colorGray200});
+        ColorStateList text = new ColorStateList(
+                new int[][]{{android.R.attr.state_checked}, {}},
+                new int[]{colorPrimary, colorBlack});
+
+        for (int id : new int[]{R.id.chipNewest, R.id.chipBestSelling, R.id.chipPriceLow, R.id.chipPriceHigh}) {
+            Chip chip = binding.getRoot().findViewById(id);
+            if (chip == null) continue;
+            chip.setChipBackgroundColor(bg);
+            chip.setTextColor(text);
+            chip.setCheckedIconVisible(false);
+            chip.setChipStrokeWidth(0f);
+        }
     }
 
     private void syncSortChip() {

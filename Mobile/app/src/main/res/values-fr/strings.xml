@@ -153,6 +153,8 @@
     <string name="label_discount">DISCOUNT</string>
     <string name="btn_use">Use</string>
     <string name="voucher_expiry">Expiry: %1$s</string>
+    <string name="copy_code">Copy code</string>
+    <string name="copied_to_clipboard">Copied to clipboard</string>
     <string name="voucher_discount_amount">Discount %1$s</string>
     <string name="voucher_condition">Applied for orders from %1$s.</string>
     <string name="voucher_upsell">Buy %1$s more to apply</string>
@@ -322,4 +324,23 @@
     <string name="error_register_failed">Échec de l\'inscription. Le téléphone ou l\'e-mail est peut-être déjà enregistré.</string>
     <string name="register_otp_sent">Le code OTP a été envoyé à votre téléphone</string>
     <string name="otp_account_created">Compte créé ! Vous pouvez maintenant vous connecter.</string>
+
+    <!-- Promotions (Home) -->
+    <string name="promotions_title">🔥 Offres Spéciales</string>
+    <string name="coupon_discount_percent">-%1$d%%</string>
+    <string name="coupon_discount_fixed">-%1$s</string>
+    <string name="coupon_min_order">Commande dès %1$s</string>
+    <string name="coupon_no_min">Sans montant minimum</string>
+
+    <!-- Birthday popup -->
+    <string name="birthday_popup_title">🎉 Joyeux Anniversaire !</string>
+    <string name="birthday_popup_message">UniFurniture vous offre un bon de réduction de 50%% (Code : BDAY50) pour votre anniversaire ce mois-ci !</string>
+    <string name="birthday_popup_btn">Génial !</string>
+
+    <!-- Product list -->
+    <string name="load_more">Charger plus</string>
+
+    <!-- Voucher stub labels -->
+    <string name="discount_percent_stub">-%1$d%%</string>
+    <string name="discount_fixed_stub">-%1$dK</string>
 </resources>

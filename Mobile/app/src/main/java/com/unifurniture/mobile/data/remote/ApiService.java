@@ -194,4 +194,8 @@ public interface ApiService {
             @Query("limit") int limit,
             @Query("status") String status
     );
+
+    // ── Public Coupons (home promotions) ──────────────────────────────────────
+    @GET("coupons")
+    Call<java.util.List<CouponDto>> getCoupons();
 }

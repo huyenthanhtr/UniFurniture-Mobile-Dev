@@ -95,7 +95,7 @@ public class FilterBottomSheetFragment extends BottomSheetDialogFragment {
     private void buildCategoryChips(ArrayList<String> ids, ArrayList<String> names, String selId) {
         if (ids == null || names == null) return;
 
-        Chip allChip = makeChoiceChip("Tất cả", null);
+        Chip allChip = makeChoiceChip(getString(R.string.filter_all), null);
         binding.chipGroupCategories.addView(allChip);
         if (selId == null) binding.chipGroupCategories.check(allChip.getId());
 
@@ -146,10 +146,14 @@ public class FilterBottomSheetFragment extends BottomSheetDialogFragment {
         }
 
         // Read price inputs
-        Double minP = parsePrice(binding.etMinPrice.getText() != null
-                ? binding.etMinPrice.getText().toString() : "");
-        Double maxP = parsePrice(binding.etMaxPrice.getText() != null
-                ? binding.etMaxPrice.getText().toString() : "");
+        String minText = binding.etMinPrice.getText() != null ? binding.etMinPrice.getText().toString() : "";
+        String maxText = binding.etMaxPrice.getText() != null ? binding.etMaxPrice.getText().toString() : "";
+        Double minP = parsePrice(minText);
+        Double maxP = parsePrice(maxText);
+        // Swap if user entered min > max
+        if (minP != null && maxP != null && minP > maxP) {
+            Double tmp = minP; minP = maxP; maxP = tmp;
+        }
 
         // Read rating selection
         int rating = 0;
@@ -169,8 +173,10 @@ public class FilterBottomSheetFragment extends BottomSheetDialogFragment {
 
     private Double parsePrice(String text) {
         if (TextUtils.isEmpty(text.trim())) return null;
-        try { return Double.parseDouble(text.trim()); }
-        catch (NumberFormatException e) { return null; }
+        try {
+            double val = Double.parseDouble(text.trim());
+            return val > 0 ? val : null; // bỏ qua giá trị âm hoặc bằng 0
+        } catch (NumberFormatException e) { return null; }
     }
 
     @Override

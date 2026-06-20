@@ -30,6 +30,26 @@ public class ProductDto {
     public String collectionId;
     @SerializedName("average_rating")
     public Double averageRating;
+    public java.util.List<ColorInfo> colors;
+
+    public static class ColorInfo {
+        public String name;
+        public Double price;
+        @SerializedName("originalPrice")
+        public Double originalPrice;
+        public String imageUrl;
+    }
+
+    /** compare_at_price có thể nằm trên product hoặc trong colors array từ variant */
+    public Double getEffectiveCompareAtPrice() {
+        if (compareAtPrice != null && compareAtPrice > 0) return compareAtPrice;
+        if (colors != null) {
+            for (ColorInfo c : colors) {
+                if (c.originalPrice != null && c.originalPrice > 0) return c.originalPrice;
+            }
+        }
+        return null;
+    }
 
     // Helper: get best image URL
     public String getImageUrl() {

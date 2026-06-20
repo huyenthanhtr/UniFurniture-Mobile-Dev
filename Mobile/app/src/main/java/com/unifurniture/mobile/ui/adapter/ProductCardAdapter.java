@@ -54,10 +54,13 @@ public class ProductCardAdapter extends ListAdapter<ProductDto, ProductCardAdapt
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        ViewGroup.LayoutParams lp = holder.itemView.getLayoutParams();
-        if (lp != null) {
-            lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
-            holder.itemView.setLayoutParams(lp);
+        // columns == 0 means horizontal carousel — keep XML-defined width
+        if (columns > 0) {
+            ViewGroup.LayoutParams lp = holder.itemView.getLayoutParams();
+            if (lp != null) {
+                lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
+                holder.itemView.setLayoutParams(lp);
+            }
         }
         holder.bind(getItem(position), listener);
     }
@@ -71,19 +74,59 @@ public class ProductCardAdapter extends ListAdapter<ProductDto, ProductCardAdapt
         }
 
         void bind(ProductDto product, OnProductClickListener listener) {
-            binding.tvName.setText(product.name);
-            binding.tvPrice.setText(FormatUtil.formatCurrency(product.minPrice));
+            android.content.Context ctx = binding.getRoot().getContext();
 
-            String badge = FormatUtil.discountBadge(product.minPrice, product.compareAtPrice);
+            binding.tvName.setText(product.name != null ? product.name : "");
+
+            Double compareAt = product.getEffectiveCompareAtPrice();
+            String badge = FormatUtil.discountBadge(product.minPrice, compareAt);
             if (badge != null) {
+                // Có sale: badge đỏ + giá sale đỏ + giá gốc gạch ngang
                 binding.tvDiscount.setText(badge);
                 binding.tvDiscount.setVisibility(android.view.View.VISIBLE);
-                binding.tvOriginalPrice.setText(FormatUtil.formatCurrency(product.compareAtPrice));
-                binding.tvOriginalPrice.setPaintFlags(binding.tvOriginalPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
+                binding.tvPrice.setText(FormatUtil.formatCurrency(product.minPrice));
+                binding.tvPrice.setTextColor(ctx.getColor(R.color.discount_red));
+                binding.tvOriginalPrice.setText(FormatUtil.formatCurrency(compareAt));
+                binding.tvOriginalPrice.setPaintFlags(
+                        binding.tvOriginalPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
                 binding.tvOriginalPrice.setVisibility(android.view.View.VISIBLE);
             } else {
+                // Giá thường: không badge, màu primary
                 binding.tvDiscount.setVisibility(android.view.View.GONE);
+                binding.tvPrice.setText(FormatUtil.formatCurrency(product.minPrice));
+                binding.tvPrice.setTextColor(ctx.getColor(R.color.primary));
+                // Clear strike-thru flag khi recycle — tránh hiển thị sai trên item không có sale
+                binding.tvOriginalPrice.setPaintFlags(
+                        binding.tvOriginalPrice.getPaintFlags() & ~android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
                 binding.tvOriginalPrice.setVisibility(android.view.View.GONE);
+            }
+
+            // Rating + sold count
+            boolean hasRating = product.averageRating != null && product.averageRating > 0;
+            boolean hasSold = product.sold != null && product.sold > 0;
+            if (hasRating || hasSold) {
+                binding.layoutRatingRow.setVisibility(android.view.View.VISIBLE);
+                if (hasRating) {
+                    binding.tvRating.setText("★ " + String.format("%.1f", product.averageRating));
+                    binding.tvRating.setVisibility(android.view.View.VISIBLE);
+                } else {
+                    binding.tvRating.setVisibility(android.view.View.GONE);
+                }
+                if (hasSold) {
+                    binding.tvSoldCount.setText(ctx.getString(R.string.sold_count,
+                            FormatUtil.formatSold(product.sold)));
+                    binding.tvSoldCount.setVisibility(android.view.View.VISIBLE);
+                } else {
+                    binding.tvSoldCount.setVisibility(android.view.View.GONE);
+                }
+                // Hide divider (child at index 1) if one side is missing
+                android.view.View divider = binding.layoutRatingRow.getChildAt(1);
+                if (divider != null) {
+                    divider.setVisibility((hasRating && hasSold)
+                            ? android.view.View.VISIBLE : android.view.View.GONE);
+                }
+            } else {
+                binding.layoutRatingRow.setVisibility(android.view.View.GONE);
             }
 
             Glide.with(binding.getRoot())

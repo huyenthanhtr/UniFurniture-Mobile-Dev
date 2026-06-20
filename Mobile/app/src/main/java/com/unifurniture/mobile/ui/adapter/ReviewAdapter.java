@@ -10,6 +10,11 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.MultiTransformation;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.bumptech.glide.request.RequestOptions;
 import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.data.model.ReviewDto;
 import com.unifurniture.mobile.databinding.ItemReviewBinding;
@@ -58,8 +63,8 @@ public class ReviewAdapter extends ListAdapter<ReviewDto, ReviewAdapter.ViewHold
 
         void bind(ReviewDto review, String serverHost) {
             binding.tvCustomerName.setText(review.customerName != null ? review.customerName : itemView.getContext().getString(R.string.guest_customer));
-            binding.tvContent.setText(review.content);
-            binding.ratingBar.setRating(review.rating != null ? review.rating : 5);
+            binding.tvContent.setText(review.content != null ? review.content : "");
+            binding.ratingBar.setRating(review.rating != null ? review.rating : 0);
             binding.tvDate.setText(review.createdAt != null ?
                     review.createdAt.substring(0, Math.min(10, review.createdAt.length())) : "");
 
@@ -69,6 +74,7 @@ public class ReviewAdapter extends ListAdapter<ReviewDto, ReviewAdapter.ViewHold
                 binding.layoutImages.removeAllViews();
                 int sizePx = dpToPx(80);
                 int marginPx = dpToPx(8);
+                int cornerPx = dpToPx(6);
                 for (String url : review.images) {
                     String imageUrl = url.replace("http://localhost:3000", serverHost);
                     ImageView iv = new ImageView(binding.getRoot().getContext());
@@ -80,7 +86,9 @@ public class ReviewAdapter extends ListAdapter<ReviewDto, ReviewAdapter.ViewHold
                             .load(imageUrl)
                             .placeholder(R.drawable.placeholder_product)
                             .error(R.drawable.placeholder_product)
-                            .centerCrop()
+                            .apply(new RequestOptions().transform(
+                                    new MultiTransformation<>(new CenterCrop(), new RoundedCorners(cornerPx))))
+                            .transition(DrawableTransitionOptions.withCrossFade(150))
                             .into(iv);
                     binding.layoutImages.addView(iv);
                 }

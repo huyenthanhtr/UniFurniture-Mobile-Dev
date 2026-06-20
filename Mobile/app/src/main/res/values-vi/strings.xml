@@ -153,6 +153,8 @@
     <string name="label_discount">GIẢM GIÁ</string>
     <string name="btn_use">Sử dụng</string>
     <string name="voucher_expiry">Hạn dùng: %1$s</string>
+    <string name="copy_code">Sao chép mã</string>
+    <string name="copied_to_clipboard">Đã sao chép</string>
     <string name="voucher_discount_amount">Giảm %1$s</string>
     <string name="voucher_condition">Áp dụng cho đơn hàng từ %1$s trở lên.</string>
     <string name="voucher_upsell">Mua thêm %1$s để áp dụng</string>
@@ -306,4 +308,23 @@
     <string name="error_register_failed">Đăng ký thất bại. SĐT hoặc email có thể đã được đăng ký.</string>
     <string name="register_otp_sent">Mã OTP đã được gửi đến số điện thoại của bạn</string>
     <string name="otp_account_created">Tạo tài khoản thành công! Bạn có thể đăng nhập ngay.</string>
+
+    <!-- Promotions (Home) -->
+    <string name="promotions_title">🔥 Khuyến Mãi Hấp Dẫn</string>
+    <string name="coupon_discount_percent">GIẢM %1$d%%</string>
+    <string name="coupon_discount_fixed">GIẢM %1$s</string>
+    <string name="coupon_min_order">Đơn từ %1$s</string>
+    <string name="coupon_no_min">Không giới hạn đơn tối thiểu</string>
+
+    <!-- Birthday popup -->
+    <string name="birthday_popup_title">🎉 Chúc mừng sinh nhật!</string>
+    <string name="birthday_popup_message">UniFurniture tặng bạn voucher giảm giá 50%% (Mã: BDAY50) nhân dịp sinh nhật của bạn trong tháng này!</string>
+    <string name="birthday_popup_btn">Tuyệt vời</string>
+
+    <!-- Product list -->
+    <string name="load_more">Xem thêm</string>
+
+    <!-- Voucher stub labels -->
+    <string name="discount_percent_stub">GIẢM %1$d%%</string>
+    <string name="discount_fixed_stub">GIẢM %1$dK</string>
 </resources>

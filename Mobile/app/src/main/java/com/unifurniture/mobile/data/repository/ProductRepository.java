@@ -199,6 +199,30 @@ public class ProductRepository {
         return result;
     }
 
+    public LiveData<List<CouponDto>> getCoupons() {
+        MutableLiveData<List<CouponDto>> result = new MutableLiveData<>();
+        // Server returns plain array; filter active coupons client-side
+        apiService.getCoupons().enqueue(new Callback<List<CouponDto>>() {
+            @Override
+            public void onResponse(Call<List<CouponDto>> call, Response<List<CouponDto>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<CouponDto> active = new java.util.ArrayList<>();
+                    for (CouponDto c : response.body()) {
+                        if ("active".equals(c.status)) active.add(c);
+                    }
+                    result.setValue(active.isEmpty() ? null : active);
+                } else {
+                    result.setValue(null);
+                }
+            }
+            @Override
+            public void onFailure(Call<List<CouponDto>> call, Throwable t) {
+                result.setValue(null);
+            }
+        });
+        return result;
+    }
+
     public LiveData<Boolean> removeFromWishlist(String wishlistItemId) {
         MutableLiveData<Boolean> result = new MutableLiveData<>();
         apiService.removeFromWishlist(wishlistItemId).enqueue(new Callback<Void>() {
