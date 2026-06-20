@@ -11,4 +11,12 @@ public class ApiListResponse<T> {
     public int total;
     public int totalPages;
     public List<T> items;
+
+    public List<T> getData() {
+        return items;
+    }
+
+    public void setData(List<T> data) {
+        this.items = data;
+    }
 }

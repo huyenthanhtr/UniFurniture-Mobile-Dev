@@ -138,6 +138,7 @@ public class ProductDetailFragment extends Fragment {
                 }
             }
             viewModel.addToCart(selectedVariantId, quantity);
+            com.unifurniture.mobile.util.SoundManager.playSound(requireContext(), com.unifurniture.mobile.util.SoundManager.SOUND_SUCCESS);
         });
         binding.btnBack.setOnClickListener(v ->
                 Navigation.findNavController(requireView()).navigateUp());

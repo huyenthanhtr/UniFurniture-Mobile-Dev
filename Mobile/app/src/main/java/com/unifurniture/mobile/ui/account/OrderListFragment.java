@@ -16,9 +16,11 @@ import android.app.Application;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.navigation.Navigation;
 import com.unifurniture.mobile.UniFurnitureApp;
 import com.unifurniture.mobile.data.model.ApiListResponse;
 import com.unifurniture.mobile.data.model.OrderDto;
+import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.data.repository.OrderRepository;
 
 public class OrderListFragment extends Fragment {
@@ -40,11 +42,15 @@ public class OrderListFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         viewModel = new ViewModelProvider(this).get(OrderListViewModel.class);
 
-        adapter = new OrderAdapter();
+        adapter = new OrderAdapter(order -> {
+            Bundle bundle = new Bundle();
+            bundle.putString("order_id", order.getId());
+            Navigation.findNavController(requireView()).navigate(R.id.orderDetailFragment, bundle);
+        });
         binding.rvOrders.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvOrders.setAdapter(adapter);
 
-        binding.btnBack.setOnClickListener(v -> requireActivity().onBackPressed());
+        binding.btnBack.setOnClickListener(v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
         viewModel.getOrders().observe(getViewLifecycleOwner(), response -> {
             boolean isEmpty = response == null || response.items == null || response.items.isEmpty();

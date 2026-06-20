@@ -88,7 +88,7 @@ public class CheckoutFragment extends Fragment {
         setupLabels();
         detectZone();
 
-        binding.btnBack.setOnClickListener(v -> requireActivity().onBackPressed());
+        binding.btnBack.setOnClickListener(v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
         binding.btnPlaceOrder.setOnClickListener(v -> placeOrder());
 

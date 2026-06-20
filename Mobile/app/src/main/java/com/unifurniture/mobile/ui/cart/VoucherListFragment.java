@@ -40,7 +40,7 @@ public class VoucherListFragment extends Fragment {
             cartSubtotal = getArguments().getDouble("subtotal", 0);
         }
 
-        binding.btnBack.setOnClickListener(v -> requireActivity().onBackPressed());
+        binding.btnBack.setOnClickListener(v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
         setupRecyclerView();
         loadVouchers();
@@ -51,7 +51,7 @@ public class VoucherListFragment extends Fragment {
             VoucherManager.getInstance(requireContext()).setSelectedVoucherCode(voucher.code);
             if (cartSubtotal >= voucher.minOrderValue) {
                 Toast.makeText(requireContext(), getString(R.string.toast_voucher_applied, voucher.code), Toast.LENGTH_SHORT).show();
-                requireActivity().onBackPressed();
+                requireActivity().getOnBackPressedDispatcher().onBackPressed();
             } else {
                 Toast.makeText(requireContext(), R.string.toast_voucher_saved_upsell, Toast.LENGTH_LONG).show();
                 

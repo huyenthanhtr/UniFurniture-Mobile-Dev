@@ -1,6 +1,8 @@
 package com.unifurniture.mobile.data.model;
 
 import com.google.gson.annotations.SerializedName;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProductDto {
     @SerializedName("_id")
@@ -44,6 +46,19 @@ public class ProductDto {
         return url;
     }
 
+    public String getTitle() {
+        return name;
+    }
+
+    public List<ImageDto> getImages() {
+        List<ImageDto> images = new ArrayList<>();
+        String url = getImageUrl();
+        if (url != null && !url.isEmpty()) {
+            images.add(new ImageDto(url));
+        }
+        return images;
+    }
+
     // Helper: discount badge text
     public String getDiscountBadge() {
         if (minPrice != null && compareAtPrice != null && compareAtPrice > minPrice) {
@@ -51,5 +66,17 @@ public class ProductDto {
             return "-" + pct + "%";
         }
         return null;
+    }
+
+    public static class ImageDto {
+        private final String url;
+
+        public ImageDto(String url) {
+            this.url = url;
+        }
+
+        public String getUrl() {
+            return url;
+        }
     }
 }

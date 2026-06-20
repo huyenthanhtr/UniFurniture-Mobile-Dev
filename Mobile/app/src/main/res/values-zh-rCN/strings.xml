@@ -267,4 +267,27 @@
     <string name="applied_voucher">已应用：%1$s</string>
     <string name="order_reference_label">订单查询码</string>
     <string name="qr_instruction">使用银行应用扫描二维码支付</string>
+    <!-- Profile & Account Flow -->
+    <string name="edit_profile">编辑个人资料</string>
+    <string name="my_reviews">我的评价</string>
+    <string name="email">电子邮箱</string>
+    <string name="gender">性别</string>
+    <string name="birthday">生日</string>
+    <string name="save_changes">保存更改</string>
+    <string name="male">男</string>
+    <string name="female">女</string>
+    <string name="other">其他</string>
+    <string name="order_tracking">订单跟踪</string>
+    <string name="order_details">订单详情</string>
+    <string name="profile_updated">个人资料更新成功</string>
+    <string name="order_number_format">订单 %1$s</string>
+    <string name="order_date_format">日期：%1$s</string>
+    <string name="quantity_format">x%1$d</string>
+    <string name="status_cancelled">已取消</string>
+    <string name="account_about_title">关于 UniFurniture</string>
+    <string name="account_policy_title">隐私政策</string>
+    <string name="account_community_title">社区</string>
+    <string name="tracking_code_required">请输入运单号</string>
+    <string name="tracking_not_found">未找到该编码对应的订单</string>
+    <string name="tracking_lookup_error">无法查询该订单</string>
 </resources>

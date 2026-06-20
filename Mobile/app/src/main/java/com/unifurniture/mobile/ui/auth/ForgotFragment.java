@@ -74,7 +74,7 @@ public class ForgotFragment extends Fragment {
             viewModel.resetPassword(phoneNum, otpCode, newPassword);
         });
 
-        binding.tvBackToLogin.setOnClickListener(v -> requireActivity().onBackPressed());
+        binding.tvBackToLogin.setOnClickListener(v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
         // Observers
         viewModel.isLoading().observe(getViewLifecycleOwner(), loading -> {
@@ -99,7 +99,7 @@ public class ForgotFragment extends Fragment {
                 } else if (currentStep.equals("newpass")) {
                     Toast.makeText(requireContext(), result.message != null ? result.message : getString(R.string.str_reset_password_success), Toast.LENGTH_LONG).show();
                     // Go back to login screen
-                    requireActivity().onBackPressed();
+                    requireActivity().getOnBackPressedDispatcher().onBackPressed();
                 }
             }
         });

@@ -54,5 +54,9 @@ public class ApiClient {
         return INSTANCE;
     }
 
+    public static ApiService getClient() {
+        return getInstance();
+    }
+
     private ApiClient() {}
 }

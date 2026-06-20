@@ -264,4 +264,27 @@
     <string name="applied_voucher">Đã áp dụng: %1$s</string>
     <string name="order_reference_label">MÃ THAM CHIẾU ĐƠN HÀNG</string>
     <string name="qr_instruction">Sử dụng ứng dụng ngân hàng quét mã QR để thanh toán</string>
+    <!-- Profile & Account Flow -->
+    <string name="edit_profile">Chỉnh sửa hồ sơ</string>
+    <string name="my_reviews">Đánh giá của tôi</string>
+    <string name="email">Email</string>
+    <string name="gender">Giới tính</string>
+    <string name="birthday">Ngày sinh</string>
+    <string name="save_changes">Lưu thay đổi</string>
+    <string name="male">Nam</string>
+    <string name="female">Nữ</string>
+    <string name="other">Khác</string>
+    <string name="order_tracking">Theo dõi đơn hàng</string>
+    <string name="order_details">Chi tiết đơn hàng</string>
+    <string name="profile_updated">Cập nhật hồ sơ thành công</string>
+    <string name="order_number_format">Đơn hàng %1$s</string>
+    <string name="order_date_format">Ngày: %1$s</string>
+    <string name="quantity_format">x%1$d</string>
+    <string name="status_cancelled">Đã hủy</string>
+    <string name="account_about_title">Về UniFurniture</string>
+    <string name="account_policy_title">Chính sách bảo mật</string>
+    <string name="account_community_title">Cộng đồng</string>
+    <string name="tracking_code_required">Vui lòng nhập mã vận đơn</string>
+    <string name="tracking_not_found">Không tìm thấy đơn hàng với mã này</string>
+    <string name="tracking_lookup_error">Lỗi khi tra cứu đơn hàng</string>
 </resources>

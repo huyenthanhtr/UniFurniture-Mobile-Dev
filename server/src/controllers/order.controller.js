@@ -643,6 +643,8 @@ async function getOrders(req, res, next) {
       startDate,
       endDate,
       q,
+      customer_id: customerId,
+      tracking_code: trackingCode,
       accountId,
       sortBy = "ordered_at",
       order = "desc",
@@ -665,12 +667,18 @@ async function getOrders(req, res, next) {
       andConditions.push({ account_id: new mongoose.Types.ObjectId(String(accountId)) });
     }
 
-    if (q) {
-      const kw = String(q).trim();
+    if (customerId && mongoose.Types.ObjectId.isValid(String(customerId))) {
+      andConditions.push({ customer_id: new mongoose.Types.ObjectId(String(customerId)) });
+    }
+
+    const searchText = String(trackingCode || q || "").trim();
+    if (searchText) {
+      const kw = searchText;
       if (kw) {
         andConditions.push({
           $or: [
             { order_code: { $regex: kw, $options: "i" } },
+            { tracking_code: { $regex: kw, $options: "i" } },
             { shipping_name: { $regex: kw, $options: "i" } },
             { shipping_phone: { $regex: kw, $options: "i" } },
             { shipping_email: { $regex: kw, $options: "i" } },
