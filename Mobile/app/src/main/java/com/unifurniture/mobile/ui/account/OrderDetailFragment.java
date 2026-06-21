@@ -11,23 +11,20 @@ import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.data.model.OrderDetailDto;
-import com.unifurniture.mobile.data.model.OrderDetailResponse;
 import com.unifurniture.mobile.data.model.OrderDto;
-import com.unifurniture.mobile.data.remote.ApiClient;
-import com.unifurniture.mobile.data.remote.ApiService;
 import com.unifurniture.mobile.databinding.FragmentOrderDetailBinding;
 import com.unifurniture.mobile.databinding.ItemOrderDetailBinding;
 import com.unifurniture.mobile.util.FormatUtil;
+import com.unifurniture.mobile.util.NavViewModelProvider;
+import com.unifurniture.mobile.util.ScrollStateHelper;
 import java.util.List;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class OrderDetailFragment extends Fragment {
 
     private FragmentOrderDetailBinding binding;
-    private ApiService apiService;
+    private OrderDetailViewModel viewModel;
     private String orderId;
+    private final ScrollStateHelper scrollState = new ScrollStateHelper("order_detail");
 
     @Nullable
     @Override
@@ -38,48 +35,37 @@ public class OrderDetailFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        apiService = ApiClient.getInstance();
-        
+        viewModel = NavViewModelProvider.get(this, R.id.orderDetailFragment, OrderDetailViewModel.class);
+        scrollState.read(savedInstanceState);
+
         binding.toolbar.setNavigationOnClickListener(v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
         if (getArguments() != null) {
             orderId = getArguments().getString("order_id");
         }
 
-        if (orderId != null) {
-            loadOrderDetails();
-        } else {
+        if (orderId == null) {
             Toast.makeText(requireContext(), R.string.error_unknown, Toast.LENGTH_SHORT).show();
             requireActivity().getOnBackPressedDispatcher().onBackPressed();
+            return;
         }
-    }
 
-    private void loadOrderDetails() {
-        binding.progressBar.setVisibility(View.VISIBLE);
-        binding.contentScrollView.setVisibility(View.GONE);
+        viewModel.getOrderDetail().observe(getViewLifecycleOwner(), state -> {
+            if (state == null) return;
+            binding.contentScrollView.setVisibility(View.VISIBLE);
+            displayOrderInfo(state.order, state.items);
+            scrollState.restore(binding.contentScrollView);
+        });
 
-        apiService.getOrderById(orderId).enqueue(new Callback<OrderDetailResponse>() {
-            @Override
-            public void onResponse(Call<OrderDetailResponse> call, Response<OrderDetailResponse> response) {
-                if (isAdded()) {
-                    binding.progressBar.setVisibility(View.GONE);
-                    if (response.isSuccessful() && response.body() != null && response.body().getOrder() != null) {
-                        binding.contentScrollView.setVisibility(View.VISIBLE);
-                        displayOrderInfo(response.body().getOrder(), response.body().getItems());
-                    } else {
-                        Toast.makeText(requireContext(), R.string.error_unknown, Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<OrderDetailResponse> call, Throwable t) {
-                if (isAdded()) {
-                    binding.progressBar.setVisibility(View.GONE);
-                    Toast.makeText(requireContext(), getString(R.string.error_network, t.getMessage()), Toast.LENGTH_SHORT).show();
-                }
+        viewModel.isLoading().observe(getViewLifecycleOwner(), loading -> {
+            boolean initialLoad = Boolean.TRUE.equals(loading) && viewModel.getOrderDetail().getValue() == null;
+            binding.progressBar.setVisibility(initialLoad ? View.VISIBLE : View.GONE);
+            if (initialLoad) {
+                binding.contentScrollView.setVisibility(View.GONE);
             }
         });
+
+        viewModel.loadOrderIfNeeded(orderId);
     }
 
     private void displayOrderInfo(OrderDto order, List<OrderDetailDto> responseItems) {
@@ -231,6 +217,20 @@ public class OrderDetailFragment extends Fragment {
                 binding.tvStep1.setText(R.string.status_cancelled);
                 binding.ivStep1.setImageResource(android.R.drawable.ic_delete);
                 break;
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (binding != null) scrollState.saveScroll(binding.contentScrollView);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (binding != null) {
+            scrollState.save(outState, binding.contentScrollView);
         }
     }
 

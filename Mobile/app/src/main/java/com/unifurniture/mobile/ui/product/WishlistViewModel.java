@@ -24,6 +24,13 @@ public class WishlistViewModel extends AndroidViewModel {
         repository = new ProductRepository(UniFurnitureApp.getInstance().getApiService());
     }
 
+    public void loadWishlistIfNeeded() {
+        if (wishlist.getValue() != null && !Boolean.TRUE.equals(loading.getValue())) {
+            return;
+        }
+        loadWishlist();
+    }
+
     public void loadWishlist() {
         SessionManager session = SessionManager.getInstance(getApplication());
         String customerId = session.getCustomerId();

@@ -20,10 +20,12 @@ public class WishlistAdapter extends ListAdapter<WishlistItemDto, WishlistAdapte
         void onRemove(WishlistItemDto item);
     }
 
+    private final String serverHost;
     private final OnWishlistClickListener listener;
 
-    public WishlistAdapter(OnWishlistClickListener listener) {
+    public WishlistAdapter(String serverHost, OnWishlistClickListener listener) {
         super(DIFF_CALLBACK);
+        this.serverHost = serverHost;
         this.listener = listener;
     }
 
@@ -49,7 +51,7 @@ public class WishlistAdapter extends ListAdapter<WishlistItemDto, WishlistAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.bind(getItem(position), listener);
+        holder.bind(getItem(position), serverHost, listener);
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -60,15 +62,18 @@ public class WishlistAdapter extends ListAdapter<WishlistItemDto, WishlistAdapte
             this.binding = binding;
         }
 
-        void bind(WishlistItemDto item, OnWishlistClickListener listener) {
+        void bind(WishlistItemDto item, String serverHost, OnWishlistClickListener listener) {
             ProductDto product = item.getProduct();
             if (product != null) {
                 binding.tvName.setText(product.name != null ? product.name : "");
                 binding.tvPrice.setText(FormatUtil.formatCurrency(product.minPrice));
                 
+                String imageUrl = com.unifurniture.mobile.util.CategoryImageHelper.resolveProductUrl(product, serverHost);
+
                 Glide.with(binding.getRoot())
-                        .load(product.getImageUrl())
+                        .load(imageUrl)
                         .placeholder(R.drawable.placeholder_product)
+                        .error(R.drawable.placeholder_product)
                         .centerCrop()
                         .into(binding.ivProduct);
                 

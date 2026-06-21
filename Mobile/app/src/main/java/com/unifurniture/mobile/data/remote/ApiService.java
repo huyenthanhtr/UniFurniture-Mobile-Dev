@@ -37,6 +37,7 @@ public interface ApiService {
             @Query("collection") String collection,
             @Query("minPrice") Double minPrice,
             @Query("maxPrice") Double maxPrice,
+            @Query("minRating") Integer minRating,
             @Query("fields") String fields
     );
 

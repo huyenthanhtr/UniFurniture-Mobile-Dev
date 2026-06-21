@@ -7,10 +7,11 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.unifurniture.mobile.databinding.FragmentOrderListBinding;
 import com.unifurniture.mobile.ui.adapter.OrderAdapter;
+import com.unifurniture.mobile.util.NavViewModelProvider;
+import com.unifurniture.mobile.util.RecyclerViewStateHelper;
 import com.unifurniture.mobile.util.SessionManager;
 import android.app.Application;
 import androidx.lifecycle.AndroidViewModel;
@@ -22,12 +23,14 @@ import com.unifurniture.mobile.data.model.ApiListResponse;
 import com.unifurniture.mobile.data.model.OrderDto;
 import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.data.repository.OrderRepository;
+import com.unifurniture.mobile.util.LiveDataUtil;
 
 public class OrderListFragment extends Fragment {
 
     private FragmentOrderListBinding binding;
     private OrderListViewModel viewModel;
     private OrderAdapter adapter;
+    private final RecyclerViewStateHelper rvState = new RecyclerViewStateHelper("orders");
 
     @Nullable
     @Override
@@ -40,7 +43,8 @@ public class OrderListFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        viewModel = new ViewModelProvider(this).get(OrderListViewModel.class);
+        viewModel = NavViewModelProvider.get(this, R.id.orderListFragment, OrderListViewModel.class);
+        viewModel.loadOrdersIfNeeded();
 
         adapter = new OrderAdapter(order -> {
             Bundle bundle = new Bundle();
@@ -49,17 +53,24 @@ public class OrderListFragment extends Fragment {
         });
         binding.rvOrders.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvOrders.setAdapter(adapter);
+        rvState.bind(binding.rvOrders, savedInstanceState);
 
         binding.btnBack.setOnClickListener(v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
         viewModel.getOrders().observe(getViewLifecycleOwner(), response -> {
             boolean isEmpty = response == null || response.items == null || response.items.isEmpty();
             binding.tvEmpty.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
-            if (!isEmpty) adapter.submitList(response.items);
+            if (!isEmpty) adapter.submitList(response.items, rvState.afterSubmitCallback());
         });
 
         viewModel.isLoading().observe(getViewLifecycleOwner(), loading ->
                 binding.progressBar.setVisibility(loading ? View.VISIBLE : View.GONE));
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        rvState.save(outState);
     }
 
     @Override
@@ -73,18 +84,23 @@ public class OrderListFragment extends Fragment {
         private final OrderRepository repository;
         private final MutableLiveData<ApiListResponse<OrderDto>> orders = new MutableLiveData<>();
         private final MutableLiveData<Boolean> loading = new MutableLiveData<>(false);
+        private boolean hasLoaded = false;
 
         public OrderListViewModel(@NonNull Application application) {
             super(application);
             repository = new OrderRepository(UniFurnitureApp.getInstance().getApiService());
-            String customerId = SessionManager.getInstance(application).getCustomerId();
-            if (customerId != null) {
-                loading.setValue(true);
-                repository.getOrders(customerId).observeForever(r -> {
-                    orders.setValue(r);
-                    loading.setValue(false);
-                });
-            }
+        }
+
+        public void loadOrdersIfNeeded() {
+            if (hasLoaded) return;
+            hasLoaded = true;
+            String customerId = SessionManager.getInstance(getApplication()).getCustomerId();
+            if (customerId == null) return;
+            loading.setValue(true);
+            LiveDataUtil.observeOnce(repository.getOrders(customerId), r -> {
+                orders.setValue(r);
+                loading.setValue(false);
+            });
         }
 
         public LiveData<ApiListResponse<OrderDto>> getOrders() { return orders; }

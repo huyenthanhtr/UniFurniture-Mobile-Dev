@@ -369,4 +369,19 @@
     <string name="voucher_expiry_date">Expire le: %s</string>
     <string name="btn_use_now">Utiliser</string>
     <string name="promotions_title_alt">🔥 Offres Spéciales</string>
+
+    <!-- Home — brand section -->
+    <string name="home_about_tagline">Élevez votre espace de vie avec des meubles élégants et modernes. Nous proposons des solutions de design optimales alliant esthétique et fonctionnalité.</string>
+    <string name="home_value_quality">Qualité</string>
+    <string name="home_value_elegant">Élégant</string>
+    <string name="home_value_dedicated">Dévoué</string>
+
+    <!-- Category -->
+    <string name="empty_categories">Aucune catégorie disponible</string>
+
+    <!-- Account -->
+    <string name="change_password">Changer le mot de passe</string>
+
+    <!-- Rating -->
+    <string name="rating_display">★ %s</string>
 </resources>

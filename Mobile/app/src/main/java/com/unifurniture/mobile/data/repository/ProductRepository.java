@@ -19,9 +19,10 @@ public class ProductRepository {
 
     public LiveData<ApiListResponse<ProductDto>> getProducts(
             int page, int limit, String search, String categories, String collection,
-            String sortBy, String order, Double minPrice, Double maxPrice) {
+            String sortBy, String order, Double minPrice, Double maxPrice, Integer minRating) {
         MutableLiveData<ApiListResponse<ProductDto>> result = new MutableLiveData<>();
-        apiService.getProducts(page, limit, "active", sortBy, order, search, categories, collection, minPrice, maxPrice, null)
+        Integer ratingParam = (minRating != null && minRating > 0) ? minRating : null;
+        apiService.getProducts(page, limit, "active", sortBy, order, search, categories, collection, minPrice, maxPrice, ratingParam, null)
                 .enqueue(new Callback<ApiListResponse<ProductDto>>() {
                     @Override
                     public void onResponse(Call<ApiListResponse<ProductDto>> call,

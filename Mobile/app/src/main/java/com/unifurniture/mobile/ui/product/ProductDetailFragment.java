@@ -14,7 +14,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.core.text.HtmlCompat;
@@ -32,7 +31,9 @@ import com.unifurniture.mobile.ui.adapter.ImageSliderAdapter;
 import com.unifurniture.mobile.ui.adapter.ProductCardAdapter;
 import com.unifurniture.mobile.ui.adapter.ReviewAdapter;
 import com.unifurniture.mobile.util.FormatUtil;
+import com.unifurniture.mobile.util.NavViewModelProvider;
 import com.unifurniture.mobile.util.RecentlyViewedManager;
+import com.unifurniture.mobile.util.ScrollStateHelper;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -52,6 +53,7 @@ public class ProductDetailFragment extends Fragment {
     private final Map<String, Integer> variantStock = new HashMap<>();
     private final List<ReviewDto> allReviews = new ArrayList<>();
     private final Handler cartRestoreHandler = new Handler(Looper.getMainLooper());
+    private final ScrollStateHelper scrollState = new ScrollStateHelper("product_detail");
 
     @Nullable
     @Override
@@ -64,7 +66,8 @@ public class ProductDetailFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        viewModel = new ViewModelProvider(this).get(ProductDetailViewModel.class);
+        viewModel = NavViewModelProvider.get(this, R.id.productDetailFragment, ProductDetailViewModel.class);
+        scrollState.read(savedInstanceState);
 
         String slug = getArguments() != null ? getArguments().getString("slug") : null;
         if (slug == null) {
@@ -77,8 +80,9 @@ public class ProductDetailFragment extends Fragment {
         setupReviews();
         setupRecommendations();
         setupReviewSort();
-        viewModel.loadProduct(slug);
+        viewModel.loadProductIfNeeded(slug);
         observeData();
+        scrollState.restore(binding.nestedScrollView);
 
         binding.btnDecrease.setOnClickListener(v -> {
             if (quantity > 1) {
@@ -222,7 +226,8 @@ public class ProductDetailFragment extends Fragment {
     }
 
     private void setupRecommendations() {
-        recommendationAdapter = new ProductCardAdapter(product -> {
+        String serverHost = BuildConfig.API_BASE_URL.replace("/api/", "");
+        recommendationAdapter = new ProductCardAdapter(serverHost, product -> {
             Bundle args = new Bundle();
             args.putString("slug", product.slug != null ? product.slug : product.id);
             Navigation.findNavController(requireView()).navigate(R.id.productDetailFragment, args);
@@ -311,7 +316,8 @@ public class ProductDetailFragment extends Fragment {
             binding.tvSoldCount.setText(getString(R.string.sold_count, FormatUtil.formatSold(soldCount)));
             binding.tvSoldCount.setVisibility(View.VISIBLE);
             // Save to recently viewed + use thumbnail for slider fallback
-            String thumb = product.getImageUrl();
+            String serverHost = com.unifurniture.mobile.BuildConfig.API_BASE_URL.replace("/api/", "");
+            String thumb = com.unifurniture.mobile.util.CategoryImageHelper.resolveProductUrl(product, serverHost);
             String slugKey = product.slug != null ? product.slug : product.id;
             recentlyViewedManager.add(new RecentlyViewedManager.Item(
                     product.id, slugKey, product.name, thumb));
@@ -324,15 +330,19 @@ public class ProductDetailFragment extends Fragment {
         });
 
         viewModel.getImages().observe(getViewLifecycleOwner(), response -> {
+            String serverHost = com.unifurniture.mobile.BuildConfig.API_BASE_URL.replace("/api/", "");
             List<String> urls = new ArrayList<>();
             if (response != null && response.items != null) {
                 for (var img : response.items) {
-                    if (img.imageUrl != null && !img.imageUrl.isEmpty()) urls.add(img.imageUrl);
+                    if (img.imageUrl != null && !img.imageUrl.isEmpty()) {
+                        String url = img.imageUrl.replace("http://localhost:3000", serverHost);
+                        urls.add(url);
+                    }
                 }
             }
             if (urls.isEmpty()) {
                 ProductDto p = viewModel.getProduct().getValue();
-                String thumb = p != null ? p.getImageUrl() : null;
+                String thumb = com.unifurniture.mobile.util.CategoryImageHelper.resolveProductUrl(p, serverHost);
                 if (thumb != null && !thumb.isEmpty()) urls.add(thumb);
             }
             sliderAdapter.updateImages(urls);
@@ -627,6 +637,21 @@ public class ProductDetailFragment extends Fragment {
             chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.black));
         }
     }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (binding != null) scrollState.saveScroll(binding.nestedScrollView);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (binding != null) {
+            scrollState.save(outState, binding.nestedScrollView);
+        }
+    }
+
 
     @Override
     public void onDestroyView() {

@@ -369,4 +369,19 @@
     <string name="voucher_expiry_date">Expiry: %s</string>
     <string name="btn_use_now">Apply</string>
     <string name="promotions_title_alt">🔥 Hot Promotions</string>
+
+    <!-- Home — brand section -->
+    <string name="home_about_tagline">Elevate your living space with elegant and modern furniture. We offer optimal design solutions that harmoniously blend aesthetics and functionality.</string>
+    <string name="home_value_quality">Quality</string>
+    <string name="home_value_elegant">Elegant</string>
+    <string name="home_value_dedicated">Dedicated</string>
+
+    <!-- Category -->
+    <string name="empty_categories">No categories found</string>
+
+    <!-- Account -->
+    <string name="change_password">Change password</string>
+
+    <!-- Rating -->
+    <string name="rating_display">★ %s</string>
 </resources>

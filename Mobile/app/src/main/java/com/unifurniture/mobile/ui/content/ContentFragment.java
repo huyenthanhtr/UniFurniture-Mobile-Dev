@@ -13,10 +13,13 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.unifurniture.mobile.databinding.FragmentContentBinding;
+import com.unifurniture.mobile.util.ScrollStateHelper;
 
 public class ContentFragment extends Fragment {
 
     private FragmentContentBinding binding;
+    private final ScrollStateHelper scrollState = new ScrollStateHelper("content");
+    private boolean contentLoaded;
 
     @Nullable
     @Override
@@ -27,6 +30,8 @@ public class ContentFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        scrollState.read(savedInstanceState);
+
         String title = getArguments() != null ? getArguments().getString("title", "") : "";
         String url = getArguments() != null ? getArguments().getString("url", "") : "";
 
@@ -43,7 +48,22 @@ public class ContentFragment extends Fragment {
                 }
             }
         });
-        
+
+        if (savedInstanceState != null) {
+            binding.webView.restoreState(savedInstanceState);
+            contentLoaded = true;
+            binding.progressBar.setVisibility(View.GONE);
+        } else {
+            loadContent(title, url);
+        }
+
+        scrollState.restore(binding.webView);
+    }
+
+    private void loadContent(String title, String url) {
+        if (contentLoaded || binding == null) return;
+        contentLoaded = true;
+
         String localHtml = buildLocalContent(title, url);
         if (!localHtml.isEmpty()) {
             binding.webView.loadDataWithBaseURL(null, localHtml, "text/html", "UTF-8", null);
@@ -97,8 +117,18 @@ public class ContentFragment extends Fragment {
     }
 
     @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (binding != null) {
+            binding.webView.saveState(outState);
+            scrollState.save(outState, binding.webView);
+        }
+    }
+
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+        contentLoaded = false;
     }
 }

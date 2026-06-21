@@ -20,6 +20,13 @@ public class CartViewModel extends AndroidViewModel {
     public CartViewModel(@NonNull Application application) {
         super(application);
         repository = new CartRepository(UniFurnitureApp.getInstance().getApiService());
+        loadCartIfNeeded();
+    }
+
+    public void loadCartIfNeeded() {
+        if (cart.getValue() != null) {
+            return;
+        }
         loadCart();
     }
 
@@ -32,8 +39,11 @@ public class CartViewModel extends AndroidViewModel {
             cart.setValue(null);
             return;
         }
-        
-        loading.setValue(true);
+
+        boolean showLoading = cart.getValue() == null;
+        if (showLoading) {
+            loading.setValue(true);
+        }
         repository.getActiveCart(customerId, cartId).observeForever(c -> {
             if (c != null && c.id != null) {
                 session.saveCartId(c.id);

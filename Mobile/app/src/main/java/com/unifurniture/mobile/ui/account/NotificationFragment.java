@@ -17,14 +17,18 @@ import com.unifurniture.mobile.data.model.NotificationDto;
 import com.unifurniture.mobile.databinding.FragmentNotificationBinding;
 import com.unifurniture.mobile.ui.adapter.NotificationAdapter;
 import com.unifurniture.mobile.util.NotificationManager;
+import com.unifurniture.mobile.util.RecyclerViewStateHelper;
 import java.util.ArrayList;
 import java.util.List;
 
 public class NotificationFragment extends Fragment {
 
+    private static final String KEY_FILTER = "notification_filter";
+
     private FragmentNotificationBinding binding;
     private NotificationAdapter adapter;
     private String currentFilter = "all"; // "all", "order", "account"
+    private final RecyclerViewStateHelper rvState = new RecyclerViewStateHelper("notifications");
 
     @Nullable
     @Override
@@ -38,6 +42,10 @@ public class NotificationFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        if (savedInstanceState != null) {
+            currentFilter = savedInstanceState.getString(KEY_FILTER, "all");
+        }
 
         // Setup Back press
         binding.btnBack.setOnClickListener(v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
@@ -68,6 +76,7 @@ public class NotificationFragment extends Fragment {
 
         binding.rvNotifications.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvNotifications.setAdapter(adapter);
+        rvState.bind(binding.rvNotifications, savedInstanceState);
 
         // Setup Mark All As Read
         binding.btnMarkAllRead.setOnClickListener(v -> {
@@ -128,7 +137,7 @@ public class NotificationFragment extends Fragment {
         }
 
         updateSummary(unreadList);
-        adapter.submitList(filteredList);
+        adapter.submitList(filteredList, rvState.afterSubmitCallback());
 
         if (filteredList.isEmpty()) {
             binding.rvNotifications.setVisibility(View.GONE);
@@ -205,6 +214,13 @@ public class NotificationFragment extends Fragment {
             binding.tabOther.setBackgroundResource(R.drawable.bg_tab_pill_selected);
             binding.tabOther.setTextColor(activeTextColor);
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(KEY_FILTER, currentFilter);
+        rvState.save(outState);
     }
 
     @Override

@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.unifurniture.mobile.R;
@@ -25,7 +24,9 @@ import com.unifurniture.mobile.ui.adapter.ProductCardAdapter;
 import com.unifurniture.mobile.ui.adapter.RecentlyViewedAdapter;
 import com.unifurniture.mobile.ui.adapter.SearchHistoryAdapter;
 import com.unifurniture.mobile.ui.adapter.SearchSuggestionAdapter;
+import com.unifurniture.mobile.util.NavViewModelProvider;
 import com.unifurniture.mobile.util.RecentlyViewedManager;
+import com.unifurniture.mobile.util.ScrollStateHelper;
 import com.unifurniture.mobile.util.SearchHistoryManager;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +49,7 @@ public class HomeFragment extends Fragment {
     private RecentlyViewedAdapter recentlyViewedAdapter;
     private RecentlyViewedManager recentlyViewedManager;
     private CouponHomeAdapter couponHomeAdapter;
+    private final ScrollStateHelper scrollState = new ScrollStateHelper("home");
 
     @Nullable
     @Override
@@ -60,7 +62,8 @@ public class HomeFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        viewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+        viewModel = NavViewModelProvider.get(this, R.id.homeFragment, HomeViewModel.class);
+        scrollState.read(savedInstanceState);
 
         setupRecyclerViews();
         setupBanner();
@@ -91,13 +94,14 @@ public class HomeFragment extends Fragment {
                 androidx.appcompat.R.id.search_src_text);
         if (searchInnerEdit != null) {
             searchInnerEdit.setOnFocusChangeListener((v, hasFocus) -> {
-                if (hasFocus && binding.searchView.getQuery().toString().trim().isEmpty()) {
-                    showSearchHistory();
-                } else if (!hasFocus) {
+                if (hasFocus) {
+                    binding.layoutContent.setAlpha(0.3f); // Làm mờ nội dung chính
+                    if (binding.searchView.getQuery().toString().trim().isEmpty()) {
+                        showSearchHistory();
+                    }
+                } else {
+                    binding.layoutContent.setAlpha(1.0f); // Hiện lại nội dung chính
                     hideSearchHistory();
-                    // Do NOT hideSearchSuggestions() here — focus loss fires before the
-                    // suggestion click completes, causing the tap to miss.
-                    // Suggestions hide via onQueryTextChange (empty text) or suggestion tap handler.
                 }
             });
         }
@@ -123,8 +127,10 @@ public class HomeFragment extends Fragment {
                 if (query.isEmpty()) {
                     hideSearchSuggestions();
                     showSearchHistory();
+                    binding.layoutContent.setAlpha(0.3f);
                     return true;
                 }
+                binding.layoutContent.setAlpha(0.1f); // Mờ hẳn khi đang gõ để tập trung vào gợi ý
                 hideSearchHistory();
                 searchRunnable = () -> viewModel.searchForSuggestions(query);
                 searchHandler.postDelayed(searchRunnable, 300);
@@ -133,9 +139,11 @@ public class HomeFragment extends Fragment {
         });
 
         binding.swipeRefresh.setOnRefreshListener(() -> {
-            viewModel.loadData();
+            viewModel.refreshData();
             binding.swipeRefresh.setRefreshing(false);
         });
+
+        scrollState.restore(binding.homeScrollView);
 
         // Birthday Popup
         if (com.unifurniture.mobile.util.SessionManager.getInstance(requireContext()).isLoggedIn()) {
@@ -170,8 +178,9 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupRecyclerViews() {
+        String serverHost = BuildConfig.API_BASE_URL.replace("/api/", "");
         // Featured products - horizontal scroll
-        featuredAdapter = new ProductCardAdapter(product -> {
+        featuredAdapter = new ProductCardAdapter(serverHost, product -> {
             Bundle args = new Bundle();
             args.putString("slug", product.slug != null ? product.slug : product.id);
             Navigation.findNavController(requireView()).navigate(R.id.productDetailFragment, args);
@@ -181,16 +190,17 @@ public class HomeFragment extends Fragment {
                 new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
         binding.rvFeaturedProducts.setAdapter(featuredAdapter);
 
-        // Categories
-        categoryAdapter = new CategoryAdapter(category -> {
+        // Categories - 3 columns for readable labels and larger circular thumbnails
+        categoryAdapter = new CategoryAdapter(serverHost, category -> {
             Bundle args = new Bundle();
             args.putString("categoryId", category.id);
             args.putString("categoryName", category.name);
             Navigation.findNavController(requireView()).navigate(R.id.productListFragment, args);
         });
         binding.rvCategories.setLayoutManager(
-                new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+                new androidx.recyclerview.widget.GridLayoutManager(requireContext(), 3));
         binding.rvCategories.setAdapter(categoryAdapter);
+        binding.rvCategories.setNestedScrollingEnabled(false); // Smooth scroll in NestedScrollView
 
         // Promotions coupon carousel
         couponHomeAdapter = new CouponHomeAdapter();
@@ -206,7 +216,6 @@ public class HomeFragment extends Fragment {
         }
 
         // Collections
-        String serverHost = BuildConfig.API_BASE_URL.replace("/api/", "");
         collectionAdapter = new CollectionAdapter(serverHost, collection -> {
             Bundle args = new Bundle();
             args.putString("collectionId", collection.id);
@@ -226,7 +235,8 @@ public class HomeFragment extends Fragment {
 
         viewModel.getCategories().observe(getViewLifecycleOwner(), items -> {
             if (items != null) {
-                categoryAdapter.submitList(items);
+                int previewCount = Math.min(items.size(), 9);
+                categoryAdapter.submitList(items.subList(0, previewCount));
             }
         });
 
@@ -376,6 +386,9 @@ public class HomeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        if (binding != null) {
+            binding.getRoot().post(this::clearSearchUiState);
+        }
         if (bannerAdapter != null && bannerAdapter.getItemCount() > 1) {
             autoScrollHandler.postDelayed(autoScrollRunnable, 3500);
         }
@@ -383,9 +396,39 @@ public class HomeFragment extends Fragment {
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        if (binding != null) scrollState.saveScroll(binding.homeScrollView);
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
         if (autoScrollHandler != null) autoScrollHandler.removeCallbacks(autoScrollRunnable);
+        clearSearchUiState();
+    }
+
+    private void clearSearchUiState() {
+        if (binding == null) return;
+        binding.searchView.clearFocus();
+        hideSearchSuggestions();
+        hideSearchHistory();
+        binding.layoutContent.setAlpha(1.0f);
+
+        android.view.inputmethod.InputMethodManager imm =
+                (android.view.inputmethod.InputMethodManager) requireContext()
+                        .getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(binding.searchView.getWindowToken(), 0);
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (binding != null) {
+            scrollState.save(outState, binding.homeScrollView);
+        }
     }
 
     @Override

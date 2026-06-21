@@ -81,5 +81,13 @@ public class FormatUtil {
         return (int) (dp * context.getResources().getDisplayMetrics().density);
     }
 
+    public static String stripDiacritics(String text) {
+        if (text == null) return "";
+        String normalized = java.text.Normalizer.normalize(text, java.text.Normalizer.Form.NFD);
+        String result = normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+        return result.replace("đ", "d").replace("Đ", "D");
+    }
+
+
     private FormatUtil() {}
 }

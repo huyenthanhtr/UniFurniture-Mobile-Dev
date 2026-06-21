@@ -178,6 +178,17 @@ public class AccountFragment extends Fragment {
     private void loadProfileAvatar(SessionManager session) {
         var customer = session.getCustomer();
         if (customer == null || customer.getId() == null || customer.getId().isEmpty()) return;
+
+        String cachedAvatar = session.getAvatarUrl();
+        if (cachedAvatar != null && !cachedAvatar.isEmpty() && binding != null) {
+            Glide.with(requireContext())
+                    .load(cachedAvatar)
+                    .placeholder(R.drawable.ic_account)
+                    .error(R.drawable.ic_account)
+                    .into(binding.ivUserAvatar);
+            return;
+        }
+
         apiService.getProfile(customer.getId()).enqueue(new Callback<ApiListResponse<ProfileDto>>() {
             @Override
             public void onResponse(@NonNull Call<ApiListResponse<ProfileDto>> call, @NonNull Response<ApiListResponse<ProfileDto>> response) {
@@ -186,6 +197,7 @@ public class AccountFragment extends Fragment {
                         ? response.body().getData().get(0) : null;
                 String avatarUrl = profile != null ? profile.getAvatarUrl() : null;
                 if (avatarUrl != null && !avatarUrl.isEmpty()) {
+                    session.saveAvatarUrl(avatarUrl);
                     Glide.with(requireContext())
                             .load(avatarUrl)
                             .placeholder(R.drawable.ic_account)

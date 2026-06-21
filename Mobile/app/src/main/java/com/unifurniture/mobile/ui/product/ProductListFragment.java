@@ -1,6 +1,7 @@
 package com.unifurniture.mobile.ui.product;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import java.text.Normalizer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,7 +15,6 @@ import android.view.inputmethod.InputMethodManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -30,22 +30,34 @@ import com.unifurniture.mobile.ui.adapter.ProductCardAdapter;
 import com.unifurniture.mobile.ui.adapter.SearchHistoryAdapter;
 import com.unifurniture.mobile.ui.adapter.SearchSuggestionAdapter;
 import com.unifurniture.mobile.util.FormatUtil;
+import com.unifurniture.mobile.util.NavViewModelProvider;
+import com.unifurniture.mobile.util.RecyclerViewStateHelper;
 import com.unifurniture.mobile.util.SearchHistoryManager;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ProductListFragment extends Fragment {
 
+    private static final String KEY_IS_GRID = "is_grid";
+    private static final String PREF_PRODUCTS_SCROLL = "products_scroll_state";
+    private static final String PREF_KEY_REQUEST = "request_key";
+    private static final String PREF_KEY_POSITION = "position";
+    private static final String PREF_KEY_OFFSET = "offset";
+
     private FragmentProductListBinding binding;
     private ProductListViewModel viewModel;
     private ProductCardAdapter adapter;
     private boolean isGrid = true;
+    private final RecyclerViewStateHelper rvState = new RecyclerViewStateHelper("products");
     private Handler searchHandler;
     private Runnable searchRunnable;
     private TextWatcher searchWatcher;
     private SearchSuggestionAdapter suggestionAdapter;
     private SearchHistoryManager historyManager;
     private SearchHistoryAdapter historyAdapter;
+    private List<ProductDto> fullProductList = new ArrayList<>(); // Bản sao để lọc tức thì
+    private boolean pendingScrollRestore = false;
+    private boolean restoringScroll = false;
 
     @Nullable
     @Override
@@ -58,11 +70,18 @@ public class ProductListFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        viewModel = new ViewModelProvider(this).get(ProductListViewModel.class);
+        viewModel = NavViewModelProvider.get(this, R.id.productListFragment, ProductListViewModel.class);
+
+        if (savedInstanceState != null) {
+            isGrid = savedInstanceState.getBoolean(KEY_IS_GRID, true);
+        }
 
         historyManager = new SearchHistoryManager(requireContext());
         setupRecyclerView();
+        rvState.bind(binding.rvProducts, savedInstanceState);
         handleArguments();  // populate etSearch BEFORE watcher is attached
+        restorePersistedScrollState();
+        pendingScrollRestore = savedInstanceState != null || viewModel.hasSavedScrollState();
         setupSearch();
         observeData();
         styleChips();
@@ -81,6 +100,11 @@ public class ProductListFragment extends Fragment {
         binding.rvProducts.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView rv, int dx, int dy) {
+                if (!restoringScroll && (dx != 0 || dy != 0)) {
+                    pendingScrollRestore = false;
+                    saveCurrentScrollState();
+                }
+
                 GridLayoutManager lm = (GridLayoutManager) rv.getLayoutManager();
                 if (lm == null) return;
                 int lastVisible = lm.findLastVisibleItemPosition();
@@ -91,13 +115,17 @@ public class ProductListFragment extends Fragment {
                     binding.btnLoadMore.setVisibility(View.VISIBLE);
                 }
             }
+
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+            }
         });
 
         binding.fabFilter.setOnClickListener(v -> showFilterSheet());
         binding.btnToggleLayout.setOnClickListener(v -> toggleLayout());
 
         binding.swipeRefresh.setOnRefreshListener(() -> {
-            viewModel.loadProducts();
+            viewModel.refreshProducts();
             binding.swipeRefresh.setRefreshing(false);
         });
     }
@@ -113,42 +141,131 @@ public class ProductListFragment extends Fragment {
 
             if (search != null) {
                 binding.etSearch.setText(search);
-                viewModel.search(search);
                 historyManager.add(search);
                 filterApplied = true;
             }
             if (categoryId != null) {
-                viewModel.filterByCategory(categoryId);
                 if (categoryName != null) binding.tvTitle.setText(categoryName);
                 filterApplied = true;
             }
             if (collectionId != null) {
-                viewModel.filterByCollection(collectionId);
                 filterApplied = true;
             }
+            if (filterApplied && !viewModel.matchesCurrentRequest(search, categoryId, collectionId)) {
+                viewModel.applyRequest(search, categoryId, collectionId);
+            }
         }
-        if (!filterApplied) viewModel.loadProducts();
+        if (!filterApplied && !viewModel.hasLoadedProducts()) {
+            viewModel.loadProductsIfNeeded();
+        }
         updateFilterBadge();
         updateActiveFilterChips();
     }
 
     private void setupRecyclerView() {
-        adapter = new ProductCardAdapter(product -> {
+        String serverHost = com.unifurniture.mobile.BuildConfig.API_BASE_URL.replace("/api/", "");
+        adapter = new ProductCardAdapter(serverHost, product -> {
             Bundle args = new Bundle();
             args.putString("slug", product.slug != null ? product.slug : product.id);
             Navigation.findNavController(requireView()).navigate(R.id.productDetailFragment, args);
         });
-        binding.rvProducts.setLayoutManager(new GridLayoutManager(requireContext(), 2));
+        int span = isGrid ? 2 : 1;
+        binding.rvProducts.setLayoutManager(new GridLayoutManager(requireContext(), span));
+        adapter.setColumns(span);
         binding.rvProducts.setAdapter(adapter);
+        binding.btnToggleLayout.setImageResource(
+                isGrid ? R.drawable.ic_view_list : R.drawable.ic_grid_view);
+    }
+
+    private void restoreRecyclerViewState() {
+        rvState.restoreIfPending();
+        restoreSavedScrollState();
+    }
+
+    private void maybeRestoreRecyclerViewState() {
+        restoreRecyclerViewState();
+    }
+
+    private void saveCurrentScrollState() {
+        if (binding == null || restoringScroll) return;
+        RecyclerView.LayoutManager manager = binding.rvProducts.getLayoutManager();
+        if (!(manager instanceof GridLayoutManager layoutManager)) return;
+
+        int position = layoutManager.findFirstVisibleItemPosition();
+        if (position == RecyclerView.NO_POSITION) return;
+
+        View firstChild = layoutManager.findViewByPosition(position);
+        int offset = firstChild != null
+                ? firstChild.getTop() - binding.rvProducts.getPaddingTop()
+                : 0;
+        viewModel.saveScrollState(position, offset);
+        persistScrollState(position, offset);
+    }
+
+    private void persistScrollState(int position, int offset) {
+        if (viewModel == null) return;
+        requireContext().getSharedPreferences(PREF_PRODUCTS_SCROLL, Context.MODE_PRIVATE)
+                .edit()
+                .putString(PREF_KEY_REQUEST, viewModel.getCurrentScrollKey())
+                .putInt(PREF_KEY_POSITION, position)
+                .putInt(PREF_KEY_OFFSET, offset)
+                .apply();
+    }
+
+    private void restorePersistedScrollState() {
+        if (viewModel == null) return;
+        SharedPreferences prefs = requireContext()
+                .getSharedPreferences(PREF_PRODUCTS_SCROLL, Context.MODE_PRIVATE);
+        String savedRequest = prefs.getString(PREF_KEY_REQUEST, null);
+        if (!viewModel.getCurrentScrollKey().equals(savedRequest)) return;
+
+        int position = prefs.getInt(PREF_KEY_POSITION, RecyclerView.NO_POSITION);
+        if (position == RecyclerView.NO_POSITION) return;
+
+        int offset = prefs.getInt(PREF_KEY_OFFSET, 0);
+        viewModel.saveScrollState(position, offset);
+    }
+
+    private void restoreSavedScrollState() {
+        if (!pendingScrollRestore || binding == null || !viewModel.hasSavedScrollState()) return;
+        RecyclerView.LayoutManager manager = binding.rvProducts.getLayoutManager();
+        if (!(manager instanceof GridLayoutManager layoutManager)) return;
+        if (adapter.getItemCount() <= viewModel.getSavedScrollPosition()) return;
+
+        binding.rvProducts.post(() -> {
+            if (binding == null || !pendingScrollRestore || !viewModel.hasSavedScrollState()) return;
+            restoringScroll = true;
+            binding.rvProducts.stopScroll();
+            layoutManager.scrollToPositionWithOffset(
+                    viewModel.getSavedScrollPosition(),
+                    viewModel.getSavedScrollOffset());
+            binding.rvProducts.post(() -> {
+                pendingScrollRestore = false;
+                restoringScroll = false;
+            });
+        });
     }
 
     private void toggleLayout() {
         isGrid = !isGrid;
         int span = isGrid ? 2 : 1;
-        binding.rvProducts.setLayoutManager(new GridLayoutManager(requireContext(), span));
+        GridLayoutManager layoutManager = (GridLayoutManager) binding.rvProducts.getLayoutManager();
+        if (layoutManager == null) {
+            layoutManager = new GridLayoutManager(requireContext(), span);
+            binding.rvProducts.setLayoutManager(layoutManager);
+        } else {
+            layoutManager.setSpanCount(span);
+        }
         adapter.setColumns(span);
         binding.btnToggleLayout.setImageResource(
                 isGrid ? R.drawable.ic_view_list : R.drawable.ic_grid_view);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(KEY_IS_GRID, isGrid);
+        rvState.save(outState);
     }
 
     private void setupSearch() {
@@ -237,18 +354,23 @@ public class ProductListFragment extends Fragment {
                 if (query.isEmpty()) {
                     hideSuggestions();
                     showSearchHistory();
+                    binding.layoutEmpty.setVisibility(View.GONE);
                     binding.progressBar.setVisibility(View.GONE);
+                    // Khi xóa trắng, hiện lại toàn bộ danh sách gốc
+                    adapter.submitList(new ArrayList<>(fullProductList));
                     searchRunnable = () -> { viewModel.search(""); syncSortChip(); };
                     searchHandler.postDelayed(searchRunnable, 300);
                     return;
                 }
 
                 hideSearchHistory();
-                binding.progressBar.setVisibility(View.VISIBLE);
-                showClientSideSuggestions(query);
+                binding.layoutEmpty.setVisibility(View.GONE); // Ẩn ngay lập tức để không gây hiểu lầm
+                
+                // Lọc "mềm" tức thì trên dữ liệu đang có
+                performInstantLocalFilter(query);
 
                 searchRunnable = () -> { viewModel.search(query); syncSortChip(); };
-                searchHandler.postDelayed(searchRunnable, 300);
+                searchHandler.postDelayed(searchRunnable, 600); // Đợi khách gõ xong mới gọi Server
             }
         };
         binding.etSearch.addTextChangedListener(searchWatcher);
@@ -277,33 +399,59 @@ public class ProductListFragment extends Fragment {
         }
     }
 
-    private void showClientSideSuggestions(String query) {
-        ApiListResponse<ProductDto> current = viewModel.getProducts().getValue();
-        if (current == null || current.items == null) return;
-        String normalizedQuery = stripDiacritics(query.toLowerCase());
+    private List<ProductDto> sortByRelevance(List<ProductDto> list, String query) {
+        if (list == null || query == null || query.trim().isEmpty()) return list;
+        String nQuery = FormatUtil.stripDiacritics(query.trim().toLowerCase());
+        List<ProductDto> sorted = new ArrayList<>(list);
+        sorted.sort((p1, p2) -> {
+            String n1 = FormatUtil.stripDiacritics(p1.name != null ? p1.name.toLowerCase() : "");
+            String n2 = FormatUtil.stripDiacritics(p2.name != null ? p2.name.toLowerCase() : "");
+
+            boolean start1 = n1.startsWith(nQuery);
+            boolean start2 = n2.startsWith(nQuery);
+            if (start1 && !start2) return -1;
+            if (!start1 && start2) return 1;
+
+            boolean wordStart1 = n1.contains(" " + nQuery);
+            boolean wordStart2 = n2.contains(" " + nQuery);
+            if (wordStart1 && !wordStart2) return -1;
+            if (!wordStart1 && wordStart2) return 1;
+
+            return n1.compareTo(n2);
+        });
+        return sorted;
+    }
+
+    private List<ProductDto> getLocalMatches(String query) {
+        String normalizedQuery = FormatUtil.stripDiacritics(query.toLowerCase());
         List<ProductDto> matched = new ArrayList<>();
-        for (ProductDto p : current.items) {
-            if (p.name != null && matchesWordStart(stripDiacritics(p.name.toLowerCase()), normalizedQuery)) {
-                matched.add(p);
-                if (matched.size() >= 8) break;
+        for (ProductDto p : fullProductList) {
+            if (p.name != null) {
+                String normalizedName = FormatUtil.stripDiacritics(p.name.toLowerCase());
+                if (normalizedName.contains(normalizedQuery)) {
+                    matched.add(p);
+                }
             }
         }
+        return sortByRelevance(matched, query);
+    }
+
+    private void performInstantLocalFilter(String query) {
+        List<ProductDto> matched = getLocalMatches(query);
+        adapter.submitList(new ArrayList<>(matched));
+        
         if (!matched.isEmpty()) {
-            suggestionAdapter.submitList(matched);
+            int limit = Math.min(8, matched.size());
+            suggestionAdapter.submitList(new ArrayList<>(matched.subList(0, limit)));
             binding.rvSuggestions.setVisibility(View.VISIBLE);
         } else {
             hideSuggestions();
         }
     }
 
-    private String stripDiacritics(String text) {
-        String normalized = Normalizer.normalize(text, Normalizer.Form.NFD);
-        return normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
-    }
-
-    // Trả về true nếu query khớp với đầu tên hoặc đầu một từ trong tên
+    // Trả về true nếu tên sản phẩm chứa từ khóa (không phân biệt hoa thường, dấu)
     private boolean matchesWordStart(String normalizedName, String normalizedQuery) {
-        return normalizedName.startsWith(normalizedQuery);
+        return normalizedName.contains(normalizedQuery);
     }
 
     private void hideSuggestions() {
@@ -313,26 +461,54 @@ public class ProductListFragment extends Fragment {
     private void observeData() {
         viewModel.getProducts().observe(getViewLifecycleOwner(), response -> {
             if (response != null && response.items != null) {
-                adapter.submitList(response.items);
-                binding.tvProductCount.setText(getString(R.string.showing_products, response.items.size(), response.total));
-                boolean empty = response.items.isEmpty();
+                String query = binding.etSearch.getText().toString().trim();
+                
+                // 1. Cập nhật bản sao dữ liệu khi không ở chế độ tìm kiếm hoặc khi Server có hàng
+                if (query.isEmpty() || !response.items.isEmpty()) {
+                    fullProductList = new ArrayList<>(response.items);
+                }
+                
+                List<ProductDto> displayList = response.items;
+                boolean loading = Boolean.TRUE.equals(viewModel.isLoading().getValue());
+
+                // Sắp xếp lại theo độ liên quan nếu đang tìm kiếm
+                if (!query.isEmpty()) {
+                    // UX FIX: Nếu Server không thấy kết quả nhưng bộ lọc máy thấy, ưu tiên dùng máy
+                    if (displayList.isEmpty()) {
+                        List<ProductDto> localMatches = getLocalMatches(query);
+                        if (!localMatches.isEmpty()) {
+                            displayList = localMatches;
+                        }
+                    } else {
+                        // Luôn sắp xếp lại kết quả từ Server theo độ liên quan
+                        displayList = sortByRelevance(displayList, query);
+                    }
+                }
+
+                adapter.submitList(new ArrayList<>(displayList), this::maybeRestoreRecyclerViewState);
+                binding.tvProductCount.setText(getString(R.string.showing_products, displayList.size(), response.total));
+                
+                // 2. Chỉ hiện thông báo "Không tìm thấy" khi cả Server và Máy đều rỗng
+                boolean empty = displayList.isEmpty() && !loading && !query.isEmpty();
+                
                 binding.layoutEmpty.setVisibility(empty ? View.VISIBLE : View.GONE);
                 binding.rvProducts.setVisibility(empty ? View.GONE : View.VISIBLE);
-                // Hide Load More on new results — scroll listener reveals it when user reaches bottom
                 binding.btnLoadMore.setVisibility(View.GONE);
-
-                // Refresh suggestions with API results
-                String query = binding.etSearch.getText().toString().trim();
-                if (!query.isEmpty() && !response.items.isEmpty()) {
-                    int limit = Math.min(8, response.items.size());
-                    suggestionAdapter.submitList(response.items.subList(0, limit));
+                
+                // 3. Cập nhật gợi ý dựa trên danh sách đang hiển thị
+                if (!query.isEmpty() && !displayList.isEmpty()) {
+                    int limit = Math.min(8, displayList.size());
+                    suggestionAdapter.submitList(new ArrayList<>(displayList.subList(0, limit)));
                     binding.rvSuggestions.setVisibility(View.VISIBLE);
                 }
             }
         });
 
         viewModel.isLoading().observe(getViewLifecycleOwner(), loading -> {
-            boolean isInitialLoad = loading && adapter.getItemCount() == 0;
+            boolean isInitialLoad = loading && (adapter.getItemCount() == 0 || binding.rvProducts.getVisibility() == View.GONE);
+            if (loading) {
+                binding.layoutEmpty.setVisibility(View.GONE); // Luôn ẩn "Trống" khi đang loading
+            }
             if (isInitialLoad) {
                 binding.shimmerLayout.setVisibility(View.VISIBLE);
                 binding.shimmerLayout.startShimmer();
@@ -512,5 +688,21 @@ public class ProductListFragment extends Fragment {
             searchHandler.removeCallbacks(searchRunnable);
         }
         binding = null;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Only restore scroll here when onViewCreated did NOT already set it up
+        // (e.g. fragment was paused/resumed without view recreation).
+        if (binding != null && viewModel != null && viewModel.hasSavedScrollState() && !pendingScrollRestore) {
+            pendingScrollRestore = true;
+            restoreSavedScrollState();
+        }
     }
 }

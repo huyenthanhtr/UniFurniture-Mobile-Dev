@@ -14,6 +14,7 @@ public class SessionManager {
     private static final String KEY_CART_ID = "cart_id";
     private static final String KEY_PROFILE_ID = "profile_id";
     private static final String KEY_LOCAL_WISHLIST = "local_wishlist";
+    private static final String KEY_AVATAR_URL = "avatar_url";
 
     private static SessionManager instance;
     private final SharedPreferences prefs;
@@ -67,6 +68,15 @@ public class SessionManager {
         if (rawId != null) return rawId;
         CustomerDto c = getCustomer();
         return c != null ? c.getId() : null;
+    }
+
+    // Avatar URL cache
+    public void saveAvatarUrl(String url) {
+        prefs.edit().putString(KEY_AVATAR_URL, url).apply();
+    }
+
+    public String getAvatarUrl() {
+        return prefs.getString(KEY_AVATAR_URL, null);
     }
 
     // Profile ID (for change password)

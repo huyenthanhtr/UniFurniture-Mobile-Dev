@@ -354,4 +354,19 @@
     <string name="voucher_expiry_date">Hạn dùng: %s</string>
     <string name="btn_use_now">Sử dụng</string>
     <string name="promotions_title_alt">🔥 Khuyến Mãi Hấp Dẫn</string>
+
+    <!-- Home — brand section -->
+    <string name="home_about_tagline">Nâng tầm không gian sống với nội thất tinh tế và hiện đại. Chúng tôi cung cấp những giải pháp thiết kế tối ưu, kết hợp hài hòa giữa thẩm mỹ và công năng.</string>
+    <string name="home_value_quality">Chất lượng</string>
+    <string name="home_value_elegant">Tinh tế</string>
+    <string name="home_value_dedicated">Tận tâm</string>
+
+    <!-- Category -->
+    <string name="empty_categories">Không có danh mục nào</string>
+
+    <!-- Account -->
+    <string name="change_password">Đổi mật khẩu</string>
+
+    <!-- Rating -->
+    <string name="rating_display">★ %s</string>
 </resources>

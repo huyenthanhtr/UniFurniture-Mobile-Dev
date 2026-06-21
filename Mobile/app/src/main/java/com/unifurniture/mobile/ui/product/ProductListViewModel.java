@@ -6,11 +6,13 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
+import androidx.recyclerview.widget.RecyclerView;
 import com.unifurniture.mobile.UniFurnitureApp;
 import com.unifurniture.mobile.data.model.*;
 import com.unifurniture.mobile.data.repository.ProductRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ProductListViewModel extends AndroidViewModel {
 
@@ -23,6 +25,11 @@ public class ProductListViewModel extends AndroidViewModel {
     private final List<ProductDto> allProducts = new ArrayList<>();
     private boolean hasMore = true;
 
+    private static final List<ProductDto> sharedProductsCache = new ArrayList<>();
+    private static int sharedTotalCache = 0;
+    private static int sharedScrollPosition = RecyclerView.NO_POSITION;
+    private static int sharedScrollOffset = 0;
+
     private int currentPage = 1;
     private static final int PAGE_SIZE = 50;
     private String currentSearch = null;
@@ -33,6 +40,9 @@ public class ProductListViewModel extends AndroidViewModel {
     private Double currentMinPrice = null;
     private Double currentMaxPrice = null;
     private int currentMinRating = 0;
+    private int savedScrollPosition = RecyclerView.NO_POSITION;
+    private int savedScrollOffset = 0;
+    private int cachedTotal = 0;
 
     // Track observers to prevent memory leaks
     private LiveData<ApiListResponse<ProductDto>> fetchLiveData;
@@ -44,12 +54,56 @@ public class ProductListViewModel extends AndroidViewModel {
         super(application);
         repository = new ProductRepository(UniFurnitureApp.getInstance().getApiService());
         loadCategories();
+        restoreSharedCache();
+    }
+
+    private void restoreSharedCache() {
+        if (sharedProductsCache.isEmpty()) return;
+        allProducts.clear();
+        allProducts.addAll(sharedProductsCache);
+        cachedTotal = sharedTotalCache;
+        savedScrollPosition = sharedScrollPosition;
+        savedScrollOffset = sharedScrollOffset;
+
+        ApiListResponse<ProductDto> restored = new ApiListResponse<>();
+        restored.items = new ArrayList<>(allProducts);
+        restored.total = cachedTotal;
+        products.setValue(restored);
     }
 
     public void loadProducts() {
+        loadProducts(true, true);
+    }
+
+    public void loadProductsIfNeeded() {
+        if (hasLoadedProducts()) return;
+        loadProducts(false, allProducts.isEmpty());
+    }
+
+    public void refreshProducts() {
+        loadProducts(true, true);
+    }
+
+    private void loadProducts(boolean resetScroll, boolean clearExistingProducts) {
         currentPage = 1;
-        allProducts.clear();
+        if (clearExistingProducts) {
+            allProducts.clear();
+        }
         hasMore = true;
+        if (resetScroll) {
+            clearSavedScrollState();
+        }
+        
+        // Bật loading TRƯỚC khi reset dữ liệu để UI không hiện "Trống" nhầm
+        loading.setValue(true);
+        
+        if (clearExistingProducts) {
+            ApiListResponse<ProductDto> emptyResponse = new ApiListResponse<>();
+            emptyResponse.items = new ArrayList<>();
+            emptyResponse.total = 0;
+            products.setValue(emptyResponse);
+        }
+
         fetchCurrentPage(false);
     }
 
@@ -81,23 +135,16 @@ public class ProductListViewModel extends AndroidViewModel {
             if (response != null && response.items != null) {
                 List<ProductDto> pageItems = response.items;
 
-                if (currentMinRating > 0) {
-                    List<ProductDto> filtered = new ArrayList<>();
-                    for (ProductDto p : pageItems) {
-                        // Chỉ giữ sản phẩm có rating đủ điều kiện (null = chưa có đánh giá, bỏ qua)
-                        if (p.averageRating != null && p.averageRating >= currentMinRating) {
-                            filtered.add(p);
-                        }
-                    }
-                    pageItems = filtered;
-                }
-
                 hasMore = response.page < response.totalPages;
                 allProducts.addAll(pageItems);
 
                 ApiListResponse<ProductDto> result = new ApiListResponse<>();
                 result.items = new ArrayList<>(allProducts);
                 result.total = response.total;
+                cachedTotal = response.total;
+                sharedProductsCache.clear();
+                sharedProductsCache.addAll(allProducts);
+                sharedTotalCache = cachedTotal;
                 products.setValue(result);
             } else {
                 hasMore = false;
@@ -107,7 +154,8 @@ public class ProductListViewModel extends AndroidViewModel {
 
         fetchLiveData = repository.getProducts(currentPage, PAGE_SIZE, currentSearch,
                 currentCategory, currentCollection, currentSortBy, currentOrder,
-                currentMinPrice, currentMaxPrice);
+                currentMinPrice, currentMaxPrice,
+                currentMinRating > 0 ? currentMinRating : null);
         fetchLiveData.observeForever(fetchObserver);
     }
 
@@ -125,6 +173,14 @@ public class ProductListViewModel extends AndroidViewModel {
 
     public void filterByCollection(String collectionId) {
         currentCollection = collectionId;
+        currentPage = 1;
+        loadProducts();
+    }
+
+    public void applyRequest(String search, String categoryId, String collectionId) {
+        currentSearch = normalizeBlank(search);
+        currentCategory = normalizeBlank(categoryId);
+        currentCollection = normalizeBlank(collectionId);
         currentPage = 1;
         loadProducts();
     }
@@ -184,4 +240,61 @@ public class ProductListViewModel extends AndroidViewModel {
     public String getCurrentSortBy() { return currentSortBy; }
     public String getCurrentOrder() { return currentOrder; }
     public boolean hasMorePages() { return hasMore; }
+    public int getCachedTotal() { return cachedTotal; }
+
+    public List<ProductDto> getCachedProducts() {
+        return new ArrayList<>(allProducts);
+    }
+
+    public boolean matchesCurrentRequest(String search, String categoryId, String collectionId) {
+        return Objects.equals(normalizeBlank(search), currentSearch)
+                && Objects.equals(normalizeBlank(categoryId), currentCategory)
+                && Objects.equals(normalizeBlank(collectionId), currentCollection);
+    }
+
+    private static String normalizeBlank(String value) {
+        if (value == null) return null;
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    public void saveScrollState(int position, int offset) {
+        savedScrollPosition = position;
+        savedScrollOffset = offset;
+        sharedScrollPosition = position;
+        sharedScrollOffset = offset;
+    }
+
+    public boolean hasSavedScrollState() {
+        return savedScrollPosition != RecyclerView.NO_POSITION;
+    }
+
+    public int getSavedScrollPosition() { return savedScrollPosition; }
+    public int getSavedScrollOffset() { return savedScrollOffset; }
+
+    public String getCurrentScrollKey() {
+        return normalizeForKey(currentSearch) + "|"
+                + normalizeForKey(currentCategory) + "|"
+                + normalizeForKey(currentCollection) + "|"
+                + normalizeForKey(currentSortBy) + "|"
+                + normalizeForKey(currentOrder) + "|"
+                + normalizeForKey(currentMinPrice) + "|"
+                + normalizeForKey(currentMaxPrice) + "|"
+                + currentMinRating;
+    }
+
+    private static String normalizeForKey(Object value) {
+        return value == null ? "" : String.valueOf(value);
+    }
+
+    public void clearSavedScrollState() {
+        savedScrollPosition = RecyclerView.NO_POSITION;
+        savedScrollOffset = 0;
+        sharedScrollPosition = RecyclerView.NO_POSITION;
+        sharedScrollOffset = 0;
+    }
+
+    public boolean hasLoadedProducts() {
+        return products.getValue() != null;
+    }
 }

@@ -17,6 +17,8 @@ import com.unifurniture.mobile.data.remote.ApiClient;
 import com.unifurniture.mobile.data.remote.ApiService;
 import com.unifurniture.mobile.databinding.FragmentAddressBookBinding;
 import com.unifurniture.mobile.databinding.ItemCustomerAddressBinding;
+import com.unifurniture.mobile.util.NavViewModelProvider;
+import com.unifurniture.mobile.util.ScrollStateHelper;
 import com.unifurniture.mobile.util.SessionManager;
 
 import java.util.HashMap;
@@ -30,9 +32,11 @@ import retrofit2.Response;
 public class AddressBookFragment extends Fragment {
 
     private FragmentAddressBookBinding binding;
+    private AddressBookViewModel viewModel;
     private ApiService apiService;
     private SessionManager sessionManager;
     private String editingAddressId = null;
+    private final ScrollStateHelper scrollState = new ScrollStateHelper("address_book");
 
     @Nullable
     @Override
@@ -43,6 +47,8 @@ public class AddressBookFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        viewModel = NavViewModelProvider.get(this, R.id.addressBookFragment, AddressBookViewModel.class);
+        scrollState.read(savedInstanceState);
         apiService = ApiClient.getInstance();
         sessionManager = SessionManager.getInstance(requireContext());
 
@@ -50,40 +56,36 @@ public class AddressBookFragment extends Fragment {
         binding.btnSaveAddress.setOnClickListener(v -> saveAddress());
         binding.btnCancelEdit.setOnClickListener(v -> clearForm());
 
-        loadAddresses();
-    }
+        viewModel.getAddresses().observe(getViewLifecycleOwner(), items -> {
+            if (items == null) return;
+            if (items.isEmpty()) {
+                showEmptyState(true, getString(R.string.address_book_empty));
+            } else {
+                binding.tvEmpty.setVisibility(View.GONE);
+                renderAddresses(items);
+                scrollState.restore(binding.scrollContent);
+            }
+        });
 
-    private void loadAddresses() {
+        viewModel.isLoading().observe(getViewLifecycleOwner(), loading -> {
+            // Only show blocking state on first load
+            if (Boolean.TRUE.equals(loading) && viewModel.getAddresses().getValue() == null) {
+                binding.tvEmpty.setVisibility(View.GONE);
+            }
+        });
+
+        viewModel.getErrorMessage().observe(getViewLifecycleOwner(), message -> {
+            if (message != null && isAdded()) {
+                showEmptyState(true, getString(R.string.error_network, message));
+            }
+        });
+
         String customerId = sessionManager.getCustomerId();
         if (customerId == null || customerId.isEmpty()) {
             showEmptyState(true, getString(R.string.login_required_orders_hint));
-            return;
+        } else {
+            viewModel.loadAddressesIfNeeded();
         }
-
-        binding.tvEmpty.setVisibility(View.GONE);
-        binding.containerAddresses.removeAllViews();
-
-        apiService.getCustomerAddresses(customerId, 100).enqueue(new Callback<ApiListResponse<CustomerAddressDto>>() {
-            @Override
-            public void onResponse(@NonNull Call<ApiListResponse<CustomerAddressDto>> call,
-                                   @NonNull Response<ApiListResponse<CustomerAddressDto>> response) {
-                if (!isAdded()) return;
-
-                List<CustomerAddressDto> items = response.body() != null ? response.body().getData() : null;
-                if (response.isSuccessful() && items != null && !items.isEmpty()) {
-                    binding.tvEmpty.setVisibility(View.GONE);
-                    renderAddresses(items);
-                } else {
-                    showEmptyState(true, getString(R.string.address_book_empty));
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<ApiListResponse<CustomerAddressDto>> call, @NonNull Throwable t) {
-                if (!isAdded()) return;
-                showEmptyState(true, getString(R.string.error_network, t.getMessage()));
-            }
-        });
     }
 
     private void renderAddresses(List<CustomerAddressDto> items) {
@@ -171,7 +173,7 @@ public class AddressBookFragment extends Fragment {
                         Toast.makeText(requireContext(), R.string.profile_updated, Toast.LENGTH_SHORT).show();
                     }
                     clearForm();
-                    loadAddresses();
+                    viewModel.reloadAddresses();
                 } else {
                     Toast.makeText(requireContext(), R.string.error_unknown, Toast.LENGTH_SHORT).show();
                 }
@@ -192,7 +194,7 @@ public class AddressBookFragment extends Fragment {
             public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                 if (isAdded() && response.isSuccessful()) {
                     Toast.makeText(requireContext(), R.string.address_deleted, Toast.LENGTH_SHORT).show();
-                    loadAddresses();
+                    viewModel.reloadAddresses();
                 }
             }
 
@@ -232,7 +234,7 @@ public class AddressBookFragment extends Fragment {
             if (response.isSuccessful()) {
                 Toast.makeText(requireContext(), R.string.profile_updated, Toast.LENGTH_SHORT).show();
                 clearForm();
-                loadAddresses();
+                viewModel.reloadAddresses();
             } else {
                 Toast.makeText(requireContext(), R.string.error_unknown, Toast.LENGTH_SHORT).show();
             }
@@ -243,6 +245,20 @@ public class AddressBookFragment extends Fragment {
             if (isAdded()) {
                 Toast.makeText(requireContext(), getString(R.string.error_network, t.getMessage()), Toast.LENGTH_SHORT).show();
             }
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (binding != null) scrollState.saveScroll(binding.scrollContent);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (binding != null) {
+            scrollState.save(outState, binding.scrollContent);
         }
     }
 

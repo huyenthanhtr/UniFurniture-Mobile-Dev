@@ -51,8 +51,8 @@ public class EditProfileFragment extends Fragment {
         setupToolbar();
         setupGenderDropdown();
         setupBirthdayPicker();
-        
-        loadProfileData();
+
+        loadProfileData(savedInstanceState);
 
         binding.btnSave.setOnClickListener(v -> saveProfile());
     }
@@ -84,7 +84,17 @@ public class EditProfileFragment extends Fragment {
         });
     }
 
-    private void loadProfileData() {
+    private void loadProfileData(Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            binding.etName.setText(savedInstanceState.getString("name", ""));
+            binding.etEmail.setText(savedInstanceState.getString("email", ""));
+            binding.etPhone.setText(savedInstanceState.getString("phone", ""));
+            binding.etGender.setText(savedInstanceState.getString("gender", ""), false);
+            binding.etBirthday.setText(savedInstanceState.getString("birthday", ""));
+            currentProfileId = savedInstanceState.getString("profile_id");
+            return;
+        }
+
         CustomerDto customer = sessionManager.getCustomer();
         if (customer == null) return;
 
@@ -197,6 +207,19 @@ public class EditProfileFragment extends Fragment {
                 }
             }
         });
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (binding != null) {
+            outState.putString("name", binding.etName.getText().toString());
+            outState.putString("email", binding.etEmail.getText().toString());
+            outState.putString("phone", binding.etPhone.getText().toString());
+            outState.putString("gender", binding.etGender.getText().toString());
+            outState.putString("birthday", binding.etBirthday.getText().toString());
+            outState.putString("profile_id", currentProfileId);
+        }
     }
 
     @Override

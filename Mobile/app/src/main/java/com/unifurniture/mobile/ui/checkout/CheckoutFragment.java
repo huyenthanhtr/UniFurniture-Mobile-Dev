@@ -83,7 +83,7 @@ public class CheckoutFragment extends Fragment {
         }
 
         setupVoucherSection();
-        setupAddressSection();
+        setupAddressSection(savedInstanceState);
         calculatePrices();
         setupLabels();
         detectZone();
@@ -141,11 +141,11 @@ public class CheckoutFragment extends Fragment {
         }
     }
 
-    private void setupAddressSection() {
+    private void setupAddressSection(Bundle savedInstanceState) {
         SessionManager session = SessionManager.getInstance(requireContext());
         if (session.isLoggedIn()) {
             CustomerDto customer = session.getCustomer();
-            if (customer != null) {
+            if (savedInstanceState == null && customer != null) {
                 if (customer.name != null) binding.etName.setText(customer.name);
                 if (customer.phone != null) binding.etPhone.setText(customer.phone);
             }

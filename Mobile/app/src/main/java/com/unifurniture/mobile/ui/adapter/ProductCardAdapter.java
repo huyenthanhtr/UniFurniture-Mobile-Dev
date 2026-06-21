@@ -19,10 +19,12 @@ public class ProductCardAdapter extends ListAdapter<ProductDto, ProductCardAdapt
     }
 
     private final OnProductClickListener listener;
+    private final String serverHost;
     private int columns = 2;
 
-    public ProductCardAdapter(OnProductClickListener listener) {
+    public ProductCardAdapter(String serverHost, OnProductClickListener listener) {
         super(DIFF_CALLBACK);
+        this.serverHost = serverHost;
         this.listener = listener;
     }
 
@@ -62,7 +64,7 @@ public class ProductCardAdapter extends ListAdapter<ProductDto, ProductCardAdapt
                 holder.itemView.setLayoutParams(lp);
             }
         }
-        holder.bind(getItem(position), listener);
+        holder.bind(getItem(position), serverHost, listener);
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -73,7 +75,7 @@ public class ProductCardAdapter extends ListAdapter<ProductDto, ProductCardAdapt
             this.binding = binding;
         }
 
-        void bind(ProductDto product, OnProductClickListener listener) {
+        void bind(ProductDto product, String serverHost, OnProductClickListener listener) {
             android.content.Context ctx = binding.getRoot().getContext();
 
             binding.tvName.setText(product.name != null ? product.name : "");
@@ -107,7 +109,7 @@ public class ProductCardAdapter extends ListAdapter<ProductDto, ProductCardAdapt
             if (hasRating || hasSold) {
                 binding.layoutRatingRow.setVisibility(android.view.View.VISIBLE);
                 if (hasRating) {
-                    binding.tvRating.setText("★ " + String.format("%.1f", product.averageRating));
+                    binding.tvRating.setText(ctx.getString(R.string.rating_display, String.format("%.1f", product.averageRating)));
                     binding.tvRating.setVisibility(android.view.View.VISIBLE);
                 } else {
                     binding.tvRating.setVisibility(android.view.View.GONE);
@@ -129,9 +131,12 @@ public class ProductCardAdapter extends ListAdapter<ProductDto, ProductCardAdapt
                 binding.layoutRatingRow.setVisibility(android.view.View.GONE);
             }
 
+            String imageUrl = com.unifurniture.mobile.util.CategoryImageHelper.resolveProductUrl(product, serverHost);
+
             Glide.with(binding.getRoot())
-                    .load(product.getImageUrl())
+                    .load(imageUrl)
                     .placeholder(R.drawable.placeholder_product)
+                    .error(R.drawable.placeholder_product)
                     .centerCrop()
                     .into(binding.ivProduct);
 

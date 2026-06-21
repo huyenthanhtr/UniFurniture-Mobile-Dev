@@ -43,7 +43,12 @@ const {
   ensureUniqueSlug,
   recalculateProductAggregates,
 } = require("../utils/product-aggregate");
+const {
+  attachAverageRatings,
+  getProductIdsWithMinRating,
+} = require("../utils/product-ratings");
 const { getColorHex } = require("../utils/color-map.utils");
+const { createDiacriticRegex } = require("../utils/search-helper");
 
 function toObjectIdOrNull(value) {
   if (!value) return null;
@@ -161,6 +166,7 @@ async function getProducts(req, res, next) {
       fields,
       minPrice,
       maxPrice,
+      minRating,
     } = req.query;
 
     const pageNum = Math.max(parseInt(page, 10) || 1, 1);
@@ -187,6 +193,15 @@ async function getProducts(req, res, next) {
       andConditions.push({ min_price: priceFilter });
     }
 
+    if (minRating) {
+      const ratedProductIds = await getProductIdsWithMinRating(minRating);
+      andConditions.push(
+        ratedProductIds && ratedProductIds.length
+          ? { _id: ratedProductIds.length > 1 ? { $in: ratedProductIds } : ratedProductIds[0] }
+          : { _id: { $in: [] } }
+      );
+    }
+
     if (collection) {
       const collectionIds = await resolveTaxonomyObjectIds(Collection, collection);
       andConditions.push(
@@ -208,9 +223,10 @@ async function getProducts(req, res, next) {
     if (q) {
       const kw = String(q).trim();
       if (kw) {
+        const diacriticKw = createDiacriticRegex(kw);
         const [matchedCategories, matchedCollections] = await Promise.all([
-          Category.find({ name: { $regex: kw, $options: "i" } }).select({ _id: 1 }).lean(),
-          Collection.find({ name: { $regex: kw, $options: "i" } }).select({ _id: 1 }).lean(),
+          Category.find({ name: { $regex: diacriticKw, $options: "i" } }).select({ _id: 1 }).lean(),
+          Collection.find({ name: { $regex: diacriticKw, $options: "i" } }).select({ _id: 1 }).lean(),
         ]);
 
         const categoryIds = matchedCategories.map((item) => item._id);
@@ -218,8 +234,8 @@ async function getProducts(req, res, next) {
 
         andConditions.push({
           $or: [
-          { name: { $regex: kw, $options: "i" } },
-          { sku: { $regex: kw, $options: "i" } },
+            { name: { $regex: diacriticKw, $options: "i" } },
+            { sku: { $regex: kw, $options: "i" } },
             ...(categoryIds.length ? [{ category_id: { $in: categoryIds } }] : []),
             ...(collectionIds.length ? [{ collection_id: { $in: collectionIds } }] : []),
           ],
@@ -379,15 +395,17 @@ async function getProducts(req, res, next) {
       colors: Array.from(colorsByProduct.get(String(p._id))?.values() || []),
     }));
 
+    const itemsWithRatings = await attachAverageRatings(itemsWithColors);
+
     // Apply translations for the requested language (e.g. ?lang=en).
-    await overlayTranslations(itemsWithColors, req.query.lang);
+    await overlayTranslations(itemsWithRatings, req.query.lang);
 
     res.json({
       page: pageNum,
       limit: limitNum,
       total,
       totalPages: Math.ceil(total / limitNum) || 1,
-      items: itemsWithColors,
+      items: itemsWithRatings,
     });
 
   } catch (err) {

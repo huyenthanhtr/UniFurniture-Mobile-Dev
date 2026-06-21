@@ -356,4 +356,19 @@
     <string name="voucher_expiry_date">有效期至: %s</string>
     <string name="btn_use_now">使用</string>
     <string name="promotions_title_alt">🔥 热门促销</string>
+
+    <!-- Home — brand section -->
+    <string name="home_about_tagline">以精致现代的家具提升您的居住空间。我们提供优质设计方案，完美融合美观与功能。</string>
+    <string name="home_value_quality">品质</string>
+    <string name="home_value_elegant">精致</string>
+    <string name="home_value_dedicated">专注</string>
+
+    <!-- Category -->
+    <string name="empty_categories">暂无分类</string>
+
+    <!-- Account -->
+    <string name="change_password">修改密码</string>
+
+    <!-- Rating -->
+    <string name="rating_display">★ %s</string>
 </resources>
