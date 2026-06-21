@@ -27,7 +27,16 @@
                 <androidx.viewpager2.widget.ViewPager2
                     android:id="@+id/viewPagerImages"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+                    android:layout_height="match_parent"
+                    android:overScrollMode="never" />
+
+                <com.tbuonomo.viewpagerdotsindicator.DotsIndicator
+                    android:id="@+id/dotsIndicator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|center_horizontal"
+                    android:layout_marginBottom="14dp"
+                    android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/tvImageIndicator"
@@ -305,14 +314,53 @@
                     android:lineSpacingMultiplier="1.4"
                     android:visibility="gone" />
 
-                <TextView
-                    android:id="@+id/tvDescription"
+                <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+
+                    <TextView
+                        android:id="@+id/tvDescription"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/gray_800"
+                        android:textSize="15sp"
+                        android:lineSpacingMultiplier="1.4"
+                        android:maxLines="5"
+                        android:ellipsize="end"
+                        android:animateLayoutChanges="true" />
+
+                    <View
+                        android:id="@+id/viewDescriptionGradient"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:layout_gravity="bottom"
+                        android:background="@drawable/bg_description_gradient"
+                        android:visibility="visible" />
+                </FrameLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnToggleDescription"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:textColor="@color/gray_800"
-                    android:textSize="15sp"
-                    android:lineSpacingMultiplier="1.4" />
+                    android:layout_gravity="center_horizontal"
+                    android:text="@string/read_more"
+                    android:textColor="@color/primary"
+                    android:textSize="14sp"
+                    android:textAllCaps="false"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:background="@drawable/bg_btn_toggle_outline"
+                    app:backgroundTint="@null"
+                    app:icon="@drawable/ic_arrow_down"
+                    app:iconGravity="end"
+                    app:iconTint="@color/primary"
+                    app:cornerRadius="20dp"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:visibility="gone" />
             </LinearLayout>
 
             <!-- Reviews Section -->

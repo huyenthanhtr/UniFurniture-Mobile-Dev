@@ -22,6 +22,10 @@
     <color name="surface">#FAFAF8</color>
     <color name="on_primary">#FFFFFF</color>
     <color name="notification_unread">#EEF6F2</color>
+    <color name="bg_notif_order">#E8F5E9</color>
+    <color name="bg_notif_account">#FFFDE7</color>
+    <color name="bg_notif_other">#E3F2FD</color>
     <color name="rating_star">#D4A853</color>
     <color name="white_alpha_20">#33FFFFFF</color>
+    <color name="primary_alpha_10">#1A1B4332</color>
 </resources>

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProductDto {
-    @SerializedName("_id")
+    @SerializedName(value = "_id", alternate = {"id"})
     public String id;
     public String name;
     public String slug;

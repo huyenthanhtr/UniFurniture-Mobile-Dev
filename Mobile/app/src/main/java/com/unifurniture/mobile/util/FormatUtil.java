@@ -77,5 +77,9 @@ public class FormatUtil {
         return "-" + pct + "%";
     }
 
+    public static int dpToPx(android.content.Context context, int dp) {
+        return (int) (dp * context.getResources().getDisplayMetrics().density);
+    }
+
     private FormatUtil() {}
 }

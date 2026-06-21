@@ -45,63 +45,102 @@
 
     </LinearLayout>
 
-    <!-- Custom Filter Tabs -->
+    <!-- Summary Bar -->
     <LinearLayout
+        android:id="@+id/layoutSummary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:background="#F0F4F2"
         android:paddingHorizontal="16dp"
-        android:paddingVertical="12dp"
-        android:gravity="center_vertical">
-
+        android:paddingVertical="8dp"
+        android:visibility="gone">
         <TextView
-            android:id="@+id/tabAll"
-            android:layout_width="wrap_content"
+            android:id="@+id/tvSummary"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/label_all"
             android:textSize="13sp"
-            android:textStyle="bold"
-            android:textColor="@color/white"
-            android:background="@drawable/bg_tab_pill_selected"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="8dp"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true"
-            android:layout_marginEnd="8dp" />
-
-        <TextView
-            android:id="@+id/tabOrders"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/label_orders"
-            android:textSize="13sp"
-            android:textStyle="bold"
-            android:textColor="@color/gray_600"
-            android:background="@drawable/bg_tab_pill_unselected"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="8dp"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true"
-            android:layout_marginEnd="8dp" />
-
-        <TextView
-            android:id="@+id/tabAccount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/label_account"
-            android:textSize="13sp"
-            android:textStyle="bold"
-            android:textColor="@color/gray_600"
-            android:background="@drawable/bg_tab_pill_unselected"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="8dp"
-            android:gravity="center"
-            android:clickable="true"
-            android:focusable="true" />
-
+            android:textColor="@color/primary"
+            android:textStyle="italic" />
     </LinearLayout>
+
+    <!-- Custom Filter Tabs -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tabAll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_all"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:background="@drawable/bg_tab_pill_selected"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/tabOrders"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_orders"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="@color/gray_600"
+                android:background="@drawable/bg_tab_pill_unselected"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/tabAccount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_account"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="@color/gray_600"
+                android:background="@drawable/bg_tab_pill_unselected"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/tabOther"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_other"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="@color/gray_600"
+                android:background="@drawable/bg_tab_pill_unselected"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true" />
+
+        </LinearLayout>
+    </HorizontalScrollView>
 
     <!-- List & Empty State Container -->
     <FrameLayout

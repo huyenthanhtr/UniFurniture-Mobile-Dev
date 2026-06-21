@@ -172,6 +172,13 @@
     <string name="label_orders">Orders</string>
     <string name="label_all">All</string>
     <string name="label_account">Account</string>
+    <string name="label_other">Other</string>
+    <string name="notification_summary">You have %1$d new notifications (%2$s)</string>
+    <string name="mark_as_unread">Mark as unread</string>
+    <string name="order_type">orders</string>
+    <string name="account_type">account</string>
+    <string name="other_type">others</string>
+    <string name="comma">, </string>
 
     <!-- Wishlist -->
     <string name="empty_wishlist">Wishlist is empty</string>
@@ -196,6 +203,7 @@
     <string name="toast_voucher_applied">Applied voucher: %1$s</string>
     <string name="toast_order_id">Order: %1$s</string>
     <string name="toast_mark_all_read">Marked all as read</string>
+    <string name="toast_mark_unread">Marked as unread</string>
     <string name="toast_login_required_orders">Please login to view orders</string>
     <string name="image_indicator_format">%1$d/%2$d</string>
     <string name="price_range_format">%1$s - %2$s</string>
@@ -343,4 +351,7 @@
     <!-- Voucher stub labels -->
     <string name="discount_percent_stub">-%1$d%%</string>
     <string name="discount_fixed_stub">-%1$dK</string>
+
+    <string name="read_more">Read more</string>
+    <string name="read_less">Read less</string>
 </resources>

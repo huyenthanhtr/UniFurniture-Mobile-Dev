@@ -172,6 +172,13 @@
     <string name="label_orders">订单</string>
     <string name="label_all">全部</string>
     <string name="label_account">账户</string>
+    <string name="label_other">其他</string>
+    <string name="notification_summary">您有 %1$d 条新通知 (%2$s)</string>
+    <string name="mark_as_unread">标记为未读</string>
+    <string name="order_type">订单</string>
+    <string name="account_type">账户</string>
+    <string name="other_type">其他</string>
+    <string name="comma">, </string>
 
     <!-- Wishlist -->
     <string name="empty_wishlist">收藏夹为空</string>
@@ -196,6 +203,7 @@
     <string name="toast_voucher_applied">已应用优惠券：%1$s</string>
     <string name="toast_order_id">订单号：%1$s</string>
     <string name="toast_mark_all_read">已将所有通知标记为已读</string>
+    <string name="toast_mark_unread">已标记为未读</string>
     <string name="toast_login_required_orders">请登录以查看订单</string>
 
     <!-- Formats & Limits -->
@@ -330,4 +338,7 @@
     <!-- Voucher stub labels -->
     <string name="discount_percent_stub">减 %1$d%%</string>
     <string name="discount_fixed_stub">减 %1$dK</string>
+
+    <string name="read_more">查看更多</string>
+    <string name="read_less">收起</string>
 </resources>
