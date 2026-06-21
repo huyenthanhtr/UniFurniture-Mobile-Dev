@@ -202,7 +202,7 @@ public class HomeFragment extends Fragment {
 
         if (binding.btnViewAllPromotions != null) {
             binding.btnViewAllPromotions.setOnClickListener(v ->
-                    Navigation.findNavController(requireView()).navigate(R.id.promotionsFragment));
+                    Navigation.findNavController(requireView()).navigate(R.id.voucherListFragment));
         }
 
         // Collections

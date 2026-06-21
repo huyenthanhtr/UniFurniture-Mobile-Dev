@@ -35,7 +35,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom|center_horizontal"
-                    android:layout_marginBottom="14dp"
+                    android:layout_marginBottom="36dp"
+                    app:dotsColor="#D1C7BD"
+                    app:selectedDotColor="@color/accent"
+                    app:dotsSize="6dp"
+                    app:dotsSpacing="4dp"
                     android:visibility="gone" />
 
                 <TextView

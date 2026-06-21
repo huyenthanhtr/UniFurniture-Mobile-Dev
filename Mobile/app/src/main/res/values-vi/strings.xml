@@ -339,4 +339,19 @@
 
     <string name="read_more">Xem thêm</string>
     <string name="read_less">Thu gọn</string>
+    <string name="login_required_title">Yêu cầu đăng nhập</string>
+    <string name="login_required_msg">Vui lòng đăng nhập để xem đơn hàng và theo dõi lịch sử mua hàng.</string>
+    <string name="voucher_applied_title">Áp dụng voucher thành công</string>
+    <string name="voucher_applied_msg">Mã giảm giá %s đã được áp dụng thành công.</string>
+    <string name="optimal_voucher_section_title">Mã Giảm Giá Tốt Nhất</string>
+    <string name="optimal_badge">TỐI ƯU NHẤT</string>
+    <string name="optimal_savings">Tiết kiệm %s</string>
+    <string name="voucher_name_fixed">Giảm %s</string>
+    <string name="voucher_name_percent">Giảm %d%%</string>
+    <string name="voucher_desc_fixed">Áp dụng cho đơn hàng từ %s.</string>
+    <string name="voucher_desc_percent">Giảm %1$d%% cho đơn hàng từ %2$s.</string>
+    <string name="voucher_desc_percent_max">Giảm %1$d%%, tối đa %2$s cho đơn hàng từ %3$s.</string>
+    <string name="voucher_expiry_date">Hạn dùng: %s</string>
+    <string name="btn_use_now">Sử dụng</string>
+    <string name="promotions_title_alt">🔥 Khuyến Mãi Hấp Dẫn</string>
 </resources>

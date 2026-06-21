@@ -346,4 +346,19 @@
 
     <string name="read_more">Read more</string>
     <string name="read_less">Read less</string>
+    <string name="login_required_title">Login Required</string>
+    <string name="login_required_msg">Please login to view your orders and track purchase history.</string>
+    <string name="voucher_applied_title">Voucher Applied</string>
+    <string name="voucher_applied_msg">Voucher code %s has been applied successfully.</string>
+    <string name="optimal_voucher_section_title">Best Discount Voucher</string>
+    <string name="optimal_badge">BEST CHOICE</string>
+    <string name="optimal_savings">Save %s</string>
+    <string name="voucher_name_fixed">Discount %s</string>
+    <string name="voucher_name_percent">Discount %d%%</string>
+    <string name="voucher_desc_fixed">Applicable to orders from %s.</string>
+    <string name="voucher_desc_percent">Save %1$d%% on orders from %2$s.</string>
+    <string name="voucher_desc_percent_max">Save %1$d%%, max %2$s for orders from %3$s.</string>
+    <string name="voucher_expiry_date">Expiry: %s</string>
+    <string name="btn_use_now">Apply</string>
+    <string name="promotions_title_alt">🔥 Hot Promotions</string>
 </resources>
