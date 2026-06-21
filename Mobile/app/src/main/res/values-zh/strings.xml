@@ -341,4 +341,19 @@
 
     <string name="read_more">查看更多</string>
     <string name="read_less">收起</string>
+    <string name="login_required_title">需要登录</string>
+    <string name="login_required_msg">请登录以查看您的订单并追踪购买历史记录。</string>
+    <string name="voucher_applied_title">已应用优惠券</string>
+    <string name="voucher_applied_msg">优惠券码 %s 已成功应用。</string>
+    <string name="optimal_voucher_section_title">最佳折扣券</string>
+    <string name="optimal_badge">最佳选择</string>
+    <string name="optimal_savings">节省 %s</string>
+    <string name="voucher_name_fixed">减免 %s</string>
+    <string name="voucher_name_percent">折扣 %d%%</string>
+    <string name="voucher_desc_fixed">适用于满 %s 的订单。</string>
+    <string name="voucher_desc_percent">满 %2$s 折扣 %1$d%%。</string>
+    <string name="voucher_desc_percent_max">满 %3$s 折扣 %1$d%%，最多减免 %2$s。</string>
+    <string name="voucher_expiry_date">有效期至: %s</string>
+    <string name="btn_use_now">使用</string>
+    <string name="promotions_title_alt">🔥 热门促销</string>
 </resources>

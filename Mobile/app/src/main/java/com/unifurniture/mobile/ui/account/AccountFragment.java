@@ -17,6 +17,7 @@ import com.unifurniture.mobile.data.remote.ApiService;
 import com.unifurniture.mobile.databinding.FragmentAccountBinding;
 import com.unifurniture.mobile.ui.auth.AuthActivity;
 import com.unifurniture.mobile.util.SessionManager;
+import com.unifurniture.mobile.util.CustomBlueDialog;
 import com.bumptech.glide.Glide;
 
 import android.widget.Toast;
@@ -56,9 +57,33 @@ public class AccountFragment extends Fragment {
                     startActivity(new Intent(requireContext(), AuthActivity.class)));
             
             binding.itemOrders.setOnClickListener(v -> 
-                    Toast.makeText(requireContext(), R.string.toast_login_required_orders, Toast.LENGTH_SHORT).show());
+                    CustomBlueDialog.show(
+                            requireContext(),
+                            R.drawable.ic_account,
+                            getString(R.string.login_required_title),
+                            getString(R.string.login_required_msg),
+                            getString(R.string.login),
+                            dialog -> {
+                                dialog.dismiss();
+                                startActivity(new Intent(requireContext(), AuthActivity.class));
+                            },
+                            getString(R.string.cancel),
+                            dialog -> dialog.dismiss()
+                    ));
             binding.itemMyReviews.setOnClickListener(v -> 
-                    Toast.makeText(requireContext(), R.string.toast_login_required_orders, Toast.LENGTH_SHORT).show());
+                    CustomBlueDialog.show(
+                            requireContext(),
+                            R.drawable.ic_account,
+                            getString(R.string.login_required_title),
+                            getString(R.string.login_required_msg),
+                            getString(R.string.login),
+                            dialog -> {
+                                dialog.dismiss();
+                                startActivity(new Intent(requireContext(), AuthActivity.class));
+                            },
+                            getString(R.string.cancel),
+                            dialog -> dialog.dismiss()
+                    ));
         } else {
             binding.btnLoginPrompt.setVisibility(View.GONE);
             binding.btnLogout.setVisibility(View.VISIBLE);

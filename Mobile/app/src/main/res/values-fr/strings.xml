@@ -354,4 +354,19 @@
 
     <string name="read_more">Voir plus</string>
     <string name="read_less">Réduire</string>
+    <string name="login_required_title">Connexion requise</string>
+    <string name="login_required_msg">Veuillez vous connecter pour voir vos commandes et suivre l\'historique d\'achat.</string>
+    <string name="voucher_applied_title">Voucher appliqué</string>
+    <string name="voucher_applied_msg">Le code de réduction %s a été appliqué avec succès.</string>
+    <string name="optimal_voucher_section_title">Meilleur Bon de Réduction</string>
+    <string name="optimal_badge">MEILLEUR CHOIX</string>
+    <string name="optimal_savings">Économisez %s</string>
+    <string name="voucher_name_fixed">Remise %s</string>
+    <string name="voucher_name_percent">Remise %d%%</string>
+    <string name="voucher_desc_fixed">Applicable aux commandes dès %s.</string>
+    <string name="voucher_desc_percent">Économisez %1$d%% sur les commandes dès %2$s.</string>
+    <string name="voucher_desc_percent_max">Économisez %1$d%%, max %2$s pour les commandes dès %3$s.</string>
+    <string name="voucher_expiry_date">Expire le: %s</string>
+    <string name="btn_use_now">Utiliser</string>
+    <string name="promotions_title_alt">🔥 Offres Spéciales</string>
 </resources>

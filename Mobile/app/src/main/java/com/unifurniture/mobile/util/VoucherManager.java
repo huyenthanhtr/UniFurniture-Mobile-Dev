@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.unifurniture.mobile.R;
+import com.unifurniture.mobile.data.model.CouponDto;
 import com.unifurniture.mobile.data.model.VoucherDto;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -14,7 +16,6 @@ public class VoucherManager {
     private static final String PREFS_NAME = "unifurniture_vouchers";
     private static final String KEY_VOUCHERS = "vouchers_list";
     private static final String KEY_SELECTED = "selected_voucher_code";
-    private static final String KEY_SEEDED = "vouchers_seeded";
 
     private static VoucherManager instance;
     private final SharedPreferences prefs;
@@ -35,9 +36,6 @@ public class VoucherManager {
     public synchronized List<VoucherDto> getVouchers() {
         String json = prefs.getString(KEY_VOUCHERS, null);
         if (json == null) {
-            if (!prefs.getBoolean(KEY_SEEDED, false)) {
-                return seedDefaultVouchers();
-            }
             return new ArrayList<>();
         }
         Type type = new TypeToken<ArrayList<VoucherDto>>() {}.getType();
@@ -104,63 +102,66 @@ public class VoucherManager {
         return 0;
     }
 
-    private void saveVouchers(List<VoucherDto> list) {
+    public synchronized void saveVouchers(List<VoucherDto> list) {
         prefs.edit().putString(KEY_VOUCHERS, gson.toJson(list)).apply();
     }
 
-    private List<VoucherDto> seedDefaultVouchers() {
-        List<VoucherDto> list = new ArrayList<>();
+    public static VoucherDto convertCouponToVoucher(Context context, CouponDto coupon) {
+        if (coupon == null) return null;
 
-        list.add(new VoucherDto(
-                "UNIFRESH50",
-                "Giảm 50.000 ₫",
-                "Áp dụng cho mọi đơn hàng có giá trị từ 500.000 ₫ trở lên khi mua đồ gỗ nội thất.",
-                "fixed",
-                50000,
-                500000,
-                0,
-                false,
-                "Hạn dùng: 31/12/2026"
-        ));
+        String name;
+        String description;
 
-        list.add(new VoucherDto(
-                "UNISUPER10",
-                "Giảm 10%",
-                "Giảm ngay 10% tổng giá trị đơn hàng, tối đa 200.000 ₫ cho các đơn hàng từ 1.000.000 ₫.",
-                "percent",
-                10,
-                1000000,
-                200000,
-                false,
-                "Hạn dùng: 31/12/2026"
-        ));
+        if ("fixed".equalsIgnoreCase(coupon.discountType)) {
+            name = context.getString(R.string.voucher_name_fixed, FormatUtil.formatCurrency(coupon.discountValue));
+            description = context.getString(R.string.voucher_desc_fixed, FormatUtil.formatCurrency(coupon.minOrderValue));
+        } else {
+            name = context.getString(R.string.voucher_name_percent, (int) coupon.discountValue);
+            double maxAmount = (coupon.maxDiscountAmount != null) ? coupon.maxDiscountAmount : 0;
+            if (maxAmount > 0) {
+                description = context.getString(R.string.voucher_desc_percent_max,
+                        (int) coupon.discountValue,
+                        FormatUtil.formatCurrency(maxAmount),
+                        FormatUtil.formatCurrency(coupon.minOrderValue));
+            } else {
+                description = context.getString(R.string.voucher_desc_percent,
+                        (int) coupon.discountValue,
+                        FormatUtil.formatCurrency(coupon.minOrderValue));
+            }
+        }
 
-        list.add(new VoucherDto(
-                "WELCOMENEW",
-                "Giảm 15%",
-                "Mã giảm giá chào mừng thành viên mới. Giảm 15% tối đa 100.000 ₫ không yêu cầu giá trị tối thiểu.",
-                "percent",
-                15,
-                0,
-                100000,
-                false,
-                "Hạn dùng: 31/12/2026"
-        ));
+        String expiration = formatExpirationDate(context, coupon.endAt);
+        boolean isUsed = "used".equalsIgnoreCase(coupon.status) || coupon.used >= coupon.totalLimit;
 
-        list.add(new VoucherDto(
-                "FREESHIP30",
-                "Giảm 30.000 ₫",
-                "Áp dụng cho đơn hàng từ 300.000 ₫ trở lên. Hỗ trợ phí vận chuyển tận nhà.",
-                "fixed",
-                30000,
-                300000,
-                0,
-                false,
-                "Hạn dùng: 31/12/2026"
-        ));
+        return new VoucherDto(
+                coupon.code,
+                name,
+                description,
+                coupon.discountType,
+                coupon.discountValue,
+                coupon.minOrderValue,
+                (coupon.maxDiscountAmount != null) ? coupon.maxDiscountAmount : 0,
+                isUsed,
+                expiration
+        );
+    }
 
-        saveVouchers(list);
-        prefs.edit().putBoolean(KEY_SEEDED, true).apply();
-        return list;
+    private static String formatExpirationDate(Context context, String endAt) {
+        if (endAt == null || endAt.isEmpty()) {
+            return "";
+        }
+        try {
+            if (endAt.length() >= 10) {
+                String datePart = endAt.substring(0, 10);
+                String[] parts = datePart.split("-");
+                if (parts.length == 3) {
+                    String formattedDate = parts[2] + "/" + parts[1] + "/" + parts[0];
+                    return context.getString(R.string.voucher_expiry_date, formattedDate);
+                }
+            }
+        } catch (Exception e) {
+            // fallback
+        }
+        return context.getString(R.string.voucher_expiry_date, endAt);
     }
 }

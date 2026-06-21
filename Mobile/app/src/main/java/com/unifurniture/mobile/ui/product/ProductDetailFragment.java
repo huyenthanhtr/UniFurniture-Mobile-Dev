@@ -347,38 +347,26 @@ public class ProductDetailFragment extends Fragment {
             binding.chipGroupVariants.removeAllViews();
 
             if (response != null && response.items != null && !response.items.isEmpty()) {
-                double min = Double.MAX_VALUE;
-                double max = Double.MIN_VALUE;
+                // Find index of variant with the highest discount percentage
+                int selectedIndex = 0;
+                double maxDiscountPct = 0.0;
+                for (int i = 0; i < response.items.size(); i++) {
+                    var variant = response.items.get(i);
+                    if (variant.price != null && variant.compareAtPrice != null && variant.compareAtPrice > variant.price) {
+                        double pct = (variant.compareAtPrice - variant.price) / variant.compareAtPrice;
+                        if (pct > maxDiscountPct) {
+                            maxDiscountPct = pct;
+                            selectedIndex = i;
+                        }
+                    }
+                }
 
+                int idx = 0;
                 for (var variant : response.items) {
                     if (variant.id != null) {
                         variantStock.put(variant.id, variant.stockQuantity != null ? variant.stockQuantity : 0);
                     }
-                    if (variant.price != null) {
-                        min = Math.min(min, variant.price);
-                        max = Math.max(max, variant.price);
-                    }
-                }
 
-                if (min != Double.MAX_VALUE && max != Double.MIN_VALUE) {
-                    if (min < max) {
-                        binding.tvPrice.setText(getString(R.string.price_range_format,
-                                FormatUtil.formatCurrency(min),
-                                FormatUtil.formatCurrency(max)));
-                        binding.tvPrice.setTextColor(ContextCompat.getColor(requireContext(), R.color.black));
-                        binding.tvOriginalPrice.setVisibility(View.GONE);
-                        binding.tvDiscount.setVisibility(View.GONE);
-                    } else {
-                        ProductDto product = viewModel.getProduct().getValue();
-                        Double compareAt = product != null ? product.getEffectiveCompareAtPrice() : null;
-                        if (response.items.size() == 1) {
-                            compareAt = response.items.get(0).compareAtPrice != null ? response.items.get(0).compareAtPrice : compareAt;
-                        }
-                        updatePricingUI(min, compareAt);
-                    }
-                }
-
-                for (var variant : response.items) {
                     com.google.android.material.chip.Chip chip = new com.google.android.material.chip.Chip(requireContext());
                     chip.setId(View.generateViewId());
                     chip.setText(getVariantLabelText(variant));
@@ -400,17 +388,12 @@ public class ProductDetailFragment extends Fragment {
                     });
 
                     binding.chipGroupVariants.addView(chip);
+                    if (idx == selectedIndex) {
+                        chip.setChecked(true);
+                    }
+                    idx++;
                 }
 
-                if (binding.chipGroupVariants.getChildCount() == 1) {
-                    com.google.android.material.chip.Chip singleChip =
-                            (com.google.android.material.chip.Chip) binding.chipGroupVariants.getChildAt(0);
-                    if (singleChip != null) {
-                        singleChip.setChecked(true);
-                    }
-                } else {
-                    updateStockStatus(null);
-                }
                 binding.chipGroupVariants.setVisibility(View.VISIBLE);
             } else {
                 binding.chipGroupVariants.setVisibility(View.GONE);
