@@ -19,6 +19,7 @@ public class NotificationAdapter extends ListAdapter<NotificationDto, Notificati
 
     public interface OnNotificationClickListener {
         void onNotificationClick(NotificationDto notification);
+        void onMarkUnreadClick(NotificationDto notification);
     }
 
     private final OnNotificationClickListener listener;
@@ -35,7 +36,8 @@ public class NotificationAdapter extends ListAdapter<NotificationDto, Notificati
                 return oldItem.isRead == newItem.isRead &&
                         oldItem.title.equals(newItem.title) &&
                         oldItem.content.equals(newItem.content) &&
-                        oldItem.timestamp == newItem.timestamp;
+                        oldItem.timestamp == newItem.timestamp &&
+                        (oldItem.type == null ? newItem.type == null : oldItem.type.equals(newItem.type));
             }
         });
         this.listener = listener;
@@ -78,29 +80,42 @@ public class NotificationAdapter extends ListAdapter<NotificationDto, Notificati
 
             // Visual properties based on read/unread
             if (item.isRead) {
-                binding.cardNotification.setCardBackgroundColor(ContextCompat.getColor(context, R.color.white));
+                binding.tvTitle.setTypeface(null, android.graphics.Typeface.NORMAL);
                 binding.viewUnreadDot.setVisibility(View.GONE);
+                binding.btnMarkUnread.setVisibility(View.VISIBLE);
             } else {
-                binding.cardNotification.setCardBackgroundColor(ContextCompat.getColor(context, R.color.notification_unread));
+                binding.tvTitle.setTypeface(null, android.graphics.Typeface.BOLD);
                 binding.viewUnreadDot.setVisibility(View.VISIBLE);
+                binding.btnMarkUnread.setVisibility(View.GONE);
             }
 
-            // Theme icon type
+            // Background color based on type
+            int bgColor;
             if ("order".equals(item.type)) {
+                bgColor = ContextCompat.getColor(context, R.color.bg_notif_order);
                 binding.ivNotificationIcon.setImageResource(R.drawable.ic_cart);
-                binding.ivNotificationIcon.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.primary)));
-                // Soft background tint for order icon container
-                binding.cardIconContainer.setCardBackgroundColor(ContextCompat.getColor(context, R.color.notification_unread));
-            } else {
+            } else if ("account".equals(item.type)) {
+                bgColor = ContextCompat.getColor(context, R.color.bg_notif_account);
                 binding.ivNotificationIcon.setImageResource(R.drawable.ic_account);
-                binding.ivNotificationIcon.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.accent)));
-                // Soft gold/amber tint background
-                binding.cardIconContainer.setCardBackgroundColor(ColorStateList.valueOf(0xFFFFF9E6));
+            } else {
+                bgColor = ContextCompat.getColor(context, R.color.bg_notif_other);
+                binding.ivNotificationIcon.setImageResource(R.drawable.ic_bell);
             }
+            binding.cardNotification.setCardBackgroundColor(bgColor);
+
+            // soft background for icon container
+            binding.cardIconContainer.setCardBackgroundColor(ContextCompat.getColor(context, R.color.white));
+            binding.ivNotificationIcon.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.primary)));
 
             binding.getRoot().setOnClickListener(v -> {
                 if (listener != null) {
                     listener.onNotificationClick(item);
+                }
+            });
+
+            binding.btnMarkUnread.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onMarkUnreadClick(item);
                 }
             });
         }

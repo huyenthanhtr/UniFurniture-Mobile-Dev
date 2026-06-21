@@ -38,10 +38,15 @@ public class ApiClient {
 
                         // Append the current UI language as ?lang= so the backend can return
                         // translated product content (name/short_description/description).
-                        // Endpoints that don't use it simply ignore the extra query param.
+                        // Only add it to endpoints that support translation and don't fail on extra query params.
                         String lang = com.unifurniture.mobile.util.LanguageHelper
                                 .getLanguage(UniFurnitureApp.getInstance());
-                        if (lang != null && !lang.isEmpty() && original.url().queryParameter("lang") == null) {
+                        String path = original.url().encodedPath();
+                        boolean shouldAppendLang = (path.contains("/products") && !path.contains("/product-images") && !path.contains("/product-variants"))
+                                || path.contains("/categories")
+                                || path.contains("/collections");
+
+                        if (shouldAppendLang && lang != null && !lang.isEmpty() && original.url().queryParameter("lang") == null) {
                             builder.url(original.url().newBuilder()
                                     .addQueryParameter("lang", lang)
                                     .build());

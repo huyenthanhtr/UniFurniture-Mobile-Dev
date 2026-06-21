@@ -171,6 +171,14 @@
     <string name="content_desc_mark_all_read">Đánh dấu tất cả đã đọc</string>
     <string name="label_orders">Đơn hàng</string>
     <string name="label_all">Tất cả</string>
+    <string name="label_account">Tài khoản</string>
+    <string name="label_other">Khác</string>
+    <string name="notification_summary">Có %1$d thông báo mới (%2$s)</string>
+    <string name="mark_as_unread">Đánh dấu chưa đọc</string>
+    <string name="order_type">đơn hàng</string>
+    <string name="account_type">tài khoản</string>
+    <string name="other_type">khác</string>
+    <string name="comma">, </string>
 
     <!-- Wishlist -->
     <string name="empty_wishlist">Danh sách yêu thích trống</string>
@@ -195,6 +203,7 @@
     <string name="toast_voucher_applied">Đã áp dụng mã: %1$s</string>
     <string name="toast_order_id">Đơn hàng: %1$s</string>
     <string name="toast_mark_all_read">Đã đánh dấu tất cả là đã đọc</string>
+    <string name="toast_mark_unread">Đã đánh dấu là chưa đọc</string>
     <string name="toast_login_required_orders">Vui lòng đăng nhập để xem đơn hàng</string>
     <string name="image_indicator_format">%1$d/%2$d</string>
     <string name="price_range_format">%1$s - %2$s</string>
@@ -327,4 +336,7 @@
     <!-- Voucher stub labels -->
     <string name="discount_percent_stub">GIẢM %1$d%%</string>
     <string name="discount_fixed_stub">GIẢM %1$dK</string>
+
+    <string name="read_more">Xem thêm</string>
+    <string name="read_less">Thu gọn</string>
 </resources>

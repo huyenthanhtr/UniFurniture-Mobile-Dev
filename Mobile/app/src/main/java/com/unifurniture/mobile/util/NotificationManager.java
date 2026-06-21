@@ -67,11 +67,19 @@ public class NotificationManager {
     }
 
     public synchronized void markAsRead(String id) {
+        updateReadStatus(id, true);
+    }
+
+    public synchronized void markAsUnread(String id) {
+        updateReadStatus(id, false);
+    }
+
+    private synchronized void updateReadStatus(String id, boolean isRead) {
         List<NotificationDto> list = getNotifications();
         boolean changed = false;
         for (NotificationDto n : list) {
-            if (n.id.equals(id) && !n.isRead) {
-                n.isRead = true;
+            if (n.id.equals(id) && n.isRead != isRead) {
+                n.isRead = isRead;
                 changed = true;
                 break;
             }

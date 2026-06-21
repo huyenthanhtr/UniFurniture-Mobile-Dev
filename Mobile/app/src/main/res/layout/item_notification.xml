@@ -49,7 +49,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="15sp"
-                android:textStyle="bold"
                 android:textColor="@color/black" />
 
             <TextView
@@ -70,14 +69,32 @@
 
         </LinearLayout>
 
-        <!-- Unread Indicator Dot -->
-        <View
-            android:id="@+id/viewUnreadDot"
-            android:layout_width="8dp"
-            android:layout_height="8dp"
-            android:layout_marginStart="8dp"
-            android:background="@drawable/bg_notification_badge"
-            android:visibility="gone" />
+        <!-- Unread & Actions -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="end"
+            android:layout_marginStart="8dp">
+
+            <View
+                android:id="@+id/viewUnreadDot"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:background="@drawable/bg_notification_badge"
+                android:visibility="gone" />
+
+            <ImageButton
+                android:id="@+id/btnMarkUnread"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginTop="8dp"
+                android:src="@drawable/ic_unread"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="@color/gray_400"
+                android:contentDescription="@string/mark_as_unread"
+                android:visibility="gone" />
+        </LinearLayout>
 
     </LinearLayout>
 

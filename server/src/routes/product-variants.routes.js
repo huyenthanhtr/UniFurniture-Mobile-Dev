@@ -13,7 +13,7 @@ router.get("/", async (req, res) => {
 
     const filter = {};
     for (const [k, v] of Object.entries(req.query)) {
-      if (["page", "limit", "sort", "fields", "exclude"].includes(k)) continue;
+      if (["page", "limit", "sort", "fields", "exclude", "lang"].includes(k)) continue;
       filter[k] = v;
     }
 

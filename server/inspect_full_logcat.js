@@ -6,7 +6,7 @@ const adbPath = '"C:\\Users\\ASUS\\AppData\\Local\\Android\\Sdk\\platform-tools\
 try {
     console.log("Fetching logcat logs...");
     // Clear logcat buffer first to capture fresh logs if needed, but let's just dump current buffer
-    const buffer = execSync(`${adbPath} logcat -d -t 10000`);
+    const buffer = execSync(`${adbPath} logcat -d -t 10000`, { maxBuffer: 10 * 1024 * 1024 });
     const logcat = buffer.toString('utf8');
     fs.writeFileSync('logcat_full.txt', logcat);
     console.log("Logs written to logcat_full.txt");
