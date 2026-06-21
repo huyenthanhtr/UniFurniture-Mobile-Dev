@@ -1,0 +1,109 @@
+﻿<div class="card shadow-sm mb-3">
+  <div class="card-body px-4 py-4">
+    <h6 class="fw-bold mb-4">Giỏ hàng</h6>
+
+    <div *ngFor="let item of cartItems" class="cart-item pb-3 mb-3">
+      <div class="d-flex gap-3 align-items-start">
+        <img [src]="item.imageUrl" [alt]="item.name" class="item-img rounded" />
+
+        <div class="flex-grow-1">
+          <div class="item-name fw-semibold small">{{ item.name }}</div>
+          <div class="variant-tag mt-1">{{ item.variant }}</div>
+
+          <div class="price-row mt-2">
+            <span class="sale-price">{{ formatCurrency(item.salePrice) }}</span>
+            <span class="original-price" *ngIf="item.originalPrice > item.salePrice">
+              {{ formatCurrency(item.originalPrice) }}
+            </span>
+          </div>
+
+          <div *ngIf="item.originalPrice > item.salePrice" class="discount-hint small mt-1">
+            Tiết kiệm {{ formatCurrency(getSavedPerItem(item)) }} / sản phẩm
+          </div>
+
+          <div class="line-total mt-2">
+            Tổng {{ item.quantity }} sản phẩm: <strong>{{ formatCurrency(getLineTotal(item)) }}</strong>
+          </div>
+
+          <div *ngIf="hasStockError(item.cartKey)" class="stock-error mt-1">Đã vượt quá số lượng tồn kho</div>
+        </div>
+
+        <div class="d-flex flex-column align-items-end gap-2">
+
+          <div class="qty-control qty-control--locked d-flex align-items-center gap-2">
+            <button type="button" class="qty-btn" disabled>-</button>
+            <input
+              type="number"
+              class="qty-input"
+              [value]="item.quantity"
+              min="1"
+              readonly
+            />
+            <button type="button" class="qty-btn" disabled>+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-payment-method
+  [form]="form"
+  [total]="total"
+  [requireDeposit]="requireDeposit"
+  [depositAmount]="depositAmount"
+  (formChange)="formChange.emit($event)"
+></app-payment-method>
+
+
+<div class="card shadow-sm mb-3">
+  <div class="card-body px-4 py-3">
+    <h6 class="fw-semibold mb-3">Tóm tắt đơn hàng</h6>
+    <div class="summary-row d-flex justify-content-between small mb-2">
+      <span class="text-muted">Tổng tiền hàng</span>
+      <span>{{ formatCurrency(subtotal + totalDiscount) }}</span>
+    </div>
+    <div class="summary-row d-flex justify-content-between small mb-2 text-success" *ngIf="totalDiscount > 0">
+      <span>Giảm giá sản phẩm</span>
+      <span>-{{ formatCurrency(totalDiscount) }}</span>
+    </div>
+    <div class="summary-row d-flex justify-content-between small mb-2 text-success" *ngIf="couponAmount > 0">
+      <span>Giảm từ mã khuyến mãi</span>
+      <span>-{{ formatCurrency(couponAmount) }}</span>
+    </div>
+    <div class="summary-row d-flex justify-content-between small mb-2">
+      <span class="text-muted">Phí vận chuyển</span>
+      <span class="text-success fw-semibold">Đã gồm trong giá sản phẩm</span>
+    </div>
+    <div class="divider my-2"></div>
+    <div class="summary-row d-flex justify-content-between fw-bold">
+      <span>Tổng thanh toán toàn đơn</span>
+      <span class="text-primary fs-6">{{ formatCurrency(total) }}</span>
+    </div>
+
+    <div *ngIf="isLoggedIn" class="summary-row d-flex justify-content-between small mt-2">
+      <span class="text-muted">Điểm tích lũy dự kiến</span>
+      <span class="text-success fw-semibold">+{{ estimatedPoints }} điểm</span>
+    </div>
+
+    <div *ngIf="requireDeposit" class="deposit-row mt-2 p-2 rounded small text-center">
+      Cần cọc ngay: <strong class="text-danger">{{ formatCurrency(depositAmount) }}</strong>
+    </div>
+  </div>
+</div>
+
+<button
+  type="button"
+  class="btn btn-place-order w-100 fw-bold py-3"
+  [disabled]="!canSubmit || isSubmitting"
+  (click)="placeOrder.emit()"
+>
+  <span *ngIf="!isSubmitting">
+    <i class="bi bi-bag-check me-2"></i>Đặt hàng
+  </span>
+  <span *ngIf="isSubmitting">
+    <span class="spinner-border spinner-border-sm me-2"></span>Đang xử lý...
+  </span>
+</button>
+
+

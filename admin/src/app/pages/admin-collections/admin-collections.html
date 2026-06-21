@@ -1,0 +1,242 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Quản lý Bộ sưu tập</h1>
+    </div>
+    <button class="btn btn-primary" (click)="openAddModal()">
+      <i class="fas fa-plus" style="margin-right: 6px;"></i> Thêm bộ sưu tập
+    </button>
+  </div>
+
+  <div class="filter-bar card mb-4">
+    <div class="filter-wrapper d-flex flex-wrap align-items-center gap-3">
+      <div class="filter-item">
+        <input type="text" class="search-input" placeholder="Tìm theo tên..." [(ngModel)]="searchTerm" (input)="applyFilters()">
+      </div>
+
+      <div class="filter-item">
+        <select class="toolbar-select" [(ngModel)]="statusFilter" (change)="applyFilters()">
+          <option value="all">-- Trạng thái --</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+
+      <button class="btn btn-ghost btn-icon d-flex align-items-center justify-content-center" 
+              (click)="resetFilters()" title="Đặt lại bộ lọc">
+        <i class="fas fa-undo"></i>
+      </button>
+    </div>
+  </div>
+
+<div class="table-wrap card">
+    <table style="width: 100%; table-layout: fixed; border-collapse: collapse; min-width: 900px;">
+      <thead>
+        <tr>
+          <th style="width: 150px; text-align: center;">Banner</th>
+          
+          <th style="width: 20%;" class="cell-title sortable text-center" (click)="sortBy('name')">
+            Tên bộ sưu tập <i class="fas" [ngClass]="getSortIcon('name')"></i>
+          </th>
+          
+          <th style="width: 40%;" class="text-center">Mô tả</th>
+          
+          <th style="width: 15%; text-align: center;">Trạng thái</th>
+          
+          <th style="width: 120px;" class="th-actions text-center">Hành động</th>
+        </tr>
+      </thead>
+      
+      <tbody>
+        <tr *ngIf="filteredCollections.length === 0">
+          <td colspan="5" class="state">Không tìm thấy bộ sưu tập nào phù hợp.</td>
+        </tr>
+
+        <tr *ngFor="let item of paginatedCollections">
+          <td class="text-center">
+            <img [src]="item.banner || item.banner_url || item.image_url" alt="" class="img-thumbnail-custom">
+          </td>
+          
+          <td style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; " [title]="item.name" class="text-center">
+            <strong>{{ item.name }}</strong>
+          </td>
+          
+          <td style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #666;" [title]="item.description || 'Không có mô tả'">
+            {{ item.description || '-' }}
+          </td>
+          
+          <td class="text-center">
+            <select [(ngModel)]="item.status" (change)="updateStatus(item)" [className]="'status-dropdown ' + item.status">
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </td>
+          
+          <td class="actions-cell">
+            <div class="actions justify-content-center">
+              <button class="btn btn-ghost btn-sm btn-icon-only" (click)="viewProducts(item)" title="Xem sản phẩm thuộc bộ sưu tập">
+                <i class="fas fa-box-open"></i> 
+              </button>
+              <button class="btn btn-ghost btn-sm btn-icon-only" (click)="openEditModal(item)" title="Sửa bộ sưu tập">
+                <i class="fas fa-edit"></i> 
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+<div class="pagination" *ngIf="totalPages > 1">
+    <button class="pg pg-arrow" (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1">&#8249;</button>
+    
+    <ng-container *ngFor="let p of visiblePages">
+      <button class="pg" [class.active]="p === currentPage" (click)="changePage(p)">
+        {{ p }}
+      </button>
+    </ng-container>
+
+    <button class="pg pg-arrow" (click)="changePage(currentPage + 1)" [disabled]="currentPage >= totalPages">&#8250;</button>
+  </div>
+
+  <div class="modal-overlay" *ngIf="showModal">
+    <div class="modal-card">
+      <div class="modal-card-header">
+        <h3>{{ isEditMode ? 'Chỉnh sửa bộ sưu tập' : 'Thêm bộ sưu tập mới' }}</h3>
+        <button class="close-modal" (click)="closeModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-card-body">
+        <div *ngIf="validationError" class="validation-alert">
+          <i class="fas fa-exclamation-triangle"></i> {{ validationError }}
+        </div>
+
+        <div class="modal-form-grid">
+          <div class="form-group full-width">
+            <label class="form-label">Tên bộ sưu tập *</label>
+            <input type="text" [(ngModel)]="currentCollection.name" name="name" 
+                   (input)="realTimeValidate()" (blur)="realTimeValidate()" 
+                   class="search-input">
+          </div>
+          
+          <div class="form-group full-width">
+            <label class="form-label">Trạng thái</label>
+            <select [(ngModel)]="currentCollection.status" name="status" class="toolbar-select">
+              <option value="active">Hoạt động</option>
+              <option value="inactive">Không hoạt động</option>
+            </select>
+          </div>
+          
+          <div class="form-group full-width">
+            <label class="form-label">Hình ảnh Banner</label>
+            <input type="file" class="search-input" style="padding: 7px 12px;" (change)="onFileSelected($event)" accept="image/*">
+            <div class="mt-2 text-center p-2 border rounded" *ngIf="imagePreview || currentCollection.banner || currentCollection.banner_url" style="background-color: #faf7f3;">
+              <img [src]="imagePreview || currentCollection.banner || currentCollection.banner_url" alt="Preview" style="max-height: 120px; border-radius: 8px; object-fit: cover; border: 1px solid #ddd2c6;">
+            </div>
+          </div>
+          
+          <div class="form-group full-width">
+            <label class="form-label">Mô tả</label>
+            <textarea class="search-input" [(ngModel)]="currentCollection.description" name="desc" rows="3" style="height: auto; padding: 10px;"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-card-footer">
+        <button class="btn btn-ghost" (click)="closeModal()">Hủy bỏ</button>
+        <button class="btn btn-primary" [disabled]="!isFormValid" (click)="confirmSave()">Lưu thông tin</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="confirm-overlay" *ngIf="showConfirmPopup">
+    <div class="confirm-box">
+      <h4>Xác nhận</h4>
+      <p>Bạn có chắc chắn muốn lưu các thay đổi này không?</p>
+      <div class="actions justify-content-center">
+        <button class="btn btn-ghost" (click)="cancelConfirm()">Hủy</button>
+        <button class="btn btn-primary" (click)="executeSave()">Đồng ý lưu</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="confirm-overlay" *ngIf="showResultPopup">
+    <div class="result-box" [class]="resultMessage.type">
+      <div class="icon-result">
+        <i class="fas" [ngClass]="resultMessage.type === 'success' ? 'fa-check' : 'fa-times'"></i>
+      </div>
+      <h4>{{ resultMessage.title }}</h4>
+      <p>{{ resultMessage.message }}</p>
+      <button class="btn btn-primary w-100" style="width: 100%;" (click)="showResultPopup = false">Đóng</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" *ngIf="showProductsModal">
+    <div class="modal-card" style="width: 850px; max-width: 95%;">
+      <div class="modal-card-header">
+        <h3>Sản phẩm thuộc: <span class="text-highlight">{{ selectedCollectionForProducts?.name }}</span></h3>
+        <button class="close-modal" (click)="closeProductsModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-card-body" style="padding: 0; background: #fbfbfb;">
+        <div *ngIf="isLoadingProducts" class="state" style="padding: 60px;">
+          <i class="fas fa-spinner fa-spin fa-2x" style="color: #908372; margin-bottom: 12px;"></i>
+          <p>Đang tải danh sách sản phẩm...</p>
+        </div>
+
+        <div class="table-wrap" *ngIf="!isLoadingProducts" style="border-radius: 0; border: none; max-height: 60vh; overflow-y: auto;">
+          <table style="width: 100%; table-layout: fixed; border-collapse: collapse;">
+            <thead style="position: sticky; top: 0; z-index: 1; box-shadow: 0 1px 2px rgba(0,0,0,0.05); background: #faf7f3;">
+              <tr>
+                <th style="width: 70px; text-align: center;">Ảnh</th>
+                <th style="width: 40%;">Tên sản phẩm</th>
+                <th style="width: 15%;">SKU</th>
+                <th style="width: 20%;">Thương hiệu</th>
+                <th style="width: 15%; text-align: center;">Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="collectionProducts.length === 0">
+                <td colspan="5" class="state" style="background: #fff;">Bộ sưu tập này hiện chưa có sản phẩm nào.</td>
+              </tr>
+              <tr *ngFor="let prod of collectionProducts" 
+                  class="product-row"
+                  (click)="goToProductDetail(prod)"
+                  title="Nhấn để xem chi tiết sản phẩm này">
+                <td class="text-center">
+                  <img [src]="prod.thumbnail || prod.thumbnail_url" alt="" class="img-thumbnail-custom" style="width: 40px; height: 40px; border-radius: 6px;">
+                </td>
+                <td>
+                  <div style="width: 100%; font-weight: 600; color: #444; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" [title]="prod.name">
+                    {{ prod.name }}
+                  </div>
+                </td>
+                <td>
+                  <span style="background: #f2ede8; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-family: monospace;">{{ prod.sku || 'N/A' }}</span>
+                </td>
+                <td>
+                  <div style="width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    {{ prod.brand || '-' }}
+                  </div>
+                </td>
+                <td class="text-center">
+                  <span class="status-dropdown" [ngClass]="prod.status === 'active' ? 'active' : 'inactive'" style="padding: 4px 10px; background-image: none; cursor: pointer;">
+                    {{ prod.status === 'active' ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="modal-card-footer">
+        <button class="btn btn-primary" (click)="closeProductsModal()">Đóng cửa sổ</button>
+      </div>
+    </div>
+  </div>
+</div>

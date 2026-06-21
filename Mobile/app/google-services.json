@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "228900859089",
+    "project_id": "unifurniture-mobile-dev",
+    "storage_bucket": "unifurniture-mobile-dev.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:228900859089:android:e46adb839549b981b3a9f0",
+        "android_client_info": {
+          "package_name": "com.unifurniture.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDOvWf7bPJjT20Pi6dFd5uCPzqNgStpxvw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

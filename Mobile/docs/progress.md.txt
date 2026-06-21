@@ -1,0 +1,918 @@
+# UniFurniture Mobile — Progress Tracker
+
+Last updated: 2026-06-01 (i18n + UI/UX bonus features complete)
+Branch: feature/home
+Owner of this file: Như Ngọc
+
+> **2026-06-01:** P1 ✅ P2 ✅ P3 ✅ — ALL DONE. Bugs fixed: rvReviews LayoutManager + ReviewDto camelCase + Glide placeholder. Scope complete.
+> **2026-06-01 (session 2):** Multi-language (EN/VI/ZH/FR) + 7 UI/UX improvements (badge, shimmer, active chips, cart feedback, pinch-to-zoom, recently viewed, review sort) — ALL DONE.
+
+---
+
+## Team Assignments
+
+| Person | Scope | Branch |
+|---|---|---|
+| Khải Đào | Auth Flow (Splash, Login, Register, OTP, Forgot Password) | feature/auth-login |
+| Như Ngọc | Home, Product List, Search, Filter, Product Detail | feature/home |
+| Thảo Vân | Product Detail (variant/cart actions), Wishlist, Cart, Notifications | feature/cart |
+| Quang Vinh | Checkout, QR Payment, Order Success | feature/checkout |
+| Thanh Huyền | Profile, Orders, Order Tracking, Reviews — also team coordinator | feature/profile |
+
+---
+
+## Current Project Status
+
+The initial mobile scaffold was committed by Khải Đào (`17e9ba3`). It established a
+working skeleton for all screens and wired up the API layer. Auth (Khải's scope) is
+functionally complete. All other screens — including Như Ngọc's scope — are scaffolded
+but incomplete: core features specified in the documentation are missing.
+
+**Completed 2026-05-31:** Như Ngọc implemented and fully verified the Home Banner/Image
+Slider (P1 #1). Initial implementation + 3 post-implementation bugs fixed + UI polish
+applied. All 8 manual test items passed.
+
+**Also fixed 2026-05-31 (bugs found during first test run):**
+- `AuthActivity` showed blank white screen — fragment transaction was missing in `onCreate`
+- Server `POST /api/auth/login` rejected app requests — field name mismatch (`phone` vs
+  `emailOrPhone`) and response format mismatch (`profile` vs `{token, customer}`)
+- Network: `10.0.2.2` does not work on machines with VMware installed; use the host WiFi
+  IP (`192.168.1.12`) and set it in `Mobile/local.properties`
+
+**Also fixed 2026-05-31 (post-banner bugs):**
+- `GET /categories` and `GET /collections` return plain JSON arrays `[...]` but
+  `ApiService` declared `Call<ApiListResponse<T>>` — Gson failed silently, categories
+  and banner never rendered. Fixed by changing to `Call<List<T>>` across
+  `ApiService`, `ProductRepository`, `HomeViewModel`, `HomeFragment`,
+  `ProductListViewModel`.
+
+Active work has moved to P1 #2 — Home Collections section.
+
+---
+
+## Completed Features (across the project)
+
+### Khải Đào — Auth Flow ✅ (with fixes applied 2026-05-31)
+- Splash screen with 1.8s delay and session-based routing
+- Login fragment (email/phone + password, calls `POST /auth/login`)
+- Register fragment (calls `POST /auth/register`)
+- OTP verification fragment (calls `POST /auth/verify-otp`)
+- Forgot password (calls `POST /auth/forgot-password`)
+- `SessionManager` — persists token, customer object, and cart ID in SharedPreferences
+- **Fix:** `AuthActivity.onCreate()` now shows `LoginFragment` on start (was blank screen)
+- **Fix:** `server/auth.controller.js` `login()` now accepts `phone` field alongside
+  `emailOrPhone`, and returns `{token, customer}` format the app expects
+
+### Khải Đào — App Infrastructure ✅
+- `UniFurnitureApp` application class, holds singleton `ApiService`
+- `ApiClient` — Retrofit singleton with OkHttp logging and 30s timeouts
+- `ApiService` — all required REST endpoints defined (auth, products, categories,
+  collections, cart, orders, wishlist, reviews, profiles, customers)
+- All DTO models: `ProductDto`, `ProductVariantDto`, `ProductImageDto`, `CategoryDto`,
+  `CollectionDto`, `CartDto`, `CartItemDto`, `OrderDto`, `CheckoutRequest`,
+  `ReviewDto`, `ReviewSummaryDto`, `WishlistItemDto`, `ProfileDto`, `CustomerDto`,
+  `AuthResponse`, `ApiListResponse`
+- `FormatUtil` — currency formatter (VND), sold count shortener, discount badge
+- Navigation graph (`nav_graph.xml`) with all fragments registered and arguments typed
+- Bottom navigation (Home, Products, Cart, Account)
+- `ProductRepository`, `CartRepository`, `AuthRepository`, `OrderRepository`
+
+### Như Ngọc — Home Banner/Image Slider ✅
+
+**Completed:** 2026-05-31
+
+#### Implementation summary
+
+Banner slider powered by `ViewPager2` + `ImageSliderAdapter` (reused as-is from
+`ProductDetailFragment`) + `DotsIndicator`. Images sourced from `CollectionDto.bannerUrl`
+via the existing `HomeViewModel.getCollections()` LiveData. Auto-scroll every 3.5s via
+`Handler` + `Runnable`, lifecycle-managed across `onResume` / `onPause` / `onDestroyView`.
+UI polished with a dark gradient overlay behind the dots and accent-gold dot colour.
+
+#### Modified files
+
+| File | Change |
+|---|---|
+| `fragment_home.xml` | Replaced static colored box with `ViewPager2` + gradient overlay `View` + styled `DotsIndicator` inside 200dp `FrameLayout`; added `android:overScrollMode="never"` |
+| `HomeFragment.java` | Added `setupBanner()`, collections observer (extracts `bannerUrl`, rewrites `localhost:3000` → real host), auto-scroll handler, `onResume`/`onPause`/`onDestroyView` lifecycle management |
+| `ImageSliderAdapter.java` | Added `DiskCacheStrategy.ALL` to Glide call so banner images are cached to disk — instant on subsequent opens |
+| `ApiService.java` | `getCategories` + `getCollections` return type: `Call<ApiListResponse<T>>` → `Call<List<T>>` (server returns plain array) |
+| `ProductRepository.java` | `getCategories` + `getCollections` return type: `LiveData<ApiListResponse<T>>` → `LiveData<List<T>>`; added `import java.util.List` |
+| `HomeViewModel.java` | `categories` + `collections` field type: `MutableLiveData<ApiListResponse<T>>` → `MutableLiveData<List<T>>`; updated getters; added `import java.util.List` |
+| `ProductListViewModel.java` | `categories` field + getter updated to `List<CategoryDto>`; added `import java.util.List` |
+| `drawable/bg_banner_gradient.xml` | New file — transparent-to-30%-black linear gradient used as overlay behind dots |
+
+#### Unchanged files (reused as-is)
+
+- `data/model/CollectionDto.java` — no changes
+- `data/model/CollectionDto.bannerUrl` mapped via `@SerializedName("banner_url")`
+
+#### Manual test results
+
+| # | Test | Result |
+|---|---|---|
+| 1 | Home shows real banner images from `CollectionDto.bannerUrl` | ✅ Pass |
+| 2 | Banner auto-advances every ~3.5 seconds | ✅ Pass |
+| 3 | Dots indicator reflects correct current page | ✅ Pass |
+| 4 | Dots hidden when 0 or 1 banner URL | ✅ Pass |
+| 5 | Manual swipe left/right works | ✅ Pass |
+| 6 | Navigate away and return — auto-scroll resumes without crash | ✅ Pass |
+| 7 | No crash when collections API returns null or empty | ✅ Pass |
+| 8 | No crash when individual `bannerUrl` is null | ✅ Pass |
+
+---
+
+### Như Ngọc's Scope — Scaffolded (partial, not complete) ⚠️
+
+**Home (`HomeFragment` / `HomeViewModel`)**
+- Search bar (submit-only, navigates to ProductList with query arg)
+- Category horizontal list (`CategoryAdapter`, tap navigates with `categoryId` + `categoryName`)
+- Featured products horizontal list (`ProductCardAdapter`, loads latest 10 by `createdAt desc`)
+- "View All" button → ProductList
+- SwipeRefresh
+- ShimmerFrameLayout (skeleton placeholder exists but not shaped)
+- Collections loaded in ViewModel but **not rendered in layout**
+- Banner area exists as a static colored box — **no actual image slider**
+
+**Product List (`ProductListFragment` / `ProductListViewModel`)**
+- 2-column `GridLayoutManager`
+- Four sort chips: Newest, Best Selling, Price Low, Price High
+- Handles incoming `search` and `categoryId` navigation arguments
+- SwipeRefresh
+- Product count label
+- ViewModel supports: `search()`, `filterByCategory()`, `filterByCollection()`,
+  `sortBy()`, `clearFilters()` — all API-connected and working
+
+**Product Detail (`ProductDetailFragment` / `ProductDetailViewModel`)**
+- ViewPager2 image slider with `ImageSliderAdapter` and `DotsIndicator`
+- Product name, sale price, original price (strikethrough), discount badge
+- `RatingBar` + average rating + review count
+- Warranty badge (conditional)
+- Variant selector as chip group (auto-selects first, tracks `selectedVariantId`)
+- Short description + full description sections
+- Reviews `RecyclerView` with `ReviewAdapter`
+- Add to Cart button (adds quantity = 1 of selected variant)
+- Back button
+
+**Adapters**
+- `ProductCardAdapter` — `ListAdapter` with `DiffUtil`, shows image/name/price/discount
+- `CategoryAdapter` — `ListAdapter` with `DiffUtil`, shows image/name
+- `ImageSliderAdapter` — basic `RecyclerView.Adapter` for ViewPager2 images
+- `ReviewAdapter` — `ListAdapter` with `DiffUtil`, shows name/rating/date/content
+
+---
+
+## In Progress
+
+### Bug — BottomNavigationView Home Tab Unresponsive
+
+**Status:** ✅ Fixed 2026-06-01 — `MainActivity.java` replaced `NavigationUI.setupWithNavController`.
+
+#### Observed symptom
+
+After implementing P1 #1 and P1 #2, the Home tab in `BottomNavigationView` did not
+respond to taps from any screen. Icon did not become selected. No navigation occurred.
+No crash. Products / Cart / Account tabs worked normally.
+
+#### Confirmed root cause (Logcat evidence)
+
+Diagnostic log confirmed:
+- `OnItemSelectedListener` DOES fire for the Home tab (touch reaches the listener ✓)
+- `NavigationUI.onNavDestinationSelected` returns `false` for Home tab on every tap
+- `onNavDestinationSelected` returns `true` for Products/Cart/Account tabs ✓
+
+Logcat excerpt:
+```
+CLICK: itemId=2131230971 homeId=2131230971 match=true
+onNavDestinationSelected returned: false   ← always false for Home
+```
+
+`onNavDestinationSelected` returns `false` only when `NavController.navigate()` throws
+`IllegalArgumentException` internally. In Navigation Component 2.7.6,
+`NavigationUI.setupWithNavController` automatically adds `saveState=true` and
+`restoreState=true` to all bottom nav navigate calls. For the Home tab, the navigate
+destination (`homeFragment`) equals the `popUpTo` target (`graph.startDestination =
+homeFragment`). This combination causes Navigation 2.7.6 to throw
+`IllegalArgumentException` — saving and immediately restoring the same key creates an
+internal conflict. The exception is caught silently; `false` is returned; BottomNavigation
+does not select Home; no navigation occurs.
+
+This does not affect Products/Cart/Account because their destination IDs differ from the
+`popUpTo` target (`homeFragment`).
+
+This bug predates P1 #1 and P1 #2. P1 #2's Collections section made the non-Home
+navigation paths prominent, which is when the bug was first noticed during testing.
+
+#### Fix applied
+
+`MainActivity.java` — replaced `NavigationUI.setupWithNavController` with:
+- Manual `setOnItemSelectedListener` using plain `NavOptions` (no `saveState`/`restoreState`)
+- Manual `addOnDestinationChangedListener` to update tab visual state on destination change
+
+No nav_graph, fragment, adapter, or layout changes.
+
+---
+
+### P2 #9 — ProductList: Grid/List Toggle
+
+**Status:** ✅ Completed 2026-06-01 — implementation + 1 bug fixed (card không full-width).
+
+#### Implementation summary
+
+`ImageButton` (`btnToggleLayout`) thêm vào toolbar bên phải `tvProductCount`. Tap → flip `isGrid`,
+đổi `GridLayoutManager(2)` ↔ `GridLayoutManager(1)`, đổi icon, gọi `adapter.setColumns()`.
+
+`ProductCardAdapter` thêm `columns` field + `setColumns(int)`. Trong `onBindViewHolder`, cập nhật
+`lp.width` theo `columns`: `MATCH_PARENT` khi 1 cột, `160dp_px` khi 2 cột.
+
+#### Modified/created files
+
+| # | File | Action |
+|---|---|---|
+| 1 | `res/drawable/ic_grid_view.xml` | CREATED — 4-ô grid icon, fill trắng |
+| 2 | `res/drawable/ic_view_list.xml` | CREATED — 3-gạch list icon, fill trắng |
+| 3 | `res/layout/fragment_product_list.xml` | MODIFIED — thêm `btnToggleLayout` ImageButton vào toolbar |
+| 4 | `ui/adapter/ProductCardAdapter.java` | MODIFIED — thêm `columns` field, `setColumns()`, update `LayoutParams` trong `onBindViewHolder` |
+| 5 | `ui/product/ProductListFragment.java` | MODIFIED — thêm `isGrid` field, `toggleLayout()`, wire `btnToggleLayout` |
+
+#### Bug fixed
+
+Ban đầu dùng `GridLayoutManager(1)` nghĩ sẽ tự stretch card. Thực ra `GridLayoutManager` chỉ
+override width khi child dùng `match_parent` / `wrap_content`, không override kích thước cứng
+(`160dp`). Fix: `setColumns()` + `onBindViewHolder` set `lp.width` đúng mode.
+
+#### Testing checklist
+
+- [x] Icon toggle hiện trên toolbar (góc phải)
+- [x] Tap → chuyển 1 cột full-width, icon đổi thành grid
+- [x] Tap lại → về 2 cột 160dp, icon đổi thành list
+- [x] Card full-width đúng khi 1 cột
+- [x] Home screen card không bị ảnh hưởng (adapter instance riêng)
+
+---
+
+### P2 #8 — ProductList: Empty State + P2 #10 Sort Chip Active State
+
+**Status:** ✅ Completed 2026-06-01 — manually tested.
+
+#### Implementation summary
+
+**#8 Empty state:** Thêm `layoutEmpty` (LinearLayout với 2 TextView) bên trong `FrameLayout`
+bao `RecyclerView` trong `SwipeRefreshLayout`. Khi `response.items.isEmpty()` → show empty, hide
+RecyclerView; ngược lại thì đảo lại.
+
+**#10 Sort chip:** `chipNewest` thêm `android:checked="true"` trong XML (default sort). ViewModel
+thêm `getCurrentSortBy()` / `getCurrentOrder()`. Fragment thêm `syncSortChip()` để set đúng chip
+checked theo state ViewModel — gọi khi Fragment load và sau `onFiltersCleared()`.
+
+#### Modified files
+
+| # | File | Action |
+|---|---|---|
+| 1 | `res/layout/fragment_product_list.xml` | `RecyclerView` bọc trong `FrameLayout`; thêm `layoutEmpty`; `chipNewest` thêm `android:checked="true"` |
+| 2 | `ui/product/ProductListViewModel.java` | Thêm `getCurrentSortBy()` và `getCurrentOrder()` |
+| 3 | `ui/product/ProductListFragment.java` | Observer show/hide `layoutEmpty`; thêm `syncSortChip()`; gọi sau load và sau `clearFilters()` |
+
+#### Testing checklist
+
+- [x] Filter không có kết quả → hiện "Không tìm thấy sản phẩm"
+- [x] Search vô nghĩa → hiện empty state
+- [x] Xóa bộ lọc sau empty → grid hiện lại, empty ẩn
+- [x] Kết quả bình thường → không hiện empty state
+- [x] Mở ProductList → chip "Mới nhất" đang checked
+- [x] Tap sort chip khác → chip đó checked, chip cũ bỏ checked
+- [x] Xóa bộ lọc → chip quay về "Mới nhất"
+- [x] Navigate sang ProductDetail → back → chip vẫn đúng
+
+---
+
+### P1 #5 — ProductDetail: Quantity Selector
+
+**Status:** ✅ Completed 2026-06-01 — implementation + 1 build bug fixed.
+
+#### Implementation summary
+
+Row `Số lượng` với nút `−` / số / `+` thêm vào **bottom bar cố định** (không nằm trong scroll area)
+ngay trên nút "Thêm vào giỏ". Luôn hiển thị mà không cần cuộn. `quantity` được track là local field
+trong Fragment (transient UI state, không vào ViewModel). Nút `−` giảm tới min=1, nút `+` tăng tới
+max=99. `ProductDetailViewModel.addToCart()` đổi signature từ `addToCart(variantId)` sang
+`addToCart(variantId, quantity)`.
+
+#### Modified/created files
+
+| # | File | Action |
+|---|---|---|
+| 1 | `res/layout/fragment_product_detail.xml` | MODIFIED — `layoutBottomBar` đổi sang `vertical`; thêm row quantity (`Button` outline + `TextView` + `Button` filled) trên `btnAddToCart` |
+| 2 | `res/drawable/bg_quantity_btn_outline.xml` | CREATED — rounded rect, viền `primary`, nền transparent (nút `−`) |
+| 3 | `res/drawable/bg_quantity_btn_filled.xml` | CREATED — rounded rect, fill `primary` (nút `+`) |
+| 4 | `ui/product/ProductDetailViewModel.java` | MODIFIED — `addToCart(variantId)` → `addToCart(variantId, int quantity)`; bỏ hardcode `1` |
+| 5 | `ui/product/ProductDetailFragment.java` | MODIFIED — thêm field `quantity=1`; wire `btnDecrease`/`btnIncrease`; truyền `quantity` vào `addToCart` |
+
+#### Post-implementation bug fixed
+
+`app:insetLeft/Right/Top/Bottom` không phải XML attribute của `MaterialButton` (chỉ dùng được trong
+style resource) → build error "attribute insetLeft not found". Fix: thay `MaterialButton` bằng plain
+`Button` với custom drawable background — loại bỏ hoàn toàn dependency vào `app:inset*`.
+
+#### Testing checklist
+
+- [ ] Row "Số lượng" hiển thị trong bottom bar (luôn thấy, không cần cuộn)
+- [ ] Nút `−` giảm quantity, không xuống dưới 1
+- [ ] Nút `+` tăng quantity, không vượt quá 99
+- [ ] Số giữa cập nhật real-time khi nhấn
+- [ ] "Thêm vào giỏ" gửi đúng quantity lên API
+- [ ] Mở product detail mới — quantity reset về 1
+
+---
+
+### P3 #13 — ProductDetail: Recommendations
+
+**Status:** ✅ Completed 2026-06-01
+
+#### Implementation summary
+
+Horizontal `RecyclerView` (`rvRecommendations`) thêm vào cuối ProductDetail, bọc trong `layoutRecommendations` (`LinearLayout`, `visibility=gone`). Khi API trả về items → show section. Tap card → navigate sang ProductDetail của sản phẩm đó.
+
+`ProductRepository.getProductRecommendations(slug, userId)` gọi `GET /products/:slug/recommendations`. Server trả về `{ "items": [...] }` — extract key `"items"` (không phải `"recommendations"` như docs cũ ghi).
+
+**Fallback ảnh:** Nếu `product_images` rỗng (sản phẩm chỉ có thumbnail CDN, không có record trong product_images collection) → dùng `product.thumbnail` làm fallback cho ImageSliderAdapter. Áp dụng cả khi product load xong mà slider vẫn rỗng.
+
+#### Modified files
+
+| # | File | Action |
+|---|---|---|
+| 1 | `data/repository/ProductRepository.java` | ADDED — `getProductRecommendations(slug, userId)`, extract key `"items"` |
+| 2 | `ui/product/ProductDetailViewModel.java` | ADDED — `recommendations` LiveData, `loadRecommendations(slug)`, getter |
+| 3 | `res/layout/fragment_product_detail.xml` | ADDED — `layoutRecommendations` + `rvRecommendations` trước bottom spacer |
+| 4 | `ui/product/ProductDetailFragment.java` | ADDED — `setupRecommendations()`, observe, fallback thumbnail logic |
+
+#### Testing checklist
+
+- [x] Mở "Combo Giường Tủ Quần Áo VLINE V3" → section "Sản phẩm liên quan" hiện cuối trang
+- [x] Scroll ngang trong section → thấy các card sản phẩm
+- [x] Tap card → navigate sang ProductDetail đúng sản phẩm, ảnh hiển thị
+- [ ] Sản phẩm không có recommendations → section ẩn hoàn toàn
+
+---
+
+### P3 #11+#12 — ProductDetail: Stock Status + Sold Count
+
+**Status:** ✅ Completed 2026-06-01
+
+#### Implementation summary
+
+**Stock status (#11):** `tvStockStatus` thêm vào layout bên dưới `chipGroupVariants`. Fragment giữ `Map<String, Integer> variantStock` (variantId → stockQuantity). Mỗi khi user chọn chip variant → `updateStockStatus(variantId)` cập nhật text + màu + trạng thái `btnAddToCart`. "Còn hàng" (xanh, `@color/success`), "Hết hàng" (đỏ, `@color/discount_red`, disable nút Add to Cart). Ẩn khi `stockQuantity == null`.
+
+**Sold count (#12):** `tvSoldCount` thêm vào Product Info section, dòng riêng bên dưới rating row (cách 4dp). Chỉ hiện khi `product.sold != null && product.sold > 0`. Dùng `FormatUtil.formatSold()` để format (ví dụ 1200 → "1.2k").
+
+**Rating fix:** Ẩn toàn bộ rating row (RatingBar + tvRating + tvReviewCount) khi `totalReviews == 0` thay vì hiện "0.0". Default text của `tvRating` trong XML đổi từ "0.0" về empty string.
+
+#### Modified files
+
+| # | File | Action |
+|---|---|---|
+| 1 | `res/layout/fragment_product_detail.xml` | Thêm `tvStockStatus`, `tvSoldCount`; fix default tvRating text; tách tvSoldCount ra dòng riêng |
+| 2 | `ui/product/ProductDetailFragment.java` | Thêm `variantStock` Map, `updateStockStatus()`, sold count observer, rating guard |
+
+#### Testing checklist
+
+- [x] Mở "Combo Giường Tủ Quần Áo VLINE V3" → hiện "Đã bán: 8"
+- [x] Sản phẩm sold = 0 → không hiện "Đã bán"
+- [x] Sản phẩm không có review → rating row ẩn hoàn toàn
+- [ ] Variant hết hàng → hiện "Hết hàng" đỏ, nút Add to Cart disable
+- [ ] Variant còn hàng → hiện "Còn hàng" xanh, nút Add to Cart enable
+- [ ] Đổi variant → stock status cập nhật đúng
+
+---
+
+### P2 #7 — Search: Real-time Debounce + Suggestions
+
+**Status:** ✅ Completed 2026-06-01
+
+#### Implementation summary
+
+**ProductList search bar:**
+- `EditText` pill-shape (bo tròn) bên dưới toolbar, `focusableInTouchMode="true"` để nhận input đúng
+- `TextWatcher` 300ms debounce → `viewModel.search(query)` cập nhật grid
+- Suggestions hiện ngay lập tức (client-side từ data đang load) trước khi API về → sau đó update từ API results
+- Suggestions dùng `startsWith` sau khi strip dấu tiếng Việt (NFD normalize) — chỉ match tên bắt đầu bằng query, tránh suggest sai
+- Tap suggestion → navigate thẳng vào **ProductDetail** (không search lại)
+- Submit / Enter → navigate sang **ProductList** với từ khóa
+- `progressBar` xuất hiện ngay khi gõ (trước API response) để feedback tức thì
+- `viewModel.search("")` treat empty string là null
+
+**Home search bar:**
+- `SearchView` (có sẵn) thêm `onQueryTextChange` với 300ms debounce
+- Gọi `viewModel.searchForSuggestions(query)` → API `GET /products?q=query&limit=8`
+- Suggestions overlay lên content bên dưới (FrameLayout wrapper + `elevation="8dp"`)
+- Tap suggestion → navigate thẳng vào **ProductDetail**
+- Submit → navigate sang **ProductList**
+- `searchSuggestions` LiveData trong HomeViewModel tách biệt với `featuredProducts`
+
+**Lý do suggestion tap → ProductDetail (không phải ProductList search):**
+Full product name làm search query → server không match được → empty state. Navigate thẳng bằng `slug` đảm bảo luôn tìm được sản phẩm.
+
+**UniKey + Android emulator:** UniKey intercept keystroke ở Windows level → emulator không nhận được input. Workaround: tắt UniKey khi test emulator, hoặc test trên điện thoại thật.
+
+#### Modified/created files
+
+| # | File | Action |
+|---|---|---|
+| 1 | `res/drawable/bg_search_field.xml` | CREATED — pill shape radius 20dp |
+| 2 | `res/drawable/item_search_suggestion.xml` | CREATED — row 48dp cho suggestions |
+| 3 | `res/layout/fragment_product_list.xml` | MODIFIED — search bar + `rvSuggestions` |
+| 4 | `res/layout/fragment_home.xml` | MODIFIED — FrameLayout wrapper + `rvSearchSuggestions` |
+| 5 | `ui/adapter/SearchSuggestionAdapter.java` | CREATED — adapter nhận `List<ProductDto>`, click → `ProductDto` |
+| 6 | `ui/product/ProductListFragment.java` | MODIFIED — `setupSearch()`, debounce, client-side suggestions, navigate ProductDetail on tap |
+| 7 | `ui/product/ProductListViewModel.java` | MODIFIED — `search()` treat empty as null |
+| 8 | `ui/home/HomeFragment.java` | MODIFIED — debounce, call `searchForSuggestions()`, observe suggestions LiveData |
+| 9 | `ui/home/HomeViewModel.java` | MODIFIED — thêm `searchForSuggestions()` + `searchSuggestions` LiveData |
+
+#### Testing checklist
+
+- [ ] ProductList: gõ "tu" → gợi ý chỉ hiện sản phẩm có tên bắt đầu bằng "tủ"
+- [ ] ProductList: gợi ý hiện ngay (client-side), sau đó update từ API
+- [ ] ProductList: tap gợi ý → mở ProductDetail đúng sản phẩm
+- [ ] ProductList: submit/Enter → navigate sang ProductList với từ khóa
+- [ ] ProductList: xóa text → grid về tất cả sản phẩm
+- [ ] Home: gõ → 300ms → gợi ý từ API hiện bên dưới search bar
+- [ ] Home: tap gợi ý → mở ProductDetail đúng sản phẩm
+- [ ] Home: submit → navigate sang ProductList với từ khóa
+
+---
+
+### P2 #6 — ProductList: Pagination / Infinite Scroll
+
+**Status:** ✅ Completed 2026-06-01
+
+#### Implementation summary
+
+Infinite scroll với `RecyclerView.OnScrollListener`. Khi user cuộn gần cuối list (còn 3 item),
+Fragment gọi `viewModel.loadNextPage()`. ViewModel accumulate các page vào `allProducts` và
+post toàn bộ list lên `products` LiveData — `ListAdapter + DiffUtil` tự animate các item mới ở cuối.
+
+`tvProductCount` hiển thị `"Hiển thị X / Y sản phẩm"` để user biết mình đang ở đâu trong kết quả.
+Footer spinner (`progressBarLoadMore`) hiện trong lúc fetch page tiếp theo.
+
+`hasMore` được xác định bằng `response.page < response.totalPages` (dùng server metadata,
+chính xác hơn so với check `items.size() >= PAGE_SIZE`).
+
+Mọi action reset list (sort, filter, search, swipeRefresh) đều gọi `loadProducts()` → clear
+`allProducts`, reset `page=1`.
+
+#### Modified files
+
+| # | File | Action |
+|---|---|---|
+| 1 | `ui/product/ProductListViewModel.java` | MODIFIED — tách `loadProducts()` thành fresh-load + `fetchCurrentPage(boolean)`; thêm `loadNextPage()`, `canLoadMore()`, `allProducts` list, `hasMore` flag, `loadingMore` LiveData |
+| 2 | `res/layout/fragment_product_list.xml` | MODIFIED — thêm `progressBarLoadMore` bên dưới SwipeRefreshLayout |
+| 3 | `ui/product/ProductListFragment.java` | MODIFIED — thêm `RecyclerView.OnScrollListener`; observe `isLoadingMore()`; cập nhật `tvProductCount` thành "Hiển thị X / Y sản phẩm" |
+
+#### Testing checklist
+
+- [ ] Scroll xuống cuối page 1 → footer spinner xuất hiện → page 2 append vào list
+- [ ] `tvProductCount` cập nhật: `"Hiển thị 20 / 120 sản phẩm"` → `"Hiển thị 40 / 120 sản phẩm"`
+- [ ] Scroll hết data → không load thêm, không spinner
+- [ ] SwipeRefresh → list reset hoàn toàn về page 1
+- [ ] Đổi sort chip → list reset, load page 1 mới
+- [ ] Áp filter → list reset, load page 1 mới
+- [ ] Không crash khi scroll nhanh (nhiều trigger liên tiếp)
+
+---
+
+### P1 #3 — ProductList: Filter Bottom Sheet
+
+**Status:** ✅ Completed 2026-06-01 — implementation + 4 post-implementation bugs fixed.
+
+#### Implementation summary
+
+Floating filter button (`FloatingActionButton`, `ic_filter_list`) added to the Product List screen.
+Tapping it opens `FilterBottomSheetFragment` (extends `BottomSheetDialogFragment`) pre-populated
+with the current filter state. The sheet contains:
+- Horizontal scrolling category chips (dynamically built from `viewModel.getCategories()` at tap time,
+  plus a "Tất cả" chip for "no category" selection)
+- Min/max price text fields
+- Rating chips (Tất cả / 3★ / 4★ / 5★)
+- "Áp dụng" → calls `viewModel.applyFilters(categoryId, minPrice, maxPrice, minRating)`
+- "Xóa bộ lọc" → calls `viewModel.clearFilters()`
+
+Communication back to `ProductListFragment` via `OnFiltersAppliedListener` interface (not shared ViewModel,
+not Fragment result API — consistent with project listener pattern).
+
+#### Modified/created files
+
+| # | File | Action |
+|---|---|---|
+| 1 | `ui/product/FilterBottomSheetFragment.java` | CREATED — `BottomSheetDialogFragment`, `newInstance()` factory, `OnFiltersAppliedListener` interface, dynamic category chip builder with `View.generateViewId()`, price/rating state restoration |
+| 2 | `res/layout/fragment_product_list.xml` | MODIFIED — wrapped root in `CoordinatorLayout`; added `FloatingActionButton` (`fabFilter`) at `bottom|end` |
+| 3 | `ui/product/ProductListFragment.java` | MODIFIED — added `fabFilter` click → `showFilterSheet()`; `showFilterSheet()` builds category id/name lists from current ViewModel state and passes them to the bottom sheet |
+
+#### Post-implementation bugs fixed (2026-06-01)
+
+| Bug | Root cause | Fix |
+|---|---|---|
+| Toàn bộ text trong bottom sheet vô hình | Root `LinearLayout` không có background → nền tối của dialog lộ ra | Thêm `android:background="@color/white"` vào root `LinearLayout` |
+| Nút "Áp dụng" text vô hình | Filled button với `backgroundTint=primary` nhưng không có `textColor` → theme tự set text tối trên nền tối | Thêm `android:textColor="@color/white"` |
+| Filter theo danh mục không có tác dụng | `ApiService` gửi `?categories=…` nhưng server đọc `req.query.category` (số ít) | Đổi `@Query("categories")` → `@Query("category")` trong `ApiService.java` |
+| Icon FAB 3 gạch màu đen | FAB apply tint tối từ theme đè lên `fillColor="#FFFFFF"` của vector | Thêm `app:tint="@color/white"` vào FAB trong layout |
+
+#### Testing checklist
+
+- [ ] Filter FAB visible on Product List screen (bottom-right corner), icon 3 gạch trắng
+- [ ] Tap FAB → bottom sheet slides up, toàn bộ text hiển thị rõ
+- [ ] Category chips populated from API data (scrollable)
+- [ ] "Tất cả" category chip selected by default when no filter active
+- [ ] Selected category chip pre-checked when re-opening sheet
+- [ ] Min/max price fields accept numeric input
+- [ ] Price values restored correctly when re-opening sheet
+- [ ] Rating chips: only one selectable at a time
+- [ ] "Áp dụng" với category → ProductList chỉ hiện sản phẩm đúng danh mục
+- [ ] "Áp dụng" với giá → sản phẩm ngoài khoảng giá bị loại
+- [ ] "Áp dụng" với rating → sản phẩm dưới mức rating bị ẩn
+- [ ] "Xóa bộ lọc" → reset toàn bộ, load lại sản phẩm
+- [ ] Sheet đóng sau khi nhấn nút
+- [ ] Không crash khi danh mục rỗng
+
+#### Database cleanup (2026-06-01)
+
+Xóa 3 entries test/rác khỏi MongoDB qua REST API:
+- Collection `iloveuel` (id `69b4666263e0e522607cb99f`) — `DELETE /api/collections/:id`
+- Category `Lê Thị Duy Nhất` (id `69b45cb1eec4649e243c508c`) — `DELETE /api/categories/:id`
+- Category `áo test` (id `69b45af663f22fa60b852c7b`) — `DELETE /api/categories/:id`
+
+---
+
+### P1 #2 — Home Collections Section
+
+**Status:** ✅ Completed 2026-06-01 — implementation + collection filter bug fixed + manually tested.
+**Date implemented:** 2026-06-01
+
+#### Implementation summary
+
+Horizontal scrollable row of collection cards added below "Sản phẩm nổi bật". Each card
+(`MaterialCardView` 140×90dp) shows the collection's `bannerUrl` image with a gradient
+overlay and `name` label. Tapping navigates to `ProductListFragment` filtered by
+`collectionId`. Data flows from the existing `HomeViewModel.getCollections()` observer —
+no new API calls, no ViewModel changes.
+
+`serverHost` for localhost URL rewrite is computed once in `setupRecyclerViews()` and
+injected into `CollectionAdapter`'s constructor, consistent with the banner's rewrite
+pattern.
+
+#### Modified/created files
+
+| # | File | Action |
+|---|---|---|
+| 1 | `res/layout/item_collection.xml` | CREATED — `MaterialCardView` 140×90dp, full-bleed `ImageView`, `bg_banner_gradient` overlay 36dp, `TextView` name bottom-start |
+| 2 | `ui/adapter/CollectionAdapter.java` | CREATED — `ListAdapter<CollectionDto,VH>`, `DiffUtil` (`Objects.equals`), `serverHost` constructor param, Glide `centerCrop`, `placeholder_product` |
+| 3 | `res/layout/fragment_home.xml` | MODIFIED — added "Bộ sưu tập" `TextView` + `rvCollections` `RecyclerView` 110dp before bottom spacer |
+| 4 | `ui/home/HomeFragment.java` | MODIFIED — added `collectionAdapter` field; init with `serverHost` in `setupRecyclerViews()`; added `collectionAdapter.submitList(items)` in collections observer |
+| 5 | `res/navigation/nav_graph.xml` | MODIFIED — added `collectionId` nullable string arg to `productListFragment` |
+| 6 | `ui/product/ProductListFragment.java` | MODIFIED — reads `collectionId` in `handleArguments()`, calls `viewModel.filterByCollection()` |
+
+#### Testing checklist
+
+- [x] "Bộ sưu tập" section header visible on Home screen
+- [x] Collections RecyclerView scrolls horizontally
+- [x] Each card shows banner image (or `placeholder_product` if null/fails)
+- [x] Each card shows collection name
+- [x] Tap a collection → navigates to ProductList filtered by that collection
+- [x] ProductList shows only products belonging to the tapped collection
+- [x] `filterByCollection()` clears any active category/search filter
+- [x] No crash when collections list is empty
+- [x] No crash when `bannerUrl` is null on an item
+- [x] No crash when `id` is null on an item
+- [x] Navigate away from Home and back — collections list still populated
+- [x] SwipeRefresh on Home reloads collections data
+
+---
+
+### P3 #14 — Home: Shimmer Skeletons
+
+**Status:** ✅ Completed 2026-06-01
+
+#### Implementation summary
+
+Thay thế `ShimmerFrameLayout` cũ (chỉ là 1 gray rectangle 120dp) bằng skeleton có hình dạng khớp với 3 section thật:
+
+- **Danh mục skeleton**: 5 item, mỗi item gồm circle 64dp (category image) + text stub 56×10dp bên dưới — khớp với `item_category.xml` (80×100dp)
+- **Sản phẩm nổi bật skeleton**: 3 rectangle 160×260dp — khớp với `item_product_card.xml`
+- **Bộ sưu tập skeleton**: 4 rectangle 140×90dp — khớp với `item_collection.xml`
+- Mỗi section có header stub (gray rectangle thay cho "Danh mục" / "Sản phẩm nổi bật" / "Bộ sưu tập")
+
+Real content được bọc trong `layoutContent` (`visibility="gone"` mặc định). Loading observer toggle shimmer ↔ content: khi loading → `startShimmer()` + hide `layoutContent`; khi xong → `stopShimmer()` + show `layoutContent`.
+
+#### Modified / created files
+
+| File | Action |
+|---|---|
+| `res/drawable/bg_shimmer_rect.xml` | CREATED — gray_200 rounded rect 8dp |
+| `res/drawable/bg_shimmer_circle.xml` | CREATED — gray_200 oval (dùng cho category image stub) |
+| `res/layout/fragment_home.xml` | MODIFIED — thay shimmer cũ bằng skeleton 3-section; wrap 3 real sections trong `layoutContent` |
+| `ui/home/HomeFragment.java` | MODIFIED — loading observer gọi `startShimmer()`/`stopShimmer()` + toggle `layoutContent` |
+
+#### Testing checklist
+
+- [ ] Mở Home → shimmer hiện ngay trước khi data về
+- [ ] Skeleton có 3 section: circles (category), cards (product), cards (collection)
+- [ ] Shimmer animation chạy (ánh sáng trượt ngang)
+- [ ] Data load xong → shimmer tắt, content thật hiện
+- [ ] SwipeRefresh → shimmer hiện lại trong lúc reload
+- [ ] Không crash khi xoay màn hình
+
+---
+
+### Bug — Review section không hiển thị nội dung / ảnh
+
+**Status:** ✅ Fixed 2026-06-01
+
+#### Symptom
+
+Bấm vào trang Product Detail → phần "Đánh giá" cuộn đến đúng section nhưng không thấy item nào. Sau khi thêm LayoutManager thì thấy item, nhưng chỉ thấy tên và sao — không thấy nội dung text và ảnh đánh giá.
+
+#### Root causes (3 lớp)
+
+**1. `rvReviews` thiếu `LayoutManager`**
+
+`setupReviews()` tạo adapter và gán cho RecyclerView nhưng không gọi `setLayoutManager()`. RecyclerView không có LayoutManager → không render item nào. Fix: thêm `new LinearLayoutManager(requireContext())`.
+
+**2. `ReviewDto` dùng sai `@SerializedName` (camelCase vs snake_case)**
+
+Server `GET /api/reviews/product/:productId` trả về camelCase (`customerName`, `createdAt`, `repliedAt`, `productId`, `customerId`) nhưng DTO dùng `@SerializedName("customer_name")` v.v. → Gson không map được → các field đều null → hiện "Khách hàng" thay vì tên thật, không có ngày, không có admin reply date.
+
+Fix: xóa toàn bộ `@SerializedName` sai cho các field camelCase — Gson tự map theo tên field. Giữ lại `@SerializedName("_id")` vì `_id` là MongoDB convention.
+
+| Field | Sai | Đúng |
+|---|---|---|
+| `customerName` | `@SerializedName("customer_name")` | *(không có annotation)* |
+| `createdAt` | `@SerializedName("created_at")` | *(không có annotation)* |
+| `repliedAt` (inner) | `@SerializedName("replied_at")` | *(không có annotation)* |
+| `productId` | `@SerializedName("product_id")` | *(không có annotation)* |
+| `customerId` | `@SerializedName("customer_id")` | *(không có annotation)* |
+
+**3. Glide không có error/placeholder cho ảnh review**
+
+Khi file ảnh không tồn tại trên server (upload từ máy khác), Glide nhận 404 → hiện blank ImageView → trông như "không có ảnh". Fix: thêm `.placeholder(R.drawable.placeholder_product).error(R.drawable.placeholder_product)`.
+
+**Lưu ý về data test:** Review của "Thư Hà Yoonn" có 5 entries ảnh trong DB nhưng các file vật lý không tồn tại trên máy này (upload từ thiết bị khác). Để test ảnh đúng, dùng sản phẩm **"Combo Basic Phòng Ngủ 4 Món U-HOME FURNI HOBRO"** (`slug: combo-phong-ngu-hobro-co-ban`) — có review với 5 ảnh mà file thực tế có trong `/uploads/reviews/`.
+
+#### Modified files
+
+| File | Change |
+|---|---|
+| `ui/product/ProductDetailFragment.java` | Thêm `binding.rvReviews.setLayoutManager(new LinearLayoutManager(...))` trong `setupReviews()` |
+| `data/model/ReviewDto.java` | Xóa `@SerializedName` sai cho 5 field camelCase; giữ lại `@SerializedName("_id")` |
+| `ui/adapter/ReviewAdapter.java` | Thêm `.placeholder()`, `.error()`, `.centerCrop()` vào Glide call; thêm `import R` |
+
+#### Testing checklist
+
+- [x] Review hiện tên khách hàng thật (không còn "Khách hàng")
+- [x] Review hiện số sao đúng
+- [x] Review hiện nội dung text
+- [x] Review hiện ngày (format YYYY-MM-DD)
+- [x] Sản phẩm "Combo Basic Phòng Ngủ 4 Món" → review có 5 ảnh hiện đúng trong HorizontalScrollView
+- [ ] Admin reply hiện đúng ngày (repliedAt fix)
+- [ ] Ảnh lỗi / không tồn tại → hiện placeholder_product gray thay vì blank
+
+---
+
+### P3 #18 — Search: Search History
+
+**Status:** ✅ Completed 2026-06-01
+
+#### Implementation summary
+
+Lưu lịch sử tìm kiếm vào `SharedPreferences`, hiển thị khi search bar focused + query rỗng. Áp dụng cho cả **Home** (`SearchView`) lẫn **ProductList** (`EditText`).
+
+**Khi nào lưu history:**
+- Home: submit query (Enter / nút search)
+- ProductList: navigate đến với search arg từ Home (trong `handleArguments`)
+- ProductList: nhấn Enter/Done trên keyboard
+
+**Khi nào hiện history:** Focus vào search bar khi text rỗng, hoặc khi xóa hết text.
+
+**UX:**
+- Mỗi item: icon clock + query text + nút X xóa item đó
+- Header "Tìm kiếm gần đây" + nút "Xóa tất cả" ở góc phải
+- Max 10 items, item mới nhất lên đầu, duplicate tự remove
+- Tap item → fill text + search ngay lập tức
+- History ẩn khi bắt đầu gõ (suggestions thay thế)
+
+**Bug fix đi kèm:** Focus listener ban đầu gọi `hideSuggestions()` khi EditText mất focus → suggestion bị ẩn trước khi click kịp fire. Fix: focus listener chỉ quản lý history (show/hide), KHÔNG ẩn suggestions. Suggestions tự ẩn qua text change hoặc suggestion tap handler.
+
+#### Modified / created files
+
+| File | Action |
+|---|---|
+| `util/SearchHistoryManager.java` | CREATED — SharedPreferences wrapper, Gson serialization, max 10 items, dedup |
+| `ui/adapter/SearchHistoryAdapter.java` | CREATED — `ListAdapter<String>`, click + delete callbacks |
+| `res/layout/item_search_history.xml` | CREATED — clock icon + query text + delete button (48dp row) |
+| `res/drawable/ic_history.xml` | CREATED — Material Design history/clock vector icon |
+| `res/layout/fragment_home.xml` | MODIFIED — thêm `layoutSearchHistory` + `rvSearchHistory` overlay trong search FrameLayout |
+| `res/layout/fragment_product_list.xml` | MODIFIED — thêm `layoutSearchHistory` + `rvSearchHistory` sau `rvSuggestions` |
+| `ui/home/HomeFragment.java` | MODIFIED — `setupSearchHistory()`, focus listener, save on submit, show/hide logic |
+| `ui/product/ProductListFragment.java` | MODIFIED — history setup, `onEditorActionListener`, save in `handleArguments()`, show/hide logic |
+
+#### Testing checklist
+
+- [x] Search "ghế" → submit → back về Home → tap search bar → "ghế" xuất hiện trong history
+- [x] Search từ Home → ProductList mở → xóa text → history "ghế" hiện
+- [x] Tap history item → text filled + search chạy
+- [x] Nút X trên item → xóa item đó, list cập nhật
+- [x] "Xóa tất cả" → panel ẩn hoàn toàn
+- [x] Gõ chữ → history ẩn, suggestions hiện bình thường
+- [x] Tap suggestion → navigate đúng (không bị ẩn trước khi click)
+- [x] Max 10 items, search cùng query 2 lần → chỉ giữ 1 (dedup, move to front)
+- [ ] History persist sau khi kill app và mở lại
+
+---
+
+## Remaining Features — Như Ngọc's Scope
+
+### Home
+
+- [x] **Banner/Image Slider** ✅ Completed 2026-05-31
+- [x] **Collections section** ✅ Completed 2026-06-01
+- [x] **Proper shimmer skeletons** ✅ Completed 2026-06-01
+
+### Product List
+
+- [x] **Filter bottom sheet** ✅ Completed 2026-06-01
+- [x] **Price range + rating filter** ✅ Completed 2026-06-01 (wired trong P1 #3)
+- [x] **Pagination / infinite scroll** ✅ Completed 2026-06-01
+- [x] **Empty state view** ✅ Completed 2026-06-01
+- [x] **Grid / List view toggle** ✅ Completed 2026-06-01
+- [x] **Active sort chip state** ✅ Completed 2026-06-01
+
+### Search
+
+- [x] **Real-time search with debounce** ✅ Completed 2026-06-01
+- [ ] **Search suggestions / autocomplete** — Dropdown or RecyclerView of matches
+      while typing
+- [x] **Search history** ✅ Completed 2026-06-01
+
+### Product Detail
+
+- [x] **Quantity selector** ✅ Completed 2026-06-01
+- [x] **Stock status indicator** ✅ Completed 2026-06-01
+- [x] **Sold count** ✅ Completed 2026-06-01
+- [x] **Recommendations section** ✅ Completed 2026-06-01
+- [x] **Review images** ✅ Completed 2026-06-01
+- [x] **Admin reply on review** ✅ Completed 2026-06-01
+- [x] **Deprecated back navigation** ✅ Already using `navigateUp()` — no change needed
+
+---
+
+## Prioritized Backlog
+
+### P1 — Core missing features (implement first)
+
+| # | Task | Why |
+|---|---|---|
+| 1 | ~~Home: Banner/Image Slider~~ | ✅ **DONE** 2026-05-31 |
+| 2 | ~~Home: Collections section~~ | ✅ **DONE** 2026-06-01 |
+| 3 | ~~ProductList: Filter bottom sheet (category + price + rating)~~ | ✅ **DONE** 2026-06-01 |
+| 4 | ~~ProductList: Price range + rating in ViewModel/API~~ | ✅ **DONE** 2026-06-01 (wired cùng P1 #3) |
+| 5 | ~~ProductDetail: Quantity selector~~ | ✅ **DONE** 2026-06-01 |
+
+### P2 — Important UX gaps
+
+| # | Task | Why |
+|---|---|---|
+| 6 | ~~ProductList: Pagination / infinite scroll~~ | ✅ **DONE** 2026-06-01 |
+| 7 | ~~Search: Real-time debounced query~~ | ✅ **DONE** 2026-06-01 |
+| 8 | ~~ProductList: Empty state view~~ | ✅ **DONE** 2026-06-01 |
+| 9 | ~~ProductList: Grid/List toggle~~ | ✅ **DONE** 2026-06-01 |
+| 10 | ~~ProductList: Active sort chip state~~ | ✅ **DONE** 2026-06-01 |
+
+### P3 — Polish and completeness
+
+| # | Task | Why |
+|---|---|---|
+| 11 | ~~ProductDetail: Stock status per variant~~ | ✅ **DONE** 2026-06-01 |
+| 12 | ~~ProductDetail: Sold count~~ | ✅ **DONE** 2026-06-01 |
+| 13 | ~~ProductDetail: Recommendations~~ | ✅ **DONE** 2026-06-01 |
+| 14 | ~~Home: Proper shimmer skeletons~~ | ✅ **DONE** 2026-06-01 |
+| 15 | ~~ProductDetail: Review images~~ | ✅ **DONE** 2026-06-01 |
+| 16 | ~~ProductDetail: Admin reply on review~~ | ✅ **DONE** 2026-06-01 |
+| 17 | ~~ProductDetail: Fix deprecated back nav~~ | ✅ Already done (navigateUp()) |
+| 18 | ~~Search: Search history~~ | ✅ **DONE** 2026-06-01 |
+
+---
+
+## Next Recommended Task
+
+**Scope và toàn bộ UI/UX improvements đã hoàn thành.** Bước tiếp theo: tạo PR từ `feature/home` → `main` để nhóm review và merge.
+
+**Lưu ý trước khi tạo PR:**
+- Chạy `Sync Project with Gradle Files` trong Android Studio (PhotoView dependency mới)
+- Test thủ công các tính năng mới trên emulator trước khi push
+
+---
+
+## Completed — Multi-language Support (i18n)
+
+**Completed:** 2026-06-01
+
+### Summary
+
+Toàn bộ UI text được extract ra `strings.xml` và dịch sang 4 ngôn ngữ. Default là English (theo yêu cầu thầy).
+
+| File | Ngôn ngữ |
+|---|---|
+| `res/values/strings.xml` | English (default) |
+| `res/values-vi/strings.xml` | Tiếng Việt |
+| `res/values-zh-rCN/strings.xml` | Tiếng Trung (Giản thể) |
+| `res/values-fr/strings.xml` | Tiếng Pháp |
+
+**Layouts updated (12 files):** `fragment_home`, `fragment_product_list`, `fragment_product_detail`, `fragment_filter_bottom_sheet`, `fragment_login`, `fragment_register`, `fragment_otp`, `fragment_cart`, `fragment_account`, `fragment_checkout`, `fragment_order_list`, `activity_splash`, `item_search_history`, `item_review`
+
+**Java files updated (4 files):** `ProductDetailFragment`, `ProductListFragment`, `ReviewAdapter`, `CheckoutFragment`
+
+**Cách test:** Settings → General Management → Language → chọn ngôn ngữ khác → mở lại app.
+
+---
+
+## Completed — UI/UX Improvements
+
+**Completed:** 2026-06-01
+
+### A — Filter FAB badge
+
+FAB bọc trong `FrameLayout` + `tvFilterBadge` (oval đỏ, 20dp). Hiện số lượng filter đang active (max 3: category, price, rating). `updateFilterBadge()` gọi sau mỗi `onFiltersApplied`, `onFiltersCleared`, `handleArguments`.
+
+**Files:** `fragment_product_list.xml`, `ProductListFragment.java`, `drawable/bg_badge.xml`
+
+---
+
+### B — ProductList shimmer
+
+`ShimmerFrameLayout` chứa 2 hàng × 2 cột skeleton (dùng `bg_shimmer_rect`). Chỉ hiện khi **initial load** (adapter rỗng) — không hiện khi sort/filter reload có sẵn data. `swipeRefresh` toggle `GONE`/`VISIBLE` đồng bộ với shimmer.
+
+**Files:** `fragment_product_list.xml`, `ProductListFragment.java`
+
+---
+
+### C — Active filter chips
+
+`HorizontalScrollView` + `ChipGroup` (`scrollActiveFilters`, `chipGroupActiveFilters`) đặt ngay dưới sort chips. Mỗi filter active tạo 1 `Chip` với `closeIconVisible=true`. Tap × xóa filter đó ngay mà không cần mở bottom sheet. Gọi lại `viewModel.applyFilters()` với param tương ứng set null.
+
+**Files:** `fragment_product_list.xml`, `ProductListFragment.java`
+
+---
+
+### D — Add to Cart feedback
+
+Thay Toast bằng button state change: khi `addToCartResult` arrive → `btnAddToCart` text = `btn_added` ("✓ Đã thêm"), `backgroundTint` = `@color/success`, `enabled=false`. Sau 1.5s `cartRestoreHandler.postDelayed` restore về trạng thái ban đầu. Handler được cancel trong `onDestroyView` để tránh NPE.
+
+**Files:** `ProductDetailFragment.java`
+
+---
+
+### E — Pinch-to-zoom ảnh sản phẩm
+
+`ImageSliderAdapter` thay `ImageView` → `PhotoView` (`com.github.chrisbanes:PhotoView:2.3.0`). Áp dụng cho cả ProductDetail image slider lẫn Home banner. Double-tap zoom, pinch zoom. JitPack đã có sẵn trong `settings.gradle`.
+
+**Files:** `app/build.gradle`, `ImageSliderAdapter.java`
+
+---
+
+### F — Sản phẩm đã xem gần đây
+
+`RecentlyViewedManager`: SharedPreferences + Gson, lưu `List<Item>` (id, slug, name, imageUrl), max 10, dedup theo id (move to front).
+
+`RecentlyViewedAdapter`: `ListAdapter<Item>` + `DiffUtil`, click navigate sang ProductDetail bằng slug.
+
+Section cuối `layoutContent` trong Home (`layoutRecentlyViewed` + `rvRecentlyViewed` 180dp, horizontal). Ẩn khi list rỗng. `refreshRecentlyViewed()` gọi trong `onResume` → cập nhật ngay khi user back từ ProductDetail.
+
+Lưu trong `ProductDetailFragment.observeData()` khi product load xong.
+
+**Files:** `RecentlyViewedManager.java` (NEW), `RecentlyViewedAdapter.java` (NEW), `item_recently_viewed.xml` (NEW), `fragment_home.xml`, `HomeFragment.java`, `ProductDetailFragment.java`
+
+---
+
+### G — Sort reviews
+
+`ChipGroup` (`chipGroupReviewSort`) inline bên phải header "Đánh giá" trong `fragment_product_detail.xml`. 3 chips: Mới nhất / Sao cao nhất / Sao thấp nhất. `visibility=gone` mặc định, chỉ hiện khi có reviews (`totalReviews > 0`).
+
+`allReviews: List<ReviewDto>` lưu toàn bộ list gốc trong Fragment. `sortReviews(mode)` sort bản sao và `submitList()` — list gốc không bị mutate.
+
+Sort "Mới nhất": so sánh `createdAt` String lexicographically (ISO 8601 tự sort đúng). Sort sao: so sánh `rating` int.
+
+**Files:** `fragment_product_detail.xml`, `ProductDetailFragment.java`
+
+---
+
+## UI/UX Improvements & Bonus Features
+
+### ✅ Tất cả đã implement
+
+| # | Task | Status |
+|---|---|---|
+| A | Filter FAB badge | ✅ Done 2026-06-01 |
+| B | ProductList shimmer | ✅ Done 2026-06-01 |
+| C | Active filter chips | ✅ Done 2026-06-01 |
+| D | Add to Cart feedback | ✅ Done 2026-06-01 |
+| E | Pinch-to-zoom ảnh | ✅ Done 2026-06-01 |
+| F | Sản phẩm đã xem gần đây | ✅ Done 2026-06-01 |
+| G | Sort reviews | ✅ Done 2026-06-01 |

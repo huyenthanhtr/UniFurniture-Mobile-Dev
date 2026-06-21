@@ -1,0 +1,161 @@
+﻿<div class="promo-page">
+  <nav class="promo-breadcrumb">
+    <a routerLink="/">Trang chủ</a>
+    <span>/</span>
+    <span>Khuyến mãi</span>
+  </nav>
+
+  <section class="promo-hero">
+    <div class="promo-hero__content">
+      <span class="eyebrow">Khuyến mãi U-Home Furni</span>
+      <h1>Khuyến mãi đặc biệt mùa xuân</h1>
+      <p class="hero-subtitle">
+        Giảm sâu tới 40%, combo phòng theo phong cách và ưu đãi vận chuyển miễn phí.
+      </p>
+
+      <div class="hero-actions">
+        <button type="button" class="btn-primary" (click)="scrollToSection('flash-deals')">Mua ngay</button>
+        <button type="button" class="btn-secondary" (click)="scrollToSection('voucher-codes')">Mã ưu đãi</button>
+      </div>
+
+      <div class="hero-metrics">
+        <div class="metric">
+          <strong>{{ countdown().hours }}</strong>
+          <span>Giờ</span>
+        </div>
+        <div class="metric">
+          <strong>{{ countdown().minutes }}</strong>
+          <span>Phút</span>
+        </div>
+        <div class="metric">
+          <strong>{{ countdown().seconds }}</strong>
+          <span>Giây</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="promo-hero__media">
+      <img
+        src="assets/images/banner-km.png"
+        alt="Không gian nội thất khuyến mãi U-Home Furni"
+        loading="eager"
+      />
+    </div>
+  </section>
+
+  <div class="state-message" *ngIf="loading">
+    Đang tải dữ liệu khuyến mãi...
+  </div>
+  <div class="state-message state-error" *ngIf="!loading && errorMessage">{{ errorMessage }}</div>
+
+  <section id="flash-deals" class="promo-section" *ngIf="!loading && !errorMessage">
+    <div class="section-head">
+      <h2>Flash Deal hôm nay</h2>
+      <p>Giá tốt trong 24h cho các sản phẩm nổi bật.</p>
+    </div>
+
+    <div class="deal-grid" *ngIf="flashDeals.length > 0; else emptyDeals">
+      <a
+        class="deal-card"
+        *ngFor="let deal of flashDeals; trackBy: trackByDealId"
+        [routerLink]="['/products', deal.productSlug]"
+      >
+        <div class="deal-thumb">
+          <img [src]="deal.imageUrl" [alt]="deal.title" />
+          <span class="deal-badge">-{{ discountPercent(deal) }}%</span>
+        </div>
+
+        <div class="deal-body">
+          <p class="deal-category">{{ deal.category }}</p>
+          <h3>{{ deal.title }}</h3>
+
+          <div class="deal-price">
+            <strong>{{ formatPrice(deal.salePrice) }}</strong>
+            <span>{{ formatPrice(deal.originalPrice) }}</span>
+          </div>
+
+          <div class="deal-progress">
+            <div class="deal-progress-bar" [style.width.%]="soldPercent(deal)"></div>
+          </div>
+          <p class="deal-sold">Đã bán {{ deal.sold }}/{{ deal.total }}</p>
+        </div>
+      </a>
+    </div>
+
+    <ng-template #emptyDeals>
+      <p class="state-message">Chưa có sản phẩm khuyến mãi</p>
+    </ng-template>
+  </section>
+
+  <section id="voucher-codes" class="promo-section vouchers" *ngIf="!loading && !errorMessage">
+    <div class="section-head">
+      <h2>Mã ưu đãi</h2>
+      <p class="voucher-subtitle">Nhấn vào để copy mã giảm giá và sử dụng ở trang thanh toán</p>
+    </div>
+
+    <div class="voucher-grid" *ngIf="vouchers.length > 0; else emptyCoupons">
+      <article
+        class="voucher-card"
+        *ngFor="let voucher of vouchers; trackBy: trackByVoucher"
+        [class.is-copyable]="voucher.availability === 'active'"
+        [class.is-expired]="voucher.isExpired"
+        (click)="copyVoucherCode(voucher)"
+      >
+        <div class="voucher-head">
+          <p class="voucher-code" [style.color]="voucher.color">{{ voucher.code }}</p>
+          <span class="voucher-copy-state" [class.active]="copiedCode === voucher.code" [class.expired]="voucher.isExpired">
+            {{
+              voucher.availability === 'not_started'
+                ? 'Chưa có hiệu lực'
+                : (voucher.availability === 'expired'
+                ? 'Hết hạn'
+                : (voucher.availability === 'sold_out'
+                  ? 'Đã hết'
+                  : (copiedCode === voucher.code ? 'Đã copy' : 'Copy mã')))
+            }}
+          </span>
+        </div>
+        <h3>{{ voucher.label }}</h3>
+        <ul class="voucher-meta">
+          <li *ngFor="let detail of voucher.details">{{ detail }}</li>
+        </ul>
+      </article>
+    </div>
+
+    <ng-template #emptyCoupons>
+      <p class="state-message">Chưa có mã ưu đãi khả dụng.</p>
+    </ng-template>
+  </section>
+
+  <section class="promo-section collections" *ngIf="!loading && collections.length > 0">
+    <div class="section-head section-head--collections">
+      <div>
+        <span class="collection-kicker">Bộ sưu tập nổi bật</span>
+        <h2>Bộ sưu tập được yêu thích</h2>
+        <p>Chọn nhanh các sản phẩm thuộc bộ sưu tập đang được khách hàng quan tâm nhiều nhất.</p>
+      </div>
+      <a
+        class="collection-link"
+        [routerLink]="['/products']"
+        [queryParams]="{ group: 'bo-suu-tap', groupLabel: 'Bộ sưu tập' }"
+      >Xem tất cả Bộ sưu tập</a>
+    </div>
+
+    <div class="collection-grid">
+      <a
+        class="collection-card"
+        *ngFor="let collection of collections; let index = index; trackBy: trackByCollection"
+        [routerLink]="toProductDetailLink(collection)"
+      >
+        <img [src]="collection.imageUrl" [alt]="collection.title" />
+        <span class="collection-badge">{{ index === 0 ? 'Top pick' : 'Hot combo' }}</span>
+        <div class="collection-overlay">
+          <span class="collection-tag">{{ index === 0 ? 'Nổi bật tuần này' : 'Ưu đãi có hạn' }}</span>
+          <h3>{{ collection.title }}</h3>
+          <p>{{ collection.subtitle }}</p>
+          <span class="collection-cta">Xem chi tiết</span>
+        </div>
+      </a>
+    </div>
+  </section>
+</div>

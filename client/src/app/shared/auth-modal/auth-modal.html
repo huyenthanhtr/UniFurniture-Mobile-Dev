@@ -1,0 +1,312 @@
+@if (ui.isAuthOpen()) {
+<!-- Overlay -->
+<div class="auth-overlay">
+    <div class="auth-modal">
+
+        <!-- Close Button -->
+        <button class="auth-close" (click)="ui.closeAuth()" aria-label="Đóng">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+        </button>
+
+        <!-- Logo -->
+        <div class="auth-logo">
+            <img src="assets/images/logo_ngang_no_bg.png" alt="UniFurniture" class="auth-logo-img" />
+        </div>
+
+        <!-- Tabs -->
+        <div class="auth-tabs">
+            <button class="auth-tab" [class.active]="ui.authTab() === 'login'" (click)="switchTab('login')">Đăng
+                nhập</button>
+            <button class="auth-tab" [class.active]="ui.authTab() === 'register'" (click)="switchTab('register')">Đăng
+                ký</button>
+        </div>
+
+        @if (errorMessage) {
+        <div class="auth-alert error">{{ errorMessage }}</div>
+        }
+        @if (successMessage) {
+        <div class="auth-alert success">{{ successMessage }}</div>
+        }
+
+
+        @if (ui.authTab() === 'login') {
+        <form class="auth-form" (ngSubmit)="onLogin()">
+            <div class="form-group">
+                <input type="text" class="form-input" placeholder="Nhập email hoặc số điện thoại"
+                    [(ngModel)]="loginData.email" name="email" required />
+            </div>
+
+            <div class="form-group password-group">
+                <input [type]="showPassword ? 'text' : 'password'" class="form-input" placeholder="Mật khẩu"
+                    [(ngModel)]="loginData.password" name="password" required />
+                <button type="button" class="password-toggle" (click)="togglePassword()"
+                    [attr.aria-label]="showPassword ? 'Ẩn mật khẩu' : 'Hiển thị mật khẩu'">
+                    <svg *ngIf="!showPassword" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                    </svg>
+                    <svg *ngIf="showPassword" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                        <path
+                            d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                        <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="auth-disclaimer">
+                <a [routerLink]="['/chinh-sach', 'chinh-sach-ban-hang']" (click)="ui.closeAuth()" class="auth-link">Điều
+                    khoản dịch vụ</a>
+                <span> · Website được bảo vệ bởi reCAPTCHA</span>
+            </div>
+
+            <button type="submit" class="auth-submit-btn" [disabled]="isLoading"
+                style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                @if (isLoading) {
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12a9 9 0 11-6.219-8.56">
+                        <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s"
+                            repeatCount="indefinite" />
+                    </path>
+                </svg>
+                <span>Đang đăng nhập...</span>
+                } @else {
+                <span>Đăng nhập</span>
+                }
+            </button>
+
+            <div class="auth-footer-links">
+                <span>Khách hàng mới? <a href="#" class="auth-link" (click)="switchTab('register')">Tạo tài
+                        khoản</a></span>
+                <span>Quên mật khẩu? <a href="#" class="auth-link" (click)="$event.preventDefault(); switchTab('forgot')">Khôi phục mật khẩu</a></span>
+            </div>
+        </form>
+        }
+
+        @if (ui.authTab() === 'register') {
+        @if (!isOtpOpend) {
+        <form class="auth-form" (ngSubmit)="onRegister()">
+            <p class="auth-subtitle">Tạo tài khoản mới:</p>
+
+            <div class="form-group required-field">
+                <input type="text" class="form-input" placeholder="Họ và tên *" [(ngModel)]="registerData.name"
+                    name="name" required />
+            </div>
+
+            <div class="form-group">
+                <input type="email" class="form-input" placeholder="Email (Không bắt buộc)"
+                    [(ngModel)]="registerData.email" name="email" />
+            </div>
+
+            <div class="form-group required-field" style="display: flex; gap: 8px;">
+                <select class="form-input" [(ngModel)]="dialCode" name="dialCode"
+                    style="width: 80px; padding: 0 8px; flex-shrink: 0;" required>
+                    <option value="+84">+84</option>
+                    <option value="+1">+1</option>
+                </select>
+                <input type="tel" class="form-input" placeholder="Số điện thoại *" [(ngModel)]="registerData.phone"
+                    name="phone" required style="flex: 1;" />
+            </div>
+
+            <div class="form-group required-field password-group">
+                <input [type]="showPassword ? 'text' : 'password'" class="form-input"
+                    placeholder="Mật khẩu (ít nhất 8 ký tự) *" [(ngModel)]="registerData.password" name="password"
+                    minlength="8" required />
+                <button type="button" class="password-toggle" (click)="togglePassword()"
+                    [attr.aria-label]="showPassword ? 'Ẩn mật khẩu' : 'Hiển thị mật khẩu'">
+                    <svg *ngIf="!showPassword" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                    </svg>
+                    <svg *ngIf="showPassword" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                        <path
+                            d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                        <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="form-group required-field password-group">
+                <input [type]="showPassword ? 'text' : 'password'" class="form-input" placeholder="Xác nhận mật khẩu *"
+                    [(ngModel)]="registerData.confirmPassword" name="confirmPassword" required />
+                <button type="button" class="password-toggle" (click)="togglePassword()"
+                    [attr.aria-label]="showPassword ? 'Ẩn mật khẩu' : 'Hiển thị mật khẩu'">
+                    <svg *ngIf="!showPassword" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                    </svg>
+                    <svg *ngIf="showPassword" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                        <path
+                            d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                        <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                </button>
+                @if (registerData.confirmPassword && registerData.password !== registerData.confirmPassword) {
+                <div style="color: #ef4444; font-size: 0.85rem; margin-top: 4px; padding-left: 4px;">Mật khẩu xác nhận
+                    không khớp</div>
+                }
+            </div>
+
+            <div class="auth-disclaimer">
+                <span>Bằng cách đăng ký, bạn đồng ý với </span>
+                <a [routerLink]="['/chinh-sach', 'chinh-sach-ban-hang']" (click)="ui.closeAuth()" class="auth-link">Điều
+                    khoản dịch vụ</a>
+            </div>
+
+            <button type="submit" class="auth-submit-btn" [disabled]="isLoading"
+                style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                @if (isLoading) {
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12a9 9 0 11-6.219-8.56">
+                        <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s"
+                            repeatCount="indefinite" />
+                    </path>
+                </svg>
+                <span>Đang xử lý...</span>
+                } @else {
+                <span>Tạo tài khoản</span>
+                }
+            </button>
+
+            <div class="auth-footer-links">
+                <span>Đã có tài khoản? <a href="#" class="auth-link" (click)="switchTab('login')">Đăng nhập</a></span>
+            </div>
+        </form>
+        } @else {
+        <form class="auth-form" (ngSubmit)="onVerifyOtp()">
+            <p class="auth-subtitle">Nhập mã OTP (6 số) vừa được gửi đến số {{ registerData.phone }}:</p>
+            <div class="form-group">
+                <input type="text" class="form-input" placeholder="Mã OTP" [(ngModel)]="otpCode" name="otp" required />
+            </div>
+            <button type="submit" class="auth-submit-btn" [disabled]="isLoading"
+                style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                @if (isLoading) {
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12a9 9 0 11-6.219-8.56">
+                        <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s"
+                            repeatCount="indefinite" />
+                    </path>
+                </svg>
+                <span>Đang xác thực...</span>
+                } @else {
+                <span>Xác nhận OTP</span>
+                }
+            </button>
+            <div class="auth-footer-links">
+                <span>Chưa nhận được mã? <a href="#" class="auth-link" (click)="onRegister()">Gửi lại</a></span>
+            </div>
+        </form>
+        }
+        }
+
+        @if (ui.authTab() === 'forgot') {
+
+        @if (forgotStep === 'phone') {
+        <form class="auth-form" (ngSubmit)="onForgotSendOtp()">
+            <p class="auth-subtitle">Nhập số điện thoại đã đăng ký để nhận mã OTP:</p>
+            <div class="form-group required-field">
+                <input type="tel" class="form-input" placeholder="Số điện thoại (VD: 0901234567)"
+                    [(ngModel)]="forgotPhone" name="forgotPhone" required />
+            </div>
+            <button type="submit" class="auth-submit-btn" [disabled]="isLoading"
+                style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                @if (isLoading) {
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12a9 9 0 11-6.219-8.56">
+                        <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s"
+                            repeatCount="indefinite" />
+                    </path>
+                </svg>
+                <span>Đang gửi OTP...</span>
+                } @else {
+                <span>Gửi mã OTP</span>
+                }
+            </button>
+            <div class="auth-footer-links">
+                <span>Đã nhớ mật khẩu? <a href="#" class="auth-link" (click)="$event.preventDefault(); switchTab('login')">Đăng nhập</a></span>
+            </div>
+        </form>
+        }
+
+        @if (forgotStep === 'otp') {
+        <form class="auth-form" (ngSubmit)="onForgotVerifyOtp()">
+            <p class="auth-subtitle">Nhập mã OTP (6 số) đã được gửi đến số <strong>{{ forgotPhone }}</strong>:</p>
+            <div class="form-group">
+                <input type="text" class="form-input" placeholder="Mã OTP" [(ngModel)]="forgotOtp" name="forgotOtp"
+                    required maxlength="6" />
+            </div>
+            <button type="submit" class="auth-submit-btn"
+                style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <span>Xác nhận OTP</span>
+            </button>
+            <div class="auth-footer-links">
+                <span>Chưa nhận được mã? <a href="#" class="auth-link" (click)="$event.preventDefault(); onForgotSendOtp()">Gửi lại</a></span>
+            </div>
+        </form>
+        }
+
+        @if (forgotStep === 'newpass') {
+        <form class="auth-form" (ngSubmit)="onResetPassword()">
+            <p class="auth-subtitle">Nhập mật khẩu mới cho tài khoản:</p>
+            <div class="form-group required-field password-group">
+                <input [type]="showForgotPassword ? 'text' : 'password'" class="form-input"
+                    placeholder="Mật khẩu mới (ít nhất 8 ký tự) *" [(ngModel)]="forgotNewPassword"
+                    name="forgotNewPassword" required minlength="8" />
+                <button type="button" class="password-toggle" (click)="toggleForgotPassword()">
+                    <svg *ngIf="!showForgotPassword" width="20" height="20" fill="none" stroke="currentColor"
+                        stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                    </svg>
+                    <svg *ngIf="showForgotPassword" width="20" height="20" fill="none" stroke="currentColor"
+                        stroke-width="2" viewBox="0 0 24 24">
+                        <path
+                            d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                        <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                </button>
+            </div>
+            <div class="form-group required-field">
+                <input [type]="showForgotPassword ? 'text' : 'password'" class="form-input"
+                    placeholder="Xác nhận mật khẩu mới *" [(ngModel)]="forgotConfirmPassword"
+                    name="forgotConfirmPassword" required />
+                @if (forgotConfirmPassword && forgotNewPassword !== forgotConfirmPassword) {
+                <div style="color: #ef4444; font-size: 0.85rem; margin-top: 4px; padding-left: 4px;">Mật khẩu xác nhận
+                    không khớp</div>
+                }
+            </div>
+            <button type="submit" class="auth-submit-btn" [disabled]="isLoading"
+                style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                @if (isLoading) {
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12a9 9 0 11-6.219-8.56">
+                        <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s"
+                            repeatCount="indefinite" />
+                    </path>
+                </svg>
+                <span>Đang đặt lại...</span>
+                } @else {
+                <span>Đặt lại mật khẩu</span>
+                }
+            </button>
+        </form>
+        }
+
+        }
+
+    </div>
+</div>
+}

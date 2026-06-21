@@ -1,0 +1,106 @@
+.card {
+  border: 1px solid #e8e0d8;
+  border-radius: 12px;
+}
+
+.deposit-notice {
+  background: #fffbeb;
+  border: 1.5px solid #fcd34d;
+}
+
+.deposit-notice .deposit-icon {
+  font-size: 1.2rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #b45309;
+  margin-top: 2px;
+}
+
+.payment-option {
+  border: 1.5px solid #e8e0d8;
+  border-radius: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.payment-option:hover,
+.payment-option.selected {
+  border-color: #c8923a;
+  background: #fdf8f2;
+}
+
+.payment-option.disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.radio-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.radio-dot.active {
+  border-color: #c8923a;
+  background: #c8923a;
+  box-shadow: inset 0 0 0 3px #fff;
+}
+
+.method-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  background: #f8f3ea;
+  border: 1px solid #eadbc5;
+}
+
+.method-icon--cash {
+  color: #15803d;
+  background: #ecfdf3;
+  border-color: #bbf7d0;
+}
+
+.method-icon--bank {
+  color: #1d4ed8;
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.bank-table td {
+  padding: 5px 4px;
+  vertical-align: top;
+}
+
+.bank-table td.label {
+  color: #888;
+  white-space: nowrap;
+  padding-right: 12px;
+  width: 90px;
+}
+
+.btn-xs {
+  font-size: 0.7rem;
+}
+
+.deposit-amount-badge {
+  background: #fff5f5;
+  border: 1px dashed #fca5a5;
+  font-size: 0.9rem;
+}
+
+.qr-img {
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+  border: 1px solid #e8e0d8;
+}

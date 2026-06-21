@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand Colors -->
+    <color name="primary">#1B4332</color>
+    <color name="primary_dark">#0D2B20</color>
+    <color name="primary_light">#2D6A4F</color>
+    <color name="accent">#D4A853</color>
+    <color name="accent_dark">#B8892F</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#1A1A1A</color>
+    <color name="gray_100">#F8F8F8</color>
+    <color name="gray_200">#EEEEEE</color>
+    <color name="gray_300">#E0E0E0</color>
+    <color name="gray_400">#BDBDBD</color>
+    <color name="gray_600">#757575</color>
+    <color name="gray_700">#616161</color>
+    <color name="gray_800">#424242</color>
+    <color name="secondary">#D4A853</color>
+    <color name="error">#D32F2F</color>
+    <color name="success">#388E3C</color>
+    <color name="discount_red">#E53935</color>
+    <color name="surface">#FAFAF8</color>
+    <color name="on_primary">#FFFFFF</color>
+    <color name="notification_unread">#EEF6F2</color>
+    <color name="bg_notif_order">#E8F5E9</color>
+    <color name="bg_notif_account">#FFFDE7</color>
+    <color name="bg_notif_other">#E3F2FD</color>
+    <color name="rating_star">#D4A853</color>
+    <color name="white_alpha_20">#33FFFFFF</color>
+    <color name="primary_alpha_10">#1A1B4332</color>
+</resources>
