@@ -17,18 +17,15 @@ import com.unifurniture.mobile.data.model.NotificationDto;
 import com.unifurniture.mobile.databinding.FragmentNotificationBinding;
 import com.unifurniture.mobile.ui.adapter.NotificationAdapter;
 import com.unifurniture.mobile.util.NotificationManager;
-import com.unifurniture.mobile.util.RecyclerViewStateHelper;
+import com.unifurniture.mobile.util.ToastUtil;
 import java.util.ArrayList;
 import java.util.List;
 
 public class NotificationFragment extends Fragment {
 
-    private static final String KEY_FILTER = "notification_filter";
-
     private FragmentNotificationBinding binding;
     private NotificationAdapter adapter;
     private String currentFilter = "all"; // "all", "order", "account"
-    private final RecyclerViewStateHelper rvState = new RecyclerViewStateHelper("notifications");
 
     @Nullable
     @Override
@@ -43,10 +40,6 @@ public class NotificationFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        if (savedInstanceState != null) {
-            currentFilter = savedInstanceState.getString(KEY_FILTER, "all");
-        }
-
         // Setup Back press
         binding.btnBack.setOnClickListener(v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
@@ -54,15 +47,13 @@ public class NotificationFragment extends Fragment {
         adapter = new NotificationAdapter(new NotificationAdapter.OnNotificationClickListener() {
             @Override
             public void onNotificationClick(NotificationDto notification) {
-                // Mark as read
                 NotificationManager.getInstance(requireContext()).markAsRead(notification.id);
                 loadNotifications();
 
-                // Perform actions based on type
                 if ("order".equals(notification.type) && notification.orderId != null) {
-                    Toast.makeText(requireContext(), getString(R.string.toast_order_id, notification.orderId), Toast.LENGTH_SHORT).show();
+                    ToastUtil.show(requireContext(), getString(R.string.toast_order_id, notification.orderId));
                 } else {
-                    Toast.makeText(requireContext(), notification.title, Toast.LENGTH_SHORT).show();
+                    ToastUtil.show(requireContext(), notification.title);
                 }
             }
 
@@ -70,19 +61,17 @@ public class NotificationFragment extends Fragment {
             public void onMarkUnreadClick(NotificationDto notification) {
                 NotificationManager.getInstance(requireContext()).markAsUnread(notification.id);
                 loadNotifications();
-                Toast.makeText(requireContext(), R.string.toast_mark_unread, Toast.LENGTH_SHORT).show();
             }
         });
 
         binding.rvNotifications.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvNotifications.setAdapter(adapter);
-        rvState.bind(binding.rvNotifications, savedInstanceState);
 
         // Setup Mark All As Read
         binding.btnMarkAllRead.setOnClickListener(v -> {
             NotificationManager.getInstance(requireContext()).markAllAsRead();
             loadNotifications();
-            Toast.makeText(requireContext(), R.string.toast_mark_all_read, Toast.LENGTH_SHORT).show();
+            ToastUtil.show(requireContext(), R.string.toast_mark_all_read);
         });
 
         // Setup Tab filters
@@ -104,12 +93,6 @@ public class NotificationFragment extends Fragment {
             loadNotifications();
         });
 
-        binding.tabOther.setOnClickListener(v -> {
-            currentFilter = "other";
-            updateTabStyles();
-            loadNotifications();
-        });
-
         // Initial loading
         loadNotifications();
         updateTabStyles();
@@ -120,24 +103,16 @@ public class NotificationFragment extends Fragment {
 
         List<NotificationDto> rawList = NotificationManager.getInstance(requireContext()).getNotifications();
         List<NotificationDto> filteredList = new ArrayList<>();
-        List<NotificationDto> unreadList = new ArrayList<>();
 
         for (NotificationDto item : rawList) {
-            if (!item.isRead) {
-                unreadList.add(item);
-            }
-
             if ("all".equals(currentFilter)) {
                 filteredList.add(item);
             } else if (currentFilter.equals(item.type)) {
                 filteredList.add(item);
-            } else if ("other".equals(currentFilter) && !"order".equals(item.type) && !"account".equals(item.type)) {
-                filteredList.add(item);
             }
         }
 
-        updateSummary(unreadList);
-        adapter.submitList(filteredList, rvState.afterSubmitCallback());
+        adapter.submitList(filteredList);
 
         if (filteredList.isEmpty()) {
             binding.rvNotifications.setVisibility(View.GONE);
@@ -146,39 +121,6 @@ public class NotificationFragment extends Fragment {
             binding.rvNotifications.setVisibility(View.VISIBLE);
             binding.layoutEmpty.setVisibility(View.GONE);
         }
-    }
-
-    private void updateSummary(List<NotificationDto> unreadList) {
-        if (unreadList.isEmpty()) {
-            binding.layoutSummary.setVisibility(View.GONE);
-            return;
-        }
-
-        binding.layoutSummary.setVisibility(View.VISIBLE);
-        
-        boolean hasOrder = false;
-        boolean hasAccount = false;
-        boolean hasOther = false;
-
-        for (NotificationDto n : unreadList) {
-            if ("order".equals(n.type)) hasOrder = true;
-            else if ("account".equals(n.type)) hasAccount = true;
-            else hasOther = true;
-        }
-
-        StringBuilder types = new StringBuilder();
-        String comma = getString(R.string.comma);
-        if (hasOrder) types.append(getString(R.string.order_type));
-        if (hasAccount) {
-            if (types.length() > 0) types.append(comma);
-            types.append(getString(R.string.account_type));
-        }
-        if (hasOther) {
-            if (types.length() > 0) types.append(comma);
-            types.append(getString(R.string.other_type));
-        }
-
-        binding.tvSummary.setText(getString(R.string.notification_summary, unreadList.size(), types.toString()));
     }
 
     private void updateTabStyles() {
@@ -197,9 +139,6 @@ public class NotificationFragment extends Fragment {
         binding.tabAccount.setBackgroundResource(R.drawable.bg_tab_pill_unselected);
         binding.tabAccount.setTextColor(inactiveTextColor);
 
-        binding.tabOther.setBackgroundResource(R.drawable.bg_tab_pill_unselected);
-        binding.tabOther.setTextColor(inactiveTextColor);
-
         // Highlight active tab
         if ("all".equals(currentFilter)) {
             binding.tabAll.setBackgroundResource(R.drawable.bg_tab_pill_selected);
@@ -210,17 +149,7 @@ public class NotificationFragment extends Fragment {
         } else if ("account".equals(currentFilter)) {
             binding.tabAccount.setBackgroundResource(R.drawable.bg_tab_pill_selected);
             binding.tabAccount.setTextColor(activeTextColor);
-        } else if ("other".equals(currentFilter)) {
-            binding.tabOther.setBackgroundResource(R.drawable.bg_tab_pill_selected);
-            binding.tabOther.setTextColor(activeTextColor);
         }
-    }
-
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putString(KEY_FILTER, currentFilter);
-        rvState.save(outState);
     }
 
     @Override

@@ -100,7 +100,10 @@ public interface ApiService {
 
     // ── Orders ────────────────────────────────────────────────────────────────
     @GET("orders")
-    Call<ApiListResponse<OrderDto>> getOrders(@Query("customer_id") String customerId);
+    Call<ApiListResponse<OrderDto>> getOrders(
+            @Query("customer_id") String customerId,
+            @Query("accountId") String accountId
+    );
 
     @GET("orders/{id}")
     Call<OrderDetailResponse> getOrderById(@Path("id") String orderId);
@@ -146,8 +149,17 @@ public interface ApiService {
             @Query("customer_id") String customerId
     );
 
+    @GET("profiles/{id}")
+    Call<ProfileDto> getProfileById(@Path("id") String profileId);
+
     @PATCH("profiles/{id}")
     Call<ProfileDto> updateProfile(
+            @Path("id") String profileId,
+            @Body Map<String, String> body
+    );
+
+    @POST("profiles/{id}/avatar")
+    Call<ProfileDto> uploadProfileAvatar(
             @Path("id") String profileId,
             @Body Map<String, String> body
     );

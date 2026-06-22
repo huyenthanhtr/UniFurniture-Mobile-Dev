@@ -172,13 +172,6 @@
     <string name="label_orders">订单</string>
     <string name="label_all">全部</string>
     <string name="label_account">账户</string>
-    <string name="label_other">其他</string>
-    <string name="notification_summary">您有 %1$d 条新通知 (%2$s)</string>
-    <string name="mark_as_unread">标记为未读</string>
-    <string name="order_type">订单</string>
-    <string name="account_type">账户</string>
-    <string name="other_type">其他</string>
-    <string name="comma">, </string>
 
     <!-- Wishlist -->
     <string name="empty_wishlist">收藏夹为空</string>
@@ -203,7 +196,6 @@
     <string name="toast_voucher_applied">已应用优惠券：%1$s</string>
     <string name="toast_order_id">订单号：%1$s</string>
     <string name="toast_mark_all_read">已将所有通知标记为已读</string>
-    <string name="toast_mark_unread">已标记为未读</string>
     <string name="toast_login_required_orders">请登录以查看订单</string>
 
     <!-- Formats & Limits -->
@@ -288,6 +280,15 @@
     <string name="female">女</string>
     <string name="other">其他</string>
     <string name="order_tracking">订单跟踪</string>
+    <string name="address_book_title">地址簿</string>
+    <string name="address_book_empty">您尚未保存任何地址。</string>
+    <string name="default_address">默认</string>
+    <string name="edit_address">编辑地址</string>
+    <string name="address_deleted">地址已删除</string>
+    <string name="edit">编辑</string>
+    <string name="delete">删除</string>
+    <string name="set_default">设为默认</string>
+    <string name="cancel">取消</string>
     <string name="order_details">订单详情</string>
     <string name="profile_updated">个人资料更新成功</string>
     <string name="order_number_format">订单 %1$s</string>
@@ -299,7 +300,9 @@
     <string name="account_community_title">社区</string>
     <string name="tracking_code_required">请输入运单号</string>
     <string name="tracking_not_found">未找到该编码对应的订单</string>
+    <string name="tracking_not_found_title">未找到订单编码</string>
     <string name="tracking_lookup_error">无法查询该订单</string>
+    <string name="tracking_try_again">重试</string>
     <string name="remember_password">记住密码</string>
     <string name="back_to_home">返回首页</string>
     <string name="select_language">选择语言</string>
@@ -334,41 +337,48 @@
 
     <!-- Product list -->
     <string name="load_more">加载更多</string>
+    <string name="read_more">查看更多</string>
+    <string name="read_less">收起</string>
 
     <!-- Voucher stub labels -->
     <string name="discount_percent_stub">减 %1$d%%</string>
     <string name="discount_fixed_stub">减 %1$dK</string>
-
-    <string name="read_more">查看更多</string>
-    <string name="read_less">收起</string>
-    <string name="login_required_title">需要登录</string>
-    <string name="login_required_msg">请登录以查看您的订单并追踪购买历史记录。</string>
-    <string name="voucher_applied_title">已应用优惠券</string>
-    <string name="voucher_applied_msg">优惠券码 %s 已成功应用。</string>
-    <string name="optimal_voucher_section_title">最佳折扣券</string>
-    <string name="optimal_badge">最佳选择</string>
-    <string name="optimal_savings">节省 %s</string>
-    <string name="voucher_name_fixed">减免 %s</string>
-    <string name="voucher_name_percent">折扣 %d%%</string>
-    <string name="voucher_desc_fixed">适用于满 %s 的订单。</string>
-    <string name="voucher_desc_percent">满 %2$s 折扣 %1$d%%。</string>
-    <string name="voucher_desc_percent_max">满 %3$s 折扣 %1$d%%，最多减免 %2$s。</string>
-    <string name="voucher_expiry_date">有效期至: %s</string>
-    <string name="btn_use_now">使用</string>
-    <string name="promotions_title_alt">🔥 热门促销</string>
-
-    <!-- Home — brand section -->
-    <string name="home_about_tagline">以精致现代的家具提升您的居住空间。我们提供优质设计方案，完美融合美观与功能。</string>
-    <string name="home_value_quality">品质</string>
-    <string name="home_value_elegant">精致</string>
-    <string name="home_value_dedicated">专注</string>
-
-    <!-- Category -->
-    <string name="empty_categories">暂无分类</string>
-
-    <!-- Account -->
-    <string name="change_password">修改密码</string>
-
-    <!-- Rating -->
-    <string name="rating_display">★ %s</string>
+    <string name="change_password">更改密码</string>
+    <string name="current_password">当前密码</string>
+    <string name="current_password_hint">输入当前密码</string>
+    <string name="new_password">新密码</string>
+    <string name="new_password_hint">至少 6 个字符</string>
+    <string name="confirm_new_password">确认新密码</string>
+    <string name="confirm_new_password_hint">再次输入新密码</string>
+    <string name="required_field">必填</string>
+    <string name="password_min_six">新密码至少需要 6 个字符</string>
+    <string name="password_confirm_mismatch">确认密码不匹配</string>
+    <string name="password_must_be_different">新密码必须不同于当前密码</string>
+    <string name="account_not_found_login_again">未找到账户。请重新登录。</string>
+    <string name="change_password_success">密码修改成功！</string>
+    <string name="current_password_incorrect">当前密码不正确。请重试。</string>
+    <string name="order_tracking_instruction">请输入运单号以查看订单状态。</string>
+    <string name="tracking_code_hint">运单号</string>
+    <string name="track_order_action">查询</string>
+    <string name="order_placeholder">订单 #123456</string>
+    <string name="status_pending">待确认</string>
+    <string name="status_confirmed">已确认</string>
+    <string name="status_processing">处理中</string>
+    <string name="order_date_placeholder">日期：2023-10-10</string>
+    <string name="order_date_placeholder_short">2023-10-10</string>
+    <string name="order_status_title">订单状态</string>
+    <string name="status_packed">已打包</string>
+    <string name="status_shipping">配送中</string>
+    <string name="status_completed">已完成</string>
+    <string name="status_delivered">已送达</string>
+    <string name="status_cancel_pending">等待取消确认</string>
+    <string name="cod_short">货到付款</string>
+    <string name="payment_unpaid">未付款</string>
+    <string name="zero_amount">0</string>
+    <string name="review_content_placeholder">评价内容</string>
+    <string name="shop_reply_placeholder">感谢您的支持！</string>
+    <string name="price_placeholder">100,000 越南盾</string>
+    <string name="quantity_one_placeholder">x1</string>
+    <string name="address_list_empty_hint">您还没有保存地址。\n点击 + 添加新地址。</string>
+    <string name="avatar_selected_hint">已选择新头像。点击保存即可更新。</string>
 </resources>

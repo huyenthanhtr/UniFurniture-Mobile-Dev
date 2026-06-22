@@ -41,7 +41,7 @@
                 android:id="@+id/tvDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="2023-10-10"
+                android:text="@string/order_date_placeholder_short"
                 android:textColor="@color/gray_600"
                 android:textSize="12sp" />
         </LinearLayout>
@@ -51,7 +51,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Review content goes here"
+            android:text="@string/review_content_placeholder"
             android:textColor="@color/black"
             android:textSize="14sp" />
 
@@ -79,7 +79,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Cảm ơn bạn đã ủng hộ!"
+                android:text="@string/shop_reply_placeholder"
                 android:textColor="@color/black"
                 android:textSize="13sp" />
         </LinearLayout>

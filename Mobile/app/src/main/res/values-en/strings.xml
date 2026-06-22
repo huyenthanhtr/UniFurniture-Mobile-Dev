@@ -304,7 +304,9 @@
     <string name="account_community_title">Community</string>
     <string name="tracking_code_required">Please enter a tracking code</string>
     <string name="tracking_not_found">No order found with this code</string>
+    <string name="tracking_not_found_title">Tracking code not found</string>
     <string name="tracking_lookup_error">Could not look up this order</string>
+    <string name="tracking_try_again">Try again</string>
     <string name="remember_password">Remember password</string>
     <string name="back_to_home">Back to Home</string>
     <string name="select_language">Select Language</string>
@@ -343,37 +345,42 @@
     <!-- Voucher stub labels -->
     <string name="discount_percent_stub">-%1$d%%</string>
     <string name="discount_fixed_stub">-%1$dK</string>
-
-    <string name="read_more">Read more</string>
-    <string name="read_less">Read less</string>
-    <string name="login_required_title">Login Required</string>
-    <string name="login_required_msg">Please login to view your orders and track purchase history.</string>
-    <string name="voucher_applied_title">Voucher Applied</string>
-    <string name="voucher_applied_msg">Voucher code %s has been applied successfully.</string>
-    <string name="optimal_voucher_section_title">Best Discount Voucher</string>
-    <string name="optimal_badge">BEST CHOICE</string>
-    <string name="optimal_savings">Save %s</string>
-    <string name="voucher_name_fixed">Discount %s</string>
-    <string name="voucher_name_percent">Discount %d%%</string>
-    <string name="voucher_desc_fixed">Applicable to orders from %s.</string>
-    <string name="voucher_desc_percent">Save %1$d%% on orders from %2$s.</string>
-    <string name="voucher_desc_percent_max">Save %1$d%%, max %2$s for orders from %3$s.</string>
-    <string name="voucher_expiry_date">Expiry: %s</string>
-    <string name="btn_use_now">Apply</string>
-    <string name="promotions_title_alt">🔥 Hot Promotions</string>
-
-    <!-- Home — brand section -->
-    <string name="home_about_tagline">Elevate your living space with elegant and modern furniture. We offer optimal design solutions that harmoniously blend aesthetics and functionality.</string>
-    <string name="home_value_quality">Quality</string>
-    <string name="home_value_elegant">Elegant</string>
-    <string name="home_value_dedicated">Dedicated</string>
-
-    <!-- Category -->
-    <string name="empty_categories">No categories found</string>
-
-    <!-- Account -->
-    <string name="change_password">Change password</string>
-
-    <!-- Rating -->
-    <string name="rating_display">★ %s</string>
+    <string name="change_password">Change Password</string>
+    <string name="current_password">Current Password</string>
+    <string name="current_password_hint">Enter current password</string>
+    <string name="new_password">New Password</string>
+    <string name="new_password_hint">At least 6 characters</string>
+    <string name="confirm_new_password">Confirm New Password</string>
+    <string name="confirm_new_password_hint">Re-enter new password</string>
+    <string name="required_field">Required</string>
+    <string name="password_min_six">New password must be at least 6 characters</string>
+    <string name="password_confirm_mismatch">Confirmation password does not match</string>
+    <string name="password_must_be_different">New password must be different from current password</string>
+    <string name="account_not_found_login_again">Account not found. Please log in again.</string>
+    <string name="change_password_success">Password changed successfully!</string>
+    <string name="current_password_incorrect">Current password is incorrect. Please try again.</string>
+    <string name="order_tracking_instruction">Enter your tracking code to check your order status.</string>
+    <string name="tracking_code_hint">Tracking Code</string>
+    <string name="track_order_action">Track</string>
+    <string name="order_placeholder">Order #123456</string>
+    <string name="status_pending">Pending</string>
+    <string name="status_confirmed">Confirmed</string>
+    <string name="status_processing">Processing</string>
+    <string name="order_date_placeholder">Date: 2023-10-10</string>
+    <string name="order_date_placeholder_short">2023-10-10</string>
+    <string name="order_status_title">Order Status</string>
+    <string name="status_packed">Packed</string>
+    <string name="status_shipping">Shipping</string>
+    <string name="status_completed">Completed</string>
+    <string name="status_delivered">Delivered</string>
+    <string name="status_cancel_pending">Cancellation Requested</string>
+    <string name="cod_short">COD</string>
+    <string name="payment_unpaid">Unpaid</string>
+    <string name="zero_amount">0</string>
+    <string name="review_content_placeholder">Review content goes here</string>
+    <string name="shop_reply_placeholder">Thank you for supporting us!</string>
+    <string name="price_placeholder">100,000 VND</string>
+    <string name="quantity_one_placeholder">x1</string>
+    <string name="address_list_empty_hint">You have no saved addresses yet.\nTap + to add a new address.</string>
+    <string name="avatar_selected_hint">New avatar selected. Tap Save to update.</string>
 </resources>

@@ -58,6 +58,7 @@ public class ProductListFragment extends Fragment {
     private List<ProductDto> fullProductList = new ArrayList<>(); // Bản sao để lọc tức thì
     private boolean pendingScrollRestore = false;
     private boolean restoringScroll = false;
+    private boolean searchOverlayVisible = false;
 
     @Nullable
     @Override
@@ -86,6 +87,7 @@ public class ProductListFragment extends Fragment {
         observeData();
         styleChips();
         syncSortChip();
+        setupBackButton();
 
         // Sort chips
         binding.chipNewest.setOnClickListener(v -> { viewModel.sortBy("createdAt", "desc"); syncSortChip(); });
@@ -160,6 +162,22 @@ public class ProductListFragment extends Fragment {
         }
         updateFilterBadge();
         updateActiveFilterChips();
+    }
+
+    private void setupBackButton() {
+        binding.btnBack.setOnClickListener(v -> {
+            if (!Navigation.findNavController(requireView()).navigateUp()) {
+                Navigation.findNavController(requireView()).navigate(R.id.homeFragment);
+            }
+        });
+
+        Bundle args = getArguments();
+        boolean showBack = args != null && (
+                args.getString("search") != null ||
+                args.getString("categoryId") != null ||
+                args.getString("collectionId") != null
+        );
+        binding.btnBack.setVisibility(showBack ? View.VISIBLE : View.GONE);
     }
 
     private void setupRecyclerView() {
@@ -367,6 +385,7 @@ public class ProductListFragment extends Fragment {
                 binding.layoutEmpty.setVisibility(View.GONE); // Ẩn ngay lập tức để không gây hiểu lầm
                 
                 // Lọc "mềm" tức thì trên dữ liệu đang có
+                setSearchOverlayVisible(true);
                 performInstantLocalFilter(query);
 
                 searchRunnable = () -> { viewModel.search(query); syncSortChip(); };
@@ -444,6 +463,7 @@ public class ProductListFragment extends Fragment {
             int limit = Math.min(8, matched.size());
             suggestionAdapter.submitList(new ArrayList<>(matched.subList(0, limit)));
             binding.rvSuggestions.setVisibility(View.VISIBLE);
+            setSearchOverlayVisible(true);
         } else {
             hideSuggestions();
         }
@@ -456,6 +476,23 @@ public class ProductListFragment extends Fragment {
 
     private void hideSuggestions() {
         binding.rvSuggestions.setVisibility(View.GONE);
+        setSearchOverlayVisible(false);
+    }
+
+    private void setSearchOverlayVisible(boolean visible) {
+        if (binding == null || searchOverlayVisible == visible) return;
+        searchOverlayVisible = visible;
+
+        binding.swipeRefresh.setVisibility(visible ? View.GONE : View.VISIBLE);
+        binding.scrollActiveFilters.setVisibility(visible ? View.GONE :
+                (binding.chipGroupActiveFilters.getChildCount() > 0 ? View.VISIBLE : View.GONE));
+        binding.btnToggleLayout.setVisibility(visible ? View.GONE : View.VISIBLE);
+        binding.fabFilter.setVisibility(visible ? View.GONE : View.VISIBLE);
+        if (visible) {
+            binding.layoutEmpty.setVisibility(View.GONE);
+            binding.btnLoadMore.setVisibility(View.GONE);
+            binding.progressBarLoadMore.setVisibility(View.GONE);
+        }
     }
 
     private void observeData() {
@@ -500,6 +537,9 @@ public class ProductListFragment extends Fragment {
                     int limit = Math.min(8, displayList.size());
                     suggestionAdapter.submitList(new ArrayList<>(displayList.subList(0, limit)));
                     binding.rvSuggestions.setVisibility(View.VISIBLE);
+                    setSearchOverlayVisible(true);
+                } else if (query.isEmpty()) {
+                    setSearchOverlayVisible(false);
                 }
             }
         });

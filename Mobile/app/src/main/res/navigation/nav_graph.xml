@@ -17,7 +17,7 @@
     <fragment
         android:id="@+id/promotionsFragment"
         android:name="com.unifurniture.mobile.ui.home.PromotionsFragment"
-        android:label="Promotions" />
+        android:label="@string/promotions_title" />
 
     <fragment
         android:id="@+id/contentFragment"
@@ -81,7 +81,7 @@
     <fragment
         android:id="@+id/changePasswordFragment"
         android:name="com.unifurniture.mobile.ui.account.ChangePasswordFragment"
-        android:label="Đổi mật khẩu" />
+        android:label="@string/change_password" />
 
     <fragment
         android:id="@+id/addressBookFragment"

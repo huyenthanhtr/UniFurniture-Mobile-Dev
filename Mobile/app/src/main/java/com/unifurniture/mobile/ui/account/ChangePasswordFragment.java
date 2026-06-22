@@ -16,6 +16,7 @@ import com.unifurniture.mobile.data.remote.ApiClient;
 import com.unifurniture.mobile.data.remote.ApiService;
 import com.unifurniture.mobile.databinding.FragmentChangePasswordBinding;
 import com.unifurniture.mobile.util.SessionManager;
+import com.unifurniture.mobile.util.ToastUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -61,29 +62,29 @@ public class ChangePasswordFragment extends Fragment {
         binding.tvError.setVisibility(View.GONE);
 
         if (TextUtils.isEmpty(oldPwd)) {
-            binding.tilOldPassword.setError("Bắt buộc");
+            binding.tilOldPassword.setError(getString(R.string.required_field));
             return;
         }
         if (TextUtils.isEmpty(newPwd)) {
-            binding.tilNewPassword.setError("Bắt buộc");
+            binding.tilNewPassword.setError(getString(R.string.required_field));
             return;
         }
         if (newPwd.length() < 6) {
-            binding.tilNewPassword.setError("Mật khẩu mới phải có ít nhất 6 ký tự");
+            binding.tilNewPassword.setError(getString(R.string.password_min_six));
             return;
         }
         if (!newPwd.equals(confirmPwd)) {
-            binding.tilConfirmPassword.setError("Mật khẩu xác nhận không khớp");
+            binding.tilConfirmPassword.setError(getString(R.string.password_confirm_mismatch));
             return;
         }
         if (oldPwd.equals(newPwd)) {
-            binding.tilNewPassword.setError("Mật khẩu mới phải khác mật khẩu hiện tại");
+            binding.tilNewPassword.setError(getString(R.string.password_must_be_different));
             return;
         }
 
         String profileId = sessionManager.getProfileId();
         if (profileId == null || profileId.isEmpty()) {
-            Toast.makeText(requireContext(), "Không tìm thấy tài khoản. Vui lòng đăng nhập lại.", Toast.LENGTH_SHORT).show();
+            ToastUtil.error(requireContext(), R.string.account_not_found_login_again);
             return;
         }
 
@@ -102,10 +103,10 @@ public class ChangePasswordFragment extends Fragment {
                     binding.etOldPassword.setText("");
                     binding.etNewPassword.setText("");
                     binding.etConfirmPassword.setText("");
-                    Toast.makeText(requireContext(), "Đổi mật khẩu thành công!", Toast.LENGTH_SHORT).show();
+                    ToastUtil.show(requireContext(), R.string.change_password_success);
                     requireActivity().getOnBackPressedDispatcher().onBackPressed();
                 } else {
-                    binding.tvError.setText("Mật khẩu hiện tại không đúng. Vui lòng thử lại.");
+                    binding.tvError.setText(R.string.current_password_incorrect);
                     binding.tvError.setVisibility(View.VISIBLE);
                 }
             }

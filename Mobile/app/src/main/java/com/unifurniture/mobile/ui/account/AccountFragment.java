@@ -1,6 +1,7 @@
 package com.unifurniture.mobile.ui.account;
 
 import android.content.Intent;
+import android.util.TypedValue;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,9 +18,11 @@ import com.unifurniture.mobile.data.remote.ApiService;
 import com.unifurniture.mobile.databinding.FragmentAccountBinding;
 import com.unifurniture.mobile.ui.auth.AuthActivity;
 import com.unifurniture.mobile.util.SessionManager;
-import com.unifurniture.mobile.util.CustomBlueDialog;
+import com.unifurniture.mobile.util.ToastUtil;
 import com.bumptech.glide.Glide;
 
+import android.content.res.ColorStateList;
+import androidx.core.content.ContextCompat;
 import android.widget.Toast;
 
 import retrofit2.Call;
@@ -57,33 +60,17 @@ public class AccountFragment extends Fragment {
                     startActivity(new Intent(requireContext(), AuthActivity.class)));
             
             binding.itemOrders.setOnClickListener(v -> 
-                    CustomBlueDialog.show(
-                            requireContext(),
-                            R.drawable.ic_account,
-                            getString(R.string.login_required_title),
-                            getString(R.string.login_required_msg),
-                            getString(R.string.login),
-                            dialog -> {
-                                dialog.dismiss();
-                                startActivity(new Intent(requireContext(), AuthActivity.class));
-                            },
-                            getString(R.string.cancel),
-                            dialog -> dialog.dismiss()
-                    ));
+                    ToastUtil.show(requireContext(), R.string.toast_login_required_orders));
             binding.itemMyReviews.setOnClickListener(v -> 
-                    CustomBlueDialog.show(
-                            requireContext(),
-                            R.drawable.ic_account,
-                            getString(R.string.login_required_title),
-                            getString(R.string.login_required_msg),
-                            getString(R.string.login),
-                            dialog -> {
-                                dialog.dismiss();
-                                startActivity(new Intent(requireContext(), AuthActivity.class));
-                            },
-                            getString(R.string.cancel),
-                            dialog -> dialog.dismiss()
-                    ));
+                    ToastUtil.show(requireContext(), R.string.toast_login_required_reviews));
+            binding.itemAddresses.setOnClickListener(v ->
+                    ToastUtil.show(requireContext(), R.string.toast_login_required_addresses));
+            binding.itemChangePassword.setOnClickListener(v ->
+                    ToastUtil.show(requireContext(), R.string.toast_login_required_password));
+            binding.itemNotifications.setOnClickListener(v ->
+                    ToastUtil.show(requireContext(), R.string.toast_login_required_notifications));
+            binding.itemVouchers.setOnClickListener(v ->
+                    ToastUtil.show(requireContext(), R.string.toast_login_required_vouchers));
         } else {
             binding.btnLoginPrompt.setVisibility(View.GONE);
             binding.btnLogout.setVisibility(View.VISIBLE);
@@ -136,6 +123,7 @@ public class AccountFragment extends Fragment {
         binding.itemVouchers.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
             bundle.putDouble("subtotal", 0.0); // open as wallet, see all vouchers
+            bundle.putString("entry_mode", "browse");
             androidx.navigation.Navigation.findNavController(requireView()).navigate(R.id.voucherListFragment, bundle);
         });
 
@@ -176,36 +164,37 @@ public class AccountFragment extends Fragment {
     }
 
     private void loadProfileAvatar(SessionManager session) {
-        var customer = session.getCustomer();
-        if (customer == null || customer.getId() == null || customer.getId().isEmpty()) return;
+        if (binding == null) return;
 
-        String cachedAvatar = session.getAvatarUrl();
-        if (cachedAvatar != null && !cachedAvatar.isEmpty() && binding != null) {
-            Glide.with(requireContext())
-                    .load(cachedAvatar)
-                    .placeholder(R.drawable.ic_account)
-                    .error(R.drawable.ic_account)
-                    .into(binding.ivUserAvatar);
-            return;
-        }
+        applyDefaultAvatarState();
 
-        apiService.getProfile(customer.getId()).enqueue(new Callback<ApiListResponse<ProfileDto>>() {
+        String profileId = resolveProfileId(session);
+        if (profileId == null || profileId.isEmpty()) return;
+
+        apiService.getProfileById(profileId).enqueue(new Callback<ProfileDto>() {
             @Override
-            public void onResponse(@NonNull Call<ApiListResponse<ProfileDto>> call, @NonNull Response<ApiListResponse<ProfileDto>> response) {
+            public void onResponse(@NonNull Call<ProfileDto> call, @NonNull Response<ProfileDto> response) {
                 if (!isAdded() || binding == null) return;
-                ProfileDto profile = response.body() != null && response.body().getData() != null && !response.body().getData().isEmpty()
-                        ? response.body().getData().get(0) : null;
-                String avatarUrl = profile != null ? profile.getAvatarUrl() : null;
-                if (avatarUrl != null && !avatarUrl.isEmpty()) {
-                    session.saveAvatarUrl(avatarUrl);
-                    Glide.with(requireContext())
-                            .load(avatarUrl)
-                            .placeholder(R.drawable.ic_account)
-                            .error(R.drawable.ic_account)
-                            .into(binding.ivUserAvatar);
-                }
+                
+                ProfileDto profile = response.isSuccessful() ? response.body() : null;
                 if (profile != null) {
                     session.saveProfileId(profile.getId());
+                    
+                    String avatarUrl = profile.getAvatarUrl();
+                    if (avatarUrl != null && !avatarUrl.isEmpty()) {
+                        binding.ivUserAvatar.setPadding(0, 0, 0, 0);
+                        binding.ivUserAvatar.setImageTintList(null);
+                        binding.ivUserAvatar.setScaleType(android.widget.ImageView.ScaleType.CENTER_CROP);
+                        Glide.with(requireContext())
+                                .load(avatarUrl)
+                                .placeholder(R.drawable.ic_account)
+                                .error(R.drawable.ic_account)
+                                .circleCrop()
+                                .into(binding.ivUserAvatar);
+                    } else {
+                        applyDefaultAvatarState();
+                    }
+
                     if (profile.getName() != null && !profile.getName().isEmpty()) {
                         binding.tvUserName.setText(profile.getName());
                     }
@@ -220,10 +209,45 @@ public class AccountFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(@NonNull Call<ApiListResponse<ProfileDto>> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<ProfileDto> call, @NonNull Throwable t) {
                 // keep session display values if profile fetch fails
             }
         });
+    }
+
+    private void applyDefaultAvatarState() {
+        if (binding == null || !isAdded()) return;
+
+        int padding = dpToPx(16);
+        binding.ivUserAvatar.setImageResource(R.drawable.ic_account);
+        binding.ivUserAvatar.setScaleType(android.widget.ImageView.ScaleType.CENTER_INSIDE);
+        binding.ivUserAvatar.setPadding(padding, padding, padding, padding);
+        binding.ivUserAvatar.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.primary)));
+        binding.ivUserAvatar.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+    }
+
+    private int dpToPx(int dp) {
+        return Math.round(TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                dp,
+                getResources().getDisplayMetrics()
+        ));
+    }
+
+    private String resolveProfileId(SessionManager session) {
+        String profileId = session.getProfileId();
+        if (profileId != null && !profileId.isEmpty()) {
+            return profileId;
+        }
+
+        String token = session.getToken();
+        if (token != null && !token.isEmpty()) {
+            session.saveProfileId(token);
+            return token;
+        }
+
+        var customer = session.getCustomer();
+        return customer != null ? customer.getId() : null;
     }
 
     private void updateNotificationBadge() {

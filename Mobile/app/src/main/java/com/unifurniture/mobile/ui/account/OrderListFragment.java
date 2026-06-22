@@ -44,7 +44,7 @@ public class OrderListFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         viewModel = NavViewModelProvider.get(this, R.id.orderListFragment, OrderListViewModel.class);
-        viewModel.loadOrdersIfNeeded();
+        viewModel.loadOrders(false);
 
         adapter = new OrderAdapter(order -> {
             Bundle bundle = new Bundle();
@@ -60,11 +60,23 @@ public class OrderListFragment extends Fragment {
         viewModel.getOrders().observe(getViewLifecycleOwner(), response -> {
             boolean isEmpty = response == null || response.items == null || response.items.isEmpty();
             binding.tvEmpty.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
-            if (!isEmpty) adapter.submitList(response.items, rvState.afterSubmitCallback());
+            if (isEmpty) {
+                adapter.submitList(java.util.Collections.emptyList());
+            } else {
+                adapter.submitList(response.items, rvState.afterSubmitCallback());
+            }
         });
 
         viewModel.isLoading().observe(getViewLifecycleOwner(), loading ->
                 binding.progressBar.setVisibility(loading ? View.VISIBLE : View.GONE));
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (viewModel != null) {
+            viewModel.loadOrders(true);
+        }
     }
 
     @Override
@@ -85,19 +97,38 @@ public class OrderListFragment extends Fragment {
         private final MutableLiveData<ApiListResponse<OrderDto>> orders = new MutableLiveData<>();
         private final MutableLiveData<Boolean> loading = new MutableLiveData<>(false);
         private boolean hasLoaded = false;
+        private String lastAccountId;
+        private String lastCustomerId;
 
         public OrderListViewModel(@NonNull Application application) {
             super(application);
             repository = new OrderRepository(UniFurnitureApp.getInstance().getApiService());
         }
 
-        public void loadOrdersIfNeeded() {
-            if (hasLoaded) return;
+        public void loadOrders(boolean forceRefresh) {
+            SessionManager session = SessionManager.getInstance(getApplication());
+            String accountId = session.getProfileId();
+            String customerId = accountId == null || accountId.isEmpty() ? session.getCustomerId() : null;
+            boolean sameSession =
+                    java.util.Objects.equals(lastAccountId, accountId) &&
+                    java.util.Objects.equals(lastCustomerId, customerId);
+
+            if (!forceRefresh && hasLoaded && sameSession) {
+                return;
+            }
+
             hasLoaded = true;
-            String customerId = SessionManager.getInstance(getApplication()).getCustomerId();
-            if (customerId == null) return;
+            lastAccountId = accountId;
+            lastCustomerId = customerId;
+
+            if ((customerId == null || customerId.isEmpty()) && (accountId == null || accountId.isEmpty())) {
+                orders.setValue(null);
+                loading.setValue(false);
+                return;
+            }
+
             loading.setValue(true);
-            LiveDataUtil.observeOnce(repository.getOrders(customerId), r -> {
+            LiveDataUtil.observeOnce(repository.getOrders(customerId, accountId), r -> {
                 orders.setValue(r);
                 loading.setValue(false);
             });

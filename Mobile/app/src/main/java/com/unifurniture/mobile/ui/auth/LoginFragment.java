@@ -74,6 +74,7 @@ public class LoginFragment extends Fragment {
             if (result != null && result.token != null) {
                 SessionManager session = SessionManager.getInstance(requireContext());
                 session.saveToken(result.token);
+                session.saveProfileId(result.token);
                 session.saveCustomer(result.customer);
 
                 // Sec 5: persist or forget credentials based on the checkbox.

@@ -3,6 +3,7 @@ package com.unifurniture.mobile.ui;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import androidx.annotation.IdRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
@@ -16,6 +17,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
     private NavController navController;
+    private boolean syncingBottomNav = false;
 
     private static final int[] TOP_LEVEL_DESTINATIONS = {
             R.id.homeFragment,
@@ -40,6 +42,9 @@ public class MainActivity extends AppCompatActivity {
         navController = navHostFragment.getNavController();
 
         binding.bottomNavigation.setOnItemSelectedListener(item -> {
+            if (syncingBottomNav) {
+                return true;
+            }
             int itemId = item.getItemId();
             NavDestination current = navController.getCurrentDestination();
 
@@ -53,14 +58,29 @@ public class MainActivity extends AppCompatActivity {
             return navigateToTopLevelDestination(itemId);
         });
 
+        syncBottomNavigationState(navController.getCurrentDestination());
+
         navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
-            int tabId = getParentTabId(destination.getId());
-            Menu menu = binding.bottomNavigation.getMenu();
-            for (int i = 0; i < menu.size(); i++) {
-                MenuItem menuItem = menu.getItem(i);
-                menuItem.setChecked(menuItem.getItemId() == tabId);
-            }
+            syncBottomNavigationState(destination);
         });
+    }
+
+    private void syncBottomNavigationState(NavDestination destination) {
+        if (destination == null) return;
+        int tabId = getParentTabId(destination.getId());
+        binding.bottomNavigation.setVisibility(shouldShowBottomNav(destination.getId()) ? View.VISIBLE : View.GONE);
+
+        Menu menu = binding.bottomNavigation.getMenu();
+        for (int i = 0; i < menu.size(); i++) {
+            MenuItem menuItem = menu.getItem(i);
+            boolean checked = menuItem.getItemId() == tabId;
+            menuItem.setChecked(checked);
+        }
+        if (tabId != -1 && binding.bottomNavigation.getSelectedItemId() != tabId) {
+            syncingBottomNav = true;
+            binding.bottomNavigation.setSelectedItemId(tabId);
+            syncingBottomNav = false;
+        }
     }
 
     private boolean navigateToTopLevelDestination(@IdRes int destinationId) {
@@ -82,6 +102,13 @@ public class MainActivity extends AppCompatActivity {
         return getParentTabId(currentId) == tabId;
     }
 
+    private boolean shouldShowBottomNav(@IdRes int destinationId) {
+        return destinationId == R.id.homeFragment
+                || destinationId == R.id.productListFragment
+                || destinationId == R.id.cartFragment
+                || destinationId == R.id.accountFragment;
+    }
+
     @IdRes
     private static int getParentTabId(int destinationId) {
         if (destinationId == R.id.homeFragment ||
@@ -89,7 +116,8 @@ public class MainActivity extends AppCompatActivity {
             destinationId == R.id.promotionsFragment) {
             return R.id.homeFragment;
         } else if (destinationId == R.id.productListFragment ||
-                   destinationId == R.id.wishlistFragment) {
+                   destinationId == R.id.wishlistFragment ||
+                   destinationId == R.id.productDetailFragment) {
             return R.id.productListFragment;
         } else if (destinationId == R.id.cartFragment ||
                    destinationId == R.id.checkoutFragment ||

@@ -11,20 +11,25 @@ import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.data.model.OrderDetailDto;
+import com.unifurniture.mobile.data.model.OrderDetailResponse;
 import com.unifurniture.mobile.data.model.OrderDto;
+import com.unifurniture.mobile.data.remote.ApiClient;
+import com.unifurniture.mobile.data.remote.ApiService;
 import com.unifurniture.mobile.databinding.FragmentOrderDetailBinding;
 import com.unifurniture.mobile.databinding.ItemOrderDetailBinding;
 import com.unifurniture.mobile.util.FormatUtil;
-import com.unifurniture.mobile.util.NavViewModelProvider;
-import com.unifurniture.mobile.util.ScrollStateHelper;
+import com.unifurniture.mobile.util.OrderStatusUi;
+import com.unifurniture.mobile.util.ToastUtil;
 import java.util.List;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class OrderDetailFragment extends Fragment {
 
     private FragmentOrderDetailBinding binding;
-    private OrderDetailViewModel viewModel;
+    private ApiService apiService;
     private String orderId;
-    private final ScrollStateHelper scrollState = new ScrollStateHelper("order_detail");
 
     @Nullable
     @Override
@@ -35,37 +40,48 @@ public class OrderDetailFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        viewModel = NavViewModelProvider.get(this, R.id.orderDetailFragment, OrderDetailViewModel.class);
-        scrollState.read(savedInstanceState);
-
+        apiService = ApiClient.getInstance();
+        
         binding.toolbar.setNavigationOnClickListener(v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
         if (getArguments() != null) {
             orderId = getArguments().getString("order_id");
         }
 
-        if (orderId == null) {
-            Toast.makeText(requireContext(), R.string.error_unknown, Toast.LENGTH_SHORT).show();
+        if (orderId != null) {
+            loadOrderDetails();
+        } else {
+            ToastUtil.error(requireContext(), R.string.error_unknown);
             requireActivity().getOnBackPressedDispatcher().onBackPressed();
-            return;
         }
+    }
 
-        viewModel.getOrderDetail().observe(getViewLifecycleOwner(), state -> {
-            if (state == null) return;
-            binding.contentScrollView.setVisibility(View.VISIBLE);
-            displayOrderInfo(state.order, state.items);
-            scrollState.restore(binding.contentScrollView);
-        });
+    private void loadOrderDetails() {
+        binding.progressBar.setVisibility(View.VISIBLE);
+        binding.contentScrollView.setVisibility(View.GONE);
 
-        viewModel.isLoading().observe(getViewLifecycleOwner(), loading -> {
-            boolean initialLoad = Boolean.TRUE.equals(loading) && viewModel.getOrderDetail().getValue() == null;
-            binding.progressBar.setVisibility(initialLoad ? View.VISIBLE : View.GONE);
-            if (initialLoad) {
-                binding.contentScrollView.setVisibility(View.GONE);
+        apiService.getOrderById(orderId).enqueue(new Callback<OrderDetailResponse>() {
+            @Override
+            public void onResponse(Call<OrderDetailResponse> call, Response<OrderDetailResponse> response) {
+                if (isAdded()) {
+                    binding.progressBar.setVisibility(View.GONE);
+                    if (response.isSuccessful() && response.body() != null && response.body().getOrder() != null) {
+                        binding.contentScrollView.setVisibility(View.VISIBLE);
+                        displayOrderInfo(response.body().getOrder(), response.body().getItems());
+                    } else {
+                        ToastUtil.error(requireContext(), R.string.error_unknown);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<OrderDetailResponse> call, Throwable t) {
+                if (isAdded()) {
+                    binding.progressBar.setVisibility(View.GONE);
+                    ToastUtil.error(requireContext(), getString(R.string.error_network, t.getMessage()));
+                }
             }
         });
-
-        viewModel.loadOrderIfNeeded(orderId);
     }
 
     private void displayOrderInfo(OrderDto order, List<OrderDetailDto> responseItems) {
@@ -77,7 +93,7 @@ public class OrderDetailFragment extends Fragment {
                     : getString(R.string.order_details);
         }
         binding.tvOrderId.setText(getString(R.string.order_number_format, displayCode));
-        binding.tvOrderStatus.setText(order.getStatusLabel());
+        OrderStatusUi.applyBadge(binding.tvOrderStatus, order.getStatus());
         binding.tvOrderDate.setText(getString(R.string.order_date_format, formatDate(order.getCreatedAt())));
         
         binding.tvShippingName.setText(safeText(order.getShippingName()));
@@ -147,39 +163,60 @@ public class OrderDetailFragment extends Fragment {
     private void updateTimeline(String status) {
         int primaryColor = getResources().getColor(R.color.primary, null);
         int grayColor = getResources().getColor(R.color.gray_300, null);
+        int cancelColor = getResources().getColor(R.color.status_cancelled_text, null);
+        String normalizedStatus = OrderStatusUi.normalize(status);
 
         // Reset all to gray first
+        binding.ivStep1.setImageResource(android.R.drawable.ic_menu_edit);
         binding.ivStep1.setColorFilter(grayColor);
         binding.tvStep1.setTextColor(grayColor);
+        binding.tvStep1.setText(R.string.status_pending);
         binding.line1.setBackgroundColor(grayColor);
 
+        binding.ivStep2.setImageResource(android.R.drawable.ic_menu_manage);
         binding.ivStep2.setColorFilter(grayColor);
         binding.tvStep2.setTextColor(grayColor);
+        binding.tvStep2.setText(R.string.status_confirmed);
         binding.line2.setBackgroundColor(grayColor);
 
+        binding.ivStep3.setImageResource(android.R.drawable.ic_menu_send);
         binding.ivStep3.setColorFilter(grayColor);
         binding.tvStep3.setTextColor(grayColor);
+        binding.tvStep3.setText(R.string.status_shipping);
         binding.line3.setBackgroundColor(grayColor);
 
+        binding.ivStep4.setImageResource(android.R.drawable.checkbox_on_background);
         binding.ivStep4.setColorFilter(grayColor);
         binding.tvStep4.setTextColor(grayColor);
+        binding.tvStep4.setText(R.string.status_completed);
 
-        if (status == null) return;
+        if (normalizedStatus == null || normalizedStatus.isEmpty()) return;
 
         // Apply colors based on status progression
-        switch (status) {
+        switch (normalizedStatus) {
             case "pending":
-            case "cancel_requested":
                 binding.ivStep1.setColorFilter(primaryColor);
                 binding.tvStep1.setTextColor(primaryColor);
                 break;
+            case "cancel_pending":
+                binding.ivStep1.setColorFilter(primaryColor);
+                binding.tvStep1.setTextColor(primaryColor);
+                binding.line1.setBackgroundColor(primaryColor);
+                binding.ivStep2.setColorFilter(cancelColor);
+                binding.tvStep2.setTextColor(cancelColor);
+                binding.tvStep2.setText(R.string.status_cancel_pending);
+                break;
             case "confirmed":
+            case "processing":
                 binding.ivStep1.setColorFilter(primaryColor);
                 binding.tvStep1.setTextColor(primaryColor);
                 binding.line1.setBackgroundColor(primaryColor);
                 
                 binding.ivStep2.setColorFilter(primaryColor);
                 binding.tvStep2.setTextColor(primaryColor);
+                if ("processing".equals(normalizedStatus)) {
+                    binding.tvStep2.setText(R.string.status_processing);
+                }
                 break;
             case "shipping":
                 binding.ivStep1.setColorFilter(primaryColor);
@@ -194,6 +231,7 @@ public class OrderDetailFragment extends Fragment {
                 binding.tvStep3.setTextColor(primaryColor);
                 break;
             case "delivered":
+            case "completed":
                 binding.ivStep1.setColorFilter(primaryColor);
                 binding.tvStep1.setTextColor(primaryColor);
                 binding.line1.setBackgroundColor(primaryColor);
@@ -208,29 +246,16 @@ public class OrderDetailFragment extends Fragment {
                 
                 binding.ivStep4.setColorFilter(primaryColor);
                 binding.tvStep4.setTextColor(primaryColor);
+                binding.tvStep4.setText("delivered".equals(normalizedStatus)
+                        ? R.string.status_delivered
+                        : R.string.status_completed);
                 break;
             case "cancelled":
-                // If cancelled, maybe make step 1 red and stop there?
-                int redColor = getResources().getColor(android.R.color.holo_red_dark, null);
-                binding.ivStep1.setColorFilter(redColor);
-                binding.tvStep1.setTextColor(redColor);
-                binding.tvStep1.setText(R.string.status_cancelled);
                 binding.ivStep1.setImageResource(android.R.drawable.ic_delete);
+                binding.ivStep1.setColorFilter(cancelColor);
+                binding.tvStep1.setTextColor(cancelColor);
+                binding.tvStep1.setText(R.string.status_cancelled);
                 break;
-        }
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (binding != null) scrollState.saveScroll(binding.contentScrollView);
-    }
-
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        if (binding != null) {
-            scrollState.save(outState, binding.contentScrollView);
         }
     }
 

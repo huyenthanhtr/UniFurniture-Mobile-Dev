@@ -49,14 +49,15 @@
                         app:cardCornerRadius="28dp"
                         app:cardElevation="0dp"
                         app:strokeWidth="0dp"
-                        android:layout_marginEnd="16dp">
+                        android:layout_marginEnd="16dp"
+                        app:cardBackgroundColor="@color/gray_100">
                         <ImageView
                             android:id="@+id/ivUserAvatar"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:src="@drawable/ic_account"
-                            android:padding="12dp"
-                            android:background="@color/gray_100"
+                            android:scaleType="centerInside"
+                            android:padding="16dp"
                             app:tint="@color/primary" />
                     </com.google.android.material.card.MaterialCardView>
 
@@ -143,6 +144,89 @@
                         android:paddingHorizontal="20dp"
                         android:gravity="center_vertical"
                         android:textColor="@color/black"
+                        app:drawableStartCompat="@drawable/ic_history"
+                        android:drawablePadding="16dp"
+                        app:drawableTint="@color/primary"
+                        android:background="?attr/selectableItemBackground" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/gray_200"
+                        android:layout_marginHorizontal="20dp" />
+
+                    <TextView
+                        android:id="@+id/itemAddresses"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="@string/address_book_title"
+                        android:textSize="15sp"
+                        android:paddingHorizontal="20dp"
+                        android:gravity="center_vertical"
+                        android:textColor="@color/black"
+                        app:drawableStartCompat="@drawable/ic_shipping"
+                        android:drawablePadding="16dp"
+                        app:drawableTint="@color/primary"
+                        android:background="?attr/selectableItemBackground" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/gray_200"
+                        android:layout_marginHorizontal="20dp" />
+
+                    <TextView
+                        android:id="@+id/itemMyReviews"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="@string/my_reviews"
+                        android:textSize="15sp"
+                        android:paddingHorizontal="20dp"
+                        android:gravity="center_vertical"
+                        android:textColor="@color/black"
+                        app:drawableStartCompat="@drawable/ic_edit"
+                        android:drawablePadding="16dp"
+                        app:drawableTint="@color/primary"
+                        android:background="?attr/selectableItemBackground" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/gray_200"
+                        android:layout_marginHorizontal="20dp" />
+
+                    <TextView
+                        android:id="@+id/itemChangePassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="@string/change_password"
+                        android:textSize="15sp"
+                        android:paddingHorizontal="20dp"
+                        android:gravity="center_vertical"
+                        android:textColor="@color/black"
+                        app:drawableStartCompat="@drawable/ic_account"
+                        android:drawablePadding="16dp"
+                        app:drawableTint="@color/primary"
+                        android:background="?attr/selectableItemBackground" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/gray_200"
+                        android:layout_marginHorizontal="20dp" />
+
+                    <TextView
+                        android:id="@+id/itemOrderTracking"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="@string/order_tracking"
+                        android:textSize="15sp"
+                        android:paddingHorizontal="20dp"
+                        android:gravity="center_vertical"
+                        android:textColor="@color/black"
+                        app:drawableStartCompat="@drawable/ic_shipping"
+                        android:drawablePadding="16dp"
+                        app:drawableTint="@color/primary"
                         android:background="?attr/selectableItemBackground" />
 
                     <View
@@ -228,6 +312,9 @@
                         android:paddingHorizontal="20dp"
                         android:gravity="center_vertical"
                         android:textColor="@color/black"
+                        app:drawableStartCompat="@drawable/ic_favorite_border"
+                        android:drawablePadding="16dp"
+                        app:drawableTint="@color/primary"
                         android:background="?attr/selectableItemBackground" />
 
                     <View
@@ -252,7 +339,10 @@
                             android:layout_centerVertical="true"
                             android:text="@string/notification_title"
                             android:textSize="15sp"
-                            android:textColor="@color/black" />
+                            android:textColor="@color/black"
+                            app:drawableStartCompat="@drawable/ic_bell"
+                            android:drawablePadding="16dp"
+                            app:drawableTint="@color/primary" />
 
                         <View
                             android:id="@+id/viewNotificationBadge"
@@ -280,6 +370,102 @@
                         android:paddingHorizontal="20dp"
                         android:gravity="center_vertical"
                         android:textColor="@color/black"
+                        app:drawableStartCompat="@drawable/ic_cart"
+                        android:drawablePadding="16dp"
+                        app:drawableTint="@color/primary"
+                        android:background="?attr/selectableItemBackground" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Info Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="32dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/gray_200">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="#DDE3F0">
+
+                    <TextView
+                        android:id="@+id/itemAbout"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="@string/account_about_title"
+                        android:textSize="15sp"
+                        android:paddingHorizontal="20dp"
+                        android:gravity="center_vertical"
+                        android:textColor="@color/black"
+                        app:drawableStartCompat="@drawable/ic_home"
+                        android:drawablePadding="16dp"
+                        app:drawableTint="@color/primary"
+                        android:background="?attr/selectableItemBackground" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/white"
+                        android:layout_marginHorizontal="20dp" />
+
+                    <TextView
+                        android:id="@+id/itemPolicy"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="@string/account_policy_title"
+                        android:textSize="15sp"
+                        android:paddingHorizontal="20dp"
+                        android:gravity="center_vertical"
+                        android:textColor="@color/black"
+                        app:drawableStartCompat="@drawable/ic_check"
+                        android:drawablePadding="16dp"
+                        app:drawableTint="@color/primary"
+                        android:background="?attr/selectableItemBackground" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/white"
+                        android:layout_marginHorizontal="20dp" />
+
+                    <TextView
+                        android:id="@+id/itemCommunity"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="@string/account_community_title"
+                        android:textSize="15sp"
+                        android:paddingHorizontal="20dp"
+                        android:gravity="center_vertical"
+                        android:textColor="@color/black"
+                        app:drawableStartCompat="@drawable/ic_account"
+                        android:drawablePadding="16dp"
+                        app:drawableTint="@color/primary"
+                        android:background="?attr/selectableItemBackground" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/white"
+                        android:layout_marginHorizontal="20dp" />
+
+                    <TextView
+                        android:id="@+id/itemLanguage"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="@string/language_label"
+                        android:textSize="15sp"
+                        android:paddingHorizontal="20dp"
+                        android:gravity="center_vertical"
+                        android:textColor="@color/black"
+                        app:drawableStartCompat="@drawable/ic_products"
+                        android:drawablePadding="16dp"
+                        app:drawableTint="@color/primary"
                         android:background="?attr/selectableItemBackground" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

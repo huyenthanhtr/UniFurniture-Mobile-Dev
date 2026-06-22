@@ -49,6 +49,7 @@ public class CartFragment extends Fragment {
         binding.layoutVoucher.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
             bundle.putDouble("subtotal", viewModel.getTotal());
+            bundle.putString("entry_mode", "apply");
             Navigation.findNavController(requireView()).navigate(R.id.voucherListFragment, bundle);
         });
 

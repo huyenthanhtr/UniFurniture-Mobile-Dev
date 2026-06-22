@@ -291,6 +291,7 @@ public class ProductDetailFragment extends Fragment {
                     int lineCount = binding.tvDescription.getLineCount();
                     if (lineCount > 4) {
                         binding.tvDescription.setMaxLines(4);
+                        binding.btnToggleDescription.setText(R.string.read_more);
                         binding.btnToggleDescription.setVisibility(View.VISIBLE);
                         binding.viewDescriptionGradient.setVisibility(View.VISIBLE);
                     } else {

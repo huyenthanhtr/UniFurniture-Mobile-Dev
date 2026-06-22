@@ -66,7 +66,7 @@ public class CheckoutRequest {
                            String shippingName, String shippingPhone,
                            String shippingAddress, String paymentMethod) {
         this.accountId = accountId;
-        this.customerId = accountId;
+        this.customerId = null;
         this.cartId = cartId;
         this.shippingName = shippingName;
         this.shippingPhone = shippingPhone;

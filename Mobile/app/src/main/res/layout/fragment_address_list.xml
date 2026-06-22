@@ -12,7 +12,7 @@
         android:layout_height="?attr/actionBarSize"
         android:background="@color/primary"
         app:navigationIcon="@drawable/ic_back"
-        app:title="Sổ địa chỉ"
+        app:title="@string/address_book_title"
         app:titleTextColor="@color/white" />
 
     <!-- Add new address button -->
@@ -21,7 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:layout_margin="16dp"
-        android:text="+ Thêm địa chỉ mới"
+        android:text="@string/add_new_address"
         android:textSize="14sp"
         app:cornerRadius="8dp"
         style="@style/Widget.UniFurniture.Button.Primary" />
@@ -50,7 +50,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
-            android:text="Bạn chưa có địa chỉ nào.\nNhấn + để thêm địa chỉ mới."
+            android:text="@string/address_list_empty_hint"
             android:textColor="@color/gray_600"
             android:textSize="15sp"
             android:visibility="gone" />

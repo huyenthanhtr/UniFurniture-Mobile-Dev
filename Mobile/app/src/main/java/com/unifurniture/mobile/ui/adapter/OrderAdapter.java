@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.unifurniture.mobile.data.model.OrderDto;
 import com.unifurniture.mobile.databinding.ItemOrderBinding;
 import com.unifurniture.mobile.util.FormatUtil;
+import com.unifurniture.mobile.util.OrderStatusUi;
 
 public class OrderAdapter extends ListAdapter<OrderDto, OrderAdapter.ViewHolder> {
 
@@ -72,7 +73,7 @@ public class OrderAdapter extends ListAdapter<OrderDto, OrderAdapter.ViewHolder>
                         : "-";
             }
             binding.tvOrderId.setText(binding.getRoot().getContext().getString(com.unifurniture.mobile.R.string.order_number_format, displayCode));
-            binding.tvStatus.setText(order.getStatusLabel());
+            OrderStatusUi.applyBadge(binding.tvStatus, order.getStatus());
             binding.tvTotal.setText(FormatUtil.formatCurrency(order.getTotalAmount()));
             binding.tvDate.setText(order.getCreatedAt() != null ?
                     order.getCreatedAt().substring(0, Math.min(10, order.getCreatedAt().length())) : "");

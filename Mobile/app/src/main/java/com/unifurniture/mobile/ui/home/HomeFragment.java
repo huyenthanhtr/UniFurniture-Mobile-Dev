@@ -128,6 +128,7 @@ public class HomeFragment extends Fragment {
                     hideSearchSuggestions();
                     showSearchHistory();
                     binding.layoutContent.setAlpha(0.3f);
+                    binding.layoutContent.setVisibility(View.VISIBLE);
                     return true;
                 }
                 binding.layoutContent.setAlpha(0.1f); // Mờ hẳn khi đang gõ để tập trung vào gợi ý
@@ -211,8 +212,12 @@ public class HomeFragment extends Fragment {
         }
 
         if (binding.btnViewAllPromotions != null) {
-            binding.btnViewAllPromotions.setOnClickListener(v ->
-                    Navigation.findNavController(requireView()).navigate(R.id.voucherListFragment));
+            binding.btnViewAllPromotions.setOnClickListener(v -> {
+                Bundle bundle = new Bundle();
+                bundle.putString("entry_mode", "browse");
+                bundle.putDouble("subtotal", 0.0);
+                Navigation.findNavController(requireView()).navigate(R.id.voucherListFragment, bundle);
+            });
         }
 
         // Collections
@@ -290,6 +295,7 @@ public class HomeFragment extends Fragment {
             if (products != null && !products.isEmpty()) {
                 searchSuggestionAdapter.submitList(products);
                 binding.rvSearchSuggestions.setVisibility(View.VISIBLE);
+                binding.layoutContent.setVisibility(View.GONE);
             } else {
                 hideSearchSuggestions();
             }
@@ -313,6 +319,7 @@ public class HomeFragment extends Fragment {
 
     private void hideSearchSuggestions() {
         binding.rvSearchSuggestions.setVisibility(View.GONE);
+        binding.layoutContent.setVisibility(View.VISIBLE);
     }
 
     private void setupRecentlyViewed() {

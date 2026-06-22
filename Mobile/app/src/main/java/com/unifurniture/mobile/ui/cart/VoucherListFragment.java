@@ -4,21 +4,19 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.unifurniture.mobile.databinding.FragmentVoucherListBinding;
 import com.unifurniture.mobile.data.model.CouponDto;
 import com.unifurniture.mobile.data.model.VoucherDto;
-import com.unifurniture.mobile.data.repository.ProductRepository;
 import com.unifurniture.mobile.ui.adapter.VoucherAdapter;
-import com.unifurniture.mobile.util.CustomBlueDialog;
 import com.unifurniture.mobile.util.FormatUtil;
-import com.unifurniture.mobile.util.NavViewModelProvider;
-import com.unifurniture.mobile.util.RecyclerViewStateHelper;
 import com.unifurniture.mobile.util.VoucherManager;
-import com.unifurniture.mobile.UniFurnitureApp;
+import com.unifurniture.mobile.util.ToastUtil;
 import com.unifurniture.mobile.R;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,10 +24,11 @@ import java.util.List;
 public class VoucherListFragment extends Fragment {
 
     private FragmentVoucherListBinding binding;
-    private VoucherListViewModel viewModel;
     private VoucherAdapter adapter;
+    private VoucherListViewModel viewModel;
     private double cartSubtotal = 0;
-    private final RecyclerViewStateHelper rvState = new RecyclerViewStateHelper("vouchers");
+    private boolean isApplyFlow = false;
+    private String entryMode = "browse";
 
     @Nullable
     @Override
@@ -43,91 +42,64 @@ public class VoucherListFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        viewModel = NavViewModelProvider.get(this, R.id.voucherListFragment, VoucherListViewModel.class);
 
         if (getArguments() != null) {
             cartSubtotal = getArguments().getDouble("subtotal", 0);
+            entryMode = getArguments().getString("entry_mode", "browse");
         }
+        isApplyFlow = "apply".equalsIgnoreCase(entryMode);
 
+        viewModel = new ViewModelProvider(this).get(VoucherListViewModel.class);
         binding.btnBack.setOnClickListener(v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
-        setupRecyclerView(savedInstanceState);
+        setupRecyclerView();
         observeCoupons();
         viewModel.loadCouponsIfNeeded();
+        loadVouchers();
     }
 
-    private void setupRecyclerView(@Nullable Bundle savedInstanceState) {
-        adapter = new VoucherAdapter(cartSubtotal, this::handleVoucherSelection);
+    private void setupRecyclerView() {
+        adapter = new VoucherAdapter(cartSubtotal, voucher -> {
+            VoucherManager.getInstance(requireContext()).setSelectedVoucherCode(voucher.code);
+            if (cartSubtotal >= voucher.minOrderValue) {
+                ToastUtil.show(requireContext(), getString(R.string.toast_voucher_applied, voucher.code));
+                if (isApplyFlow) {
+                    requireActivity().getOnBackPressedDispatcher().onBackPressed();
+                }
+            } else {
+                ToastUtil.show(requireContext(), R.string.toast_voucher_saved_upsell);
+            }
+        });
         binding.rvVouchers.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvVouchers.setAdapter(adapter);
-        rvState.bind(binding.rvVouchers, savedInstanceState);
     }
 
-    private void observeCoupons() {
-        viewModel.getCoupons().observe(getViewLifecycleOwner(), coupons -> {
-            if (coupons == null) return;
-            bindVoucherList(coupons);
-        });
-
-        viewModel.isLoading().observe(getViewLifecycleOwner(), loading -> {
-            boolean initialLoad = Boolean.TRUE.equals(loading) && viewModel.getCoupons().getValue() == null;
-            if (initialLoad) {
-                binding.progressBar.setVisibility(View.VISIBLE);
-                binding.rvVouchers.setVisibility(View.GONE);
-                binding.layoutOptimalContainer.setVisibility(View.GONE);
-                binding.layoutEmpty.setVisibility(View.GONE);
-            } else {
-                binding.progressBar.setVisibility(View.GONE);
-            }
-        });
-    }
-
-    private void bindVoucherList(List<CouponDto> coupons) {
+    private void loadVouchers() {
         if (binding == null) return;
-        binding.progressBar.setVisibility(View.GONE);
 
+        VoucherManager voucherManager = VoucherManager.getInstance(requireContext());
+        List<VoucherDto> allVouchers = voucherManager.getVouchers();
         List<VoucherDto> activeVouchers = new ArrayList<>();
-        if (coupons != null) {
-            for (CouponDto c : coupons) {
-                VoucherDto v = VoucherManager.convertCouponToVoucher(requireContext(), c);
-                if (v != null && !v.isUsed) {
-                    activeVouchers.add(v);
-                }
+
+        for (VoucherDto v : allVouchers) {
+            if (!v.isUsed) {
+                activeVouchers.add(v);
             }
         }
 
-        VoucherManager.getInstance(requireContext()).saveVouchers(activeVouchers);
+        VoucherDto optimalVoucher = findOptimalVoucher(activeVouchers, voucherManager);
+        bindOptimalVoucher(optimalVoucher, voucherManager);
 
-        VoucherDto optimalVoucher = null;
-        double maxDiscount = 0;
-        if (cartSubtotal > 0 && !activeVouchers.isEmpty()) {
-            for (VoucherDto v : activeVouchers) {
-                if (cartSubtotal >= v.minOrderValue) {
-                    double discount = VoucherManager.getInstance(requireContext()).calculateDiscount(v, cartSubtotal);
-                    if (discount > maxDiscount) {
-                        maxDiscount = discount;
-                        optimalVoucher = v;
-                    }
-                }
+        List<VoucherDto> regularVouchers = new ArrayList<>();
+        for (VoucherDto voucher : activeVouchers) {
+            if (optimalVoucher == null || voucher == null || !voucher.code.equalsIgnoreCase(optimalVoucher.code)) {
+                regularVouchers.add(voucher);
             }
         }
 
-        if (optimalVoucher != null && maxDiscount > 0) {
-            bindOptimalVoucher(optimalVoucher, maxDiscount);
-        } else {
-            binding.layoutOptimalContainer.setVisibility(View.GONE);
-        }
+        adapter.submitList(regularVouchers);
 
-        List<VoucherDto> displayVouchers = new ArrayList<>();
-        for (VoucherDto v : activeVouchers) {
-            if (optimalVoucher == null || maxDiscount <= 0 || !v.code.equals(optimalVoucher.code)) {
-                displayVouchers.add(v);
-            }
-        }
-
-        adapter.submitList(displayVouchers, rvState.afterSubmitCallback());
-
-        if (displayVouchers.isEmpty() && (optimalVoucher == null || maxDiscount <= 0)) {
+        if (activeVouchers.isEmpty()) {
             binding.rvVouchers.setVisibility(View.GONE);
             binding.layoutEmpty.setVisibility(View.VISIBLE);
         } else {
@@ -136,60 +108,94 @@ public class VoucherListFragment extends Fragment {
         }
     }
 
-    private void bindOptimalVoucher(VoucherDto optimal, double savings) {
-        binding.tvOptimalCode.setText(optimal.code);
-        binding.tvOptimalName.setText(optimal.name);
-        binding.tvOptimalDescription.setText(optimal.description);
-        binding.tvOptimalExpiry.setText(optimal.expirationDate);
-        binding.tvOptimalSavings.setText(getString(R.string.optimal_savings, FormatUtil.formatCurrency(savings)));
+    private void observeCoupons() {
+        viewModel.getCoupons().observe(getViewLifecycleOwner(), this::syncCouponsToVoucherWallet);
+        viewModel.isLoading().observe(getViewLifecycleOwner(), isLoading -> {
+            if (binding == null) return;
+            binding.progressBar.setVisibility(Boolean.TRUE.equals(isLoading) ? View.VISIBLE : View.GONE);
+        });
+    }
 
-        binding.btnOptimalUse.setOnClickListener(v -> handleVoucherSelection(optimal));
+    private void syncCouponsToVoucherWallet(List<CouponDto> coupons) {
+        if (coupons == null || coupons.isEmpty() || !isAdded()) {
+            return;
+        }
+
+        VoucherManager voucherManager = VoucherManager.getInstance(requireContext());
+        List<VoucherDto> currentVouchers = voucherManager.getVouchers();
+        List<VoucherDto> syncedVouchers = new ArrayList<>();
+
+        for (CouponDto coupon : coupons) {
+            VoucherDto converted = VoucherManager.convertCouponToVoucher(requireContext(), coupon);
+            if (converted == null) continue;
+
+            VoucherDto existing = findVoucherByCode(currentVouchers, converted.code);
+            if (existing != null) {
+                converted.isUsed = existing.isUsed;
+            }
+            syncedVouchers.add(converted);
+        }
+
+        voucherManager.saveVouchers(syncedVouchers);
+        loadVouchers();
+    }
+
+    private VoucherDto findVoucherByCode(List<VoucherDto> vouchers, String code) {
+        if (vouchers == null || code == null) return null;
+        for (VoucherDto voucher : vouchers) {
+            if (voucher != null && code.equalsIgnoreCase(voucher.code)) {
+                return voucher;
+            }
+        }
+        return null;
+    }
+
+    private VoucherDto findOptimalVoucher(List<VoucherDto> vouchers, VoucherManager voucherManager) {
+        VoucherDto bestVoucher = null;
+        double bestDiscount = 0;
+
+        for (VoucherDto voucher : vouchers) {
+            if (voucher == null) continue;
+
+            double discount = voucherManager.calculateDiscount(voucher, cartSubtotal);
+            if (discount <= 0) continue;
+
+            if (bestVoucher == null || discount > bestDiscount) {
+                bestVoucher = voucher;
+                bestDiscount = discount;
+            }
+        }
+
+        return bestVoucher;
+    }
+
+    private void bindOptimalVoucher(VoucherDto voucher, VoucherManager voucherManager) {
+        if (binding == null) return;
+
+        if (voucher == null) {
+            binding.layoutOptimalContainer.setVisibility(View.GONE);
+            return;
+        }
 
         binding.layoutOptimalContainer.setVisibility(View.VISIBLE);
-    }
+        binding.tvOptimalCode.setText(voucher.code);
+        binding.tvOptimalName.setText(voucher.name);
+        binding.tvOptimalDescription.setText(voucher.description);
+        binding.tvOptimalExpiry.setText(voucher.expirationDate);
 
-    private void handleVoucherSelection(VoucherDto voucher) {
-        if (cartSubtotal >= voucher.minOrderValue) {
-            CustomBlueDialog.show(
-                    requireContext(),
-                    R.drawable.ic_check,
-                    getString(R.string.voucher_applied_title),
-                    getString(R.string.voucher_applied_msg, voucher.code),
-                    getString(R.string.btn_use_now),
-                    dialog -> {
-                        VoucherManager.getInstance(requireContext()).setSelectedVoucherCode(voucher.code);
-                        dialog.dismiss();
-                        if (cartSubtotal > 0) {
-                            requireActivity().getOnBackPressedDispatcher().onBackPressed();
-                        }
-                    },
-                    getString(R.string.cancel),
-                    dialog -> dialog.dismiss()
-            );
-        } else {
-            CustomBlueDialog.show(
-                    requireContext(),
-                    R.drawable.ic_check,
-                    getString(R.string.voucher_title),
-                    getString(R.string.toast_voucher_saved_upsell),
-                    getString(R.string.confirm),
-                    dialog -> {
-                        VoucherManager.getInstance(requireContext()).setSelectedVoucherCode(voucher.code);
-                        dialog.dismiss();
-                        if (cartSubtotal > 0) {
-                            requireActivity().getOnBackPressedDispatcher().onBackPressed();
-                        }
-                    },
-                    null,
-                    null
-            );
-        }
-    }
+        double savings = voucherManager.calculateDiscount(voucher, cartSubtotal);
+        binding.tvOptimalSavings.setText(getString(
+                R.string.voucher_discount_amount,
+                FormatUtil.formatCurrency(savings)
+        ));
 
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        rvState.save(outState);
+        binding.btnOptimalUse.setOnClickListener(v -> {
+            voucherManager.setSelectedVoucherCode(voucher.code);
+            ToastUtil.show(requireContext(), getString(R.string.toast_voucher_applied, voucher.code));
+            if (isApplyFlow) {
+                requireActivity().getOnBackPressedDispatcher().onBackPressed();
+            }
+        });
     }
 
     @Override

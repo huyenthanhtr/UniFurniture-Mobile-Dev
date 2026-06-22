@@ -21,9 +21,9 @@ public class OrderRepository {
         this.apiService = apiService;
     }
 
-    public LiveData<ApiListResponse<OrderDto>> getOrders(String customerId) {
+    public LiveData<ApiListResponse<OrderDto>> getOrders(String customerId, String accountId) {
         MutableLiveData<ApiListResponse<OrderDto>> result = new MutableLiveData<>();
-        apiService.getOrders(customerId).enqueue(new Callback<ApiListResponse<OrderDto>>() {
+        apiService.getOrders(customerId, accountId).enqueue(new Callback<ApiListResponse<OrderDto>>() {
             @Override
             public void onResponse(Call<ApiListResponse<OrderDto>> call,
                                    Response<ApiListResponse<OrderDto>> response) {

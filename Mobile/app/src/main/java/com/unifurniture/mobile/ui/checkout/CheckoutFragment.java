@@ -131,6 +131,7 @@ public class CheckoutFragment extends Fragment {
         binding.btnSelectVoucher.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
             bundle.putDouble("subtotal", subtotal);
+            bundle.putString("entry_mode", "apply");
             Navigation.findNavController(requireView()).navigate(R.id.voucherListFragment, bundle);
         });
 
@@ -381,7 +382,7 @@ public class CheckoutFragment extends Fragment {
 
         com.unifurniture.mobile.util.NotificationManager.getInstance(requireContext())
                 .addNotification(getString(R.string.order_success_notif_title),
-                        getString(R.string.order_success_notif_msg, orderCode), "order", orderId);
+                        getString(R.string.order_success_notif_msg, orderCode), "order", orderCode);
 
         Bundle bundle = new Bundle();
         bundle.putString("order_code", orderCode);

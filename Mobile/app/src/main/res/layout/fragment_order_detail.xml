@@ -55,7 +55,7 @@
                         android:id="@+id/tvOrderId"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Order #123456"
+                        android:text="@string/order_placeholder"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:textColor="@color/black" />
@@ -64,16 +64,20 @@
                         android:id="@+id/tvOrderStatus"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Pending"
-                        android:textSize="14sp"
-                        android:textColor="@color/primary"
+                        android:text="@string/status_pending"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:paddingStart="10dp"
+                        android:paddingTop="5dp"
+                        android:paddingEnd="10dp"
+                        android:paddingBottom="5dp"
                         android:layout_marginTop="4dp" />
 
                     <TextView
                         android:id="@+id/tvOrderDate"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Date: 2023-10-10"
+                        android:text="@string/order_date_placeholder"
                         android:textSize="14sp"
                         android:textColor="@color/gray_600"
                         android:layout_marginTop="4dp" />
@@ -85,7 +89,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Trạng thái đơn hàng"
+                android:text="@string/order_status_title"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="@color/black"
@@ -124,7 +128,7 @@
                             android:id="@+id/tvStep1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Chờ xác nhận"
+                            android:text="@string/status_pending"
                             android:textSize="10sp"
                             android:textColor="@color/gray_400"
                             android:layout_marginTop="4dp"
@@ -156,7 +160,7 @@
                             android:id="@+id/tvStep2"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Đã đóng gói"
+                            android:text="@string/status_confirmed"
                             android:textSize="10sp"
                             android:textColor="@color/gray_400"
                             android:layout_marginTop="4dp"
@@ -188,7 +192,7 @@
                             android:id="@+id/tvStep3"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Đang giao"
+                            android:text="@string/status_shipping"
                             android:textSize="10sp"
                             android:textColor="@color/gray_400"
                             android:layout_marginTop="4dp"
@@ -220,7 +224,7 @@
                             android:id="@+id/tvStep4"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Hoàn thành"
+                            android:text="@string/status_completed"
                             android:textSize="10sp"
                             android:textColor="@color/gray_400"
                             android:layout_marginTop="4dp"
@@ -256,7 +260,7 @@
                         android:id="@+id/tvShippingName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Name"
+                        android:text="@string/recipient_name"
                         android:textColor="@color/black"
                         android:textSize="14sp" />
 
@@ -264,7 +268,7 @@
                         android:id="@+id/tvShippingPhone"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Phone"
+                        android:text="@string/phone"
                         android:textColor="@color/gray_600"
                         android:textSize="14sp"
                         android:layout_marginTop="4dp" />
@@ -273,7 +277,7 @@
                         android:id="@+id/tvShippingAddress"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Address"
+                        android:text="@string/delivery_address"
                         android:textColor="@color/gray_600"
                         android:textSize="14sp"
                         android:layout_marginTop="4dp" />
@@ -308,7 +312,7 @@
                         android:id="@+id/tvPaymentMethod"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="COD"
+                        android:text="@string/cod_short"
                         android:textColor="@color/black"
                         android:textSize="14sp" />
                         
@@ -316,7 +320,7 @@
                         android:id="@+id/tvPaymentStatus"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Unpaid"
+                        android:text="@string/payment_unpaid"
                         android:textColor="@color/gray_600"
                         android:textSize="14sp"
                         android:layout_marginTop="4dp" />
@@ -366,7 +370,7 @@
                     android:id="@+id/tvTotalAmount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="0"
+                    android:text="@string/zero_amount"
                     android:textColor="@color/primary"
                     android:textSize="18sp"
                     android:textStyle="bold" />

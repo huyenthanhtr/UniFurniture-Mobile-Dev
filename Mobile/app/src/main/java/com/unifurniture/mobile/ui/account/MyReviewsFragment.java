@@ -13,20 +13,25 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.data.model.ReviewDto;
+import com.unifurniture.mobile.data.remote.ApiClient;
+import com.unifurniture.mobile.data.remote.ApiService;
 import com.unifurniture.mobile.databinding.FragmentMyReviewsBinding;
 import com.unifurniture.mobile.ui.adapter.MyReviewsAdapter;
-import com.unifurniture.mobile.util.NavViewModelProvider;
-import com.unifurniture.mobile.util.RecyclerViewStateHelper;
 import com.unifurniture.mobile.util.SessionManager;
+import com.unifurniture.mobile.util.ToastUtil;
 
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MyReviewsFragment extends Fragment {
 
     private FragmentMyReviewsBinding binding;
-    private MyReviewsViewModel viewModel;
     private MyReviewsAdapter adapter;
-    private final RecyclerViewStateHelper rvState = new RecyclerViewStateHelper("my_reviews");
+    private ApiService apiService;
+    private String customerId;
 
     @Nullable
     @Override
@@ -37,62 +42,61 @@ public class MyReviewsFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        viewModel = NavViewModelProvider.get(this, R.id.myReviewsFragment, MyReviewsViewModel.class);
+        apiService = ApiClient.getInstance();
+        customerId = SessionManager.getInstance(requireContext()).getCustomerId();
 
-        binding.toolbar.setNavigationOnClickListener(v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
+        setupToolbar();
+        setupRecyclerView();
 
-        setupRecyclerView(savedInstanceState);
-        observeData();
-
-        String customerId = SessionManager.getInstance(requireContext()).getCustomerId();
         if (customerId != null) {
-            viewModel.loadReviewsIfNeeded();
+            loadReviews();
         } else {
             binding.tvEmpty.setVisibility(View.VISIBLE);
         }
     }
 
-    private void setupRecyclerView(@Nullable Bundle savedInstanceState) {
+    private void setupToolbar() {
+        binding.toolbar.setNavigationOnClickListener(v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
+    }
+
+    private void setupRecyclerView() {
         adapter = new MyReviewsAdapter();
         binding.rvReviews.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvReviews.setAdapter(adapter);
-        rvState.bind(binding.rvReviews, savedInstanceState);
     }
 
-    private void observeData() {
-        viewModel.getReviews().observe(getViewLifecycleOwner(), reviews -> {
-            if (reviews == null) {
-                if (!Boolean.TRUE.equals(viewModel.isLoading().getValue())) {
-                    Toast.makeText(requireContext(), R.string.error_unknown, Toast.LENGTH_SHORT).show();
+    private void loadReviews() {
+        binding.progressBar.setVisibility(View.VISIBLE);
+        binding.tvEmpty.setVisibility(View.GONE);
+
+        apiService.getReviews(customerId).enqueue(new Callback<List<ReviewDto>>() {
+            @Override
+            public void onResponse(Call<List<ReviewDto>> call, Response<List<ReviewDto>> response) {
+                if (isAdded()) {
+                    binding.progressBar.setVisibility(View.GONE);
+                    List<ReviewDto> reviews = response.body();
+                    if (response.isSuccessful() && reviews != null) {
+                        if (!reviews.isEmpty()) {
+                            adapter.submitList(reviews);
+                        } else {
+                            binding.tvEmpty.setVisibility(View.VISIBLE);
+                        }
+                    } else {
+                        ToastUtil.error(requireContext(), R.string.error_unknown);
+                        binding.tvEmpty.setVisibility(View.VISIBLE);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<ReviewDto>> call, Throwable t) {
+                if (isAdded()) {
+                    binding.progressBar.setVisibility(View.GONE);
+                    ToastUtil.error(requireContext(), getString(R.string.error_network, t.getMessage()));
                     binding.tvEmpty.setVisibility(View.VISIBLE);
                 }
-                return;
-            }
-            if (reviews.isEmpty()) {
-                binding.tvEmpty.setVisibility(View.VISIBLE);
-            } else {
-                binding.tvEmpty.setVisibility(View.GONE);
-                adapter.submitList(reviews, rvState.afterSubmitCallback());
             }
         });
-
-        viewModel.isLoading().observe(getViewLifecycleOwner(), loading -> {
-            List<ReviewDto> cached = viewModel.getReviews().getValue();
-            boolean initialLoad = Boolean.TRUE.equals(loading) && (cached == null || cached.isEmpty());
-            binding.progressBar.setVisibility(initialLoad ? View.VISIBLE : View.GONE);
-        });
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        rvState.savePending();
-    }
-
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        rvState.save(outState);
     }
 
     @Override

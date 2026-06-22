@@ -4,19 +4,22 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.data.model.ApiListResponse;
 import com.unifurniture.mobile.data.model.OrderDto;
 import com.unifurniture.mobile.data.remote.ApiClient;
 import com.unifurniture.mobile.data.remote.ApiService;
 import com.unifurniture.mobile.databinding.FragmentOrderTrackingBinding;
+import com.unifurniture.mobile.util.ToastUtil;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -69,10 +72,10 @@ public class OrderTrackingFragment extends Fragment {
                             bundle.putString("order_id", order.getId());
                             Navigation.findNavController(requireView()).navigate(R.id.orderDetailFragment, bundle);
                         } else {
-                            Toast.makeText(requireContext(), R.string.tracking_not_found, Toast.LENGTH_SHORT).show();
+                            showTrackingErrorDialog();
                         }
                     } else {
-                        Toast.makeText(requireContext(), R.string.tracking_lookup_error, Toast.LENGTH_SHORT).show();
+                        ToastUtil.error(requireContext(), R.string.tracking_lookup_error);
                     }
                 }
             }
@@ -82,10 +85,30 @@ public class OrderTrackingFragment extends Fragment {
                 if (isAdded()) {
                     binding.progressBar.setVisibility(View.GONE);
                     binding.btnTrack.setEnabled(true);
-                    Toast.makeText(requireContext(), getString(R.string.error_network, t.getMessage()), Toast.LENGTH_SHORT).show();
+                    ToastUtil.error(requireContext(), getString(R.string.error_network, t.getMessage()));
                 }
             }
         });
+    }
+
+    private void showTrackingErrorDialog() {
+        if (!isAdded()) return;
+
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_tracking_error, null, false);
+        TextView titleView = dialogView.findViewById(R.id.tvDialogTitle);
+        TextView messageView = dialogView.findViewById(R.id.tvDialogMessage);
+        titleView.setText(R.string.tracking_not_found_title);
+        messageView.setText(R.string.tracking_not_found);
+
+        AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext())
+                .setView(dialogView)
+                .setPositiveButton(R.string.tracking_try_again, (d, which) -> d.dismiss())
+                .create();
+
+        dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(
+                androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary)
+        ));
+        dialog.show();
     }
 
     @Override
