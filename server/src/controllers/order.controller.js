@@ -1020,13 +1020,18 @@ async function getOrderById(req, res, next) {
     const itemsSubtotal = itemsWithReview.reduce((sum, item) => sum + Number(item.total || 0), 0);
     const orderTotal = Number(order.total_amount || 0);
     const discountAmount = itemsSubtotal > orderTotal ? itemsSubtotal - orderTotal : 0;
+    const paymentSummary = buildPaymentSummary(order, payments);
 
     res.json({
-      order,
+      order: {
+        ...order,
+        payment_summary: paymentSummary,
+      },
       customer,
       profile,
       items: itemsWithReview,
       payments,
+      payment_summary: paymentSummary,
       display: buildDisplay(order, customer, profile),
       pricing: {
         items_subtotal: itemsSubtotal,

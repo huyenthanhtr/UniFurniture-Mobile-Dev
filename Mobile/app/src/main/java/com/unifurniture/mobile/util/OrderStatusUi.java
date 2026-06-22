@@ -129,6 +129,92 @@ public final class OrderStatusUi {
         textView.setBackground(background);
     }
 
+    public static void applyTimeline(
+            String status,
+            android.widget.ImageView iv1, android.widget.TextView tv1, android.view.View l1,
+            android.widget.ImageView iv2, android.widget.TextView tv2, android.view.View l2,
+            android.widget.ImageView iv3, android.widget.TextView tv3, android.view.View l3,
+            android.widget.ImageView iv4, android.widget.TextView tv4
+    ) {
+        Context context = iv1.getContext();
+        String s = normalize(status);
+
+        int inactiveColor = ContextCompat.getColor(context, R.color.gray_400);
+        int inactiveLine = ContextCompat.getColor(context, R.color.gray_300);
+        int activeColor = ContextCompat.getColor(context, R.color.primary);
+        int errorColor = ContextCompat.getColor(context, R.color.error);
+
+        // Reset all
+        iv1.setImageTintList(android.content.res.ColorStateList.valueOf(inactiveColor));
+        tv1.setTextColor(inactiveColor);
+        if (l1 != null) l1.setBackgroundColor(inactiveLine);
+        
+        iv2.setImageTintList(android.content.res.ColorStateList.valueOf(inactiveColor));
+        tv2.setTextColor(inactiveColor);
+        if (l2 != null) l2.setBackgroundColor(inactiveLine);
+        
+        iv3.setImageTintList(android.content.res.ColorStateList.valueOf(inactiveColor));
+        tv3.setTextColor(inactiveColor);
+        if (l3 != null) l3.setBackgroundColor(inactiveLine);
+        
+        iv4.setImageTintList(android.content.res.ColorStateList.valueOf(inactiveColor));
+        tv4.setTextColor(inactiveColor);
+
+        // Set labels
+        tv1.setText(R.string.timeline_step_1);
+        tv2.setText(R.string.timeline_step_2);
+        tv3.setText(R.string.timeline_step_3);
+        tv4.setText(R.string.timeline_step_4);
+
+        if ("cancelled".equals(s)) {
+            iv1.setImageTintList(android.content.res.ColorStateList.valueOf(errorColor));
+            tv1.setTextColor(errorColor);
+            tv1.setText(R.string.status_cancelled);
+            return;
+        }
+
+        if ("cancel_pending".equals(s)) {
+            iv1.setImageTintList(android.content.res.ColorStateList.valueOf(activeColor));
+            tv1.setTextColor(activeColor);
+            
+            iv2.setImageTintList(android.content.res.ColorStateList.valueOf(errorColor));
+            tv2.setTextColor(errorColor);
+            tv2.setText(R.string.status_cancel_pending);
+            return;
+        }
+
+        // Step 1 active for all non-cancelled
+        iv1.setImageTintList(android.content.res.ColorStateList.valueOf(activeColor));
+        tv1.setTextColor(activeColor);
+
+        if ("pending".equals(s)) return;
+
+        // Step 2 active
+        if (l1 != null) l1.setBackgroundColor(activeColor);
+        iv2.setImageTintList(android.content.res.ColorStateList.valueOf(activeColor));
+        tv2.setTextColor(activeColor);
+
+        if ("confirmed".equals(s) || "processing".equals(s)) return;
+
+        // Step 3 active
+        if (l2 != null) l2.setBackgroundColor(activeColor);
+        iv3.setImageTintList(android.content.res.ColorStateList.valueOf(activeColor));
+        tv3.setTextColor(activeColor);
+
+        if ("shipping".equals(s)) return;
+
+        // Step 4 active
+        if (l3 != null) l3.setBackgroundColor(activeColor);
+        iv4.setImageTintList(android.content.res.ColorStateList.valueOf(activeColor));
+        tv4.setTextColor(activeColor);
+        
+        if ("delivered".equals(s)) {
+            tv4.setText(R.string.status_delivered);
+        } else if ("completed".equals(s)) {
+            tv4.setText(R.string.status_completed);
+        }
+    }
+
     private static float dp(Context context, int value) {
         return value * context.getResources().getDisplayMetrics().density;
     }

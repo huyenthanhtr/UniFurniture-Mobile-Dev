@@ -300,7 +300,7 @@
     <string name="quantity_format">x%1$d</string>
     <string name="status_cancelled">Cancelled</string>
     <string name="account_about_title">About UniFurniture</string>
-    <string name="account_policy_title">Privacy Policy</string>
+    <string name="account_policy_title">Policies</string>
     <string name="account_community_title">Community</string>
     <string name="tracking_code_required">Please enter a tracking code</string>
     <string name="tracking_not_found">No order found with this code</string>

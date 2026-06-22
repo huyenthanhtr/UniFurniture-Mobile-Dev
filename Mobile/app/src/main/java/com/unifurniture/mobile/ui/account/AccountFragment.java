@@ -139,19 +139,12 @@ public class AccountFragment extends Fragment {
             androidx.navigation.Navigation.findNavController(requireView()).navigate(R.id.contentFragment, bundle);
         });
 
-        binding.itemPolicy.setOnClickListener(v -> {
-            Bundle bundle = new Bundle();
-            bundle.putString("title", getString(R.string.account_policy_title));
-            bundle.putString("url", baseUrl + "/chinh-sach-bao-mat");
-            androidx.navigation.Navigation.findNavController(requireView()).navigate(R.id.contentFragment, bundle);
-        });
-
-        binding.itemCommunity.setOnClickListener(v -> {
-            Bundle bundle = new Bundle();
-            bundle.putString("title", getString(R.string.account_community_title));
-            bundle.putString("url", baseUrl + "/cong-dong");
-            androidx.navigation.Navigation.findNavController(requireView()).navigate(R.id.contentFragment, bundle);
-        });
+        binding.cardPolicySales.setOnClickListener(v -> openPolicy(baseUrl, "chinh-sach-ban-hang", getString(R.string.policy_sales)));
+        binding.cardPolicyShipping.setOnClickListener(v -> openPolicy(baseUrl, "giao-hang-lap-dat", getString(R.string.policy_shipping)));
+        binding.cardPolicyWarranty.setOnClickListener(v -> openPolicy(baseUrl, "bao-hanh-bao-tri", getString(R.string.policy_warranty)));
+        binding.cardPolicyReturn.setOnClickListener(v -> openPolicy(baseUrl, "doi-tra", getString(R.string.policy_return)));
+        binding.cardPolicyLoyalty.setOnClickListener(v -> openPolicy(baseUrl, "khach-hang-than-thiet", getString(R.string.policy_loyalty)));
+        binding.cardPolicyPartner.setOnClickListener(v -> openPolicy(baseUrl, "doi-tac-ban-hang", getString(R.string.policy_partner)));
 
         binding.itemLanguage.setOnClickListener(v ->
                 com.unifurniture.mobile.util.LanguageDialog.show(requireContext(), false, (code, changed) -> {
@@ -161,6 +154,13 @@ public class AccountFragment extends Fragment {
 
         updateNotificationBadge();
         loadProfileAvatar(session);
+    }
+
+    private void openPolicy(String baseUrl, String slug, String title) {
+        Bundle bundle = new Bundle();
+        bundle.putString("title", title);
+        bundle.putString("url", baseUrl + "/chinh-sach/" + slug);
+        androidx.navigation.Navigation.findNavController(requireView()).navigate(R.id.contentFragment, bundle);
     }
 
     private void loadProfileAvatar(SessionManager session) {

@@ -25,6 +25,8 @@ public class OrderDto {
     private String paymentMethod;
     @SerializedName("payment_status")
     private String paymentStatus;
+    @SerializedName("payment_summary")
+    private PaymentSummaryDto paymentSummary;
     @SerializedName("tracking_code")
     private String trackingCode;
     @SerializedName(value = "details", alternate = {"items", "order_items_preview"})
@@ -134,6 +136,14 @@ public class OrderDto {
 
     public void setPaymentStatus(String paymentStatus) {
         this.paymentStatus = paymentStatus;
+    }
+
+    public PaymentSummaryDto getPaymentSummary() {
+        return paymentSummary;
+    }
+
+    public void setPaymentSummary(PaymentSummaryDto paymentSummary) {
+        this.paymentSummary = paymentSummary;
     }
 
     public String getTrackingCode() {
