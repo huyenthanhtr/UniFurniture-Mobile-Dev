@@ -211,4 +211,14 @@ public interface ApiService {
     // ── Public Coupons (home promotions) ──────────────────────────────────────
     @GET("coupons")
     Call<java.util.List<CouponDto>> getCoupons();
+
+    // ── Blogs / Posts ─────────────────────────────────────────────────────────
+    @GET("posts")
+    Call<ApiListResponse<PostDto>> getPosts(
+            @Query("status") String status,
+            @Query("limit") int limit
+    );
+
+    @GET("posts/{id}")
+    Call<PostDto> getPostById(@Path("id") String id);
 }

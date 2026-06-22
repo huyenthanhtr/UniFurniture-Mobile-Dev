@@ -100,8 +100,17 @@ public class OrderDetailFragment extends Fragment {
         binding.tvShippingPhone.setText(safeText(order.getShippingPhone()));
         binding.tvShippingAddress.setText(safeText(order.getShippingAddress()));
         
-        binding.tvPaymentMethod.setText(order.getPaymentMethod() != null ? order.getPaymentMethod().toUpperCase() : "");
-        binding.tvPaymentStatus.setText(safeText(order.getPaymentStatus()));
+        String method = order.getPaymentMethod();
+        if ((method == null || method.trim().isEmpty()) && order.getPaymentSummary() != null) {
+            method = order.getPaymentSummary().getMethod();
+        }
+        binding.tvPaymentMethod.setText(method != null ? method.toUpperCase() : "");
+        
+        String pStatus = order.getPaymentStatus();
+        if ((pStatus == null || pStatus.trim().isEmpty()) && order.getPaymentSummary() != null) {
+            pStatus = order.getPaymentSummary().getStatus();
+        }
+        binding.tvPaymentStatus.setText(safeText(pStatus));
         
         binding.tvTotalAmount.setText(FormatUtil.formatCurrency(order.getTotalAmount()));
 
@@ -161,102 +170,13 @@ public class OrderDetailFragment extends Fragment {
     }
 
     private void updateTimeline(String status) {
-        int primaryColor = getResources().getColor(R.color.primary, null);
-        int grayColor = getResources().getColor(R.color.gray_300, null);
-        int cancelColor = getResources().getColor(R.color.status_cancelled_text, null);
-        String normalizedStatus = OrderStatusUi.normalize(status);
-
-        // Reset all to gray first
-        binding.ivStep1.setImageResource(android.R.drawable.ic_menu_edit);
-        binding.ivStep1.setColorFilter(grayColor);
-        binding.tvStep1.setTextColor(grayColor);
-        binding.tvStep1.setText(R.string.status_pending);
-        binding.line1.setBackgroundColor(grayColor);
-
-        binding.ivStep2.setImageResource(android.R.drawable.ic_menu_manage);
-        binding.ivStep2.setColorFilter(grayColor);
-        binding.tvStep2.setTextColor(grayColor);
-        binding.tvStep2.setText(R.string.status_confirmed);
-        binding.line2.setBackgroundColor(grayColor);
-
-        binding.ivStep3.setImageResource(android.R.drawable.ic_menu_send);
-        binding.ivStep3.setColorFilter(grayColor);
-        binding.tvStep3.setTextColor(grayColor);
-        binding.tvStep3.setText(R.string.status_shipping);
-        binding.line3.setBackgroundColor(grayColor);
-
-        binding.ivStep4.setImageResource(android.R.drawable.checkbox_on_background);
-        binding.ivStep4.setColorFilter(grayColor);
-        binding.tvStep4.setTextColor(grayColor);
-        binding.tvStep4.setText(R.string.status_completed);
-
-        if (normalizedStatus == null || normalizedStatus.isEmpty()) return;
-
-        // Apply colors based on status progression
-        switch (normalizedStatus) {
-            case "pending":
-                binding.ivStep1.setColorFilter(primaryColor);
-                binding.tvStep1.setTextColor(primaryColor);
-                break;
-            case "cancel_pending":
-                binding.ivStep1.setColorFilter(primaryColor);
-                binding.tvStep1.setTextColor(primaryColor);
-                binding.line1.setBackgroundColor(primaryColor);
-                binding.ivStep2.setColorFilter(cancelColor);
-                binding.tvStep2.setTextColor(cancelColor);
-                binding.tvStep2.setText(R.string.status_cancel_pending);
-                break;
-            case "confirmed":
-            case "processing":
-                binding.ivStep1.setColorFilter(primaryColor);
-                binding.tvStep1.setTextColor(primaryColor);
-                binding.line1.setBackgroundColor(primaryColor);
-                
-                binding.ivStep2.setColorFilter(primaryColor);
-                binding.tvStep2.setTextColor(primaryColor);
-                if ("processing".equals(normalizedStatus)) {
-                    binding.tvStep2.setText(R.string.status_processing);
-                }
-                break;
-            case "shipping":
-                binding.ivStep1.setColorFilter(primaryColor);
-                binding.tvStep1.setTextColor(primaryColor);
-                binding.line1.setBackgroundColor(primaryColor);
-                
-                binding.ivStep2.setColorFilter(primaryColor);
-                binding.tvStep2.setTextColor(primaryColor);
-                binding.line2.setBackgroundColor(primaryColor);
-                
-                binding.ivStep3.setColorFilter(primaryColor);
-                binding.tvStep3.setTextColor(primaryColor);
-                break;
-            case "delivered":
-            case "completed":
-                binding.ivStep1.setColorFilter(primaryColor);
-                binding.tvStep1.setTextColor(primaryColor);
-                binding.line1.setBackgroundColor(primaryColor);
-                
-                binding.ivStep2.setColorFilter(primaryColor);
-                binding.tvStep2.setTextColor(primaryColor);
-                binding.line2.setBackgroundColor(primaryColor);
-                
-                binding.ivStep3.setColorFilter(primaryColor);
-                binding.tvStep3.setTextColor(primaryColor);
-                binding.line3.setBackgroundColor(primaryColor);
-                
-                binding.ivStep4.setColorFilter(primaryColor);
-                binding.tvStep4.setTextColor(primaryColor);
-                binding.tvStep4.setText("delivered".equals(normalizedStatus)
-                        ? R.string.status_delivered
-                        : R.string.status_completed);
-                break;
-            case "cancelled":
-                binding.ivStep1.setImageResource(android.R.drawable.ic_delete);
-                binding.ivStep1.setColorFilter(cancelColor);
-                binding.tvStep1.setTextColor(cancelColor);
-                binding.tvStep1.setText(R.string.status_cancelled);
-                break;
-        }
+        OrderStatusUi.applyTimeline(
+                status,
+                binding.ivStep1, binding.tvStep1, binding.line1,
+                binding.ivStep2, binding.tvStep2, binding.line2,
+                binding.ivStep3, binding.tvStep3, binding.line3,
+                binding.ivStep4, binding.tvStep4
+        );
     }
 
     @Override

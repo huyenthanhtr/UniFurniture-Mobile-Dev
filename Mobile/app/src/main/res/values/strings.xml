@@ -304,10 +304,14 @@
     <string name="order_number_format">Order %1$s</string>
     <string name="order_date_format">Date: %1$s</string>
     <string name="quantity_format">x%1$d</string>
-    <string name="status_cancelled">Cancelled</string>
     <string name="account_about_title">About UniFurniture</string>
-    <string name="account_policy_title">Privacy Policy</string>
-    <string name="account_community_title">Community</string>
+    <string name="account_policy_title">Policies</string>
+    <string name="policy_sales">Sales</string>
+    <string name="policy_shipping">Shipping</string>
+    <string name="policy_warranty">Warranty</string>
+    <string name="policy_return">Return</string>
+    <string name="policy_loyalty">U-HOMIE</string>
+    <string name="policy_partner">Partner</string>
     <string name="tracking_code_required">Please enter a tracking code</string>
     <string name="tracking_not_found">No order found with this code</string>
     <string name="tracking_not_found_title">Tracking code not found</string>
@@ -372,14 +376,23 @@
     <string name="status_pending">Pending</string>
     <string name="status_confirmed">Confirmed</string>
     <string name="status_processing">Processing</string>
+    <string name="status_shipping">Shipping</string>
+    <string name="status_delivered">Delivered</string>
+    <string name="status_completed">Completed</string>
+    <string name="status_cancel_pending">Cancellation Requested</string>
+    <string name="status_cancelled">Cancelled</string>
+    <string name="status_packed">Packed</string>
+    <string name="order_status_title">Order Status</string>
     <string name="order_date_placeholder">Date: 2023-10-10</string>
     <string name="order_date_placeholder_short">2023-10-10</string>
-    <string name="order_status_title">Order Status</string>
-    <string name="status_packed">Packed</string>
-    <string name="status_shipping">Shipping</string>
-    <string name="status_completed">Completed</string>
-    <string name="status_delivered">Delivered</string>
-    <string name="status_cancel_pending">Cancellation Requested</string>
+    <string name="account_community_title">Community</string>
+
+    <!-- Timeline Labels -->
+    <string name="timeline_step_1">Pending</string>
+    <string name="timeline_step_2">Confirmed</string>
+    <string name="timeline_step_3">Shipping</string>
+    <string name="timeline_step_4">Completed</string>
+    <string name="timeline_cancel_pending_hint">Waiting for cancellation confirmation</string>
     <string name="cod_short">COD</string>
     <string name="payment_unpaid">Unpaid</string>
     <string name="zero_amount">0</string>

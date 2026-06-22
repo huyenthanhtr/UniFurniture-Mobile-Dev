@@ -26,12 +26,14 @@ const productModels3dRoutes = require("./src/routes/product-model-3d.routes");
 const reviewRoutes = require('./src/routes/review.routes');
 const wishlistRoutes = require("./src/routes/wishlist.routes");
 const loyaltyRoutes = require("./src/routes/loyalty.routes");
+const postsRoutes = require("./src/routes/posts.routes");
 const { normalizeSystemCodes } = require("./src/utils/normalize-system-codes");
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: "20mb" }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/assets/upload", express.static(path.join(__dirname, "..", "admin", "src", "assets", "upload")));
+app.use("/assets/images", express.static(path.join(__dirname, "..", "client", "src", "assets", "images")));
 
 
 app.get("/", (req, res) => res.send("UniFurniture API running"));
@@ -57,6 +59,7 @@ app.use("/api/product-models-3d", productModels3dRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/loyalty", loyaltyRoutes);
+app.use("/api/posts", postsRoutes);
 app.use('/api/admin/dashboard', dashboardRoutes);
 connectDB().then(async () => {
   await normalizeSystemCodes();
