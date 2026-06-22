@@ -11,7 +11,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.unifurniture.mobile.R;
@@ -19,6 +18,8 @@ import com.unifurniture.mobile.databinding.FragmentCartBinding;
 import com.unifurniture.mobile.ui.adapter.CartItemAdapter;
 import com.unifurniture.mobile.ui.auth.AuthActivity;
 import com.unifurniture.mobile.util.FormatUtil;
+import com.unifurniture.mobile.util.NavViewModelProvider;
+import com.unifurniture.mobile.util.RecyclerViewStateHelper;
 import com.unifurniture.mobile.util.SessionManager;
 import com.unifurniture.mobile.util.VoucherManager;
 import com.unifurniture.mobile.data.model.VoucherDto;
@@ -28,6 +29,7 @@ public class CartFragment extends Fragment {
     private FragmentCartBinding binding;
     private CartViewModel viewModel;
     private CartItemAdapter adapter;
+    private final RecyclerViewStateHelper rvState = new RecyclerViewStateHelper("cart");
 
     @Nullable
     @Override
@@ -40,13 +42,14 @@ public class CartFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        viewModel = new ViewModelProvider(this).get(CartViewModel.class);
-        setupRecyclerView();
+        viewModel = NavViewModelProvider.get(this, R.id.cartFragment, CartViewModel.class);
+        setupRecyclerView(savedInstanceState);
         observeData();
 
         binding.layoutVoucher.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
             bundle.putDouble("subtotal", viewModel.getTotal());
+            bundle.putString("entry_mode", "apply");
             Navigation.findNavController(requireView()).navigate(R.id.voucherListFragment, bundle);
         });
 
@@ -71,8 +74,10 @@ public class CartFragment extends Fragment {
                 startActivity(new Intent(requireContext(), AuthActivity.class)));
     }
 
-    private void setupRecyclerView() {
+    private void setupRecyclerView(@Nullable Bundle savedInstanceState) {
+        String serverHost = com.unifurniture.mobile.BuildConfig.API_BASE_URL.replace("/api/", "");
         adapter = new CartItemAdapter(
+                serverHost,
                 (item, quantity) -> viewModel.updateQuantity(item.id, quantity),
                 item -> viewModel.removeItem(item.id),
                 item -> showVariantSelectionDialog(item),
@@ -87,6 +92,7 @@ public class CartFragment extends Fragment {
         );
         binding.rvCartItems.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvCartItems.setAdapter(adapter);
+        rvState.bind(binding.rvCartItems, savedInstanceState);
     }
 
     private void showVariantSelectionDialog(com.unifurniture.mobile.data.model.CartItemDto item) {
@@ -155,13 +161,18 @@ public class CartFragment extends Fragment {
                     binding.btnLoginPrompt.setVisibility(View.VISIBLE);
                 }
             } else {
-                adapter.submitList(cart.items);
+                adapter.submitList(cart.items, rvState.afterSubmitCallback());
                 refreshPricing();
             }
         });
 
-        viewModel.isLoading().observe(getViewLifecycleOwner(), loading ->
-                binding.progressBar.setVisibility(loading ? View.VISIBLE : View.GONE));
+        viewModel.isLoading().observe(getViewLifecycleOwner(), loading -> {
+            boolean initialLoad = Boolean.TRUE.equals(loading)
+                    && (viewModel.getCart().getValue() == null
+                    || viewModel.getCart().getValue().items == null
+                    || viewModel.getCart().getValue().items.isEmpty());
+            binding.progressBar.setVisibility(initialLoad ? View.VISIBLE : View.GONE);
+        });
     }
 
     private void refreshPricing() {
@@ -213,10 +224,19 @@ public class CartFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (viewModel != null) {
-            viewModel.loadCart();
-        }
         refreshPricing();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        rvState.savePending();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        rvState.save(outState);
     }
 
     @Override

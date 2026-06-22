@@ -38,9 +38,11 @@ public class CartItemAdapter extends ListAdapter<CartItemDto, CartItemAdapter.Vi
     private final OnRemoveListener removeListener;
     private final OnVariantClickListener variantClickListener;
     private final OnItemClickListener itemClickListener;
+    private final String serverHost;
 
-    public CartItemAdapter(OnQuantityChangeListener quantityListener, OnRemoveListener removeListener, OnVariantClickListener variantClickListener, OnItemClickListener itemClickListener) {
+    public CartItemAdapter(String serverHost, OnQuantityChangeListener quantityListener, OnRemoveListener removeListener, OnVariantClickListener variantClickListener, OnItemClickListener itemClickListener) {
         super(DIFF_CALLBACK);
+        this.serverHost = serverHost;
         this.quantityListener = quantityListener;
         this.removeListener = removeListener;
         this.variantClickListener = variantClickListener;
@@ -72,7 +74,7 @@ public class CartItemAdapter extends ListAdapter<CartItemDto, CartItemAdapter.Vi
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.bind(getItem(position), quantityListener, removeListener, variantClickListener, itemClickListener);
+        holder.bind(getItem(position), serverHost, quantityListener, removeListener, variantClickListener, itemClickListener);
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -83,7 +85,7 @@ public class CartItemAdapter extends ListAdapter<CartItemDto, CartItemAdapter.Vi
             this.binding = binding;
         }
 
-        void bind(CartItemDto item, OnQuantityChangeListener quantityListener,
+        void bind(CartItemDto item, String serverHost, OnQuantityChangeListener quantityListener,
                   OnRemoveListener removeListener, OnVariantClickListener variantClickListener,
                   OnItemClickListener itemClickListener) {
             // Product info
@@ -92,9 +94,11 @@ public class CartItemAdapter extends ListAdapter<CartItemDto, CartItemAdapter.Vi
                 binding.tvName.setText(product.name);
                 Context context = binding.getRoot().getContext();
                 if (context != null) {
+                    String imageUrl = com.unifurniture.mobile.util.CategoryImageHelper.resolveProductUrl(product, serverHost);
                     Glide.with(context)
-                            .load(product.getImageUrl())
+                            .load(imageUrl)
                             .placeholder(R.drawable.placeholder_product)
+                            .error(R.drawable.placeholder_product)
                             .centerCrop()
                             .into(binding.ivProduct);
                 }

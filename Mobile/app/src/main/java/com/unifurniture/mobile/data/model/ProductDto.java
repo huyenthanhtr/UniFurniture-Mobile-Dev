@@ -1,9 +1,11 @@
 package com.unifurniture.mobile.data.model;
 
 import com.google.gson.annotations.SerializedName;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProductDto {
-    @SerializedName("_id")
+    @SerializedName(value = "_id", alternate = {"id"})
     public String id;
     public String name;
     public String slug;
@@ -28,6 +30,26 @@ public class ProductDto {
     public String collectionId;
     @SerializedName("average_rating")
     public Double averageRating;
+    public java.util.List<ColorInfo> colors;
+
+    public static class ColorInfo {
+        public String name;
+        public Double price;
+        @SerializedName("originalPrice")
+        public Double originalPrice;
+        public String imageUrl;
+    }
+
+    /** compare_at_price có thể nằm trên product hoặc trong colors array từ variant */
+    public Double getEffectiveCompareAtPrice() {
+        if (compareAtPrice != null && compareAtPrice > 0) return compareAtPrice;
+        if (colors != null) {
+            for (ColorInfo c : colors) {
+                if (c.originalPrice != null && c.originalPrice > 0) return c.originalPrice;
+            }
+        }
+        return null;
+    }
 
     // Helper: get best image URL
     public String getImageUrl() {
@@ -44,6 +66,19 @@ public class ProductDto {
         return url;
     }
 
+    public String getTitle() {
+        return name;
+    }
+
+    public List<ImageDto> getImages() {
+        List<ImageDto> images = new ArrayList<>();
+        String url = getImageUrl();
+        if (url != null && !url.isEmpty()) {
+            images.add(new ImageDto(url));
+        }
+        return images;
+    }
+
     // Helper: discount badge text
     public String getDiscountBadge() {
         if (minPrice != null && compareAtPrice != null && compareAtPrice > minPrice) {
@@ -51,5 +86,17 @@ public class ProductDto {
             return "-" + pct + "%";
         }
         return null;
+    }
+
+    public static class ImageDto {
+        private final String url;
+
+        public ImageDto(String url) {
+            this.url = url;
+        }
+
+        public String getUrl() {
+            return url;
+        }
     }
 }

@@ -63,13 +63,15 @@ public class CollectionAdapter extends ListAdapter<CollectionDto, CollectionAdap
         void bind(CollectionDto collection, String serverHost,
                   OnCollectionClickListener listener) {
             binding.tvCollectionName.setText(collection.name);
-            String url = collection.bannerUrl != null
-                    ? collection.bannerUrl.replace("http://localhost:3000", serverHost)
-                    : null;
+            
+            String imageUrl = com.unifurniture.mobile.util.CategoryImageHelper.resolveCollectionUrl(collection, serverHost);
+
             Glide.with(binding.getRoot())
-                    .load(url)
+                    .load(imageUrl)
                     .placeholder(R.drawable.placeholder_product)
                     .centerCrop()
+                    .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.NONE)
+                    .skipMemoryCache(true)
                     .into(binding.ivCollection);
             binding.getRoot().setOnClickListener(v -> listener.onClick(collection));
         }

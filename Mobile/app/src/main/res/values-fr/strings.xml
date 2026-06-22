@@ -3,268 +3,386 @@
     <string name="app_name">UniFurniture</string>
 
     <!-- Navigation -->
-    <string name="nav_home">Accueil</string>
-    <string name="nav_products">Produits</string>
-    <string name="nav_cart">Panier</string>
-    <string name="nav_account">Compte</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_products">Products</string>
+    <string name="nav_cart">Cart</string>
+    <string name="nav_account">Account</string>
 
     <!-- Auth -->
-    <string name="login">Connexion</string>
-    <string name="login_subtitle">Connexion</string>
-    <string name="login_welcome">Bon retour !</string>
-    <string name="login_success_msg">Connexion réussie. Découvrez des meubles haut de gamme juste pour vous.</string>
-    <string name="register">S\'inscrire</string>
-    <string name="register_title">Créer un compte</string>
-    <string name="register_success_otp">Inscription réussie ! Veuillez entrer le code OTP.</string>
-    <string name="phone">Numéro de téléphone</string>
-    <string name="password">Mot de passe</string>
-    <string name="full_name">Nom complet</string>
-    <string name="no_account">Pas de compte ? S\'inscrire</string>
-    <string name="have_account">Déjà un compte ? Se connecter</string>
-    <string name="otp_title">Vérification OTP</string>
-    <string name="otp_subtitle">Entrez le code OTP envoyé par SMS</string>
-    <string name="otp_code">Code OTP</string>
-    <string name="btn_verify">Vérifier</string>
+    <string name="login">Login</string>
+    <string name="login_subtitle">Login</string>
+    <string name="login_welcome">Welcome back!</string>
+    <string name="login_success_msg">Login successful. Discover premium furniture just for you.</string>
+    <string name="register">Register</string>
+    <string name="register_title">Create Account</string>
+    <string name="register_success_otp">Registration successful! Please enter the OTP code.</string>
+    <string name="phone">Phone Number</string>
+    <string name="password">Password</string>
+    <string name="full_name">Full Name</string>
+    <string name="no_account">Don\'t have an account? Sign up</string>
+    <string name="have_account">Already have an account? Login</string>
+    <string name="otp_title">OTP Verification</string>
+    <string name="otp_subtitle">Enter the OTP sent via SMS</string>
+    <string name="otp_code">OTP Code</string>
+    <string name="btn_verify">Verify</string>
 
     <!-- Cart -->
-    <string name="cart_title">Panier</string>
-    <string name="empty_cart">Le panier est vide</string>
-    <string name="login_to_shop">Se connecter pour acheter</string>
+    <string name="cart_title">Cart</string>
+    <string name="empty_cart">Cart is empty</string>
+    <string name="login_to_shop">Login to shop</string>
     <string name="total">Total</string>
-    <string name="checkout">Passer la commande</string>
+    <string name="checkout">Checkout</string>
 
     <!-- Account -->
-    <string name="account_title">Compte</string>
-    <string name="not_logged_in">Vous n\'êtes pas connecté</string>
-    <string name="login_or_register">Connexion / Inscription</string>
-    <string name="my_orders">Mes commandes</string>
-    <string name="favorites">Favoris</string>
-    <string name="logout">Se déconnecter</string>
+    <string name="account_title">Account</string>
+    <string name="not_logged_in">You are not logged in</string>
+    <string name="login_or_register">Login / Register</string>
+    <string name="my_orders">My Orders</string>
+    <string name="favorites">Favorites</string>
+    <string name="logout">Logout</string>
 
     <!-- Checkout -->
-    <string name="checkout_title">Commander</string>
-    <string name="back">Retour</string>
-    <string name="shipping_info">Informations de livraison</string>
-    <string name="recipient_name">Nom du destinataire</string>
-    <string name="delivery_address">Adresse de livraison</string>
-    <string name="payment_method">Mode de paiement</string>
-    <string name="cod">Paiement à la livraison (COD)</string>
-    <string name="bank_transfer">Virement bancaire</string>
-    <string name="place_order">Confirmer la commande</string>
-    <string name="order_success">Commande passée avec succès !</string>
-    <string name="order_success_notif_title">Commande réussie !</string>
-    <string name="order_success_notif_msg">Votre commande %1$s a été reçue.</string>
-    <string name="order_failed">Échec de la commande. Réessayez.</string>
-    <string name="fill_required">Veuillez remplir tous les champs requis</string>
+    <string name="checkout_title">Order</string>
+    <string name="back">Back</string>
+    <string name="shipping_info">Shipping Information</string>
+    <string name="recipient_name">Recipient Name</string>
+    <string name="delivery_address">Delivery Address</string>
+    <string name="payment_method">Payment Method</string>
+    <string name="cod">Cash on Delivery (COD)</string>
+    <string name="bank_transfer">Bank Transfer</string>
+    <string name="place_order">Place Order</string>
+    <string name="order_success">Order placed successfully!</string>
+    <string name="order_success_notif_title">Order Successful!</string>
+    <string name="order_success_notif_msg">Your order %1$s has been received.</string>
+    <string name="order_failed">Order failed. Please try again.</string>
+    <string name="fill_required">Please fill in all required fields</string>
 
     <!-- Home -->
-    <string name="search_hint">Rechercher des produits…</string>
-    <string name="recent_searches">Recherches récentes</string>
-    <string name="clear_all">Tout effacer</string>
-    <string name="categories">Catégories</string>
-    <string name="featured_products">Produits vedettes</string>
-    <string name="view_all">Voir tout ›</string>
+    <string name="search_hint">Search products…</string>
+    <string name="recent_searches">Recent Searches</string>
+    <string name="clear_all">Clear all</string>
+    <string name="categories">Categories</string>
+    <string name="featured_products">Featured Products</string>
+    <string name="view_all">View all ›</string>
     <string name="collections">Collections</string>
 
     <!-- Product List -->
-    <string name="products_title">Produits</string>
-    <string name="toggle_view_desc">Changer la vue</string>
-    <string name="sort_newest">Plus récents</string>
-    <string name="sort_best_selling">Meilleures ventes</string>
-    <string name="sort_price_low">Prix croissant</string>
-    <string name="sort_price_high">Prix décroissant</string>
-    <string name="empty_products">Aucun produit trouvé</string>
-    <string name="empty_products_hint">Essayez de modifier les filtres ou les mots-clés</string>
-    <string name="filter_desc">Filtrer les produits</string>
-    <string name="showing_products">Affichage de %1$d / %2$d produits</string>
+    <string name="products_title">Products</string>
+    <string name="toggle_view_desc">Toggle view</string>
+    <string name="sort_newest">Newest</string>
+    <string name="sort_best_selling">Best Selling</string>
+    <string name="sort_price_low">Price Low</string>
+    <string name="sort_price_high">Price High</string>
+    <string name="empty_products">No products found</string>
+    <string name="empty_products_hint">Try changing filters or search terms</string>
+    <string name="filter_desc">Filter products</string>
+    <string name="showing_products">Showing %1$d / %2$d products</string>
 
     <!-- Product Detail -->
-    <string name="product_detail_title">Détail du produit</string>
-    <string name="back_desc">Retour</string>
-    <string name="choose_variant">Choisir la couleur / le style</string>
-    <string name="short_description">Description courte</string>
-    <string name="full_description">Description complète</string>
-    <string name="reviews">Avis</string>
-    <string name="no_rating">Pas encore d\'avis</string>
-    <string name="no_reviews">Pas encore d\'avis</string>
-    <string name="related_products">Produits associés</string>
-    <string name="quantity">Quantité</string>
-    <string name="add_to_cart">Ajouter au panier</string>
-    <string name="warranty">Garantie : %1$d mois</string>
-    <string name="sold_count">Vendu : %1$s</string>
-    <string name="review_count">(%1$d avis)</string>
-    <string name="added_to_cart">Ajouté au panier !</string>
-    <string name="product_default_name">Produit</string>
-    <string name="variant_default_name">Défaut</string>
-    <string name="in_stock">En stock</string>
-    <string name="out_of_stock">Rupture de stock</string>
-    <string name="shop_reply">Réponse de la boutique</string>
-    <string name="guest_customer">Client</string>
+    <string name="product_detail_title">Product Detail</string>
+    <string name="back_desc">Go back</string>
+    <string name="choose_variant">Choose color / style</string>
+    <string name="short_description">Short Description</string>
+    <string name="full_description">Description</string>
+    <string name="reviews">Reviews</string>
+    <string name="no_rating">No reviews yet</string>
+    <string name="no_reviews">No reviews yet</string>
+    <string name="related_products">Related Products</string>
+    <string name="quantity">Quantity</string>
+    <string name="add_to_cart">Add to Cart</string>
+    <string name="warranty">Warranty: %1$d months</string>
+    <string name="sold_count">Sold: %1$s</string>
+    <string name="review_count">(%1$d reviews)</string>
+    <string name="added_to_cart">Added to cart!</string>
+    <string name="product_default_name">Product</string>
+    <string name="variant_default_name">Default</string>
+    <string name="in_stock">In Stock</string>
+    <string name="out_of_stock">Out of Stock</string>
+    <string name="shop_reply">Reply from store</string>
+    <string name="guest_customer">Customer</string>
 
     <!-- Filter -->
-    <string name="filter_title">Filtrer les produits</string>
-    <string name="filter_category">Catégorie</string>
-    <string name="price_range">Fourchette de prix (VND)</string>
-    <string name="price_from">De</string>
-    <string name="price_to">À</string>
-    <string name="min_rating">Note minimale</string>
-    <string name="filter_all">Tous</string>
-    <string name="rating_3_up">3★ et plus</string>
-    <string name="rating_4_up">4★ et plus</string>
+    <string name="filter_title">Filter Products</string>
+    <string name="filter_category">Category</string>
+    <string name="price_range">Price Range (VND)</string>
+    <string name="price_from">From</string>
+    <string name="price_to">To</string>
+    <string name="min_rating">Minimum Rating</string>
+    <string name="filter_all">All</string>
+    <string name="rating_3_up">3★ and above</string>
+    <string name="rating_4_up">4★ and above</string>
     <string name="rating_5">5★</string>
-    <string name="clear_filter">Réinitialiser</string>
-    <string name="apply_filter">Appliquer</string>
+    <string name="clear_filter">Clear Filters</string>
+    <string name="apply_filter">Apply</string>
 
     <!-- Common -->
-    <string name="loading">Chargement…</string>
-    <string name="delete_item">Supprimer</string>
-    <string name="no_orders">Vous n\'avez pas encore de commandes</string>
-    <string name="my_orders_title">Mes commandes</string>
-    <string name="app_tagline">Mobilier intelligent</string>
+    <string name="loading">Loading…</string>
+    <string name="delete_item">Delete</string>
+    <string name="no_orders">You have no orders yet</string>
+    <string name="my_orders_title">My Orders</string>
+    <string name="app_tagline">Smart Furniture</string>
 
     <!-- Add to cart feedback -->
-    <string name="btn_added">✓ Ajouté</string>
+    <string name="btn_added">✓ Added</string>
 
     <!-- Review sort -->
-    <string name="review_sort_newest">Plus récents</string>
-    <string name="review_sort_high_rating">Note élevée</string>
-    <string name="review_sort_low_rating">Note basse</string>
+    <string name="review_sort_newest">Newest</string>
+    <string name="review_sort_high_rating">Highest Rating</string>
+    <string name="review_sort_low_rating">Lowest Rating</string>
 
     <!-- Recently viewed -->
-    <string name="recently_viewed">Vus récemment</string>
-    <string name="added_to_favorites">Ajouté aux favoris</string>
-    <string name="removed_from_favorites">Retiré des favoris</string>
-    <string name="login_required_favorite">Veuillez vous connecter pour ajouter aux favoris</string>
-    <string name="login_required_cart">Veuillez vous connecter pour ajouter au panier</string>
-    <string name="please_select_variant">Veuillez choisir une couleur / variante</string>
-    <string name="login_required_checkout">Veuillez vous connecter pour passer à la caisse</string>
-    <string name="wishlist_add_error">Impossible d\'ajouter aux favoris</string>
-    <string name="wishlist_remove_error">Impossible de retirer des favoris</string>
-    <string name="error_network">Erreur réseau : %1$s</string>
-    <string name="error_unknown">Une erreur inconnue est survenue</string>
-    <string name="error_fill_info">Veuillez remplir toutes les informations</string>
-    <string name="error_login_failed">Numéro de téléphone ou mot de passe invalide</string>
-    <string name="error_phone_not_found">Le numéro de téléphone n\'existe pas</string>
-    <string name="error_invalid_otp_forgot">Code OTP invalide ou expiré</string>
+    <string name="recently_viewed">Recently Viewed</string>
+    <string name="added_to_favorites">Added to favorites</string>
+    <string name="removed_from_favorites">Removed from favorites</string>
+    <string name="login_required_favorite">Please login to add to favorites</string>
+    <string name="login_required_cart">Please login to add to cart</string>
+    <string name="please_select_variant">Please select a color/variant</string>
+    <string name="login_required_checkout">Please login to checkout</string>
+    <string name="wishlist_add_error">Could not add to favorites</string>
+    <string name="wishlist_remove_error">Could not remove from favorites</string>
+    <string name="error_network">Network error: %1$s</string>
+    <string name="error_unknown">An unknown error occurred</string>
+    <string name="error_fill_info">Please fill in all information</string>
+    <string name="error_login_failed">Invalid phone number or password</string>
+    <string name="error_phone_not_found">Phone number does not exist</string>
+    <string name="error_invalid_otp_forgot">Invalid or expired OTP code</string>
 
     <!-- Voucher -->
-    <string name="voucher_title">Bons de réduction</string>
-    <string name="empty_vouchers">Vous n\'avez pas encore de bons de réduction.</string>
-    <string name="label_discount">REMISE</string>
-    <string name="btn_use">Utiliser</string>
-    <string name="voucher_expiry">Expire le : %1$s</string>
-    <string name="voucher_discount_amount">Remise %1$s</string>
-    <string name="voucher_condition">Appliqué pour les commandes à partir de %1$s.</string>
-    <string name="voucher_upsell">Achetez pour %1$s de plus pour appliquer</string>
-    <string name="select_voucher">Sélectionner un bon</string>
-    <string name="voucher_wallet">Portefeuille de bons</string>
-    <string name="empty_voucher_storage">Le stockage de bons est vide</string>
-    <string name="voucher_discount_label">Remise du bon</string>
-    <string name="content_desc_remove_voucher">Supprimer le bon</string>
+    <string name="voucher_title">Vouchers</string>
+    <string name="empty_vouchers">You don\'t have any vouchers yet.</string>
+    <string name="label_discount">DISCOUNT</string>
+    <string name="btn_use">Use</string>
+    <string name="voucher_expiry">Expiry: %1$s</string>
+    <string name="copy_code">Copy code</string>
+    <string name="copied_to_clipboard">Copied to clipboard</string>
+    <string name="voucher_discount_amount">Discount %1$s</string>
+    <string name="voucher_condition">Applied for orders from %1$s.</string>
+    <string name="voucher_upsell">Buy %1$s more to apply</string>
+    <string name="select_voucher">Select voucher</string>
+    <string name="voucher_wallet">Voucher Wallet</string>
+    <string name="empty_voucher_storage">Voucher storage is empty</string>
+    <string name="voucher_discount_label">Voucher discount</string>
+    <string name="content_desc_remove_voucher">Remove voucher</string>
 
     <!-- Notifications -->
     <string name="notification_title">Notifications</string>
-    <string name="no_notifications">Pas de notifications</string>
-    <string name="new_notification_hint">Les nouvelles notifications apparaîtront ici.</string>
-    <string name="content_desc_mark_all_read">Tout marquer comme lu</string>
-    <string name="label_orders">Commandes</string>
-    <string name="label_all">Tout</string>
-    <string name="label_account">Compte</string>
+    <string name="no_notifications">No notifications</string>
+    <string name="new_notification_hint">New notifications will appear here when there is activity.</string>
+    <string name="content_desc_mark_all_read">Mark all as read</string>
+    <string name="label_orders">Orders</string>
+    <string name="label_all">All</string>
+    <string name="label_account">Account</string>
 
     <!-- Wishlist -->
-    <string name="empty_wishlist">La liste de souhaits est vide</string>
+    <string name="empty_wishlist">Wishlist is empty</string>
 
     <!-- Feedback & UI -->
-    <string name="view_cart">Voir le panier</string>
-    <string name="add_to_cart_success">Ajouté au panier avec succès</string>
-    <string name="add_to_cart_error">Impossible d\'ajouter au panier. Veuillez réessayer.</string>
-    <string name="content_desc_delete">Supprimer</string>
-    <string name="close">Fermer</string>
-    <string name="subtotal">Sous-total</string>
-    <string name="login_upsell">Connectez-vous pour recevoir des offres</string>
+    <string name="view_cart">View Cart</string>
+    <string name="add_to_cart_success">Added to cart successfully</string>
+    <string name="add_to_cart_error">Could not add to cart. Please try again.</string>
+    <string name="content_desc_delete">Delete</string>
+    <string name="close">Close</string>
+    <string name="subtotal">Subtotal</string>
+    <string name="login_upsell">Login to receive offers</string>
     <string name="content_desc_logo">Logo</string>
-    <string name="content_desc_product_image">Image du produit</string>
+    <string name="content_desc_product_image">Product Image</string>
     <string name="content_desc_collection">Collection</string>
 
     <!-- Toasts & Messages -->
-    <string name="toast_no_other_variants">Le produit n\'a pas d\'autres variantes</string>
-    <string name="toast_product_not_found">Informations produit introuvables</string>
-    <string name="toast_voucher_removed_min_spend">Bon supprimé en raison du montant minimum d\'achat</string>
-    <string name="toast_voucher_saved_upsell">Bon enregistré. Achetez plus pour appliquer !</string>
-    <string name="toast_voucher_applied">Bon appliqué : %1$s</string>
-    <string name="toast_order_id">Commande : %1$s</string>
-    <string name="toast_mark_all_read">Tout a été marqué comme lu</string>
-    <string name="toast_login_required_orders">Veuillez vous connecter pour voir les commandes</string>
-
-    <!-- Formats & Limits -->
+    <string name="toast_no_other_variants">Product has no other variants</string>
+    <string name="toast_product_not_found">Product information not found</string>
+    <string name="toast_voucher_removed_min_spend">Voucher removed due to minimum spend requirement</string>
+    <string name="toast_voucher_saved_upsell">Voucher saved. Buy more to apply!</string>
+    <string name="toast_voucher_applied">Applied voucher: %1$s</string>
+    <string name="toast_order_id">Order: %1$s</string>
+    <string name="toast_mark_all_read">Marked all as read</string>
+    <string name="toast_login_required_orders">Please login to view orders</string>
     <string name="image_indicator_format">%1$d/%2$d</string>
     <string name="price_range_format">%1$s - %2$s</string>
     <string name="min_quantity_value">1</string>
     <string name="max_quantity_value">99</string>
-    <string name="login_required_orders_hint">Connectez-vous pour enregistrer l\'historique des achats</string>
-    <string name="guest">Invité</string>
+    <string name="login_required_orders_hint">Login to save purchase history</string>
     <!-- Checkout Advanced -->
-    <string name="shipping_email">E-mail de livraison (Optionnel)</string>
-    <string name="province">Province / Région</string>
-    <string name="district">District / Ville</string>
-    <string name="shipping_method">Mode de livraison</string>
-    <string name="giao_khong_lap">Livraison standard (Sans installation)</string>
-    <string name="giao_va_lap">Livraison &amp; Assemblage (Recommandé)</string>
-    <string name="deposit_required_alert">Les commandes de 10 000 000 VND ou plus nécessitent un acompte de 10%%. Le paiement COD est désactivé.</string>
-    <string name="order_summary">Résumé de la commande</string>
-    <string name="shipping_fee">Frais de livraison</string>
-    <string name="deposit_amount_label">Acompte requis (10%%)</string>
-    <string name="remaining_amount">Solde restant (COD)</string>
-    <string name="qr_payment_title">Paiement par VietQR</string>
-    <string name="bank_name_label">Banque</string>
-    <string name="account_name_label">Titulaire du compte</string>
-    <string name="account_number_label">Numéro de compte</string>
-    <string name="transfer_amount_label">Montant</string>
-    <string name="transfer_message_label">Description du transfert</string>
-    <string name="copy">Copier</string>
-    <string name="copied">Copié dans le presse-papiers</string>
-    <string name="timer_title">Compte à rebours de paiement: </string>
-    <string name="payment_timeout">Vérification du résultat du paiement…</string>
-    <string name="cancel_payment">Annuler le paiement</string>
-    <string name="cancel_payment_confirm_title">Annuler le paiement?</string>
-    <string name="cancel_payment_confirm_msg">Êtes-vous sûr de vouloir annuler le paiement de cette commande?</string>
-    <string name="order_success_title">Merci!</string>
-    <string name="order_success_desc">Votre commande a été passée avec succès.</string>
-    <string name="order_success_ref">Référence de commande: %1$s</string>
-    <string name="go_home">Continuer vos achats</string>
-    <string name="invalid_phone">Numéro de téléphone invalide. Doit comporter 10 chiffres commençant par 0.</string>
-    <string name="invalid_email">Format d\'e-mail invalide.</string>
-    <string name="invalid_province">Veuillez entrer une province valide.</string>
-    <string name="invalid_district">Veuillez entrer un district valide.</string>
+    <string name="shipping_email">Recipient Email (Optional)</string>
+    <string name="province">Province / City</string>
+    <string name="district">District</string>
+    <string name="shipping_method">Shipping Method</string>
+    <string name="giao_khong_lap">Standard Delivery (No installation)</string>
+    <string name="giao_va_lap">Delivery &amp; Assembly (Recommended)</string>
+    <string name="deposit_required_alert">Orders of 10,000,000 VND or more require a 10%% deposit. COD payment is disabled.</string>
+    <string name="order_summary">Order Summary</string>
+    <string name="shipping_fee">Shipping Fee</string>
+    <string name="deposit_amount_label">Deposit Required (10%%)</string>
+    <string name="remaining_amount">Remaining Balance</string>
+    <string name="qr_payment_title">Scan to Pay (VietQR)</string>
+    <string name="bank_name_label">Bank</string>
+    <string name="account_name_label">Account Owner</string>
+    <string name="account_number_label">Account Number</string>
+    <string name="transfer_amount_label">Amount</string>
+    <string name="transfer_message_label">Message</string>
+    <string name="copy">Copy</string>
+    <string name="copied">Copied to clipboard</string>
+    <string name="timer_title">Payment countdown: </string>
+    <string name="payment_timeout">Checking payment result…</string>
+    <string name="cancel_payment">Cancel Payment</string>
+    <string name="cancel_payment_confirm_title">Cancel Payment?</string>
+    <string name="cancel_payment_confirm_msg">Are you sure you want to cancel this order payment?</string>
+    <string name="order_success_title">Thank You!</string>
+    <string name="order_success_desc">Your order has been placed successfully.</string>
+    <string name="order_success_ref">Order Reference: %1$s</string>
+    <string name="go_home">Continue Shopping</string>
+    <string name="invalid_phone">Invalid phone number. Must be 10 digits starting with 0.</string>
+    <string name="invalid_email">Invalid email format.</string>
+    <string name="invalid_province">Please enter a valid province.</string>
+    <string name="invalid_district">Please enter a valid district.</string>
+    <string name="guest">Guest</string>
     <!-- Forgot Password -->
-    <string name="str_forgot_title">Mot de passe oublié</string>
-    <string name="str_forgot_phone_instruction">Entrez votre numéro de téléphone enregistré pour recevoir un code OTP.</string>
-    <string name="str_phone">Numéro de téléphone</string>
-    <string name="str_send_otp">Envoyer OTP</string>
-    <string name="str_forgot_otp_instruction">Entrez le code OTP envoyé sur votre téléphone.</string>
-    <string name="str_hint_otp">Code de vérification OTP</string>
-    <string name="str_verify_otp_btn">Vérifier l\'OTP</string>
-    <string name="str_forgot_newpass_instruction">Définissez un nouveau mot de passe pour votre compte.</string>
-    <string name="str_forgot_newpass_hint">Nouveau mot de passe</string>
-    <string name="str_forgot_confirmpass_hint">Confirmer le nouveau mot de passe</string>
-    <string name="str_reset_password_btn">Réinitialiser le mot de passe</string>
-    <string name="str_remembered_password">Retour à la connexion</string>
+    <string name="str_forgot_title">Forgot Password</string>
+    <string name="str_forgot_phone_instruction">Enter your registered phone number to receive an OTP code.</string>
+    <string name="str_phone">Phone Number</string>
+    <string name="str_send_otp">Send OTP</string>
+    <string name="str_forgot_otp_instruction">Enter the OTP code sent to your phone.</string>
+    <string name="str_forgot_otp_instruction_format">Enter the OTP code sent to %s</string>
+    <string name="str_hint_otp">OTP Verification Code</string>
+    <string name="str_verify_otp_btn">Verify OTP</string>
+    <string name="str_forgot_newpass_instruction">Set a new password for your account.</string>
+    <string name="str_forgot_newpass_hint">New Password</string>
+    <string name="str_forgot_confirmpass_hint">Confirm New Password</string>
+    <string name="str_reset_password_btn">Reset Password</string>
+    <string name="str_remembered_password">Back to Login</string>
+    <string name="str_invalid_phone">Invalid phone number</string>
+    <string name="str_invalid_otp">Invalid OTP. Must be 6 digits.</string>
+    <string name="str_password_too_short">Password must be at least 8 characters.</string>
+    <string name="str_password_mismatch">Passwords do not match.</string>
+    <string name="str_reset_password_success">Password reset successfully!</string>
 
     <!-- Checkout Labels -->
-    <string name="label_shipping_name">Nom du destinataire <font color="#FF0000">*</font></string>
-    <string name="label_shipping_phone">Numéro de téléphone <font color="#FF0000">*</font></string>
-    <string name="label_shipping_address">Adresse de livraison <font color="#FF0000">*</font></string>
-    <string name="label_shipping_province">Province / Région <font color="#FF0000">*</font></string>
-    <string name="label_shipping_district">District / Ville <font color="#FF0000">*</font></string>
-    <string name="label_shipping_email">E-mail de notification (Optionnel)</string>
-    <string name="shipping_method_warning">Désolé, cette zone ne prend actuellement en charge que la livraison standard (Sans installation).</string>
-    <string name="free">Gratuit</string>
+    <string name="label_shipping_name">Recipient Name <font color="#FF0000">*</font></string>
+    <string name="label_shipping_phone">Phone Number <font color="#FF0000">*</font></string>
+    <string name="label_shipping_address">Delivery Address <font color="#FF0000">*</font></string>
+    <string name="label_shipping_province">Province / City <font color="#FF0000">*</font></string>
+    <string name="label_shipping_district">District <font color="#FF0000">*</font></string>
+    <string name="label_shipping_email">Recipient Email (Optional)</string>
+    <string name="shipping_method_warning">Sorry, this area currently only supports Standard Delivery (No installation).</string>
+    <string name="free">Free</string>
 
     <!-- Checkout New -->
-    <string name="saved_address_label">Adresse enregistrée</string>
-    <string name="select_address_hint">-- Sélectionner une adresse --</string>
-    <string name="add_new_address">+ Ajouter une adresse</string>
-    <string name="applied_voucher">Appliqué: %1$s</string>
-    <string name="order_reference_label">CODE DE RÉFÉRENCE DE LA COMMANDE</string>
-    <string name="qr_instruction">Utilisez votre application bancaire pour scanner le code QR pour payer</string>
+    <string name="saved_address_label">Saved Address</string>
+    <string name="select_address_hint">-- Select saved address --</string>
+    <string name="add_new_address">+ Add new address</string>
+    <string name="applied_voucher">Applied: %1$s</string>
+    <string name="order_reference_label">ORDER REFERENCE CODE</string>
+    <string name="qr_instruction">Use your banking app to scan the QR code to pay</string>
+    <!-- Profile & Account Flow -->
+    <string name="edit_profile">Edit Profile</string>
+    <string name="my_reviews">My Reviews</string>
+    <string name="email">Email</string>
+    <string name="gender">Gender</string>
+    <string name="birthday">Birthday</string>
+    <string name="save_changes">Save Changes</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+    <string name="other">Other</string>
+    <string name="order_tracking">Order Tracking</string>
+    <string name="address_book_title">Address Book</string>
+    <string name="address_book_empty">You have not saved any addresses yet.</string>
+    <string name="default_address">Default</string>
+    <string name="edit_address">Edit Address</string>
+    <string name="address_deleted">Address deleted</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="set_default">Set Default</string>
+    <string name="cancel">Cancel</string>
+    <string name="order_details">Order Details</string>
+    <string name="profile_updated">Profile updated successfully</string>
+    <string name="order_number_format">Order %1$s</string>
+    <string name="order_date_format">Date: %1$s</string>
+    <string name="quantity_format">x%1$d</string>
+    <string name="status_cancelled">Cancelled</string>
+    <string name="account_about_title">About UniFurniture</string>
+    <string name="account_policy_title">Privacy Policy</string>
+    <string name="account_community_title">Community</string>
+    <string name="tracking_code_required">Please enter a tracking code</string>
+    <string name="tracking_not_found">No order found with this code</string>
+    <string name="tracking_not_found_title">Tracking code not found</string>
+    <string name="tracking_lookup_error">Could not look up this order</string>
+    <string name="tracking_try_again">Try again</string>
+    <string name="remember_password">Se souvenir du mot de passe</string>
+    <string name="back_to_home">Retour à l\'accueil</string>
+    <string name="select_language">Choisir la langue</string>
+    <string name="remember_language_choice">Se souvenir de mon choix</string>
+    <string name="confirm">Confirmer</string>
+    <string name="language_label">Langue</string>
+    <string name="lang_english">English 🇬🇧</string>
+    <string name="lang_vietnamese">Tiếng Việt 🇻🇳</string>
+    <string name="lang_chinese">中文 🇨🇳</string>
+    <string name="lang_french">Français 🇫🇷</string>
+    <string name="email_optional">E-mail (facultatif)</string>
+    <string name="confirm_password">Confirmer le mot de passe</string>
+    <string name="error_phone_invalid">Le numéro doit comporter 9 à 10 chiffres</string>
+    <string name="error_password_short">Le mot de passe doit comporter au moins 8 caractères</string>
+    <string name="error_password_mismatch">Les mots de passe ne correspondent pas</string>
+    <string name="error_email_invalid">Format d\'e-mail invalide</string>
+    <string name="error_register_failed">Échec de l\'inscription. Le téléphone ou l\'e-mail est peut-être déjà enregistré.</string>
+    <string name="register_otp_sent">Le code OTP a été envoyé à votre téléphone</string>
+    <string name="otp_account_created">Compte créé ! Vous pouvez maintenant vous connecter.</string>
+
+    <!-- Promotions (Home) -->
+    <string name="promotions_title">🔥 Offres Spéciales</string>
+    <string name="coupon_discount_percent">-%1$d%%</string>
+    <string name="coupon_discount_fixed">-%1$s</string>
+    <string name="coupon_min_order">Commande dès %1$s</string>
+    <string name="coupon_no_min">Sans montant minimum</string>
+
+    <!-- Birthday popup -->
+    <string name="birthday_popup_title">🎉 Joyeux Anniversaire !</string>
+    <string name="birthday_popup_message">UniFurniture vous offre un bon de réduction de 50%% (Code : BDAY50) pour votre anniversaire ce mois-ci !</string>
+    <string name="birthday_popup_btn">Génial !</string>
+
+    <!-- Product list -->
+    <string name="load_more">Charger plus</string>
+    <string name="read_more">Lire plus</string>
+    <string name="read_less">Lire moins</string>
+
+    <!-- Voucher stub labels -->
+    <string name="discount_percent_stub">-%1$d%%</string>
+    <string name="discount_fixed_stub">-%1$dK</string>
+    <string name="change_password">Changer le mot de passe</string>
+    <string name="current_password">Mot de passe actuel</string>
+    <string name="current_password_hint">Saisir le mot de passe actuel</string>
+    <string name="new_password">Nouveau mot de passe</string>
+    <string name="new_password_hint">Au moins 6 caractères</string>
+    <string name="confirm_new_password">Confirmer le nouveau mot de passe</string>
+    <string name="confirm_new_password_hint">Saisir à nouveau le mot de passe</string>
+    <string name="required_field">Obligatoire</string>
+    <string name="password_min_six">Le nouveau mot de passe doit contenir au moins 6 caractères</string>
+    <string name="password_confirm_mismatch">La confirmation ne correspond pas</string>
+    <string name="password_must_be_different">Le nouveau mot de passe doit être différent du mot de passe actuel</string>
+    <string name="account_not_found_login_again">Compte introuvable. Veuillez vous reconnecter.</string>
+    <string name="change_password_success">Mot de passe modifié avec succès !</string>
+    <string name="current_password_incorrect">Le mot de passe actuel est incorrect. Veuillez réessayer.</string>
+    <string name="order_tracking_instruction">Saisissez votre code de suivi pour vérifier l’état de votre commande.</string>
+    <string name="tracking_code_hint">Code de suivi</string>
+    <string name="track_order_action">Suivre</string>
+    <string name="order_placeholder">Commande #123456</string>
+    <string name="status_pending">En attente</string>
+    <string name="status_confirmed">Confirmée</string>
+    <string name="status_processing">En traitement</string>
+    <string name="order_date_placeholder">Date : 2023-10-10</string>
+    <string name="order_date_placeholder_short">2023-10-10</string>
+    <string name="order_status_title">Statut de la commande</string>
+    <string name="status_packed">Emballée</string>
+    <string name="status_shipping">En livraison</string>
+    <string name="status_completed">Terminée</string>
+    <string name="status_delivered">Livrée</string>
+    <string name="status_cancel_pending">Annulation demandée</string>
+    <string name="cod_short">COD</string>
+    <string name="payment_unpaid">Non payé</string>
+    <string name="zero_amount">0</string>
+    <string name="review_content_placeholder">Contenu de l’avis</string>
+    <string name="shop_reply_placeholder">Merci pour votre soutien !</string>
+    <string name="price_placeholder">100 000 VND</string>
+    <string name="quantity_one_placeholder">x1</string>
+    <string name="address_list_empty_hint">Vous n’avez pas encore d’adresse enregistrée.\nAppuyez sur + pour ajouter une adresse.</string>
+    <string name="avatar_selected_hint">Nouvel avatar sélectionné. Appuyez sur Enregistrer pour mettre à jour.</string>
 </resources>

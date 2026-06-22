@@ -3,13 +3,13 @@ package com.unifurniture.mobile.data.model;
 import com.google.gson.annotations.SerializedName;
 
 public class ProductImageDto {
-    @SerializedName("_id")
+    @SerializedName(value = "_id", alternate = {"id"})
     public String id;
-    @SerializedName("product_id")
+    @SerializedName(value = "product_id", alternate = {"productId"})
     public String productId;
-    @SerializedName("variant_id")
+    @SerializedName(value = "variant_id", alternate = {"variantId"})
     public String variantId;
-    @SerializedName("image_url")
+    @SerializedName(value = "image_url", alternate = {"imageUrl"})
     public String imageUrl;
     @SerializedName("is_primary")
     public Boolean isPrimary;

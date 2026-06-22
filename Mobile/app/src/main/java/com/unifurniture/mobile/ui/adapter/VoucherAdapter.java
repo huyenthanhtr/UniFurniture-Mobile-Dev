@@ -73,10 +73,12 @@ public class VoucherAdapter extends ListAdapter<VoucherDto, VoucherAdapter.ViewH
 
             // Configure tag on the left sidebar
             if ("percent".equals(item.discountType)) {
-                binding.tvStubText.setText("GIẢM " + (int)item.discountValue + "%");
+                binding.tvStubText.setText(
+                        context.getString(R.string.discount_percent_stub, (int) item.discountValue));
                 binding.ivStubIcon.setImageResource(R.drawable.ic_products);
             } else {
-                binding.tvStubText.setText("GIẢM " + (int)(item.discountValue / 1000) + "K");
+                binding.tvStubText.setText(
+                        context.getString(R.string.discount_fixed_stub, (int)(item.discountValue / 1000)));
                 binding.ivStubIcon.setImageResource(R.drawable.ic_cart);
             }
 
@@ -91,7 +93,8 @@ public class VoucherAdapter extends ListAdapter<VoucherDto, VoucherAdapter.ViewH
             } else {
                 binding.spacerCondition.setVisibility(View.GONE);
                 double needed = item.minOrderValue - subtotal;
-                binding.tvConditionWarning.setText("Mua thêm " + FormatUtil.formatCurrency(needed) + " để áp dụng");
+                binding.tvConditionWarning.setText(
+                        context.getString(R.string.voucher_upsell, FormatUtil.formatCurrency(needed)));
                 binding.tvConditionWarning.setVisibility(View.VISIBLE);
             }
 

@@ -3,9 +3,9 @@ package com.unifurniture.mobile.data.model;
 import com.google.gson.annotations.SerializedName;
 
 public class ProductVariantDto {
-    @SerializedName("_id")
+    @SerializedName(value = "_id", alternate = {"id"})
     public String id;
-    @SerializedName("product_id")
+    @SerializedName(value = "product_id", alternate = {"productId"})
     public Object productId;
     public String name;
     @SerializedName("variant_name")

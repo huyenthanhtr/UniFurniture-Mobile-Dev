@@ -1,6 +1,5 @@
 package com.unifurniture.mobile.ui.auth;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,15 +9,24 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.databinding.FragmentOtpBinding;
-import com.unifurniture.mobile.ui.MainActivity;
-import com.unifurniture.mobile.util.SessionManager;
 
 public class OtpFragment extends Fragment {
 
+    private static final String ARG_PHONE = "phone";
+
     private FragmentOtpBinding binding;
     private AuthViewModel viewModel;
-    private String pendingPhone;
+
+    /** Create the OTP screen for an already-formatted (84…) phone from registration. */
+    public static OtpFragment newInstance(String formattedPhone) {
+        OtpFragment f = new OtpFragment();
+        Bundle args = new Bundle();
+        args.putString(ARG_PHONE, formattedPhone);
+        f.setArguments(args);
+        return f;
+    }
 
     @Nullable
     @Override
@@ -33,10 +41,14 @@ public class OtpFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         viewModel = new ViewModelProvider(requireActivity()).get(AuthViewModel.class);
 
+        // Phone comes from the registration step — prefill and lock it.
+        String phone = getArguments() != null ? getArguments().getString(ARG_PHONE, "") : "";
+        binding.etPhone.setText(phone);
+        binding.etPhone.setEnabled(false);
+
         binding.btnVerify.setOnClickListener(v -> {
-            String phone = binding.etPhone.getText().toString().trim();
             String otp = binding.etOtp.getText().toString().trim();
-            viewModel.verifyOtp(phone, otp);
+            viewModel.verifyOtp(binding.etPhone.getText().toString().trim(), otp);
         });
 
         viewModel.isLoading().observe(getViewLifecycleOwner(), loading ->
@@ -46,27 +58,16 @@ public class OtpFragment extends Fragment {
             if (error != null) Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
         });
 
-        viewModel.getAuthResult().observe(getViewLifecycleOwner(), result -> {
-            if (result != null && result.token != null) {
-                SessionManager session = SessionManager.getInstance(requireContext());
-                session.saveToken(result.token);
-                session.saveCustomer(result.customer);
-
-                // Merge local wishlist to server
-                java.util.Set<String> localWishlist = session.getLocalWishlist();
-                if (!localWishlist.isEmpty() && result.customer != null) {
-                    com.unifurniture.mobile.data.repository.ProductRepository productRepo =
-                            new com.unifurniture.mobile.data.repository.ProductRepository(
-                                    com.unifurniture.mobile.UniFurnitureApp.getInstance().getApiService());
-                    for (String productId : localWishlist) {
-                        productRepo.addToWishlist(result.customer.id, productId);
-                    }
-                    session.clearLocalWishlist();
-                }
-
-                startActivity(new Intent(requireContext(), MainActivity.class));
-                requireActivity().finish();
-            }
+        // OTP verified → account created (server returns no token). Like the web, go to Login.
+        viewModel.getOtpSuccess().observe(getViewLifecycleOwner(), ok -> {
+            if (ok == null || !ok) return;
+            viewModel.clearOtpSuccess();
+            Toast.makeText(requireContext(),
+                    getString(R.string.otp_account_created), Toast.LENGTH_LONG).show();
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(android.R.id.content, new LoginFragment())
+                    .commit();
         });
     }
 

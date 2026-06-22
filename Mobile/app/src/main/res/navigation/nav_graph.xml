@@ -10,6 +10,20 @@
         android:label="@string/nav_home" />
 
     <fragment
+        android:id="@+id/categoryFragment"
+        android:name="com.unifurniture.mobile.ui.product.CategoryFragment"
+        android:label="@string/categories" />
+
+    <fragment
+        android:id="@+id/promotionsFragment"
+        android:name="com.unifurniture.mobile.ui.home.PromotionsFragment"
+        android:label="@string/promotions_title" />
+
+    <fragment
+        android:id="@+id/contentFragment"
+        android:name="com.unifurniture.mobile.ui.content.ContentFragment"
+        android:label="@string/app_name" />
+    <fragment
         android:id="@+id/productListFragment"
         android:name="com.unifurniture.mobile.ui.product.ProductListFragment"
         android:label="@string/nav_products">
@@ -58,6 +72,45 @@
         android:id="@+id/accountFragment"
         android:name="com.unifurniture.mobile.ui.account.AccountFragment"
         android:label="@string/account_title" />
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.unifurniture.mobile.ui.account.EditProfileFragment"
+        android:label="@string/edit_profile" />
+
+    <fragment
+        android:id="@+id/changePasswordFragment"
+        android:name="com.unifurniture.mobile.ui.account.ChangePasswordFragment"
+        android:label="@string/change_password" />
+
+    <fragment
+        android:id="@+id/addressBookFragment"
+        android:name="com.unifurniture.mobile.ui.account.AddressBookFragment"
+        android:label="@string/address_book_title" />
+
+    <fragment
+        android:id="@+id/myReviewsFragment"
+        android:name="com.unifurniture.mobile.ui.account.MyReviewsFragment"
+        android:label="@string/my_reviews" />
+
+    <fragment
+        android:id="@+id/orderTrackingFragment"
+        android:name="com.unifurniture.mobile.ui.account.OrderTrackingFragment"
+        android:label="@string/order_tracking" />
+
+    <fragment
+        android:id="@+id/orderListFragment"
+        android:name="com.unifurniture.mobile.ui.account.OrderListFragment"
+        android:label="@string/my_orders" />
+
+    <fragment
+        android:id="@+id/orderDetailFragment"
+        android:name="com.unifurniture.mobile.ui.account.OrderDetailFragment"
+        android:label="@string/order_details">
+        <argument
+            android:name="order_id"
+            app:argType="string" />
+    </fragment>
 
     <fragment
         android:id="@+id/wishlistFragment"

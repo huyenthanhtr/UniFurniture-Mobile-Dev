@@ -41,6 +41,10 @@ const WARRANTY_YEARS = 5;
 const SOLD_COUNT_STATUSES = new Set(["completed"]);
 const MEMBERSHIP_TIER_RANK = { dong: 1, bac: 2, vang: 3, kim_cuong: 4 };
 
+function escapeRegex(value) {
+  return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function getExpectedDepositAmount(totalAmount, depositAmount) {
   const total = Math.max(Number(totalAmount || 0), 0);
   const explicitDeposit = Math.max(Number(depositAmount || 0), 0);
@@ -643,6 +647,8 @@ async function getOrders(req, res, next) {
       startDate,
       endDate,
       q,
+      customer_id: customerId,
+      tracking_code: trackingCode,
       accountId,
       sortBy = "ordered_at",
       order = "desc",
@@ -665,16 +671,30 @@ async function getOrders(req, res, next) {
       andConditions.push({ account_id: new mongoose.Types.ObjectId(String(accountId)) });
     }
 
-    if (q) {
-      const kw = String(q).trim();
-      if (kw) {
+    if (customerId && mongoose.Types.ObjectId.isValid(String(customerId))) {
+      andConditions.push({ customer_id: new mongoose.Types.ObjectId(String(customerId)) });
+    }
+
+    const exactTrackingCode = String(trackingCode || "").trim();
+    if (exactTrackingCode) {
+      const exactPattern = `^${escapeRegex(exactTrackingCode)}$`;
+      andConditions.push({
+        $or: [
+          { order_code: { $regex: exactPattern, $options: "i" } },
+          { tracking_code: { $regex: exactPattern, $options: "i" } },
+        ],
+      });
+    } else {
+      const searchText = String(q || "").trim();
+      if (searchText) {
         andConditions.push({
           $or: [
-            { order_code: { $regex: kw, $options: "i" } },
-            { shipping_name: { $regex: kw, $options: "i" } },
-            { shipping_phone: { $regex: kw, $options: "i" } },
-            { shipping_email: { $regex: kw, $options: "i" } },
-            { shipping_address: { $regex: kw, $options: "i" } },
+            { order_code: { $regex: searchText, $options: "i" } },
+            { tracking_code: { $regex: searchText, $options: "i" } },
+            { shipping_name: { $regex: searchText, $options: "i" } },
+            { shipping_phone: { $regex: searchText, $options: "i" } },
+            { shipping_email: { $regex: searchText, $options: "i" } },
+            { shipping_address: { $regex: searchText, $options: "i" } },
           ],
         });
       }

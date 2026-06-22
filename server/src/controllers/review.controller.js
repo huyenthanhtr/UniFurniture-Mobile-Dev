@@ -339,7 +339,14 @@ exports.getApprovedReviewsByProduct = async (req, res) => {
 
 exports.getAllReviews = async (req, res) => {
   try {
-    const reviews = await Review.find()
+    const { customer_id: customerId } = req.query || {};
+    const query = {};
+
+    if (customerId && mongoose.Types.ObjectId.isValid(String(customerId))) {
+      query.customer_id = new mongoose.Types.ObjectId(String(customerId));
+    }
+
+    const reviews = await Review.find(query)
       .populate('customer_id', 'customer_code full_name phone')
       .populate({
         path: 'order_detail_id',

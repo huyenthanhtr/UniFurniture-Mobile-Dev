@@ -17,6 +17,7 @@ import com.unifurniture.mobile.data.model.NotificationDto;
 import com.unifurniture.mobile.databinding.FragmentNotificationBinding;
 import com.unifurniture.mobile.ui.adapter.NotificationAdapter;
 import com.unifurniture.mobile.util.NotificationManager;
+import com.unifurniture.mobile.util.ToastUtil;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,19 +41,26 @@ public class NotificationFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // Setup Back press
-        binding.btnBack.setOnClickListener(v -> requireActivity().onBackPressed());
+        binding.btnBack.setOnClickListener(v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
         // Setup recycler view
-        adapter = new NotificationAdapter(notification -> {
-            // Mark as read
-            NotificationManager.getInstance(requireContext()).markAsRead(notification.id);
-            loadNotifications();
+        adapter = new NotificationAdapter(new NotificationAdapter.OnNotificationClickListener() {
+            @Override
+            public void onNotificationClick(NotificationDto notification) {
+                NotificationManager.getInstance(requireContext()).markAsRead(notification.id);
+                loadNotifications();
 
-            // Perform actions based on type
-            if ("order".equals(notification.type) && notification.orderId != null) {
-                Toast.makeText(requireContext(), getString(R.string.toast_order_id, notification.orderId), Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(requireContext(), notification.title, Toast.LENGTH_SHORT).show();
+                if ("order".equals(notification.type) && notification.orderId != null) {
+                    ToastUtil.show(requireContext(), getString(R.string.toast_order_id, notification.orderId));
+                } else {
+                    ToastUtil.show(requireContext(), notification.title);
+                }
+            }
+
+            @Override
+            public void onMarkUnreadClick(NotificationDto notification) {
+                NotificationManager.getInstance(requireContext()).markAsUnread(notification.id);
+                loadNotifications();
             }
         });
 
@@ -63,7 +71,7 @@ public class NotificationFragment extends Fragment {
         binding.btnMarkAllRead.setOnClickListener(v -> {
             NotificationManager.getInstance(requireContext()).markAllAsRead();
             loadNotifications();
-            Toast.makeText(requireContext(), R.string.toast_mark_all_read, Toast.LENGTH_SHORT).show();
+            ToastUtil.show(requireContext(), R.string.toast_mark_all_read);
         });
 
         // Setup Tab filters

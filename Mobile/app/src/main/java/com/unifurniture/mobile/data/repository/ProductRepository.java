@@ -19,9 +19,10 @@ public class ProductRepository {
 
     public LiveData<ApiListResponse<ProductDto>> getProducts(
             int page, int limit, String search, String categories, String collection,
-            String sortBy, String order, Double minPrice, Double maxPrice) {
+            String sortBy, String order, Double minPrice, Double maxPrice, Integer minRating) {
         MutableLiveData<ApiListResponse<ProductDto>> result = new MutableLiveData<>();
-        apiService.getProducts(page, limit, "active", sortBy, order, search, categories, collection, minPrice, maxPrice, null)
+        Integer ratingParam = (minRating != null && minRating > 0) ? minRating : null;
+        apiService.getProducts(page, limit, "active", sortBy, order, search, categories, collection, minPrice, maxPrice, ratingParam, null)
                 .enqueue(new Callback<ApiListResponse<ProductDto>>() {
                     @Override
                     public void onResponse(Call<ApiListResponse<ProductDto>> call,
@@ -193,6 +194,30 @@ public class ProductRepository {
             }
             @Override
             public void onFailure(Call<WishlistItemDto> call, Throwable t) {
+                result.setValue(null);
+            }
+        });
+        return result;
+    }
+
+    public LiveData<List<CouponDto>> getCoupons() {
+        MutableLiveData<List<CouponDto>> result = new MutableLiveData<>();
+        // Server returns plain array; filter active coupons client-side
+        apiService.getCoupons().enqueue(new Callback<List<CouponDto>>() {
+            @Override
+            public void onResponse(Call<List<CouponDto>> call, Response<List<CouponDto>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<CouponDto> active = new java.util.ArrayList<>();
+                    for (CouponDto c : response.body()) {
+                        if ("active".equals(c.status)) active.add(c);
+                    }
+                    result.setValue(active.isEmpty() ? null : active);
+                } else {
+                    result.setValue(null);
+                }
+            }
+            @Override
+            public void onFailure(Call<List<CouponDto>> call, Throwable t) {
                 result.setValue(null);
             }
         });

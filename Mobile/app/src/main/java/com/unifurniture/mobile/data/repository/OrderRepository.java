@@ -21,9 +21,9 @@ public class OrderRepository {
         this.apiService = apiService;
     }
 
-    public LiveData<ApiListResponse<OrderDto>> getOrders(String customerId) {
+    public LiveData<ApiListResponse<OrderDto>> getOrders(String customerId, String accountId) {
         MutableLiveData<ApiListResponse<OrderDto>> result = new MutableLiveData<>();
-        apiService.getOrders(customerId).enqueue(new Callback<ApiListResponse<OrderDto>>() {
+        apiService.getOrders(customerId, accountId).enqueue(new Callback<ApiListResponse<OrderDto>>() {
             @Override
             public void onResponse(Call<ApiListResponse<OrderDto>> call,
                                    Response<ApiListResponse<OrderDto>> response) {
@@ -37,15 +37,15 @@ public class OrderRepository {
         return result;
     }
 
-    public LiveData<OrderDto> getOrderById(String orderId) {
-        MutableLiveData<OrderDto> result = new MutableLiveData<>();
-        apiService.getOrderById(orderId).enqueue(new Callback<OrderDto>() {
+    public LiveData<OrderDetailResponse> getOrderById(String orderId) {
+        MutableLiveData<OrderDetailResponse> result = new MutableLiveData<>();
+        apiService.getOrderById(orderId).enqueue(new Callback<OrderDetailResponse>() {
             @Override
-            public void onResponse(Call<OrderDto> call, Response<OrderDto> response) {
+            public void onResponse(Call<OrderDetailResponse> call, Response<OrderDetailResponse> response) {
                 result.setValue(response.isSuccessful() ? response.body() : null);
             }
             @Override
-            public void onFailure(Call<OrderDto> call, Throwable t) {
+            public void onFailure(Call<OrderDetailResponse> call, Throwable t) {
                 result.setValue(null);
             }
         });

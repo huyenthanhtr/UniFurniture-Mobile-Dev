@@ -28,6 +28,7 @@ public class ProductDetailViewModel extends AndroidViewModel {
     private final MutableLiveData<java.util.List<ProductDto>> recommendations = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isFavorite = new MutableLiveData<>(false);
     private String wishlistItemId = null;
+    private String loadedSlug;
 
     private final MutableLiveData<String> snackbarMessage = new MutableLiveData<>();
 
@@ -37,7 +38,16 @@ public class ProductDetailViewModel extends AndroidViewModel {
         cartRepo = new CartRepository(UniFurnitureApp.getInstance().getApiService());
     }
 
+    public void loadProductIfNeeded(String slug) {
+        if (slug == null) return;
+        if (slug.equals(loadedSlug) && product.getValue() != null) {
+            return;
+        }
+        loadProduct(slug);
+    }
+
     public void loadProduct(String slug) {
+        loadedSlug = slug;
         loading.setValue(true);
         LiveDataUtil.observeOnce(productRepo.getProductDetail(slug), p -> {
             product.setValue(p);

@@ -8,12 +8,12 @@ import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.core.text.HtmlCompat;
@@ -31,7 +31,9 @@ import com.unifurniture.mobile.ui.adapter.ImageSliderAdapter;
 import com.unifurniture.mobile.ui.adapter.ProductCardAdapter;
 import com.unifurniture.mobile.ui.adapter.ReviewAdapter;
 import com.unifurniture.mobile.util.FormatUtil;
+import com.unifurniture.mobile.util.NavViewModelProvider;
 import com.unifurniture.mobile.util.RecentlyViewedManager;
+import com.unifurniture.mobile.util.ScrollStateHelper;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -51,6 +53,7 @@ public class ProductDetailFragment extends Fragment {
     private final Map<String, Integer> variantStock = new HashMap<>();
     private final List<ReviewDto> allReviews = new ArrayList<>();
     private final Handler cartRestoreHandler = new Handler(Looper.getMainLooper());
+    private final ScrollStateHelper scrollState = new ScrollStateHelper("product_detail");
 
     @Nullable
     @Override
@@ -63,7 +66,8 @@ public class ProductDetailFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        viewModel = new ViewModelProvider(this).get(ProductDetailViewModel.class);
+        viewModel = NavViewModelProvider.get(this, R.id.productDetailFragment, ProductDetailViewModel.class);
+        scrollState.read(savedInstanceState);
 
         String slug = getArguments() != null ? getArguments().getString("slug") : null;
         if (slug == null) {
@@ -76,8 +80,9 @@ public class ProductDetailFragment extends Fragment {
         setupReviews();
         setupRecommendations();
         setupReviewSort();
-        viewModel.loadProduct(slug);
+        viewModel.loadProductIfNeeded(slug);
         observeData();
+        scrollState.restore(binding.nestedScrollView);
 
         binding.btnDecrease.setOnClickListener(v -> {
             if (quantity > 1) {
@@ -138,16 +143,46 @@ public class ProductDetailFragment extends Fragment {
                 }
             }
             viewModel.addToCart(selectedVariantId, quantity);
+            com.unifurniture.mobile.util.SoundManager.playSound(requireContext(), com.unifurniture.mobile.util.SoundManager.SOUND_SUCCESS);
         });
         binding.btnBack.setOnClickListener(v ->
                 Navigation.findNavController(requireView()).navigateUp());
         binding.btnFavorite.setOnClickListener(v -> viewModel.toggleWishlist());
+
+        final boolean[] isDescExpanded = {false};
+        binding.btnToggleDescription.setOnClickListener(v -> {
+            androidx.transition.TransitionManager.beginDelayedTransition((android.view.ViewGroup) binding.getRoot());
+            if (isDescExpanded[0]) {
+                // Thu gọn
+                binding.tvDescription.setMaxLines(4);
+                binding.btnToggleDescription.setText(R.string.read_more);
+                binding.btnToggleDescription.setBackgroundResource(R.drawable.bg_btn_toggle_outline);
+                binding.btnToggleDescription.setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary));
+                binding.btnToggleDescription.setIconResource(R.drawable.ic_arrow_down);
+                binding.btnToggleDescription.setIconTintResource(R.color.primary);
+                binding.viewDescriptionGradient.setVisibility(View.VISIBLE);
+                isDescExpanded[0] = false;
+            } else {
+                // Mở rộng
+                binding.tvDescription.setMaxLines(Integer.MAX_VALUE);
+                binding.btnToggleDescription.setText(R.string.read_less);
+                binding.btnToggleDescription.setBackgroundResource(R.drawable.bg_btn_toggle_solid);
+                binding.btnToggleDescription.setTextColor(android.graphics.Color.WHITE);
+                binding.btnToggleDescription.setIconResource(R.drawable.ic_arrow_up);
+                binding.btnToggleDescription.setIconTintResource(R.color.white);
+                binding.viewDescriptionGradient.setVisibility(View.GONE);
+                isDescExpanded[0] = true;
+            }
+        });
     }
 
     private void setupImageSlider() {
         sliderAdapter = new ImageSliderAdapter(requireContext(), new ArrayList<>());
         binding.viewPagerImages.setAdapter(sliderAdapter);
-        
+        binding.viewPagerImages.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        binding.viewPagerImages.setOffscreenPageLimit(3);
+        binding.dotsIndicator.attachTo(binding.viewPagerImages);
+
         // Premium zoom-out and fade page transformer
         binding.viewPagerImages.setPageTransformer((page, position) -> {
             float absPosition = Math.abs(position);
@@ -175,10 +210,10 @@ public class ProductDetailFragment extends Fragment {
     private void updateImageIndicator(int position) {
         if (binding == null) return;
         int total = sliderAdapter.getItemCount();
-        if (total <= 1) {
-            binding.tvImageIndicator.setVisibility(View.GONE);
-        } else {
-            binding.tvImageIndicator.setVisibility(View.VISIBLE);
+        boolean hasMultiple = total > 1;
+        binding.tvImageIndicator.setVisibility(hasMultiple ? View.VISIBLE : View.GONE);
+        binding.dotsIndicator.setVisibility(hasMultiple ? View.VISIBLE : View.GONE);
+        if (hasMultiple) {
             binding.tvImageIndicator.setText(getString(R.string.image_indicator_format, position + 1, total));
         }
     }
@@ -191,7 +226,8 @@ public class ProductDetailFragment extends Fragment {
     }
 
     private void setupRecommendations() {
-        recommendationAdapter = new ProductCardAdapter(product -> {
+        String serverHost = BuildConfig.API_BASE_URL.replace("/api/", "");
+        recommendationAdapter = new ProductCardAdapter(serverHost, product -> {
             Bundle args = new Bundle();
             args.putString("slug", product.slug != null ? product.slug : product.id);
             Navigation.findNavController(requireView()).navigate(R.id.productDetailFragment, args);
@@ -243,22 +279,29 @@ public class ProductDetailFragment extends Fragment {
         viewModel.getProduct().observe(getViewLifecycleOwner(), product -> {
             if (product == null) return;
             binding.tvProductName.setText(product.name);
-            binding.tvPrice.setText(FormatUtil.formatCurrency(product.minPrice));
-            if (product.compareAtPrice != null && product.compareAtPrice > 0
-                    && (product.minPrice == null || product.compareAtPrice > product.minPrice)) {
-                binding.tvOriginalPrice.setText(FormatUtil.formatCurrency(product.compareAtPrice));
-                binding.tvOriginalPrice.setPaintFlags(binding.tvOriginalPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
-                binding.tvOriginalPrice.setVisibility(View.VISIBLE);
-                String badge = FormatUtil.discountBadge(product.minPrice, product.compareAtPrice);
-                if (badge != null) {
-                    binding.tvDiscount.setText(badge);
-                    binding.tvDiscount.setVisibility(View.VISIBLE);
-                }
-            }
+            
+            // Logic hiển thị giá mặc định (khi chưa chọn variant hoặc nếu không có variant)
+            updatePricingUI(product.minPrice, product.getEffectiveCompareAtPrice());
+
             if (product.description != null && !product.description.isEmpty()) {
                 binding.tvDescription.setText(cleanHtmlNewlines(HtmlCompat.fromHtml(product.description, HtmlCompat.FROM_HTML_MODE_COMPACT, new GlideImageGetter(binding.tvDescription), null)));
+                binding.tvDescription.setMaxLines(Integer.MAX_VALUE);
+                binding.tvDescription.post(() -> {
+                    if (binding == null) return;
+                    int lineCount = binding.tvDescription.getLineCount();
+                    if (lineCount > 4) {
+                        binding.tvDescription.setMaxLines(4);
+                        binding.btnToggleDescription.setText(R.string.read_more);
+                        binding.btnToggleDescription.setVisibility(View.VISIBLE);
+                        binding.viewDescriptionGradient.setVisibility(View.VISIBLE);
+                    } else {
+                        binding.btnToggleDescription.setVisibility(View.GONE);
+                        binding.viewDescriptionGradient.setVisibility(View.GONE);
+                    }
+                });
             } else {
                 binding.tvDescription.setText("");
+                binding.btnToggleDescription.setVisibility(View.GONE);
             }
             if (product.shortDescription != null && !product.shortDescription.isEmpty()) {
                 binding.tvShortDesc.setText(cleanHtmlNewlines(HtmlCompat.fromHtml(product.shortDescription, HtmlCompat.FROM_HTML_MODE_COMPACT, new GlideImageGetter(binding.tvShortDesc), null)));
@@ -274,7 +317,8 @@ public class ProductDetailFragment extends Fragment {
             binding.tvSoldCount.setText(getString(R.string.sold_count, FormatUtil.formatSold(soldCount)));
             binding.tvSoldCount.setVisibility(View.VISIBLE);
             // Save to recently viewed + use thumbnail for slider fallback
-            String thumb = product.getImageUrl();
+            String serverHost = com.unifurniture.mobile.BuildConfig.API_BASE_URL.replace("/api/", "");
+            String thumb = com.unifurniture.mobile.util.CategoryImageHelper.resolveProductUrl(product, serverHost);
             String slugKey = product.slug != null ? product.slug : product.id;
             recentlyViewedManager.add(new RecentlyViewedManager.Item(
                     product.id, slugKey, product.name, thumb));
@@ -287,102 +331,84 @@ public class ProductDetailFragment extends Fragment {
         });
 
         viewModel.getImages().observe(getViewLifecycleOwner(), response -> {
+            String serverHost = com.unifurniture.mobile.BuildConfig.API_BASE_URL.replace("/api/", "");
             List<String> urls = new ArrayList<>();
             if (response != null && response.items != null) {
                 for (var img : response.items) {
-                    if (img.imageUrl != null && !img.imageUrl.isEmpty()) urls.add(img.imageUrl);
+                    if (img.imageUrl != null && !img.imageUrl.isEmpty()) {
+                        String url = img.imageUrl.replace("http://localhost:3000", serverHost);
+                        urls.add(url);
+                    }
                 }
             }
             if (urls.isEmpty()) {
                 ProductDto p = viewModel.getProduct().getValue();
-                String thumb = p != null ? p.getImageUrl() : null;
+                String thumb = com.unifurniture.mobile.util.CategoryImageHelper.resolveProductUrl(p, serverHost);
                 if (thumb != null && !thumb.isEmpty()) urls.add(thumb);
             }
             sliderAdapter.updateImages(urls);
+            if (!urls.isEmpty()) {
+                binding.viewPagerImages.setCurrentItem(0, false);
+            }
             updateImageIndicator(binding.viewPagerImages.getCurrentItem());
         });
 
         viewModel.getVariants().observe(getViewLifecycleOwner(), response -> {
-            if (response != null && response.items != null && !response.items.isEmpty()) {
-                variantStock.clear();
-                double min = Double.MAX_VALUE;
-                double max = Double.MIN_VALUE;
-                for (var variant : response.items) {
-                    if (variant.id != null) variantStock.put(variant.id, variant.stockQuantity);
-                    if (variant.price != null) {
-                        if (variant.price < min) min = variant.price;
-                        if (variant.price > max) max = variant.price;
-                    }
-                }
+            variantStock.clear();
+            binding.chipGroupVariants.removeAllViews();
 
-                // Display min-max price range initially
-                if (min != Double.MAX_VALUE && max != Double.MIN_VALUE) {
-                    if (min < max) {
-                        binding.tvPrice.setText(getString(R.string.price_range_format, FormatUtil.formatCurrency(min), FormatUtil.formatCurrency(max)));
-                        binding.tvOriginalPrice.setVisibility(View.GONE);
-                        binding.tvDiscount.setVisibility(View.GONE);
-                    } else {
-                        binding.tvPrice.setText(FormatUtil.formatCurrency(min));
-                        ProductDto product = viewModel.getProduct().getValue();
-                        if (product != null && product.compareAtPrice != null && product.compareAtPrice > min) {
-                            binding.tvOriginalPrice.setText(FormatUtil.formatCurrency(product.compareAtPrice));
-                            binding.tvOriginalPrice.setPaintFlags(binding.tvOriginalPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
-                            binding.tvOriginalPrice.setVisibility(View.VISIBLE);
-                            String badge = FormatUtil.discountBadge(min, product.compareAtPrice);
-                            if (badge != null) {
-                                binding.tvDiscount.setText(badge);
-                                binding.tvDiscount.setVisibility(View.VISIBLE);
-                            }
-                        } else {
-                            binding.tvOriginalPrice.setVisibility(View.GONE);
-                            binding.tvDiscount.setVisibility(View.GONE);
+            if (response != null && response.items != null && !response.items.isEmpty()) {
+                // Find index of variant with the highest discount percentage
+                int selectedIndex = 0;
+                double maxDiscountPct = 0.0;
+                for (int i = 0; i < response.items.size(); i++) {
+                    var variant = response.items.get(i);
+                    if (variant.price != null && variant.compareAtPrice != null && variant.compareAtPrice > variant.price) {
+                        double pct = (variant.compareAtPrice - variant.price) / variant.compareAtPrice;
+                        if (pct > maxDiscountPct) {
+                            maxDiscountPct = pct;
+                            selectedIndex = i;
                         }
                     }
                 }
 
-                selectedVariantId = null;
-                binding.chipGroupVariants.removeAllViews();
+                int idx = 0;
                 for (var variant : response.items) {
-                    com.google.android.material.chip.Chip chip =
-                            new com.google.android.material.chip.Chip(requireContext());
-                    
-                    String chipText = FormatUtil.getVariantLabel(variant);
-                    chip.setText(chipText);
+                    if (variant.id != null) {
+                        variantStock.put(variant.id, variant.stockQuantity != null ? variant.stockQuantity : 0);
+                    }
+
+                    com.google.android.material.chip.Chip chip = new com.google.android.material.chip.Chip(requireContext());
+                    chip.setId(View.generateViewId());
+                    chip.setText(getVariantLabelText(variant));
                     chip.setCheckable(true);
+                    chip.setChipBackgroundColor(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.white)));
+                    chip.setChipStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.gray_300)));
+                    chip.setChipStrokeWidth(FormatUtil.dpToPx(requireContext(), 1));
+                    chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.black));
+
                     chip.setOnCheckedChangeListener((btn, checked) -> {
                         if (checked) {
                             selectedVariantId = variant.id;
                             updateStockStatus(variant.id);
-                            
-                            // Dynamic price update upon variant selection
-                            if (variant.price != null) {
-                                binding.tvPrice.setText(FormatUtil.formatCurrency(variant.price));
-                                if (variant.compareAtPrice != null && variant.compareAtPrice > variant.price) {
-                                    binding.tvOriginalPrice.setText(FormatUtil.formatCurrency(variant.compareAtPrice));
-                                    binding.tvOriginalPrice.setPaintFlags(binding.tvOriginalPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
-                                    binding.tvOriginalPrice.setVisibility(View.VISIBLE);
-                                    String badge = FormatUtil.discountBadge(variant.price, variant.compareAtPrice);
-                                    if (badge != null) {
-                                        binding.tvDiscount.setText(badge);
-                                        binding.tvDiscount.setVisibility(View.VISIBLE);
-                                    }
-                                } else {
-                                    binding.tvOriginalPrice.setVisibility(View.GONE);
-                                    binding.tvDiscount.setVisibility(View.GONE);
-                                }
-                            }
+                            updatePricingUI(variant.price, variant.compareAtPrice);
+                            updateVariantChipStyle((com.google.android.material.chip.Chip) btn, true);
+                        } else {
+                            updateVariantChipStyle((com.google.android.material.chip.Chip) btn, false);
                         }
                     });
+
                     binding.chipGroupVariants.addView(chip);
+                    if (idx == selectedIndex) {
+                        chip.setChecked(true);
+                    }
+                    idx++;
                 }
-                
-                // If there's only 1 variant, select it by default.
-                if (response.items.size() == 1 && binding.chipGroupVariants.getChildCount() > 0) {
-                    ((com.google.android.material.chip.Chip)
-                            binding.chipGroupVariants.getChildAt(0)).setChecked(true);
-                } else {
-                    updateStockStatus(null);
-                }
+
+                binding.chipGroupVariants.setVisibility(View.VISIBLE);
+            } else {
+                binding.chipGroupVariants.setVisibility(View.GONE);
+                updateStockStatus(null);
             }
         });
 
@@ -541,6 +567,37 @@ public class ProductDetailFragment extends Fragment {
         return builder;
     }
 
+    private void updatePricingUI(Double currentPrice, Double originalPrice) {
+        if (currentPrice == null) {
+            binding.tvPrice.setText(R.string.loading);
+            binding.tvPrice.setTextColor(ContextCompat.getColor(requireContext(), R.color.gray_800));
+            binding.tvOriginalPrice.setVisibility(View.GONE);
+            binding.tvDiscount.setVisibility(View.GONE);
+            return;
+        }
+
+        binding.tvPrice.setText(FormatUtil.formatCurrency(currentPrice));
+
+        if (originalPrice != null && originalPrice > currentPrice) {
+            binding.tvPrice.setTextColor(ContextCompat.getColor(requireContext(), R.color.discount_red));
+            binding.tvOriginalPrice.setText(FormatUtil.formatCurrency(originalPrice));
+            binding.tvOriginalPrice.setPaintFlags(binding.tvOriginalPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
+            binding.tvOriginalPrice.setVisibility(View.VISIBLE);
+
+            String badge = FormatUtil.discountBadge(currentPrice, originalPrice);
+            if (badge != null) {
+                binding.tvDiscount.setText(badge);
+                binding.tvDiscount.setVisibility(View.VISIBLE);
+            } else {
+                binding.tvDiscount.setVisibility(View.GONE);
+            }
+        } else {
+            binding.tvPrice.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary));
+            binding.tvOriginalPrice.setVisibility(View.GONE);
+            binding.tvDiscount.setVisibility(View.GONE);
+        }
+    }
+
     private void updateStockStatus(String variantId) {
         Integer stock = variantStock.get(variantId);
         if (stock == null) {
@@ -558,6 +615,44 @@ public class ProductDetailFragment extends Fragment {
             binding.btnAddToCart.setEnabled(true);
         }
     }
+
+    private String getVariantLabelText(com.unifurniture.mobile.data.model.ProductVariantDto variant) {
+        if (variant == null) {
+            return getString(R.string.variant_default_name);
+        }
+        String label = FormatUtil.getVariantLabel(variant);
+        if (label == null || label.trim().isEmpty() || label.equalsIgnoreCase("Mặc định")) {
+            return getString(R.string.variant_default_name);
+        }
+        return label;
+    }
+
+    private void updateVariantChipStyle(com.google.android.material.chip.Chip chip, boolean selected) {
+        if (selected) {
+            chip.setChipBackgroundColor(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.primary_alpha_10)));
+            chip.setChipStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.primary)));
+            chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary));
+        } else {
+            chip.setChipBackgroundColor(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.white)));
+            chip.setChipStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.gray_300)));
+            chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.black));
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (binding != null) scrollState.saveScroll(binding.nestedScrollView);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (binding != null) {
+            scrollState.save(outState, binding.nestedScrollView);
+        }
+    }
+
 
     @Override
     public void onDestroyView() {

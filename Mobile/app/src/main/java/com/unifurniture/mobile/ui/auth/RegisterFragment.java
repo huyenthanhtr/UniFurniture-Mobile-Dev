@@ -33,11 +33,13 @@ public class RegisterFragment extends Fragment {
         binding.btnRegister.setOnClickListener(v -> {
             String name = binding.etName.getText().toString().trim();
             String phone = binding.etPhone.getText().toString().trim();
+            String email = binding.etEmail.getText().toString().trim();
             String password = binding.etPassword.getText().toString().trim();
-            viewModel.register(phone, password, name);
+            String confirm = binding.etConfirmPassword.getText().toString().trim();
+            viewModel.register(name, phone, email, password, confirm);
         });
 
-        binding.tvLogin.setOnClickListener(v -> requireActivity().onBackPressed());
+        binding.tvLogin.setOnClickListener(v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
         viewModel.isLoading().observe(getViewLifecycleOwner(), loading -> {
             binding.btnRegister.setEnabled(!loading);
@@ -48,17 +50,17 @@ public class RegisterFragment extends Fragment {
             if (error != null) Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
         });
 
-        viewModel.getAuthResult().observe(getViewLifecycleOwner(), result -> {
-            if (result != null) {
-                Toast.makeText(requireContext(),
-                        getString(R.string.register_success_otp), Toast.LENGTH_LONG).show();
-                // Navigate to OTP screen
-                requireActivity().getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(android.R.id.content, new OtpFragment())
-                        .addToBackStack(null)
-                        .commit();
-            }
+        // Register success → OTP was sent. Move to the OTP screen carrying the formatted phone.
+        viewModel.getRegisterSuccess().observe(getViewLifecycleOwner(), formattedPhone -> {
+            if (formattedPhone == null) return;
+            viewModel.clearRegisterSuccess();
+            Toast.makeText(requireContext(),
+                    getString(R.string.register_otp_sent), Toast.LENGTH_LONG).show();
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(android.R.id.content, OtpFragment.newInstance(formattedPhone))
+                    .addToBackStack(null)
+                    .commit();
         });
     }
 
