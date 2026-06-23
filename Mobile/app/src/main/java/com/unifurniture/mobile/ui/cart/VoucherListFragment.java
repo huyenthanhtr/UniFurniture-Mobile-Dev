@@ -25,6 +25,7 @@ public class VoucherListFragment extends Fragment {
 
     private FragmentVoucherListBinding binding;
     private VoucherAdapter adapter;
+    private VoucherAdapter usedAdapter;
     private VoucherListViewModel viewModel;
     private double cartSubtotal = 0;
     private boolean isApplyFlow = false;
@@ -60,6 +61,10 @@ public class VoucherListFragment extends Fragment {
 
     private void setupRecyclerView() {
         adapter = new VoucherAdapter(cartSubtotal, voucher -> {
+            if (voucher.isUsed) {
+                ToastUtil.show(requireContext(), R.string.voucher_already_used);
+                return;
+            }
             VoucherManager.getInstance(requireContext()).setSelectedVoucherCode(voucher.code);
             if (cartSubtotal >= voucher.minOrderValue) {
                 ToastUtil.show(requireContext(), getString(R.string.toast_voucher_applied, voucher.code));
@@ -70,8 +75,12 @@ public class VoucherListFragment extends Fragment {
                 ToastUtil.show(requireContext(), R.string.toast_voucher_saved_upsell);
             }
         });
+        usedAdapter = new VoucherAdapter(cartSubtotal, voucher ->
+                ToastUtil.show(requireContext(), R.string.voucher_already_used));
         binding.rvVouchers.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvVouchers.setAdapter(adapter);
+        binding.rvUsedVouchers.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.rvUsedVouchers.setAdapter(usedAdapter);
     }
 
     private void loadVouchers() {
@@ -80,9 +89,13 @@ public class VoucherListFragment extends Fragment {
         VoucherManager voucherManager = VoucherManager.getInstance(requireContext());
         List<VoucherDto> allVouchers = voucherManager.getVouchers();
         List<VoucherDto> activeVouchers = new ArrayList<>();
+        List<VoucherDto> usedVouchers = new ArrayList<>();
 
         for (VoucherDto v : allVouchers) {
-            if (!v.isUsed) {
+            if (v == null) continue;
+            if (v.isUsed) {
+                usedVouchers.add(v);
+            } else {
                 activeVouchers.add(v);
             }
         }
@@ -98,8 +111,11 @@ public class VoucherListFragment extends Fragment {
         }
 
         adapter.submitList(regularVouchers);
+        usedAdapter.submitList(usedVouchers);
+        binding.tvUsedVouchersTitle.setVisibility(usedVouchers.isEmpty() ? View.GONE : View.VISIBLE);
+        binding.rvUsedVouchers.setVisibility(usedVouchers.isEmpty() ? View.GONE : View.VISIBLE);
 
-        if (activeVouchers.isEmpty()) {
+        if (activeVouchers.isEmpty() && usedVouchers.isEmpty()) {
             binding.rvVouchers.setVisibility(View.GONE);
             binding.layoutEmpty.setVisibility(View.VISIBLE);
         } else {

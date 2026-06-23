@@ -35,6 +35,7 @@ import com.unifurniture.mobile.data.model.ProductDto;
 import com.unifurniture.mobile.data.model.ProductVariantDto;
 import com.unifurniture.mobile.data.model.VoucherDto;
 import com.unifurniture.mobile.util.FormatUtil;
+import com.unifurniture.mobile.util.CartManager;
 import com.unifurniture.mobile.util.VoucherManager;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -139,6 +140,8 @@ public class CheckoutFragment extends Fragment {
         if (selectedVoucher != null) {
             couponCode = selectedVoucher.code;
             binding.tvVoucherLabel.setText(getString(R.string.applied_voucher, couponCode));
+        } else {
+            couponCode = null;
         }
     }
 
@@ -225,6 +228,8 @@ public class CheckoutFragment extends Fragment {
             couponCode = voucher.code;
             discount = VoucherManager.getInstance(requireContext()).calculateDiscount(voucher, subtotal);
             binding.tvVoucherLabel.setText(getString(R.string.applied_voucher, couponCode));
+        } else {
+            couponCode = null;
         }
 
         total = Math.max(0, subtotal - discount);
@@ -442,14 +447,46 @@ public class CheckoutFragment extends Fragment {
 
         public void clearCartItems(List<CartItemDto> items) {
             if (items == null) return;
+            pruneCheckedOutItems(items);
             for (CartItemDto item : items) {
                 if (item.id != null) {
                     UniFurnitureApp.getInstance().getApiService().deleteCartItem(item.id).enqueue(new retrofit2.Callback<com.unifurniture.mobile.data.model.CartDto>() {
-                        @Override public void onResponse(@NonNull retrofit2.Call<com.unifurniture.mobile.data.model.CartDto> call, @NonNull retrofit2.Response<com.unifurniture.mobile.data.model.CartDto> response) {}
+                        @Override public void onResponse(@NonNull retrofit2.Call<com.unifurniture.mobile.data.model.CartDto> call, @NonNull retrofit2.Response<com.unifurniture.mobile.data.model.CartDto> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                CartManager.getInstance().updateCart(response.body());
+                            }
+                        }
                         @Override public void onFailure(@NonNull retrofit2.Call<com.unifurniture.mobile.data.model.CartDto> call, @NonNull Throwable t) {}
                     });
                 }
             }
+        }
+
+        private void pruneCheckedOutItems(List<CartItemDto> checkedOutItems) {
+            com.unifurniture.mobile.data.model.CartDto current = CartManager.getInstance().getCurrentCart();
+            if (current == null || current.items == null) return;
+
+            java.util.Set<String> checkedOutIds = new java.util.HashSet<>();
+            for (CartItemDto item : checkedOutItems) {
+                if (item != null && item.id != null) {
+                    checkedOutIds.add(item.id);
+                }
+            }
+            if (checkedOutIds.isEmpty()) return;
+
+            com.unifurniture.mobile.data.model.CartDto updated = new com.unifurniture.mobile.data.model.CartDto();
+            updated.id = current.id;
+            updated.customerId = current.customerId;
+            updated.items = new java.util.ArrayList<>();
+            double total = 0;
+            for (CartItemDto item : current.items) {
+                if (item != null && !checkedOutIds.contains(item.id)) {
+                    updated.items.add(item);
+                    total += item.getTotalPrice();
+                }
+            }
+            updated.total = total;
+            CartManager.getInstance().updateCart(updated);
         }
 
         public LiveData<CheckoutResponse> getResult() { return result; }

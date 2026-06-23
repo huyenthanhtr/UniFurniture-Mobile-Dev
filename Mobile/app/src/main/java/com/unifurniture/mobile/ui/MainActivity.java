@@ -63,6 +63,38 @@ public class MainActivity extends AppCompatActivity {
         navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
             syncBottomNavigationState(destination);
         });
+
+        setupCartBadge();
+    }
+
+    private void setupCartBadge() {
+        com.unifurniture.mobile.util.CartManager.getInstance().getCartCount().observe(this, count -> {
+            var badge = binding.bottomNavigation.getOrCreateBadge(R.id.cartFragment);
+            if (count > 0) {
+                badge.setVisible(true);
+                badge.setNumber(count);
+            } else {
+                badge.setVisible(false);
+            }
+        });
+
+        // Initial fetch
+        com.unifurniture.mobile.data.remote.ApiService api = com.unifurniture.mobile.data.remote.ApiClient.getInstance();
+        com.unifurniture.mobile.util.SessionManager session = com.unifurniture.mobile.util.SessionManager.getInstance(this);
+        String customerId = session.getCustomerId();
+        String cartId = session.getCartId();
+        if (customerId != null || cartId != null) {
+            api.getActiveCart(customerId, cartId).enqueue(new retrofit2.Callback<com.unifurniture.mobile.data.model.CartDto>() {
+                @Override
+                public void onResponse(retrofit2.Call<com.unifurniture.mobile.data.model.CartDto> call, retrofit2.Response<com.unifurniture.mobile.data.model.CartDto> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        com.unifurniture.mobile.util.CartManager.getInstance().updateCart(response.body());
+                    }
+                }
+                @Override
+                public void onFailure(retrofit2.Call<com.unifurniture.mobile.data.model.CartDto> call, Throwable t) {}
+            });
+        }
     }
 
     private void syncBottomNavigationState(NavDestination destination) {
@@ -84,6 +116,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean navigateToTopLevelDestination(@IdRes int destinationId) {
+        if (navController.popBackStack(destinationId, false)) {
+            return true;
+        }
+
         NavOptions navOptions = new NavOptions.Builder()
                 .setLaunchSingleTop(true)
                 .setRestoreState(true)

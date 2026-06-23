@@ -8,7 +8,7 @@ public class ProductVariantDto {
     @SerializedName(value = "product_id", alternate = {"productId"})
     public Object productId;
     public String name;
-    @SerializedName("variant_name")
+    @SerializedName(value = "variant_name", alternate = {"variantName"})
     public String variantName;
     public String label;
     public String sku;
@@ -28,12 +28,13 @@ public class ProductVariantDto {
         }
         return null;
     }
+    @SerializedName(value = "color", alternate = {"color_name", "colorName"})
     public String color;
     public Double price;
-    @SerializedName("compare_at_price")
+    @SerializedName(value = "compare_at_price", alternate = {"compareAtPrice"})
     public Double compareAtPrice;
-    @SerializedName("stock_quantity")
+    @SerializedName(value = "stock_quantity", alternate = {"stockQuantity"})
     public Integer stockQuantity;
-    @SerializedName("variant_status")
+    @SerializedName(value = "variant_status", alternate = {"status", "variantStatus"})
     public String variantStatus;
 }

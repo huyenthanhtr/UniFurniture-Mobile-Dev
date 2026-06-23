@@ -226,6 +226,7 @@ public class ProductDetailViewModel extends AndroidViewModel {
                     if (cart != null && cart.id != null) {
                         session.saveCartId(cart.id);
                         addToCartResult.setValue(cart);
+                        com.unifurniture.mobile.util.CartManager.getInstance().updateCart(cart);
                     }
                     loading.setValue(false);
                 });

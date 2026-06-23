@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
+const dns = require('dns');
 
+// Cấu hình Node.js sử dụng DNS của Google/Cloudflare để sửa lỗi querySrv ECONNREFUSED
+dns.setServers(['8.8.8.8', '1.1.1.1']);
 const connectDB = async () => {
     try {
         await mongoose.connect(process.env.MONGO_URI, {

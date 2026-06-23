@@ -381,4 +381,9 @@
     <string name="quantity_one_placeholder">x1</string>
     <string name="address_list_empty_hint">您还没有保存地址。\n点击 + 添加新地址。</string>
     <string name="avatar_selected_hint">已选择新头像。点击保存即可更新。</string>
+    <string name="mark_as_unread">标记为未读</string>
+    <string name="view_wishlist">查看收藏商品</string>
+    <string name="used_vouchers_title">已使用优惠券</string>
+    <string name="voucher_used_status">已使用</string>
+    <string name="voucher_already_used">此优惠券已使用</string>
 </resources>
