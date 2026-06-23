@@ -72,11 +72,9 @@ public class OrderListFragment extends Fragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        if (viewModel != null) {
-            viewModel.loadOrders(true);
-        }
+    public void onStop() {
+        super.onStop();
+        rvState.savePending();
     }
 
     @Override
