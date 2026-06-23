@@ -385,4 +385,9 @@
     <string name="quantity_one_placeholder">x1</string>
     <string name="address_list_empty_hint">Vous n’avez pas encore d’adresse enregistrée.\nAppuyez sur + pour ajouter une adresse.</string>
     <string name="avatar_selected_hint">Nouvel avatar sélectionné. Appuyez sur Enregistrer pour mettre à jour.</string>
+    <string name="mark_as_unread">Marquer comme non lu</string>
+    <string name="view_wishlist">Voir les favoris</string>
+    <string name="used_vouchers_title">Vouchers utilisés</string>
+    <string name="voucher_used_status">Utilisé</string>
+    <string name="voucher_already_used">Ce voucher a déjà été utilisé</string>
 </resources>

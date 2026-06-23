@@ -120,12 +120,10 @@ public class VoucherManager {
             double maxAmount = (coupon.maxDiscountAmount != null) ? coupon.maxDiscountAmount : 0;
             if (maxAmount > 0) {
                 description = context.getString(R.string.voucher_desc_percent_max,
-                        (int) coupon.discountValue,
-                        FormatUtil.formatCurrency(maxAmount),
-                        FormatUtil.formatCurrency(coupon.minOrderValue));
+                        FormatUtil.formatCurrency(coupon.minOrderValue),
+                        FormatUtil.formatCurrency(maxAmount));
             } else {
                 description = context.getString(R.string.voucher_desc_percent,
-                        (int) coupon.discountValue,
                         FormatUtil.formatCurrency(coupon.minOrderValue));
             }
         }

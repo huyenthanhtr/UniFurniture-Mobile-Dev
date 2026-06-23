@@ -170,6 +170,7 @@
     <string name="new_notification_hint">Thông báo mới sẽ xuất hiện ở đây khi có hoạt động.</string>
     <string name="content_desc_mark_all_read">Đánh dấu tất cả đã đọc</string>
     <string name="label_orders">Đơn hàng</string>
+    <string name="label_account">Tài khoản</string>
     <string name="label_all">Tất cả</string>
 
     <!-- Wishlist -->
@@ -178,6 +179,7 @@
     <!-- Feedback & UI -->
     <string name="view_cart">Xem giỏ hàng</string>
     <string name="add_to_cart_success">Thêm vào giỏ hàng thành công</string>
+    <string name="buy_now">Mua ngay</string>
     <string name="add_to_cart_error">Không thể thêm vào giỏ hàng. Vui lòng thử lại.</string>
     <string name="content_desc_delete">Xóa</string>
     <string name="close">Đóng</string>
@@ -396,5 +398,22 @@
     <string name="price_placeholder">100.000 VNĐ</string>
     <string name="quantity_one_placeholder">x1</string>
     <string name="address_list_empty_hint">Bạn chưa có địa chỉ nào.\nNhấn + để thêm địa chỉ mới.</string>
-    <string name="avatar_selected_hint">ÄÃ£ chá»n avatar má»›i. Nháº¥n LÆ°u Ä‘á»ƒ cáº­p nháº­t.</string>
+    <string name="avatar_selected_hint">Đã chọn avatar mới. Nhấn Lưu để cập nhật.</string>
+    <string name="label_other">Khác</string>
+    <string name="optimal_voucher_section_title">Voucher tốt nhất cho đơn hàng này</string>
+    <string name="optimal_badge">Tốt nhất</string>
+    <string name="voucher_name_fixed">Voucher giảm %1$s</string>
+    <string name="voucher_desc_fixed">Áp dụng cho đơn hàng từ %1$s</string>
+    <string name="voucher_name_percent">Voucher giảm %1$d%%</string>
+    <string name="voucher_desc_percent">Áp dụng cho đơn hàng từ %1$s</string>
+    <string name="voucher_desc_percent_max">Áp dụng cho đơn hàng từ %1$s, giảm tối đa %2$s</string>
+    <string name="voucher_expiry_date">Hết hạn: %1$s</string>
+    <string name="select_all">Chọn tất cả</string>
+    <string name="delete_all">Xóa tất cả</string>
+    <string name="total_items_format">Tổng (%1$d sản phẩm):</string>
+    <string name="mark_as_unread">Đánh dấu là chưa đọc</string>
+    <string name="view_wishlist">Xem sản phẩm yêu thích</string>
+    <string name="used_vouchers_title">Voucher đã sử dụng</string>
+    <string name="voucher_used_status">Đã sử dụng</string>
+    <string name="voucher_already_used">Voucher này đã được sử dụng</string>
 </resources>

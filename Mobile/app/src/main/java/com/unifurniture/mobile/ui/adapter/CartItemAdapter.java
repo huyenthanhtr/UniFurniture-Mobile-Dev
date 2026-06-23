@@ -34,19 +34,25 @@ public class CartItemAdapter extends ListAdapter<CartItemDto, CartItemAdapter.Vi
         void onItemClick(CartItemDto item);
     }
 
+    public interface OnSelectionChangeListener {
+        void onSelectionChange(CartItemDto item, boolean isSelected);
+    }
+
     private final OnQuantityChangeListener quantityListener;
     private final OnRemoveListener removeListener;
     private final OnVariantClickListener variantClickListener;
     private final OnItemClickListener itemClickListener;
+    private final OnSelectionChangeListener selectionChangeListener;
     private final String serverHost;
 
-    public CartItemAdapter(String serverHost, OnQuantityChangeListener quantityListener, OnRemoveListener removeListener, OnVariantClickListener variantClickListener, OnItemClickListener itemClickListener) {
+    public CartItemAdapter(String serverHost, OnQuantityChangeListener quantityListener, OnRemoveListener removeListener, OnVariantClickListener variantClickListener, OnItemClickListener itemClickListener, OnSelectionChangeListener selectionChangeListener) {
         super(DIFF_CALLBACK);
         this.serverHost = serverHost;
         this.quantityListener = quantityListener;
         this.removeListener = removeListener;
         this.variantClickListener = variantClickListener;
         this.itemClickListener = itemClickListener;
+        this.selectionChangeListener = selectionChangeListener;
     }
 
     private static final DiffUtil.ItemCallback<CartItemDto> DIFF_CALLBACK =
@@ -60,7 +66,8 @@ public class CartItemAdapter extends ListAdapter<CartItemDto, CartItemAdapter.Vi
                     return java.util.Objects.equals(a.id, b.id) &&
                             java.util.Objects.equals(a.quantity, b.quantity) &&
                             java.util.Objects.equals(a.getVariantId(), b.getVariantId()) &&
-                            java.util.Objects.equals(a.getUnitPrice(), b.getUnitPrice());
+                            java.util.Objects.equals(a.getUnitPrice(), b.getUnitPrice()) &&
+                            a.isSelected == b.isSelected;
                 }
             };
 
@@ -74,7 +81,7 @@ public class CartItemAdapter extends ListAdapter<CartItemDto, CartItemAdapter.Vi
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.bind(getItem(position), serverHost, quantityListener, removeListener, variantClickListener, itemClickListener);
+        holder.bind(getItem(position), serverHost, quantityListener, removeListener, variantClickListener, itemClickListener, selectionChangeListener);
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -87,7 +94,7 @@ public class CartItemAdapter extends ListAdapter<CartItemDto, CartItemAdapter.Vi
 
         void bind(CartItemDto item, String serverHost, OnQuantityChangeListener quantityListener,
                   OnRemoveListener removeListener, OnVariantClickListener variantClickListener,
-                  OnItemClickListener itemClickListener) {
+                  OnItemClickListener itemClickListener, OnSelectionChangeListener selectionChangeListener) {
             // Product info
             ProductDto product = item.getProduct();
             if (product != null) {
@@ -119,12 +126,41 @@ public class CartItemAdapter extends ListAdapter<CartItemDto, CartItemAdapter.Vi
             if (variant != null) {
                 binding.tvVariant.setText(FormatUtil.getVariantLabel(variant));
                 binding.tvVariant.setVisibility(View.VISIBLE);
+
+                // Show Shopee-style pricing
+                double unitPrice = item.getUnitPrice();
+                Double compareAtPrice = variant.compareAtPrice;
+                if (compareAtPrice != null && compareAtPrice > unitPrice) {
+                    binding.tvOriginalPrice.setText(FormatUtil.formatCurrency(compareAtPrice));
+                    binding.tvOriginalPrice.setPaintFlags(binding.tvOriginalPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
+                    binding.tvOriginalPrice.setVisibility(View.VISIBLE);
+                    
+                    String badge = FormatUtil.discountBadge(unitPrice, compareAtPrice);
+                    if (badge != null) {
+                        binding.tvDiscountBadge.setText(badge);
+                        binding.tvDiscountBadge.setVisibility(View.VISIBLE);
+                    } else {
+                        binding.tvDiscountBadge.setVisibility(View.GONE);
+                    }
+                } else {
+                    binding.tvOriginalPrice.setVisibility(View.GONE);
+                    binding.tvDiscountBadge.setVisibility(View.GONE);
+                }
             } else {
                 binding.tvVariant.setVisibility(View.GONE);
+                binding.tvOriginalPrice.setVisibility(View.GONE);
+                binding.tvDiscountBadge.setVisibility(View.GONE);
             }
 
             binding.tvPrice.setText(FormatUtil.formatCurrency(item.getUnitPrice()));
             binding.tvQuantity.setText(String.valueOf(item.quantity != null ? item.quantity : 1));
+
+            binding.cbSelected.setOnCheckedChangeListener(null);
+            binding.cbSelected.setChecked(item.isSelected);
+            binding.cbSelected.setOnCheckedChangeListener((btn, checked) -> {
+                item.isSelected = checked;
+                if (selectionChangeListener != null) selectionChangeListener.onSelectionChange(item, checked);
+            });
 
             binding.btnMinus.setOnClickListener(v -> {
                 int qty = item.quantity != null ? item.quantity : 1;

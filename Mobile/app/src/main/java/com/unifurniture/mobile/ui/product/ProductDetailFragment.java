@@ -50,6 +50,8 @@ public class ProductDetailFragment extends Fragment {
     private RecentlyViewedManager recentlyViewedManager;
     private String selectedVariantId = null;
     private int quantity = 1;
+    private boolean selectedVariantInStock = true;
+    private boolean toolbarVisible = true;
     private final Map<String, Integer> variantStock = new HashMap<>();
     private final List<ReviewDto> allReviews = new ArrayList<>();
     private final Handler cartRestoreHandler = new Handler(Looper.getMainLooper());
@@ -83,6 +85,7 @@ public class ProductDetailFragment extends Fragment {
         viewModel.loadProductIfNeeded(slug);
         observeData();
         scrollState.restore(binding.nestedScrollView);
+        setupAutoHideToolbar();
 
         binding.btnDecrease.setOnClickListener(v -> {
             if (quantity > 1) {
@@ -145,6 +148,23 @@ public class ProductDetailFragment extends Fragment {
             viewModel.addToCart(selectedVariantId, quantity);
             com.unifurniture.mobile.util.SoundManager.playSound(requireContext(), com.unifurniture.mobile.util.SoundManager.SOUND_SUCCESS);
         });
+
+        binding.btnBuyNow.setOnClickListener(v -> {
+            var response = viewModel.getVariants().getValue();
+            if (response != null && response.items != null && !response.items.isEmpty()) {
+                if (selectedVariantId == null) {
+                    Toast.makeText(requireContext(), R.string.please_select_variant, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            }
+            viewModel.addToCart(selectedVariantId, quantity);
+            // Navigate to cart after a short delay to allow cart to update
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                if (isAdded()) {
+                    Navigation.findNavController(requireView()).navigate(R.id.cartFragment);
+                }
+            }, 300);
+        });
         binding.btnBack.setOnClickListener(v ->
                 Navigation.findNavController(requireView()).navigateUp());
         binding.btnFavorite.setOnClickListener(v -> viewModel.toggleWishlist());
@@ -174,6 +194,54 @@ public class ProductDetailFragment extends Fragment {
                 isDescExpanded[0] = true;
             }
         });
+    }
+
+    private void setupAutoHideToolbar() {
+        binding.toolbarOverlay.post(() -> {
+            if (binding == null) return;
+            binding.toolbarOverlay.setVisibility(View.VISIBLE);
+            binding.toolbarOverlay.setAlpha(1f);
+            binding.toolbarOverlay.setTranslationY(0f);
+        });
+
+        binding.nestedScrollView.setOnScrollChangeListener((View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) -> {
+            int deltaY = scrollY - oldScrollY;
+            int threshold = FormatUtil.dpToPx(requireContext(), 6);
+
+            if (scrollY <= threshold) {
+                showToolbarOverlay();
+            } else if (deltaY > threshold) {
+                hideToolbarOverlay();
+            } else if (deltaY < -threshold) {
+                showToolbarOverlay();
+            }
+        });
+    }
+
+    private void hideToolbarOverlay() {
+        if (!toolbarVisible || binding == null) return;
+        toolbarVisible = false;
+        binding.toolbarOverlay.animate()
+                .translationY(-binding.toolbarOverlay.getHeight())
+                .alpha(0f)
+                .setDuration(180)
+                .withEndAction(() -> {
+                    if (binding == null || toolbarVisible) return;
+                    binding.toolbarOverlay.setVisibility(View.GONE);
+                })
+                .start();
+    }
+
+    private void showToolbarOverlay() {
+        if (toolbarVisible || binding == null) return;
+        toolbarVisible = true;
+        binding.toolbarOverlay.setVisibility(View.VISIBLE);
+        binding.toolbarOverlay.animate()
+                .translationY(0f)
+                .alpha(1f)
+                .setDuration(180)
+                .withEndAction(null)
+                .start();
     }
 
     private void setupImageSlider() {
@@ -356,13 +424,17 @@ public class ProductDetailFragment extends Fragment {
         viewModel.getVariants().observe(getViewLifecycleOwner(), response -> {
             variantStock.clear();
             binding.chipGroupVariants.removeAllViews();
+            selectedVariantId = null;
 
-            if (response != null && response.items != null && !response.items.isEmpty()) {
+            List<com.unifurniture.mobile.data.model.ProductVariantDto> validVariants =
+                    getRenderableVariants(response != null ? response.items : null);
+
+            if (!validVariants.isEmpty()) {
                 // Find index of variant with the highest discount percentage
                 int selectedIndex = 0;
                 double maxDiscountPct = 0.0;
-                for (int i = 0; i < response.items.size(); i++) {
-                    var variant = response.items.get(i);
+                for (int i = 0; i < validVariants.size(); i++) {
+                    var variant = validVariants.get(i);
                     if (variant.price != null && variant.compareAtPrice != null && variant.compareAtPrice > variant.price) {
                         double pct = (variant.compareAtPrice - variant.price) / variant.compareAtPrice;
                         if (pct > maxDiscountPct) {
@@ -373,14 +445,14 @@ public class ProductDetailFragment extends Fragment {
                 }
 
                 int idx = 0;
-                for (var variant : response.items) {
+                for (var variant : validVariants) {
                     if (variant.id != null) {
                         variantStock.put(variant.id, variant.stockQuantity != null ? variant.stockQuantity : 0);
                     }
 
                     com.google.android.material.chip.Chip chip = new com.google.android.material.chip.Chip(requireContext());
                     chip.setId(View.generateViewId());
-                    chip.setText(getVariantLabelText(variant));
+                    chip.setText(getVariantChipText(variant));
                     chip.setCheckable(true);
                     chip.setChipBackgroundColor(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.white)));
                     chip.setChipStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.gray_300)));
@@ -405,9 +477,12 @@ public class ProductDetailFragment extends Fragment {
                     idx++;
                 }
 
+                binding.layoutVariantsSection.setVisibility(View.VISIBLE);
                 binding.chipGroupVariants.setVisibility(View.VISIBLE);
             } else {
+                binding.layoutVariantsSection.setVisibility(View.GONE);
                 binding.chipGroupVariants.setVisibility(View.GONE);
+                selectedVariantInStock = true;
                 updateStockStatus(null);
             }
         });
@@ -464,15 +539,15 @@ public class ProductDetailFragment extends Fragment {
                 // Button feedback tạm thời
                 binding.btnAddToCart.setEnabled(false);
                 binding.btnAddToCart.setText(R.string.btn_added);
+                binding.btnAddToCart.setTextColor(ContextCompat.getColor(requireContext(), R.color.white));
                 binding.btnAddToCart.setBackgroundTintList(ColorStateList.valueOf(
                         ContextCompat.getColor(requireContext(), R.color.success)));
                 cartRestoreHandler.removeCallbacksAndMessages(null);
                 cartRestoreHandler.postDelayed(() -> {
                     if (binding == null) return;
-                    binding.btnAddToCart.setEnabled(true);
+                    binding.btnAddToCart.setEnabled(selectedVariantInStock);
                     binding.btnAddToCart.setText(R.string.add_to_cart);
-                    binding.btnAddToCart.setBackgroundTintList(ColorStateList.valueOf(
-                            ContextCompat.getColor(requireContext(), R.color.primary)));
+                    restoreAddToCartButtonStyle();
                 }, 1500);
             } else {
                 // Nếu result là null nhưng không có lỗi set trong LiveData error
@@ -505,10 +580,48 @@ public class ProductDetailFragment extends Fragment {
 
         viewModel.getSnackbarMessage().observe(getViewLifecycleOwner(), message -> {
             if (message != null) {
-                com.google.android.material.snackbar.Snackbar.make(binding.getRoot(), message, com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show();
+                if (getString(R.string.added_to_favorites).contentEquals(message)) {
+                    showWishlistAddedDialog();
+                } else {
+                    com.google.android.material.snackbar.Snackbar.make(binding.getRoot(), message, com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show();
+                }
                 viewModel.clearSnackbarMessage();
             }
         });
+    }
+
+    private List<com.unifurniture.mobile.data.model.ProductVariantDto> getRenderableVariants(
+            List<com.unifurniture.mobile.data.model.ProductVariantDto> variants) {
+        List<com.unifurniture.mobile.data.model.ProductVariantDto> valid = new ArrayList<>();
+        ProductDto product = viewModel.getProduct().getValue();
+        String productId = product != null ? product.id : null;
+        if (variants == null || productId == null) return valid;
+
+        for (var variant : variants) {
+            if (variant == null || variant.id == null || variant.id.trim().isEmpty()) continue;
+            String variantProductId = variant.getProductId();
+            if (variantProductId == null || !productId.equals(variantProductId)) continue;
+            String label = getRawVariantLabel(variant);
+            if (label == null || label.trim().isEmpty()) continue;
+            valid.add(variant);
+        }
+        return valid;
+    }
+
+    private void showWishlistAddedDialog() {
+        if (!isAdded()) return;
+        com.unifurniture.mobile.util.CustomBlueDialog.show(
+                requireContext(),
+                R.drawable.ic_favorite_filled,
+                getString(R.string.added_to_favorites),
+                "",
+                getString(R.string.view_wishlist),
+                dialog -> {
+                    dialog.dismiss();
+                    Navigation.findNavController(requireView()).navigate(R.id.wishlistFragment);
+                },
+                getString(R.string.close),
+                dialog -> dialog.dismiss());
     }
 
     private String stripHtml(String html) {
@@ -606,13 +719,19 @@ public class ProductDetailFragment extends Fragment {
         }
         binding.tvStockStatus.setVisibility(View.VISIBLE);
         if (stock <= 0) {
+            selectedVariantInStock = false;
             binding.tvStockStatus.setText(getString(R.string.out_of_stock));
             binding.tvStockStatus.setTextColor(requireContext().getColor(R.color.discount_red));
             binding.btnAddToCart.setEnabled(false);
+            binding.btnAddToCart.setText(R.string.add_to_cart);
+            restoreAddToCartButtonStyle();
         } else {
+            selectedVariantInStock = true;
             binding.tvStockStatus.setText(getString(R.string.in_stock));
             binding.tvStockStatus.setTextColor(requireContext().getColor(R.color.success));
             binding.btnAddToCart.setEnabled(true);
+            binding.btnAddToCart.setText(R.string.add_to_cart);
+            restoreAddToCartButtonStyle();
         }
     }
 
@@ -625,6 +744,45 @@ public class ProductDetailFragment extends Fragment {
             return getString(R.string.variant_default_name);
         }
         return label;
+    }
+
+    private String getVariantChipText(com.unifurniture.mobile.data.model.ProductVariantDto variant) {
+        String label = getRawVariantLabel(variant);
+        return label != null ? label : "";
+    }
+
+    private String getRawVariantLabel(com.unifurniture.mobile.data.model.ProductVariantDto variant) {
+        if (variant == null) return null;
+        String color = safeVariantText(variant.color);
+        String spec = safeVariantText(variant.variantName);
+        if (spec == null) spec = safeVariantText(variant.name);
+        if (spec == null) spec = safeVariantText(variant.label);
+
+        if (color != null && spec != null) {
+            if (color.equalsIgnoreCase(spec) || spec.toLowerCase().contains(color.toLowerCase())) return spec;
+            if (color.toLowerCase().contains(spec.toLowerCase())) return color;
+            return color + " - " + spec;
+        }
+        return color != null ? color : spec;
+    }
+
+    private String safeVariantText(String text) {
+        if (text == null) return null;
+        String trimmed = text.trim();
+        if (trimmed.isEmpty() || "undefined".equalsIgnoreCase(trimmed) || "null".equalsIgnoreCase(trimmed)) {
+            return null;
+        }
+        return trimmed;
+    }
+
+    private void restoreAddToCartButtonStyle() {
+        if (binding == null) return;
+        int primary = ContextCompat.getColor(requireContext(), R.color.primary);
+        binding.btnAddToCart.setTextColor(primary);
+        binding.btnAddToCart.setIconTint(ColorStateList.valueOf(primary));
+        binding.btnAddToCart.setStrokeColor(ColorStateList.valueOf(primary));
+        binding.btnAddToCart.setBackgroundTintList(ColorStateList.valueOf(
+                ContextCompat.getColor(requireContext(), R.color.white)));
     }
 
     private void updateVariantChipStyle(com.google.android.material.chip.Chip chip, boolean selected) {

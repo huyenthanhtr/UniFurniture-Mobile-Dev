@@ -179,6 +179,7 @@
     <!-- Feedback & UI -->
     <string name="view_cart">View Cart</string>
     <string name="add_to_cart_success">Added to cart successfully</string>
+    <string name="buy_now">Buy now</string>
     <string name="add_to_cart_error">Could not add to cart. Please try again.</string>
     <string name="content_desc_delete">Delete</string>
     <string name="close">Close</string>
@@ -417,7 +418,14 @@
     <string name="voucher_name_fixed">Voucher %1$s</string>
     <string name="voucher_desc_fixed">Applicable for orders from %1$s</string>
     <string name="voucher_name_percent">Discount %1$d%%</string>
-    <string name="voucher_desc_percent">Apply for orders from %1$s</string>
-    <string name="voucher_desc_percent_max">Apply for orders from %1$s, max discount %2$s</string>
+    <string name="voucher_desc_percent">Applicable for orders from %1$s</string>
+    <string name="voucher_desc_percent_max">Applicable for orders from %1$s, max discount %2$s</string>
     <string name="voucher_expiry_date">Expires: %1$s</string>
+    <string name="select_all">Select all</string>
+    <string name="delete_all">Delete all</string>
+    <string name="total_items_format">Total (%1$d items):</string>
+    <string name="view_wishlist">View wishlist</string>
+    <string name="used_vouchers_title">Used vouchers</string>
+    <string name="voucher_used_status">Used</string>
+    <string name="voucher_already_used">This voucher has already been used</string>
 </resources>

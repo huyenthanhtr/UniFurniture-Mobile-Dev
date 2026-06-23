@@ -383,4 +383,9 @@
     <string name="quantity_one_placeholder">x1</string>
     <string name="address_list_empty_hint">You have no saved addresses yet.\nTap + to add a new address.</string>
     <string name="avatar_selected_hint">New avatar selected. Tap Save to update.</string>
+    <string name="mark_as_unread">Mark as unread</string>
+    <string name="view_wishlist">View wishlist</string>
+    <string name="used_vouchers_title">Used vouchers</string>
+    <string name="voucher_used_status">Used</string>
+    <string name="voucher_already_used">This voucher has already been used</string>
 </resources>
