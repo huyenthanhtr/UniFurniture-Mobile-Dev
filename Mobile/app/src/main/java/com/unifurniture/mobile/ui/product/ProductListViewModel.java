@@ -29,6 +29,15 @@ public class ProductListViewModel extends AndroidViewModel {
     private static int sharedTotalCache = 0;
     private static int sharedScrollPosition = RecyclerView.NO_POSITION;
     private static int sharedScrollOffset = 0;
+    // Lưu request state để ViewModel mới (navigate từ Home → ProductList) khỏi reload lại
+    private static String sharedCurrentSearch = null;
+    private static String sharedCurrentCategory = null;
+    private static String sharedCurrentCollection = null;
+    private static String sharedCurrentSortBy = "createdAt";
+    private static String sharedCurrentOrder = "desc";
+    private static Double sharedCurrentMinPrice = null;
+    private static Double sharedCurrentMaxPrice = null;
+    private static int sharedCurrentMinRating = 0;
 
     private int currentPage = 1;
     private static final int PAGE_SIZE = 50;
@@ -64,6 +73,15 @@ public class ProductListViewModel extends AndroidViewModel {
         cachedTotal = sharedTotalCache;
         savedScrollPosition = sharedScrollPosition;
         savedScrollOffset = sharedScrollOffset;
+        // Khôi phục request state để matchesCurrentRequest() trả đúng khi ViewModel mới được tạo
+        currentSearch = sharedCurrentSearch;
+        currentCategory = sharedCurrentCategory;
+        currentCollection = sharedCurrentCollection;
+        currentSortBy = sharedCurrentSortBy != null ? sharedCurrentSortBy : "createdAt";
+        currentOrder = sharedCurrentOrder != null ? sharedCurrentOrder : "desc";
+        currentMinPrice = sharedCurrentMinPrice;
+        currentMaxPrice = sharedCurrentMaxPrice;
+        currentMinRating = sharedCurrentMinRating;
 
         ApiListResponse<ProductDto> restored = new ApiListResponse<>();
         restored.items = new ArrayList<>(allProducts);
@@ -94,16 +112,8 @@ public class ProductListViewModel extends AndroidViewModel {
             clearSavedScrollState();
         }
         
-        // Bật loading TRƯỚC khi reset dữ liệu để UI không hiện "Trống" nhầm
         loading.setValue(true);
-        
-        if (clearExistingProducts) {
-            ApiListResponse<ProductDto> emptyResponse = new ApiListResponse<>();
-            emptyResponse.items = new ArrayList<>();
-            emptyResponse.total = 0;
-            products.setValue(emptyResponse);
-        }
-
+        // Không xóa products khi bắt đầu tải — giữ items cũ hiển thị trong khi fetch
         fetchCurrentPage(false);
     }
 
@@ -145,6 +155,15 @@ public class ProductListViewModel extends AndroidViewModel {
                 sharedProductsCache.clear();
                 sharedProductsCache.addAll(allProducts);
                 sharedTotalCache = cachedTotal;
+                // Lưu request state để ViewModel mới khôi phục đúng context, tránh reload thừa
+                sharedCurrentSearch = currentSearch;
+                sharedCurrentCategory = currentCategory;
+                sharedCurrentCollection = currentCollection;
+                sharedCurrentSortBy = currentSortBy;
+                sharedCurrentOrder = currentOrder;
+                sharedCurrentMinPrice = currentMinPrice;
+                sharedCurrentMaxPrice = currentMaxPrice;
+                sharedCurrentMinRating = currentMinRating;
                 products.setValue(result);
             } else {
                 hasMore = false;

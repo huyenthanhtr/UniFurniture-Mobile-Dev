@@ -80,9 +80,18 @@ public class ProductListFragment extends Fragment {
         historyManager = new SearchHistoryManager(requireContext());
         setupRecyclerView();
         rvState.bind(binding.rvProducts, savedInstanceState);
+        rvState.restoreIfPending(); // set LayoutManager pending scroll before first layout pass
         handleArguments();  // populate etSearch BEFORE watcher is attached
         restorePersistedScrollState();
         pendingScrollRestore = savedInstanceState != null || viewModel.hasSavedScrollState();
+        // Apply saved scroll immediately when adapter already has items (back navigation)
+        if (adapter != null && adapter.getItemCount() > 0 && viewModel.hasSavedScrollState()) {
+            int pos = viewModel.getSavedScrollPosition();
+            if (pos >= 0 && pos < adapter.getItemCount()) {
+                GridLayoutManager lm = (GridLayoutManager) binding.rvProducts.getLayoutManager();
+                if (lm != null) lm.scrollToPositionWithOffset(pos, viewModel.getSavedScrollOffset());
+            }
+        }
         setupSearch();
         observeData();
         styleChips();
@@ -182,11 +191,13 @@ public class ProductListFragment extends Fragment {
 
     private void setupRecyclerView() {
         String serverHost = com.unifurniture.mobile.BuildConfig.API_BASE_URL.replace("/api/", "");
-        adapter = new ProductCardAdapter(serverHost, product -> {
-            Bundle args = new Bundle();
-            args.putString("slug", product.slug != null ? product.slug : product.id);
-            Navigation.findNavController(requireView()).navigate(R.id.productDetailFragment, args);
-        });
+        if (adapter == null) {
+            adapter = new ProductCardAdapter(serverHost, product -> {
+                Bundle args = new Bundle();
+                args.putString("slug", product.slug != null ? product.slug : product.id);
+                Navigation.findNavController(requireView()).navigate(R.id.productDetailFragment, args);
+            });
+        }
         int span = isGrid ? 2 : 1;
         binding.rvProducts.setLayoutManager(new GridLayoutManager(requireContext(), span));
         adapter.setColumns(span);
@@ -277,6 +288,13 @@ public class ProductListFragment extends Fragment {
         adapter.setColumns(span);
         binding.btnToggleLayout.setImageResource(
                 isGrid ? R.drawable.ic_view_list : R.drawable.ic_grid_view);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        saveCurrentScrollState();
+        rvState.savePending();
     }
 
     @Override
