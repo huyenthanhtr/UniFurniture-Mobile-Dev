@@ -10,12 +10,17 @@ import com.unifurniture.mobile.UniFurnitureApp;
 import com.unifurniture.mobile.data.model.*;
 import com.unifurniture.mobile.data.repository.ProductRepository;
 import com.unifurniture.mobile.util.FormatUtil;
+import com.unifurniture.mobile.util.LanguageHelper;
+import com.unifurniture.mobile.util.LiveDataUtil;
+import com.unifurniture.mobile.util.RecentlyViewedManager;
 import java.util.ArrayList;
 import java.util.List;
 
 public class HomeViewModel extends AndroidViewModel {
 
     private final ProductRepository repository;
+    // Language the currently-cached data was loaded for; used to detect a switch and refetch.
+    private String loadedLang;
     private final MutableLiveData<ApiListResponse<ProductDto>> featuredProducts = new MutableLiveData<>();
     private final MutableLiveData<List<CategoryDto>> categories = new MutableLiveData<>();
     private final MutableLiveData<List<CollectionDto>> collections = new MutableLiveData<>();
@@ -54,10 +59,17 @@ public class HomeViewModel extends AndroidViewModel {
         }
     }
 
+    private void loadDefaultFeaturedProducts() {
+        if (featuredLiveData != null) featuredLiveData.removeObserver(featuredObserver);
+        featuredLiveData = repository.getProducts(1, 10, null, null, null, "createdAt", "desc", null, null, null);
+        featuredLiveData.observeForever(featuredObserver);
+    }
+
     public void loadData() {
         if (featuredProducts.getValue() != null) {
             return;
         }
+        loadedLang = LanguageHelper.getLanguage(getApplication());
         loading.setValue(true);
 
         // Remove old observers before re-subscribing
@@ -66,8 +78,9 @@ public class HomeViewModel extends AndroidViewModel {
         if (collectionsLiveData != null) collectionsLiveData.removeObserver(collectionsObserver);
         if (couponsLiveData != null) couponsLiveData.removeObserver(couponsObserver);
 
-        featuredLiveData = repository.getProducts(1, 10, null, null, null, "createdAt", "desc", null, null, null);
-        featuredLiveData.observeForever(featuredObserver);
+        // Load the default featured list right away for a fast first paint. On-device
+        // recommendations are applied afterwards in personalizeFeatured() (async, no extra fetch).
+        loadDefaultFeaturedProducts();
 
         categoriesLiveData = repository.getCategories();
         categoriesLiveData.observeForever(categoriesObserver);
@@ -77,6 +90,45 @@ public class HomeViewModel extends AndroidViewModel {
 
         couponsLiveData = repository.getCoupons();
         couponsLiveData.observeForever(couponsObserver);
+    }
+
+    /**
+     * Recently-viewed entries cache the product name in the language it was viewed in. When the
+     * app language differs, refetch those names (via the lang-aware API) so the section follows
+     * the current language. Only stale-language items are fetched; calls back when names update.
+     */
+    public void refreshRecentlyViewedIfStale(Runnable onUpdated) {
+        RecentlyViewedManager mgr = new RecentlyViewedManager(getApplication());
+        List<RecentlyViewedManager.Item> items = mgr.getAll();
+        String currentLang = LanguageHelper.getLanguage(getApplication());
+
+        List<RecentlyViewedManager.Item> stale = new ArrayList<>();
+        for (RecentlyViewedManager.Item it : items) {
+            if (it.slug != null && (it.lang == null || !it.lang.equals(currentLang))) stale.add(it);
+        }
+        if (stale.isEmpty()) return;
+
+        final int[] remaining = { stale.size() };
+        for (RecentlyViewedManager.Item it : stale) {
+            LiveDataUtil.observeOnce(repository.getProductDetail(it.slug), p -> {
+                if (p != null && p.name != null) {
+                    it.name = p.name;
+                    it.lang = currentLang;
+                }
+                if (--remaining[0] == 0) {
+                    mgr.saveAll(items);
+                    if (onUpdated != null) onUpdated.run();
+                }
+            });
+        }
+    }
+
+    /** If the UI language changed since the cached data was loaded, refetch in the new language. */
+    public void reloadIfLanguageChanged() {
+        String current = LanguageHelper.getLanguage(getApplication());
+        if (loadedLang != null && !loadedLang.equals(current)) {
+            refreshData();
+        }
     }
 
     /** Pull-to-refresh: always fetch fresh data. */

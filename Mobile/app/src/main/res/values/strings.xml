@@ -23,6 +23,8 @@
     <string name="have_account">Already have an account? Login</string>
     <string name="otp_title">OTP Verification</string>
     <string name="otp_subtitle">Enter the OTP sent via SMS</string>
+    <string name="otp_subtitle_format">Enter the 6-digit OTP sent via SMS to %s</string>
+    <string name="otp_subtitle_demo">Demo: your OTP is %s (pre-filled)</string>
     <string name="otp_code">OTP Code</string>
     <string name="btn_verify">Verify</string>
 

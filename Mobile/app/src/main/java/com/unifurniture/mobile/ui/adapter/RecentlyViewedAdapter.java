@@ -29,7 +29,8 @@ public class RecentlyViewedAdapter extends ListAdapter<Item, RecentlyViewedAdapt
             return a.id != null && a.id.equals(b.id);
         }
         @Override public boolean areContentsTheSame(@NonNull Item a, @NonNull Item b) {
-            return a.id != null && a.id.equals(b.id);
+            return java.util.Objects.equals(a.name, b.name)
+                    && java.util.Objects.equals(a.imageUrl, b.imageUrl);
         }
     };
 
