@@ -23,6 +23,8 @@
     <string name="have_account">Đã có tài khoản? Đăng nhập</string>
     <string name="otp_title">Xác thực OTP</string>
     <string name="otp_subtitle">Nhập mã OTP đã gửi qua SMS</string>
+    <string name="otp_subtitle_format">Nhập mã OTP 6 số đã gửi qua SMS đến số %s</string>
+    <string name="otp_subtitle_demo">Demo: mã OTP của bạn là %s (đã tự điền sẵn)</string>
     <string name="otp_code">Mã OTP</string>
     <string name="btn_verify">Xác thực</string>
 

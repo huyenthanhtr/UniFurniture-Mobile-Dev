@@ -128,7 +128,7 @@ public class AuthRepository {
         Map<String, String> body = new HashMap<>();
         body.put("phone", phone);
         body.put("otp", otp);
-        body.put("password", newPassword);
+        body.put("newPassword", newPassword);
         apiService.resetPassword(body).enqueue(new Callback<AuthResponse>() {
             @Override
             public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {

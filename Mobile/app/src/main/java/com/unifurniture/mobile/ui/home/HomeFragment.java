@@ -341,6 +341,12 @@ public class HomeFragment extends Fragment {
         } else {
             recentlyViewedAdapter.submitList(items);
             binding.layoutRecentlyViewed.setVisibility(View.VISIBLE);
+            // If any names were cached in another language, refetch them in the current one.
+            if (viewModel != null) {
+                viewModel.refreshRecentlyViewedIfStale(() -> {
+                    if (binding != null) recentlyViewedAdapter.submitList(recentlyViewedManager.getAll());
+                });
+            }
         }
     }
 
@@ -393,6 +399,9 @@ public class HomeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        // Re-fetch home data if the UI language changed while we were away, so categories and
+        // products come back in the newly selected language instead of the cached one.
+        if (viewModel != null) viewModel.reloadIfLanguageChanged();
         if (binding != null) {
             binding.getRoot().post(this::clearSearchUiState);
         }

@@ -102,6 +102,10 @@ public class ForgotFragment extends Fragment {
                     currentStep = "otp";
                     updateStepVisibility();
                     binding.tvOtpMessage.setText(getString(R.string.str_forgot_otp_instruction_format, phoneNum));
+                    // Demo mode: server returned the OTP (no SMS provider) → pre-fill it.
+                    if (result.otp != null && !result.otp.isEmpty()) {
+                        binding.etForgotOtp.setText(result.otp);
+                    }
                 } else if (currentStep.equals("newpass")) {
                     Toast.makeText(requireContext(), result.message != null ? result.message : getString(R.string.str_reset_password_success), Toast.LENGTH_LONG).show();
                     // Go back to login screen

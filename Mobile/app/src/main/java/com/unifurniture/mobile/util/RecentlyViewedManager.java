@@ -14,6 +14,7 @@ public class RecentlyViewedManager {
     private static final String KEY = "items";
     private static final int MAX = 10;
 
+    private final Context appContext;
     private final SharedPreferences prefs;
     private final Gson gson = new Gson();
 
@@ -22,6 +23,8 @@ public class RecentlyViewedManager {
         public String slug;
         public String name;
         public String imageUrl;
+        // Language the cached `name` is in; lets the UI refetch when the app language changes.
+        public String lang;
 
         public Item(String id, String slug, String name, String imageUrl) {
             this.id = id;
@@ -32,14 +35,23 @@ public class RecentlyViewedManager {
     }
 
     public RecentlyViewedManager(Context context) {
+        appContext = context.getApplicationContext();
         prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
     }
 
     public void add(Item item) {
         if (item == null || item.id == null) return;
+        item.lang = LanguageHelper.getLanguage(appContext); // stamp the language of this name
         List<Item> list = getAll();
         list.removeIf(i -> item.id.equals(i.id));
         list.add(0, item);
+        if (list.size() > MAX) list = list.subList(0, MAX);
+        prefs.edit().putString(KEY, gson.toJson(list)).apply();
+    }
+
+    /** Persist an updated list (e.g. after refetching names in a new language). */
+    public void saveAll(List<Item> list) {
+        if (list == null) return;
         if (list.size() > MAX) list = list.subList(0, MAX);
         prefs.edit().putString(KEY, gson.toJson(list)).apply();
     }

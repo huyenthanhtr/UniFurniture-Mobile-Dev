@@ -8,8 +8,8 @@ if (project.rootProject.file('local.properties').exists()) {
     properties.load(project.rootProject.file('local.properties').newDataInputStream())
 }
 // Debug builds use the developer's local backend (override in local.properties via api.base.url).
-// Default falls back to the emulator loopback for a fresh checkout.
-def localApiBaseUrl = properties.getProperty("api.base.url", "http://10.0.2.2:3000/api/")
+// Default falls back to the production URL for convenience.
+def localApiBaseUrl = properties.getProperty("api.base.url", "https://unifur-git-454662189896.europe-west1.run.app/api/")
 // Release/APK builds ALWAYS ship the deployed production backend so installed APKs
 // load data on any real device, regardless of local.properties.
 def prodApiBaseUrl = "https://unifur-git-454662189896.europe-west1.run.app/api/"

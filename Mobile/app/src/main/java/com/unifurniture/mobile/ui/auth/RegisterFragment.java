@@ -58,7 +58,7 @@ public class RegisterFragment extends Fragment {
                     getString(R.string.register_otp_sent), Toast.LENGTH_LONG).show();
             requireActivity().getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(android.R.id.content, OtpFragment.newInstance(formattedPhone))
+                    .replace(android.R.id.content, OtpFragment.newInstance(formattedPhone, viewModel.getPendingOtp()))
                     .addToBackStack(null)
                     .commit();
         });
