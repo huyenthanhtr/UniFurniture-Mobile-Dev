@@ -559,6 +559,11 @@ public class ProductListFragment extends Fragment {
                 } else if (query.isEmpty()) {
                     setSearchOverlayVisible(false);
                 }
+            } else if (response == null
+                    && !com.unifurniture.mobile.util.NetworkUtil.isOnline(requireContext())) {
+                // Load failed while offline → offer a retry.
+                com.unifurniture.mobile.util.CustomBlueDialog.showNoInternet(
+                        requireContext(), () -> viewModel.refreshProducts());
             }
         });
 

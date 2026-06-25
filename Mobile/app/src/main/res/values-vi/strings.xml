@@ -418,4 +418,16 @@
     <string name="used_vouchers_title">Voucher đã sử dụng</string>
     <string name="voucher_used_status">Đã sử dụng</string>
     <string name="voucher_already_used">Voucher này đã được sử dụng</string>
+    <!-- Reviews translation + recommendations + offline (added) -->
+    <string name="ok">OK</string>
+    <string name="error_title">Lỗi</string>
+    <string name="review_translate">Dịch</string>
+    <string name="review_see_original">Xem bản gốc</string>
+    <string name="review_translating">Đang dịch…</string>
+    <string name="review_translate_failed">Không thể dịch đánh giá này</string>
+    <string name="you_may_be_interested">Có thể bạn quan tâm</string>
+    <string name="no_internet_title">Không có kết nối mạng</string>
+    <string name="no_internet_message">Vui lòng kiểm tra kết nối và thử lại.</string>
+    <string name="no_internet_banner">Không có kết nối mạng</string>
+    <string name="retry">Thử lại</string>
 </resources>

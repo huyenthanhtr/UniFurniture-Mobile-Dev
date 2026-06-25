@@ -49,6 +49,7 @@ public class HomeFragment extends Fragment {
     private RecentlyViewedAdapter recentlyViewedAdapter;
     private RecentlyViewedManager recentlyViewedManager;
     private CouponHomeAdapter couponHomeAdapter;
+    private ProductCardAdapter recommendedAdapter;
     private final ScrollStateHelper scrollState = new ScrollStateHelper("home");
 
     @Nullable
@@ -189,7 +190,20 @@ public class HomeFragment extends Fragment {
         featuredAdapter.setColumns(0); // carousel mode — don't force MATCH_PARENT width
         binding.rvFeaturedProducts.setLayoutManager(
                 new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        binding.rvFeaturedProducts.setHasFixedSize(true);
         binding.rvFeaturedProducts.setAdapter(featuredAdapter);
+
+        // "You may be interested" — same card style as featured, horizontal carousel
+        recommendedAdapter = new ProductCardAdapter(serverHost, product -> {
+            Bundle args = new Bundle();
+            args.putString("slug", product.slug != null ? product.slug : product.id);
+            Navigation.findNavController(requireView()).navigate(R.id.productDetailFragment, args);
+        });
+        recommendedAdapter.setColumns(0);
+        binding.rvRecommended.setLayoutManager(
+                new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        binding.rvRecommended.setHasFixedSize(true);
+        binding.rvRecommended.setAdapter(recommendedAdapter);
 
         // Categories - 3 columns for readable labels and larger circular thumbnails
         categoryAdapter = new CategoryAdapter(serverHost, category -> {
@@ -208,6 +222,7 @@ public class HomeFragment extends Fragment {
         if (binding.rvPromotionCoupons != null) {
             binding.rvPromotionCoupons.setLayoutManager(
                     new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+            binding.rvPromotionCoupons.setHasFixedSize(true);
             binding.rvPromotionCoupons.setAdapter(couponHomeAdapter);
         }
 
@@ -228,6 +243,7 @@ public class HomeFragment extends Fragment {
         });
         binding.rvCollections.setLayoutManager(
                 new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        binding.rvCollections.setHasFixedSize(true);
         binding.rvCollections.setAdapter(collectionAdapter);
     }
 
@@ -235,6 +251,11 @@ public class HomeFragment extends Fragment {
         viewModel.getFeaturedProducts().observe(getViewLifecycleOwner(), response -> {
             if (response != null && response.items != null) {
                 featuredAdapter.submitList(response.items);
+            } else if (response == null
+                    && !com.unifurniture.mobile.util.NetworkUtil.isOnline(requireContext())) {
+                // Load failed while offline → offer a retry.
+                com.unifurniture.mobile.util.CustomBlueDialog.showNoInternet(
+                        requireContext(), () -> viewModel.refreshData());
             }
         });
 
@@ -291,6 +312,16 @@ public class HomeFragment extends Fragment {
             }
         });
 
+        viewModel.getRecommended().observe(getViewLifecycleOwner(), products -> {
+            if (binding == null) return;
+            if (products != null && !products.isEmpty()) {
+                recommendedAdapter.submitList(products);
+                binding.layoutRecommended.setVisibility(View.VISIBLE);
+            } else {
+                binding.layoutRecommended.setVisibility(View.GONE);
+            }
+        });
+
         viewModel.getSearchSuggestions().observe(getViewLifecycleOwner(), products -> {
             if (products != null && !products.isEmpty()) {
                 searchSuggestionAdapter.submitList(products);
@@ -331,10 +362,14 @@ public class HomeFragment extends Fragment {
         });
         binding.rvRecentlyViewed.setLayoutManager(
                 new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        binding.rvRecentlyViewed.setHasFixedSize(true);
         binding.rvRecentlyViewed.setAdapter(recentlyViewedAdapter);
     }
 
     private void refreshRecentlyViewed() {
+        // Refresh the "You may be interested" row from the latest view/purchase history.
+        if (viewModel != null) viewModel.loadRecommended();
+
         List<RecentlyViewedManager.Item> items = recentlyViewedManager.getAll();
         if (items.isEmpty()) {
             binding.layoutRecentlyViewed.setVisibility(View.GONE);

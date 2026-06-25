@@ -30,6 +30,11 @@ public class RegisterFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         viewModel = new ViewModelProvider(requireActivity()).get(AuthViewModel.class);
 
+        // Guests must always be able to return to Home without registering.
+        binding.btnBackHome.setOnClickListener(v -> {
+            if (getActivity() != null) getActivity().finish();
+        });
+
         binding.btnRegister.setOnClickListener(v -> {
             String name = binding.etName.getText().toString().trim();
             String phone = binding.etPhone.getText().toString().trim();
@@ -47,7 +52,7 @@ public class RegisterFragment extends Fragment {
         });
 
         viewModel.getError().observe(getViewLifecycleOwner(), error -> {
-            if (error != null) Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
+            if (error != null) com.unifurniture.mobile.util.CustomBlueDialog.showError(requireContext(), error);
         });
 
         // Register success → OTP was sent. Move to the OTP screen carrying the formatted phone.

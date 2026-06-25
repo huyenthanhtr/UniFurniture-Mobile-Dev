@@ -9,6 +9,16 @@
     android:padding="32dp"
     android:background="@color/surface">
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnBackHome"
+        style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:text="@string/back_to_home"
+        app:icon="@drawable/ic_back"
+        app:iconGravity="start" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
