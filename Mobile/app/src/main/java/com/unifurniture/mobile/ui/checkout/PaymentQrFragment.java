@@ -158,6 +158,7 @@ public class PaymentQrFragment extends Fragment {
             binding.progressBar.setVisibility(View.GONE);
             
             Bundle bundle = new Bundle();
+            bundle.putString("order_id", orderId);
             bundle.putString("order_code", orderCode);
             Navigation.findNavController(requireView()).navigate(R.id.orderSuccessFragment, bundle);
         });

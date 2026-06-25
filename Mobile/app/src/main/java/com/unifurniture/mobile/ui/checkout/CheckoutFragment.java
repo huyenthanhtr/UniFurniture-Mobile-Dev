@@ -385,10 +385,10 @@ public class CheckoutFragment extends Fragment {
                         getString(R.string.order_success_notif_msg, orderCode), "order", orderCode);
 
         Bundle bundle = new Bundle();
+        bundle.putString("order_id", orderId);
         bundle.putString("order_code", orderCode);
         String paymentMethod = binding.rgPayment.getCheckedRadioButtonId() == R.id.rbBank ? "CHUYEN_KHOAN" : "COD";
         if ("CHUYEN_KHOAN".equals(paymentMethod)) {
-            bundle.putString("order_id", orderId);
             bundle.putFloat("total_amount", (float) total);
             bundle.putFloat("deposit_amount", (float) deposit);
             bundle.putBoolean("require_deposit", requireDeposit);

@@ -13,6 +13,8 @@ import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.data.model.OrderDetailDto;
 import com.unifurniture.mobile.data.model.OrderDetailResponse;
 import com.unifurniture.mobile.data.model.OrderDto;
+import com.unifurniture.mobile.data.model.PaymentDto;
+import com.unifurniture.mobile.data.model.PaymentSummaryDto;
 import com.unifurniture.mobile.data.remote.ApiClient;
 import com.unifurniture.mobile.data.remote.ApiService;
 import com.unifurniture.mobile.databinding.FragmentOrderDetailBinding;
@@ -67,7 +69,7 @@ public class OrderDetailFragment extends Fragment {
                     binding.progressBar.setVisibility(View.GONE);
                     if (response.isSuccessful() && response.body() != null && response.body().getOrder() != null) {
                         binding.contentScrollView.setVisibility(View.VISIBLE);
-                        displayOrderInfo(response.body().getOrder(), response.body().getItems());
+                        displayOrderInfo(response.body());
                     } else {
                         ToastUtil.error(requireContext(), R.string.error_unknown);
                     }
@@ -84,7 +86,8 @@ public class OrderDetailFragment extends Fragment {
         });
     }
 
-    private void displayOrderInfo(OrderDto order, List<OrderDetailDto> responseItems) {
+    private void displayOrderInfo(OrderDetailResponse detailResponse) {
+        OrderDto order = detailResponse.getOrder();
         String displayCode = order.getOrderCode();
         if (displayCode == null || displayCode.trim().isEmpty()) {
             String id = order.getId();
@@ -100,22 +103,31 @@ public class OrderDetailFragment extends Fragment {
         binding.tvShippingPhone.setText(safeText(order.getShippingPhone()));
         binding.tvShippingAddress.setText(safeText(order.getShippingAddress()));
         
-        String method = order.getPaymentMethod();
-        if ((method == null || method.trim().isEmpty()) && order.getPaymentSummary() != null) {
-            method = order.getPaymentSummary().getMethod();
-        }
-        binding.tvPaymentMethod.setText(method != null ? method.toUpperCase() : "");
-        
-        String pStatus = order.getPaymentStatus();
-        if ((pStatus == null || pStatus.trim().isEmpty()) && order.getPaymentSummary() != null) {
-            pStatus = order.getPaymentSummary().getStatus();
-        }
-        binding.tvPaymentStatus.setText(safeText(pStatus));
+        PaymentSummaryDto summary = order.getPaymentSummary() != null
+                ? order.getPaymentSummary()
+                : detailResponse.getPaymentSummary();
+        PaymentDto latestPayment = detailResponse.getPayments() != null && !detailResponse.getPayments().isEmpty()
+                ? detailResponse.getPayments().get(0)
+                : null;
+
+        String method = firstNonBlank(
+                order.getPaymentMethod(),
+                summary != null ? summary.getMethod() : null,
+                latestPayment != null ? latestPayment.getMethod() : null
+        );
+        binding.tvPaymentMethod.setText(formatPaymentMethod(method));
+
+        String pStatus = firstNonBlank(
+                order.getPaymentStatus(),
+                summary != null ? summary.getStatus() : null,
+                latestPayment != null ? latestPayment.getStatus() : null
+        );
+        binding.tvPaymentStatus.setText(formatPaymentStatus(pStatus));
         
         binding.tvTotalAmount.setText(FormatUtil.formatCurrency(order.getTotalAmount()));
 
         binding.llOrderItems.removeAllViews();
-        List<OrderDetailDto> details = responseItems != null ? responseItems : order.getDetails();
+        List<OrderDetailDto> details = detailResponse.getItems() != null ? detailResponse.getItems() : order.getDetails();
         if (details != null && !details.isEmpty()) {
             for (OrderDetailDto item : details) {
                 ItemOrderDetailBinding itemBinding = ItemOrderDetailBinding.inflate(getLayoutInflater(), binding.llOrderItems, true);
@@ -161,6 +173,47 @@ public class OrderDetailFragment extends Fragment {
 
     private String safeText(String value) {
         return value != null && !value.trim().isEmpty() ? value : "-";
+    }
+
+    private String firstNonBlank(String... values) {
+        if (values == null) return null;
+        for (String value : values) {
+            if (value != null && !value.trim().isEmpty() && !"-".equals(value.trim())) {
+                return value;
+            }
+        }
+        return null;
+    }
+
+    private String formatPaymentMethod(String method) {
+        String normalized = method == null ? "" : method.trim().toLowerCase();
+        switch (normalized) {
+            case "cod":
+                return getString(R.string.cod_short);
+            case "bank_transfer":
+            case "chuyen_khoan":
+            case "transfer":
+                return getString(R.string.bank_transfer);
+            default:
+                return safeText(method);
+        }
+    }
+
+    private String formatPaymentStatus(String status) {
+        String normalized = status == null ? "" : status.trim().toLowerCase();
+        switch (normalized) {
+            case "paid":
+            case "completed":
+                return getString(R.string.payment_paid);
+            case "pending":
+            case "unpaid":
+                return getString(R.string.payment_pending);
+            case "failed":
+            case "cancelled":
+                return getString(R.string.payment_failed);
+            default:
+                return safeText(status);
+        }
     }
 
     private String formatDate(String value) {

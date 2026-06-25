@@ -6,7 +6,6 @@ import { CategoryPageComponent } from './pages/category-page/category-page';
 import { PromotionsPageComponent } from './pages/promotions/promotions';
 import { PolicyPageComponent } from './pages/policy/policy';
 import { AboutPageComponent } from './pages/about/about';
-import { CommunityPageComponent } from './pages/community/community';
 import { OrderTrackingComponent } from './pages/order-tracking/order-tracking';
 import { CheckoutSuccessComponent } from './pages/checkout-success/checkout-success';
 import { AccountComponent } from './pages/account/account';
@@ -20,8 +19,8 @@ export const routes: Routes = [
   { path: 'khuyen-mai', component: PromotionsPageComponent },
   { path: 'chinh-sach/:slug', component: PolicyPageComponent },
   { path: 've-unifurniture', component: AboutPageComponent },
-  { path: 'cong-dong', component: CommunityPageComponent },
-  { path: 'cua-hang', redirectTo: 'cong-dong', pathMatch: 'full' },
+  { path: 'cong-dong', redirectTo: 've-unifurniture', pathMatch: 'full' },
+  { path: 'cua-hang', redirectTo: 've-unifurniture', pathMatch: 'full' },
   { path: 'tra-cuu-van-don', component: OrderTrackingComponent },
   { path: 'tai-khoan', component: AccountComponent },
   { path: 'tai-khoan/don-hang', component: AccountComponent, data: { tab: 'orders' } },

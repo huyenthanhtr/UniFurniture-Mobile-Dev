@@ -216,9 +216,13 @@ public interface ApiService {
     @GET("posts")
     Call<ApiListResponse<PostDto>> getPosts(
             @Query("status") String status,
-            @Query("limit") int limit
+            @Query("limit") int limit,
+            @Query("lang") String lang
     );
 
     @GET("posts/{id}")
-    Call<PostDto> getPostById(@Path("id") String id);
+    Call<PostDto> getPostById(
+            @Path("id") String id,
+            @Query("lang") String lang
+    );
 }

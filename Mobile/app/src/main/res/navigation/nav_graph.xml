@@ -156,6 +156,11 @@
         android:name="com.unifurniture.mobile.ui.checkout.OrderSuccessFragment"
         android:label="@string/order_success_title">
         <argument
+            android:name="order_id"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+        <argument
             android:name="order_code"
             app:argType="string" />
     </fragment>

@@ -296,8 +296,15 @@
     <string name="quantity_format">x%1$d</string>
     <string name="status_cancelled">已取消</string>
     <string name="account_about_title">关于 UniFurniture</string>
-    <string name="account_policy_title">隐私政策</string>
-    <string name="account_community_title">社区</string>
+    <string name="account_policy_title">政策</string>
+    <string name="account_community_title">关于 UniFurniture</string>
+    <string name="about_uni_subtitle">为温暖、实用、现代的家提供家具解决方案。</string>
+    <string name="about_uni_intro">UniFurniture 结合产品品质、贴心服务和透明信息，让每一次居家布置都更轻松。</string>
+    <string name="home_value_quality">精心打造的品质</string>
+    <string name="home_value_elegant">优雅实用的设计</string>
+    <string name="home_value_dedicated">贴心的售后支持</string>
+    <string name="about_uni_value_sustainable">可持续</string>
+    <string name="blog_empty_message">目前还没有已发布的博客文章。</string>
     <string name="tracking_code_required">请输入运单号</string>
     <string name="tracking_not_found">未找到该编码对应的订单</string>
     <string name="tracking_not_found_title">未找到订单编码</string>
@@ -381,4 +388,8 @@
     <string name="quantity_one_placeholder">x1</string>
     <string name="address_list_empty_hint">您还没有保存地址。\n点击 + 添加新地址。</string>
     <string name="avatar_selected_hint">已选择新头像。点击保存即可更新。</string>
+    <string name="view_order_detail">查看订单详情</string>
+    <string name="payment_paid">已付款</string>
+    <string name="payment_pending">待付款</string>
+    <string name="payment_failed">付款失败</string>
 </resources>

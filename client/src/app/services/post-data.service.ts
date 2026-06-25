@@ -9,14 +9,23 @@ interface ApiListResponse<T> {
   items: T[];
 }
 
+interface PostTranslationDocument {
+  title?: string;
+  caption?: string;
+  content?: string;
+  post_category?: string;
+}
+
 interface PostDocument {
   _id: string;
   title?: string;
   slug?: string;
+  caption?: string;
   content?: string;
   thumbnail_url?: string;
   post_category?: string;
   status?: 'published' | 'draft';
+  translations?: Record<string, PostTranslationDocument>;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -25,6 +34,7 @@ export interface NewsPost {
   id: string;
   title: string;
   slug: string;
+  caption: string;
   content: string;
   thumbnailUrl: string;
   category: string;
@@ -41,9 +51,6 @@ export interface NewsPostListResponse {
   items: NewsPost[];
 }
 
-const FALLBACK_NEWS_IMAGE =
-  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&q=80&w=1200';
-
 @Injectable({ providedIn: 'root' })
 export class PostDataService {
   private readonly http = inject(HttpClient);
@@ -53,7 +60,8 @@ export class PostDataService {
     const baseParams = {
       page: String(page),
       limit: String(limit),
-      sort: '-createdAt',
+      sort: '-published_at',
+      lang: 'vi',
     };
 
     return this.requestPostList({ ...baseParams, status: 'published' }).pipe(
@@ -76,7 +84,7 @@ export class PostDataService {
       return of(null);
     }
 
-    const baseParams = { slug: safeSlug, page: '1', limit: '1', sort: '-createdAt' };
+    const baseParams = { slug: safeSlug, page: '1', limit: '1', sort: '-published_at', lang: 'vi' };
 
     return this.requestPostList({ ...baseParams, status: 'published' }).pipe(
       switchMap((response) => {
@@ -117,14 +125,23 @@ export class PostDataService {
     const slug = post.slug?.trim() || id;
     return {
       id,
-      title: post.title?.trim() || 'Bai viet',
+      title: post.title?.trim() || 'Bài viết',
       slug,
+      caption: post.caption?.trim() || '',
       content: post.content || '',
-      thumbnailUrl: post.thumbnail_url?.trim() || FALLBACK_NEWS_IMAGE,
+      thumbnailUrl: this.resolveThumbnail(post.thumbnail_url),
       category: post.post_category?.trim() || 'Media',
       status: post.status || 'draft',
       createdAt: post.createdAt || '',
       updatedAt: post.updatedAt || '',
     };
+  }
+
+  private resolveThumbnail(value: string | undefined): string {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
+    if (raw.startsWith('/')) return `http://localhost:3000${raw}`;
+    return raw;
   }
 }

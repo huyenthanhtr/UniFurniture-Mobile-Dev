@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="policy_sales_highlights">
+        <item>Đặt cọc 10%%</item>
+        <item>Lưu kho 30 ngày</item>
+        <item>Hỗ trợ xuất hóa đơn</item>
+        <item>Đổi trước 24 giờ</item>
+    </string-array>
+    <string-array name="policy_sales_paragraphs">
+        <item>Với đơn hàng trên 10,000,000đ chưa thanh toán toàn bộ trước khi giao, khách hàng đặt cọc 10%%. Phần còn lại được thanh toán ngay lúc nhận hàng.</item>
+        <item>Nếu khách hàng hủy đơn sau khi đã đặt cọc, UniFurniture không hoàn lại khoản cọc 10%% vì đơn đã được ghi nhận và chuẩn bị.</item>
+        <item>Nếu không thanh toán phần còn lại khi nhận hàng, UniFurniture có thể thu hồi số sản phẩm tương ứng với số tiền chưa thanh toán và thu phí xử lý giao hàng 300,000đ tại khu vực miễn phí giao.</item>
+        <item>Các chi phí phát sinh theo quy định ban quản lý nơi nhận hàng như xe tải, thang máy, khu bốc dỡ hoặc điều kiện giao hàng tương tự sẽ do khách hàng thanh toán trực tiếp với ban quản lý.</item>
+        <item>Nếu cần xuất hóa đơn, khách hàng vui lòng thông báo ngay khi đặt hàng. Hóa đơn đã xuất không thể chỉnh sửa, hủy hoặc xuất lại với thông tin khác.</item>
+        <item>Sau 24 giờ kể từ khi đơn hàng được xác nhận, khách hàng không thể thay đổi hoặc hủy đơn nếu đơn đã được đóng gói và chuyển sang bộ phận vận chuyển.</item>
+        <item>Thời gian lưu kho tối đa là 30 ngày kể từ ngày đặt hàng. Nhu cầu lưu kho trên 7 ngày cần thanh toán trước 100%% giá trị đơn hàng.</item>
+    </string-array>
+
+    <string-array name="policy_shipping_highlights">
+        <item>Phí giao đã tính trong giá</item>
+        <item>Trong 3 ngày làm việc</item>
+        <item>Khung giờ 9:00 - 16:00</item>
+        <item>Dời lịch tối đa 1 lần</item>
+    </string-array>
+    <string-array name="policy_shipping_paragraphs">
+        <item>UniFurniture hỗ trợ giao hàng và lắp đặt theo đơn hàng đã xác nhận. Phí giao hàng đã được tính trong giá sản phẩm hiển thị, khách hàng không cần thanh toán thêm phí vận chuyển.</item>
+        <item>Thời gian giao hàng dự kiến trong vòng 3 ngày làm việc, từ 9:00 đến 16:00, thứ Hai đến thứ Bảy, trừ ngày lễ và Tết.</item>
+        <item>Khu vực hỗ trợ giao hàng và lắp đặt gồm TP.HCM, TP. Thủ Đức, Biên Hòa, Dĩ An, Thuận An, Thủ Dầu Một, Tân Uyên và một số khu vực lân cận.</item>
+        <item>Với khu vực xa hoặc ngoài phạm vi hỗ trợ lắp đặt, UniFurniture vẫn có thể hỗ trợ giao hàng nhưng có thể không hỗ trợ lắp đặt tại nhà.</item>
+        <item>Khách hàng vui lòng sắp xếp thời gian nhận hàng theo lịch đã xác nhận. Nếu cần đổi lịch, hãy thông báo ít nhất 24 giờ trước thời điểm giao.</item>
+        <item>UniFurniture hỗ trợ dời lịch giao hàng tối đa 1 lần. Từ lần tiếp theo, công ty có thể từ chối giao hàng hoặc hủy đơn tùy tình trạng thực tế.</item>
+    </string-array>
+
+    <string-array name="policy_warranty_highlights">
+        <item>Bảo hành 5 năm</item>
+        <item>Bảo trì trọn đời</item>
+        <item>Phạm vi minh bạch</item>
+        <item>Ghế văn phòng 1 năm</item>
+    </string-array>
+    <string-array name="policy_warranty_paragraphs">
+        <item>Thời hạn bảo hành tiêu chuẩn là 5 năm kể từ ngày giao hàng thành công, kèm hỗ trợ bảo trì trọn đời sau thời gian bảo hành.</item>
+        <item>UniFurniture bảo hành miễn phí cho sản phẩm hư hỏng do lỗi chất liệu, lỗi kỹ thuật hoặc lỗi lắp đặt từ phía UniFurniture.</item>
+        <item>Chính sách không áp dụng cho hư hỏng do thiên tai, tự vận chuyển, tự lắp đặt, tự sửa chữa, sử dụng sai hướng dẫn, hao mòn tự nhiên hoặc sản phẩm thanh lý không còn kinh doanh.</item>
+        <item>Sản phẩm ngoài phạm vi bảo hành hoặc đã hết hạn 5 năm vẫn được hỗ trợ bảo trì trọn đời với chi phí hợp lý dựa trên tình trạng thực tế.</item>
+        <item>Riêng ghế văn phòng được bảo hành 1 năm cho khung ghế, mâm ghế và cần nâng hạ.</item>
+    </string-array>
+
+    <string-array name="policy_return_highlights">
+        <item>Đổi trong 3 ngày</item>
+        <item>Cần đủ 2 điều kiện</item>
+        <item>Không tính lễ, Tết</item>
+        <item>Kiểm tra khi giao</item>
+    </string-array>
+    <string-array name="policy_return_paragraphs">
+        <item>Trong vòng 3 ngày kể từ ngày giao hàng thành công, không tính Chủ nhật, ngày lễ và Tết, khách hàng được đổi sản phẩm miễn phí khi đáp ứng đủ điều kiện.</item>
+        <item>Điều kiện 1: sản phẩm bị hư hỏng do lỗi chất liệu, lỗi kỹ thuật hoặc lỗi lắp đặt từ phía UniFurniture.</item>
+        <item>Điều kiện 2: sản phẩm đổi sang có giá trị bằng hoặc cao hơn sản phẩm đã giao.</item>
+        <item>Sau 3 ngày kể từ ngày giao hàng thành công, UniFurniture áp dụng chính sách bảo hành cho lỗi chất liệu, kỹ thuật và lắp đặt thay vì đổi sang sản phẩm khác.</item>
+        <item>Việc trả hàng chỉ được xử lý tại thời điểm giao nếu sản phẩm không đúng thông tin đặt hàng, hoặc khách hàng đặt nhầm và quyết định ngay lúc nhận.</item>
+    </string-array>
+
+    <string-array name="policy_loyalty_highlights">
+        <item>100,000đ = 1 điểm</item>
+        <item>4 hạng thành viên</item>
+        <item>Ưu đãi đến 7%%</item>
+        <item>Điểm hết hạn sau 365 ngày</item>
+    </string-array>
+    <string-array name="policy_loyalty_paragraphs">
+        <item>U-HOMIE là chương trình khách hàng thân thiết của UniFurniture. Mỗi khách hàng đều là người đồng hành được trân trọng trong hành trình hoàn thiện tổ ấm.</item>
+        <item>Cách tích điểm: 100,000đ tương đương 1 điểm. Điểm được tự động cộng khi đơn hàng thanh toán thành công.</item>
+        <item>Khi tích đủ 20 điểm, tương đương 2,000,000đ chi tiêu hợp lệ, khách hàng trở thành thành viên thân thiết U-HOMIE.</item>
+        <item>Hạng thành viên gồm Bronze từ 20 điểm, Silver từ 50 điểm, Gold từ 150 điểm và Diamond từ 500 điểm.</item>
+        <item>Ưu đãi theo hạng gồm Silver giảm 3%%, Gold giảm 5%% và Diamond giảm 7%% cho các đơn hàng đủ điều kiện.</item>
+        <item>Điểm tích lũy sẽ bị xóa sau 365 ngày nếu không phát sinh đơn hàng thành công mới hoặc đơn phát sinh giao không thành công.</item>
+    </string-array>
+
+    <string-array name="policy_partner_highlights">
+        <item>Cá nhân và doanh nghiệp</item>
+        <item>Toàn bộ sản phẩm</item>
+        <item>Hỗ trợ truyền thông</item>
+        <item>Tuân thủ giá niêm yết</item>
+    </string-array>
+    <string-array name="policy_partner_paragraphs">
+        <item>Chính sách đối tác áp dụng cho cá nhân và doanh nghiệp trong nhiều lĩnh vực như thiết kế nội thất, thi công xây dựng, bán lẻ hoặc cơ sở dịch vụ.</item>
+        <item>Phạm vi áp dụng gồm toàn bộ sản phẩm thương hiệu UniFurniture và các khu vực thuộc phạm vi bán hàng, giao hàng, lắp đặt hiện tại của UniFurniture.</item>
+        <item>Đối tác có thể được hỗ trợ chính sách giao hàng, lắp đặt, bảo hành, bảo trì, kiến thức sản phẩm, ấn phẩm truyền thông và sản phẩm trưng bày tùy chương trình.</item>
+        <item>Đối tác phải tuân thủ chính sách giá bán, bán đúng giá niêm yết trên website UniFurniture và không phá giá sản phẩm.</item>
+        <item>Đối tác có trách nhiệm bảo quản sản phẩm trưng bày, ấn phẩm truyền thông do UniFurniture cung cấp và duy trì chất lượng sản phẩm trong không gian tiếp xúc khách hàng.</item>
+    </string-array>
+</resources>

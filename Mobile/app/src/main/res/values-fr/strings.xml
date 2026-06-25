@@ -108,7 +108,7 @@
     <string name="price_from">From</string>
     <string name="price_to">To</string>
     <string name="min_rating">Minimum Rating</string>
-    <string name="filter_all">All</string>
+    <string name="filter_all">Tous</string>
     <string name="rating_3_up">3★ and above</string>
     <string name="rating_4_up">4★ and above</string>
     <string name="rating_5">5★</string>
@@ -170,7 +170,7 @@
     <string name="new_notification_hint">New notifications will appear here when there is activity.</string>
     <string name="content_desc_mark_all_read">Mark all as read</string>
     <string name="label_orders">Orders</string>
-    <string name="label_all">All</string>
+    <string name="label_all">Tous</string>
     <string name="label_account">Account</string>
 
     <!-- Wishlist -->
@@ -299,9 +299,16 @@
     <string name="order_date_format">Date: %1$s</string>
     <string name="quantity_format">x%1$d</string>
     <string name="status_cancelled">Cancelled</string>
-    <string name="account_about_title">About UniFurniture</string>
+    <string name="account_about_title">À propos de UniFurniture</string>
     <string name="account_policy_title">Politiques</string>
-    <string name="account_community_title">Community</string>
+    <string name="account_community_title">À propos de UniFurniture</string>
+    <string name="about_uni_subtitle">Des solutions mobilier chaleureuses, pratiques et modernes pour votre maison.</string>
+    <string name="about_uni_intro">UniFurniture réunit qualité produit, service attentif et informations transparentes pour rendre chaque aménagement plus simple.</string>
+    <string name="home_value_quality">Qualité soigneusement travaillée</string>
+    <string name="home_value_elegant">Design élégant et pratique</string>
+    <string name="home_value_dedicated">Service après-vente attentif</string>
+    <string name="about_uni_value_sustainable">Durable</string>
+    <string name="blog_empty_message">Aucun article de blog publié pour le moment.</string>
     <string name="tracking_code_required">Please enter a tracking code</string>
     <string name="tracking_not_found">No order found with this code</string>
     <string name="tracking_not_found_title">Tracking code not found</string>
@@ -385,4 +392,8 @@
     <string name="quantity_one_placeholder">x1</string>
     <string name="address_list_empty_hint">Vous n’avez pas encore d’adresse enregistrée.\nAppuyez sur + pour ajouter une adresse.</string>
     <string name="avatar_selected_hint">Nouvel avatar sélectionné. Appuyez sur Enregistrer pour mettre à jour.</string>
+    <string name="view_order_detail">Voir le détail de la commande</string>
+    <string name="payment_paid">Payé</string>
+    <string name="payment_pending">Paiement en attente</string>
+    <string name="payment_failed">Paiement échoué</string>
 </resources>

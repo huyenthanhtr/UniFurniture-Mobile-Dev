@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="policy_sales_highlights">
+        <item>10%% 订金</item>
+        <item>30 天仓储</item>
+        <item>支持开票</item>
+        <item>24 小时内修改</item>
+    </string-array>
+    <string-array name="policy_sales_paragraphs">
+        <item>订单金额超过 10,000,000 VND 且送货前未全额付款时，客户需支付 10%% 订金。剩余金额在收货时支付。</item>
+        <item>如果客户支付订金后取消订单，UniFurniture 不退还 10%% 订金，因为订单已经登记并进入准备流程。</item>
+        <item>如果收货时未支付剩余金额，UniFurniture 可收回与未付款金额相对应的商品，并在免运区域收取 300,000 VND 配送处理费。</item>
+        <item>收货地点管理方收取的货车、电梯、装卸区或类似配送条件费用，由客户直接向管理方支付。</item>
+        <item>如需发票，请在下单时通知 UniFurniture。已开具的发票不能修改、取消或以其他信息重新开具。</item>
+        <item>订单确认 24 小时后，如果订单已打包并转交配送部门，则不能再修改或取消。</item>
+        <item>最长仓储时间为下单日起 30 天。需要仓储超过 7 天时，需先支付订单全额。</item>
+    </string-array>
+
+    <string-array name="policy_shipping_highlights">
+        <item>运费已包含</item>
+        <item>3 个工作日内</item>
+        <item>9:00 - 16:00</item>
+        <item>可改期 1 次</item>
+    </string-array>
+    <string-array name="policy_shipping_paragraphs">
+        <item>UniFurniture 按已确认订单提供配送和安装服务。配送费用已包含在商品显示价格中，客户无需另付运费。</item>
+        <item>预计配送时间为 3 个工作日内，周一至周六 9:00 到 16:00，节假日和春节除外。</item>
+        <item>支持配送和安装的区域包括胡志明市、守德市、边和、以安、顺安、土龙木、新渊及部分附近地区。</item>
+        <item>对于较远区域或不在安装范围内的地点，UniFurniture 仍可支持配送，但可能无法提供上门安装。</item>
+        <item>请客户按已确认时间安排收货。如需改期，请至少在配送前 24 小时通知。</item>
+        <item>UniFurniture 最多支持 1 次配送改期。再次变更时，公司可根据实际情况拒绝配送或取消订单。</item>
+    </string-array>
+
+    <string-array name="policy_warranty_highlights">
+        <item>5 年保修</item>
+        <item>终身维护</item>
+        <item>范围清楚</item>
+        <item>办公椅说明</item>
+    </string-array>
+    <string-array name="policy_warranty_paragraphs">
+        <item>标准保修期为成功送达之日起 5 年，保修期后仍提供终身维护支持。</item>
+        <item>因 UniFurniture 的材料缺陷、技术缺陷或安装错误造成的损坏，可享受免费保修。</item>
+        <item>保修不适用于自然灾害、自行运输、自行安装、自行维修、错误使用、自然磨损或已停止销售的清仓商品造成的损坏。</item>
+        <item>不在保修范围内或超过 5 年保修期的商品，仍可按实际情况以合理费用获得终身维护。</item>
+        <item>办公椅的椅架、底盘和气压杆保修 1 年。</item>
+    </string-array>
+
+    <string-array name="policy_return_highlights">
+        <item>3 天内换货</item>
+        <item>需满足 2 条件</item>
+        <item>不含节假日</item>
+        <item>收货时检查</item>
+    </string-array>
+    <string-array name="policy_return_paragraphs">
+        <item>成功送达后 3 天内，不含周日和节假日，客户在满足条件时可免费换货。</item>
+        <item>条件 1：商品因 UniFurniture 的材料缺陷、技术缺陷或安装错误而损坏。</item>
+        <item>条件 2：换购商品的价值等于或高于已配送商品。</item>
+        <item>成功送达 3 天后，UniFurniture 对材料、技术和安装问题适用保修政策，不再适用换购其他商品。</item>
+        <item>退货仅在配送当时处理，适用于商品与订单信息不符，或客户下错单并在收货时立即决定退回的情况。</item>
+    </string-array>
+
+    <string-array name="policy_loyalty_highlights">
+        <item>100,000 VND = 1 点</item>
+        <item>4 个会员等级</item>
+        <item>最高 7%% 优惠</item>
+        <item>365 天到期</item>
+    </string-array>
+    <string-array name="policy_loyalty_paragraphs">
+        <item>U-HOMIE 是 UniFurniture 的会员忠诚计划。每位客户都是一起打造温暖家居的重要伙伴。</item>
+        <item>积分规则为每 100,000 VND 获得 1 点。订单成功付款后，积分会自动加入账户。</item>
+        <item>累计满 20 点，即符合条件消费 2,000,000 VND 后，客户成为 U-HOMIE 会员。</item>
+        <item>会员等级包括 Bronze 20 点起、Silver 50 点起、Gold 150 点起、Diamond 500 点起。</item>
+        <item>符合条件的等级优惠包括 Silver 3%%、Gold 5%%、Diamond 7%%。</item>
+        <item>如果 365 天内没有新的成功订单，或产生的订单未成功配送，累计积分将失效。</item>
+    </string-array>
+
+    <string-array name="policy_partner_highlights">
+        <item>个人和企业</item>
+        <item>所有 UniFurniture 商品</item>
+        <item>营销支持</item>
+        <item>遵守标价</item>
+    </string-array>
+    <string-array name="policy_partner_paragraphs">
+        <item>合作伙伴政策适用于多个领域的个人和企业，包括室内设计、施工、零售和服务场所。</item>
+        <item>政策范围包括 UniFurniture 品牌商品，以及 UniFurniture 当前销售、配送和安装服务覆盖的区域。</item>
+        <item>合作伙伴可根据项目获得配送、安装、保修、维护、产品知识、宣传物料和展示商品等支持。</item>
+        <item>合作伙伴必须遵守 UniFurniture 网站上的标价，不得低价破坏或扭曲商品价格。</item>
+        <item>合作伙伴负责妥善保管 UniFurniture 提供的展示商品和宣传物料，并保持面向客户空间中的产品质量。</item>
+    </string-array>
+</resources>

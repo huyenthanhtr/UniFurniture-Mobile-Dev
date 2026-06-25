@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="policy_sales_highlights">
+        <item>Acompte de 10%%</item>
+        <item>Stockage 30 jours</item>
+        <item>Facture possible</item>
+        <item>Modification sous 24 h</item>
+    </string-array>
+    <string-array name="policy_sales_paragraphs">
+        <item>Pour les commandes supérieures à 10 000 000 VND non payées en totalité avant livraison, le client verse un acompte de 10%%. Le solde est payé au moment de la réception.</item>
+        <item>Si le client annule la commande après avoir versé un acompte, UniFurniture ne rembourse pas cet acompte de 10%% car la commande a déjà été enregistrée et préparée.</item>
+        <item>Si le solde n’est pas payé à la livraison, UniFurniture peut reprendre les produits correspondant au montant impayé et facturer 300 000 VND de frais de traitement dans les zones à livraison gratuite.</item>
+        <item>Les frais imposés par la gestion du bâtiment, par exemple camion, ascenseur, zone de chargement ou conditions similaires, sont payés directement par le client à la gestion du bâtiment.</item>
+        <item>Si une facture est nécessaire, le client doit prévenir UniFurniture au moment de la commande. Une facture émise ne peut pas être modifiée, annulée ou réémise avec des informations différentes.</item>
+        <item>Après 24 heures suivant la confirmation, la commande ne peut plus être modifiée ou annulée si elle a été emballée et transmise à la livraison.</item>
+        <item>La durée maximale de stockage est de 30 jours à partir de la date de commande. Un stockage de plus de 7 jours nécessite le paiement complet de la commande.</item>
+    </string-array>
+
+    <string-array name="policy_shipping_highlights">
+        <item>Frais inclus</item>
+        <item>Sous 3 jours ouvrés</item>
+        <item>9:00 - 16:00</item>
+        <item>Un report accepté</item>
+    </string-array>
+    <string-array name="policy_shipping_paragraphs">
+        <item>UniFurniture assure la livraison et installation selon la commande confirmée. Les frais de livraison sont déjà inclus dans le prix affiché du produit.</item>
+        <item>Le délai prévu est de 3 jours ouvrés, de 9:00 à 16:00, du lundi au samedi, hors jours fériés et période du Têt.</item>
+        <item>La livraison et installation sont proposées à Ho Chi Minh Ville, Thu Duc, Bien Hoa, Di An, Thuan An, Thu Dau Mot, Tan Uyen et certaines zones proches.</item>
+        <item>Pour les zones éloignées ou hors périmètre installation, UniFurniture peut assurer la livraison mais pas forcément installation à domicile.</item>
+        <item>Le client organise la réception selon le créneau confirmé. En cas de changement, il faut prévenir au moins 24 heures avant la livraison.</item>
+        <item>UniFurniture accepte un seul report de livraison. À partir du changement suivant, la société peut refuser la livraison ou annuler la commande selon le cas.</item>
+    </string-array>
+
+    <string-array name="policy_warranty_highlights">
+        <item>Garantie 5 ans</item>
+        <item>Maintenance à vie</item>
+        <item>Couverture claire</item>
+        <item>Chaise bureau</item>
+    </string-array>
+    <string-array name="policy_warranty_paragraphs">
+        <item>La garantie standard est de 5 ans à partir de la livraison réussie, avec assistance de maintenance à vie après la période de garantie.</item>
+        <item>UniFurniture assure gratuitement la garantie pour les défauts de matériau, défauts techniques ou erreurs installation venant de UniFurniture.</item>
+        <item>La garantie ne couvre pas les dégâts causés par catastrophe naturelle, transport par le client, installation personnelle, réparation personnelle, mauvaise utilisation, usure naturelle ou produits en liquidation arrêtés.</item>
+        <item>Les produits hors garantie ou après les 5 ans peuvent toujours recevoir une maintenance à vie avec un coût raisonnable selon la situation réelle.</item>
+        <item>Les chaises de bureau ont une garantie de 1 an pour le cadre, le plateau et le vérin.</item>
+    </string-array>
+
+    <string-array name="policy_return_highlights">
+        <item>Échange sous 3 jours</item>
+        <item>Deux conditions</item>
+        <item>Hors jours fériés</item>
+        <item>Contrôle à livraison</item>
+    </string-array>
+    <string-array name="policy_return_paragraphs">
+        <item>Dans les 3 jours suivant une livraison réussie, hors dimanche et jours fériés, le client peut échanger gratuitement un produit si les conditions sont remplies.</item>
+        <item>Condition 1 : le produit est endommagé par un défaut de matériau, un défaut technique ou une erreur installation venant de UniFurniture.</item>
+        <item>Condition 2 : le produit choisi pour échange a une valeur égale ou supérieure au produit livré.</item>
+        <item>Après 3 jours suivant la livraison réussie, UniFurniture applique la garantie pour les défauts de matériau, techniques et installation au lieu de changer de produit.</item>
+        <item>Le retour est accepté uniquement au moment de la livraison si le produit ne correspond pas aux informations de commande, ou si le client a commandé par erreur et décide immédiatement.</item>
+    </string-array>
+
+    <string-array name="policy_loyalty_highlights">
+        <item>100 000 VND = 1 point</item>
+        <item>4 niveaux membres</item>
+        <item>Jusqu’à 7%%</item>
+        <item>Expiration 365 jours</item>
+    </string-array>
+    <string-array name="policy_loyalty_paragraphs">
+        <item>U-HOMIE est le programme fidélité de UniFurniture. Chaque client est considéré comme un compagnon précieux dans la création de son foyer.</item>
+        <item>Le cumul se fait à raison de 100 000 VND pour 1 point. Les points sont ajoutés automatiquement après paiement réussi de la commande.</item>
+        <item>Avec 20 points, soit 2 000 000 VND de dépenses éligibles, le client devient membre fidélité U-HOMIE.</item>
+        <item>Les niveaux sont Bronze à partir de 20 points, Silver à partir de 50 points, Gold à partir de 150 points et Diamond à partir de 500 points.</item>
+        <item>Les avantages éligibles sont 3%% pour Silver, 5%% pour Gold et 7%% pour Diamond sur les commandes qualifiées.</item>
+        <item>Les points expirent après 365 jours sans nouvelle commande réussie ou si les commandes générées ne sont pas livrées avec succès.</item>
+    </string-array>
+
+    <string-array name="policy_partner_highlights">
+        <item>Individus et entreprises</item>
+        <item>Tous les produits</item>
+        <item>Support marketing</item>
+        <item>Respect du prix affiché</item>
+    </string-array>
+    <string-array name="policy_partner_paragraphs">
+        <item>La politique partenaire concerne les individus et entreprises de nombreux domaines, dont design intérieur, construction, vente au détail et lieux de service.</item>
+        <item>Elle couvre les produits de marque UniFurniture et les zones actuelles de vente, livraison et installation de UniFurniture.</item>
+        <item>Les partenaires peuvent recevoir du support pour livraison, installation, garantie, maintenance, connaissance produit, supports de communication et produits exposés selon le programme.</item>
+        <item>Les partenaires doivent respecter le prix affiché sur le site UniFurniture et ne pas casser ou déformer les prix produits.</item>
+        <item>Les partenaires sont responsables de la conservation des produits exposés et supports de communication fournis par UniFurniture, ainsi que de la qualité visible par les clients.</item>
+    </string-array>
+</resources>
