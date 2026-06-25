@@ -24,8 +24,33 @@ public class ApiClient {
                     ? HttpLoggingInterceptor.Level.BODY
                     : HttpLoggingInterceptor.Level.NONE);
 
+            // Disk cache so revisiting a screen (products / categories / collections) serves
+            // instantly instead of re-hitting the network on every navigation.
+            okhttp3.Cache httpCache = new okhttp3.Cache(
+                    new java.io.File(UniFurnitureApp.getInstance().getCacheDir(), "http_cache"),
+                    10L * 1024 * 1024); // 10 MB
+
             OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                    .cache(httpCache)
                     .addInterceptor(logging)
+                    // Network interceptor: make public catalog GETs cacheable for a short window so
+                    // repeated navigations are instant (the backend doesn't send Cache-Control).
+                    .addNetworkInterceptor(chain -> {
+                        okhttp3.Request req = chain.request();
+                        String p = req.url().encodedPath();
+                        boolean cacheableGet = "GET".equals(req.method())
+                                && ((p.contains("/products") && !p.contains("/product-images") && !p.contains("/product-variants"))
+                                    || p.contains("/categories")
+                                    || p.contains("/collections"));
+                        okhttp3.Response resp = chain.proceed(req);
+                        if (cacheableGet && resp.isSuccessful()) {
+                            return resp.newBuilder()
+                                    .removeHeader("Pragma")
+                                    .header("Cache-Control", "public, max-age=60")
+                                    .build();
+                        }
+                        return resp;
+                    })
                     .addInterceptor(chain -> {
                         Request original = chain.request();
                         SessionManager session = SessionManager.getInstance(UniFurnitureApp.getInstance());

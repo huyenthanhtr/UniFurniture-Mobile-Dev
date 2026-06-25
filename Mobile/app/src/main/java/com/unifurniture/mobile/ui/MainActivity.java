@@ -65,6 +65,48 @@ public class MainActivity extends AppCompatActivity {
         });
 
         setupCartBadge();
+        setupConnectivityBanner();
+    }
+
+    private android.net.ConnectivityManager.NetworkCallback networkCallback;
+
+    /** Show a thin banner whenever the device is offline; hide it when connectivity returns. */
+    private void setupConnectivityBanner() {
+        binding.tvOfflineBanner.setVisibility(
+                com.unifurniture.mobile.util.NetworkUtil.isOnline(this) ? View.GONE : View.VISIBLE);
+
+        android.net.ConnectivityManager cm =
+                (android.net.ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        if (cm == null) return;
+        networkCallback = new android.net.ConnectivityManager.NetworkCallback() {
+            @Override
+            public void onAvailable(@androidx.annotation.NonNull android.net.Network network) {
+                runOnUiThread(() -> {
+                    if (binding != null) binding.tvOfflineBanner.setVisibility(View.GONE);
+                });
+            }
+            @Override
+            public void onLost(@androidx.annotation.NonNull android.net.Network network) {
+                runOnUiThread(() -> {
+                    if (binding != null && !com.unifurniture.mobile.util.NetworkUtil.isOnline(MainActivity.this))
+                        binding.tvOfflineBanner.setVisibility(View.VISIBLE);
+                });
+            }
+        };
+        cm.registerDefaultNetworkCallback(networkCallback);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (networkCallback != null) {
+            android.net.ConnectivityManager cm =
+                    (android.net.ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+            if (cm != null) {
+                try { cm.unregisterNetworkCallback(networkCallback); } catch (IllegalArgumentException ignored) {}
+            }
+            networkCallback = null;
+        }
     }
 
     private void setupCartBadge() {

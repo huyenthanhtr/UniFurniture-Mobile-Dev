@@ -17,6 +17,36 @@ public class CustomBlueDialog {
         void onClick(AlertDialog dialog);
     }
 
+    /**
+     * Convenience for a single-button error popup, styled like the rest of the app's blue dialogs.
+     * Used for auth (login/register/OTP/forgot) errors so they stand out instead of a faint Toast.
+     */
+    public static void showError(Context context, String message) {
+        show(context,
+                R.drawable.ic_alert,
+                context.getString(R.string.error_title),
+                message,
+                context.getString(R.string.ok),
+                AlertDialog::dismiss,
+                null,
+                null);
+    }
+
+    /** "No internet" popup with a Retry action and a dismiss button. */
+    public static void showNoInternet(Context context, Runnable onRetry) {
+        show(context,
+                R.drawable.ic_alert,
+                context.getString(R.string.no_internet_title),
+                context.getString(R.string.no_internet_message),
+                context.getString(R.string.retry),
+                dialog -> {
+                    dialog.dismiss();
+                    if (onRetry != null) onRetry.run();
+                },
+                context.getString(R.string.close),
+                AlertDialog::dismiss);
+    }
+
     public static void show(
             Context context,
             int iconResId,

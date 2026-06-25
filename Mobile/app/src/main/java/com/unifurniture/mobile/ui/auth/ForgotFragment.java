@@ -42,6 +42,11 @@ public class ForgotFragment extends Fragment {
 
         updateStepVisibility();
 
+        // Guests must always be able to return to Home without resetting a password.
+        binding.btnBackHome.setOnClickListener(v -> {
+            if (getActivity() != null) getActivity().finish();
+        });
+
         binding.btnSendOtp.setOnClickListener(v -> {
             String phone = binding.etForgotPhone.getText().toString().trim();
             if (phone.length() < 9 || phone.length() > 10) {
@@ -92,7 +97,7 @@ public class ForgotFragment extends Fragment {
 
         viewModel.getError().observe(getViewLifecycleOwner(), error -> {
             if (error != null) {
-                Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
+                com.unifurniture.mobile.util.CustomBlueDialog.showError(requireContext(), error);
             }
         });
 

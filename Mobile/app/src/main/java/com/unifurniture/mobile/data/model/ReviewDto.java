@@ -15,6 +15,10 @@ public class ReviewDto {
     public String customerName;
     public ReviewReplyDto reply;
 
+    // Client-only state for the "Translate / See Original" toggle (not sent to / from the server).
+    public transient String translatedContent;
+    public transient boolean showingTranslation;
+
     public ReviewDto() {
     }
 

@@ -18,6 +18,8 @@ import com.bumptech.glide.request.RequestOptions;
 import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.data.model.ReviewDto;
 import com.unifurniture.mobile.databinding.ItemReviewBinding;
+import com.unifurniture.mobile.util.LanguageHelper;
+import com.unifurniture.mobile.util.ReviewTranslator;
 
 public class ReviewAdapter extends ListAdapter<ReviewDto, ReviewAdapter.ViewHolder> {
 
@@ -36,7 +38,10 @@ public class ReviewAdapter extends ListAdapter<ReviewDto, ReviewAdapter.ViewHold
                 }
                 @Override
                 public boolean areContentsTheSame(@NonNull ReviewDto a, @NonNull ReviewDto b) {
-                    return a.id.equals(b.id);
+                    return a.id.equals(b.id)
+                            && a.showingTranslation == b.showingTranslation
+                            && java.util.Objects.equals(a.content, b.content)
+                            && java.util.Objects.equals(a.translatedContent, b.translatedContent);
                 }
             };
 
@@ -50,7 +55,7 @@ public class ReviewAdapter extends ListAdapter<ReviewDto, ReviewAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.bind(getItem(position), serverHost);
+        holder.bind(getItem(position), serverHost, this);
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -61,9 +66,9 @@ public class ReviewAdapter extends ListAdapter<ReviewDto, ReviewAdapter.ViewHold
             this.binding = binding;
         }
 
-        void bind(ReviewDto review, String serverHost) {
+        void bind(ReviewDto review, String serverHost, ReviewAdapter adapter) {
             binding.tvCustomerName.setText(review.customerName != null ? review.customerName : itemView.getContext().getString(R.string.guest_customer));
-            binding.tvContent.setText(review.content != null ? review.content : "");
+            bindContentAndToggle(review, adapter);
             binding.ratingBar.setRating(review.rating != null ? review.rating : 0);
             binding.tvDate.setText(review.createdAt != null ?
                     review.createdAt.substring(0, Math.min(10, review.createdAt.length())) : "");
@@ -107,6 +112,63 @@ public class ReviewAdapter extends ListAdapter<ReviewDto, ReviewAdapter.ViewHold
             } else {
                 binding.layoutReply.setVisibility(View.GONE);
             }
+        }
+
+        /**
+         * Show the review text (original or translated) and the grey Translate / See Original toggle.
+         * The original text is always preserved on the ReviewDto; translation happens on-device on
+         * demand and is cached on the item so re-binding (and toggling back) is instant.
+         */
+        private void bindContentAndToggle(ReviewDto review, ReviewAdapter adapter) {
+            String original = review.content != null ? review.content : "";
+            boolean hasText = !original.trim().isEmpty();
+
+            binding.tvContent.setText(review.showingTranslation && review.translatedContent != null
+                    ? review.translatedContent : original);
+
+            if (!hasText) {
+                binding.tvTranslateToggle.setVisibility(View.GONE);
+                return;
+            }
+            binding.tvTranslateToggle.setVisibility(View.VISIBLE);
+            binding.tvTranslateToggle.setText(review.showingTranslation
+                    ? R.string.review_see_original : R.string.review_translate);
+
+            binding.tvTranslateToggle.setOnClickListener(v -> {
+                int pos = getBindingAdapterPosition();
+                if (pos == RecyclerView.NO_POSITION) return;
+
+                if (review.showingTranslation) {
+                    // Toggle back to the original.
+                    review.showingTranslation = false;
+                    adapter.notifyItemChanged(pos);
+                    return;
+                }
+                if (review.translatedContent != null) {
+                    // Already translated once — just flip.
+                    review.showingTranslation = true;
+                    adapter.notifyItemChanged(pos);
+                    return;
+                }
+                // First time: translate into the current UI language on-device.
+                String target = LanguageHelper.getLanguage(itemView.getContext());
+                binding.tvTranslateToggle.setText(R.string.review_translating);
+                ReviewTranslator.translate(original, target, new ReviewTranslator.Callback() {
+                    @Override
+                    public void onResult(String translatedText) {
+                        review.translatedContent = translatedText;
+                        review.showingTranslation = true;
+                        int p = getBindingAdapterPosition();
+                        adapter.notifyItemChanged(p == RecyclerView.NO_POSITION ? pos : p);
+                    }
+                    @Override
+                    public void onError() {
+                        if (binding != null) binding.tvTranslateToggle.setText(R.string.review_translate);
+                        com.unifurniture.mobile.util.ToastUtil.error(
+                                itemView.getContext(), R.string.review_translate_failed);
+                    }
+                });
+            });
         }
 
         private int dpToPx(int dp) {

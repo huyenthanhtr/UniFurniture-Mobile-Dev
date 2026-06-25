@@ -13,8 +13,15 @@ import com.unifurniture.mobile.util.FormatUtil;
 import com.unifurniture.mobile.util.LanguageHelper;
 import com.unifurniture.mobile.util.LiveDataUtil;
 import com.unifurniture.mobile.util.RecentlyViewedManager;
+import com.unifurniture.mobile.util.SessionManager;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class HomeViewModel extends AndroidViewModel {
 
@@ -27,6 +34,8 @@ public class HomeViewModel extends AndroidViewModel {
     private final MutableLiveData<List<CouponDto>> coupons = new MutableLiveData<>();
     private final MutableLiveData<Boolean> loading = new MutableLiveData<>(false);
     private final MutableLiveData<List<ProductDto>> searchSuggestions = new MutableLiveData<>();
+    // "You may be interested" — recommendations seeded by recently-viewed + purchased products.
+    private final MutableLiveData<List<ProductDto>> recommended = new MutableLiveData<>();
     private final List<ProductDto> allProductsCache = new ArrayList<>();
 
     // Track observers so we can remove them in onCleared()
@@ -118,6 +127,80 @@ public class HomeViewModel extends AndroidViewModel {
                 if (--remaining[0] == 0) {
                     mgr.saveAll(items);
                     if (onUpdated != null) onUpdated.run();
+                }
+            });
+        }
+    }
+
+    /**
+     * Build the "You may be interested" list. Seeds are the products the user recently viewed plus,
+     * when logged in, the products they recently purchased. We reuse the server's content-based
+     * recommendation endpoint for the top seeds and merge the results (excluding items already
+     * viewed/purchased). Guests with no history get an empty list (section is hidden).
+     */
+    public void loadRecommended() {
+        RecentlyViewedManager mgr = new RecentlyViewedManager(getApplication());
+        List<String> seeds = new ArrayList<>();
+        Set<String> excludeIds = new LinkedHashSet<>();
+        for (RecentlyViewedManager.Item it : mgr.getAll()) {
+            if (it.slug != null) seeds.add(it.slug);
+            if (it.id != null) excludeIds.add(it.id);
+        }
+
+        String customerId = SessionManager.getInstance(getApplication()).getCustomerId();
+        if (customerId == null || customerId.isEmpty()) {
+            fetchRecommendations(seeds, excludeIds, null);
+            return;
+        }
+
+        // Logged in → fold in purchase history, then fetch.
+        UniFurnitureApp.getInstance().getApiService().getOrders(customerId, null)
+                .enqueue(new Callback<ApiListResponse<OrderDto>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ApiListResponse<OrderDto>> call,
+                                           @NonNull Response<ApiListResponse<OrderDto>> response) {
+                        if (response.isSuccessful() && response.body() != null && response.body().items != null) {
+                            for (OrderDto order : response.body().items) {
+                                if (order.getDetails() == null) continue;
+                                for (OrderDetailDto d : order.getDetails()) {
+                                    if (d.getProductId() != null) excludeIds.add(d.getProductId());
+                                    if (d.getProduct() != null && d.getProduct().slug != null) {
+                                        seeds.add(0, d.getProduct().slug); // purchases are stronger signals
+                                    }
+                                }
+                            }
+                        }
+                        fetchRecommendations(seeds, excludeIds, customerId);
+                    }
+                    @Override
+                    public void onFailure(@NonNull Call<ApiListResponse<OrderDto>> call, @NonNull Throwable t) {
+                        fetchRecommendations(seeds, excludeIds, customerId);
+                    }
+                });
+    }
+
+    private void fetchRecommendations(List<String> seeds, Set<String> excludeIds, String userId) {
+        List<String> uniqueSeeds = new ArrayList<>(new LinkedHashSet<>(seeds));
+        if (uniqueSeeds.size() > 2) uniqueSeeds = uniqueSeeds.subList(0, 2); // top 2 seeds is plenty
+        if (uniqueSeeds.isEmpty()) {
+            recommended.setValue(new ArrayList<>());
+            return;
+        }
+        LinkedHashMap<String, ProductDto> merged = new LinkedHashMap<>();
+        final int[] remaining = { uniqueSeeds.size() };
+        for (String slug : uniqueSeeds) {
+            LiveDataUtil.observeOnce(repository.getProductRecommendations(slug, userId), list -> {
+                if (list != null) {
+                    for (ProductDto p : list) {
+                        if (p.id != null && !excludeIds.contains(p.id) && !merged.containsKey(p.id)) {
+                            merged.put(p.id, p);
+                        }
+                    }
+                }
+                if (--remaining[0] == 0) {
+                    List<ProductDto> out = new ArrayList<>(merged.values());
+                    if (out.size() > 10) out = out.subList(0, 10);
+                    recommended.setValue(out);
                 }
             });
         }
@@ -231,4 +314,5 @@ public class HomeViewModel extends AndroidViewModel {
     public LiveData<List<CouponDto>> getCoupons() { return coupons; }
     public LiveData<Boolean> isLoading() { return loading; }
     public LiveData<List<ProductDto>> getSearchSuggestions() { return searchSuggestions; }
+    public LiveData<List<ProductDto>> getRecommended() { return recommended; }
 }

@@ -429,4 +429,16 @@
     <string name="select_all">Tout sélectionner</string>
     <string name="delete_all">Tout supprimer</string>
     <string name="total_items_format">Total (%1$d articles) :</string>
+    <!-- Reviews translation + recommendations + offline (added) -->
+    <string name="ok">OK</string>
+    <string name="error_title">Erreur</string>
+    <string name="review_translate">Traduire</string>
+    <string name="review_see_original">Voir l\'original</string>
+    <string name="review_translating">Traduction…</string>
+    <string name="review_translate_failed">Impossible de traduire cet avis</string>
+    <string name="you_may_be_interested">Vous pourriez aimer</string>
+    <string name="no_internet_title">Pas de connexion Internet</string>
+    <string name="no_internet_message">Veuillez vérifier votre connexion et réessayer.</string>
+    <string name="no_internet_banner">Pas de connexion Internet</string>
+    <string name="retry">Réessayer</string>
 </resources>

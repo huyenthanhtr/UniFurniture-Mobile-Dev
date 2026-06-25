@@ -25,10 +25,28 @@
         android:background="@color/white"
         app:itemIconTint="@color/bottom_nav_selector"
         app:itemTextColor="@color/bottom_nav_selector"
+        app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_nav_menu"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:elevation="8dp" />
+
+    <!-- Offline banner — shown when the device loses connectivity. -->
+    <TextView
+        android:id="@+id/tvOfflineBanner"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/gray_800"
+        android:gravity="center"
+        android:padding="8dp"
+        android:text="@string/no_internet_banner"
+        android:textColor="@color/white"
+        android:textSize="13sp"
+        android:elevation="12dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

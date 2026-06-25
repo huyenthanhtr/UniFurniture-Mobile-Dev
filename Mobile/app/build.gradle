@@ -108,6 +108,10 @@ dependencies {
     // Encrypted storage for "Remember password" credentials
     implementation 'androidx.security:security-crypto:1.1.0-alpha06'
 
+    // On-device translation for user reviews (free, offline after model download)
+    implementation 'com.google.mlkit:translate:17.0.3'
+    implementation 'com.google.mlkit:language-id:17.0.6'
+
     // Testing
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

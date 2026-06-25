@@ -48,6 +48,8 @@ public class ProductDetailFragment extends Fragment {
     private ReviewAdapter reviewAdapter;
     private ProductCardAdapter recommendationAdapter;
     private RecentlyViewedManager recentlyViewedManager;
+    private String currentSlug;
+    private boolean descExpanded = false;
     private String selectedVariantId = null;
     private int quantity = 1;
     private boolean selectedVariantInStock = true;
@@ -76,6 +78,7 @@ public class ProductDetailFragment extends Fragment {
             Navigation.findNavController(requireView()).navigateUp();
             return;
         }
+        currentSlug = slug;
 
         recentlyViewedManager = new RecentlyViewedManager(requireContext());
         setupImageSlider();
@@ -169,10 +172,9 @@ public class ProductDetailFragment extends Fragment {
                 Navigation.findNavController(requireView()).navigateUp());
         binding.btnFavorite.setOnClickListener(v -> viewModel.toggleWishlist());
 
-        final boolean[] isDescExpanded = {false};
         binding.btnToggleDescription.setOnClickListener(v -> {
             androidx.transition.TransitionManager.beginDelayedTransition((android.view.ViewGroup) binding.getRoot());
-            if (isDescExpanded[0]) {
+            if (descExpanded) {
                 // Thu gọn
                 binding.tvDescription.setMaxLines(4);
                 binding.btnToggleDescription.setText(R.string.read_more);
@@ -181,7 +183,7 @@ public class ProductDetailFragment extends Fragment {
                 binding.btnToggleDescription.setIconResource(R.drawable.ic_arrow_down);
                 binding.btnToggleDescription.setIconTintResource(R.color.primary);
                 binding.viewDescriptionGradient.setVisibility(View.VISIBLE);
-                isDescExpanded[0] = false;
+                descExpanded = false;
             } else {
                 // Mở rộng
                 binding.tvDescription.setMaxLines(Integer.MAX_VALUE);
@@ -191,10 +193,43 @@ public class ProductDetailFragment extends Fragment {
                 binding.btnToggleDescription.setIconResource(R.drawable.ic_arrow_up);
                 binding.btnToggleDescription.setIconTintResource(R.color.white);
                 binding.viewDescriptionGradient.setVisibility(View.GONE);
-                isDescExpanded[0] = true;
+                descExpanded = true;
             }
         });
     }
+
+    /** Set the description text and re-run the read-more / gradient logic for that content. */
+    private void renderDescription(CharSequence content) {
+        if (binding == null) return;
+        descExpanded = false;
+        binding.tvDescription.setText(content);
+        binding.tvDescription.setMaxLines(Integer.MAX_VALUE);
+        binding.btnToggleDescription.setText(R.string.read_more);
+        binding.btnToggleDescription.setBackgroundResource(R.drawable.bg_btn_toggle_outline);
+        binding.btnToggleDescription.setTextColor(
+                androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary));
+        binding.btnToggleDescription.setIconResource(R.drawable.ic_arrow_down);
+        binding.btnToggleDescription.setIconTintResource(R.color.primary);
+        binding.tvDescription.post(() -> {
+            if (binding == null) return;
+            int lineCount = binding.tvDescription.getLineCount();
+            if (lineCount > 4) {
+                binding.tvDescription.setMaxLines(4);
+                binding.btnToggleDescription.setVisibility(View.VISIBLE);
+                binding.viewDescriptionGradient.setVisibility(View.VISIBLE);
+            } else {
+                binding.btnToggleDescription.setVisibility(View.GONE);
+                binding.viewDescriptionGradient.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    /** Render a description HTML string into a CharSequence (inline images via Glide, cleaned newlines). */
+    private CharSequence renderHtml(String html) {
+        return cleanHtmlNewlines(HtmlCompat.fromHtml(
+                html, HtmlCompat.FROM_HTML_MODE_COMPACT, new GlideImageGetter(binding.tvDescription), null));
+    }
+
 
     private void setupAutoHideToolbar() {
         binding.toolbarOverlay.post(() -> {
@@ -345,28 +380,22 @@ public class ProductDetailFragment extends Fragment {
                 binding.progressBar.setVisibility(loading ? View.VISIBLE : View.GONE));
 
         viewModel.getProduct().observe(getViewLifecycleOwner(), product -> {
-            if (product == null) return;
+            if (product == null) {
+                if (!com.unifurniture.mobile.util.NetworkUtil.isOnline(requireContext())) {
+                    com.unifurniture.mobile.util.CustomBlueDialog.showNoInternet(
+                            requireContext(), () -> { if (currentSlug != null) viewModel.loadProduct(currentSlug); });
+                }
+                return;
+            }
             binding.tvProductName.setText(product.name);
             
             // Logic hiển thị giá mặc định (khi chưa chọn variant hoặc nếu không có variant)
             updatePricingUI(product.minPrice, product.getEffectiveCompareAtPrice());
 
             if (product.description != null && !product.description.isEmpty()) {
-                binding.tvDescription.setText(cleanHtmlNewlines(HtmlCompat.fromHtml(product.description, HtmlCompat.FROM_HTML_MODE_COMPACT, new GlideImageGetter(binding.tvDescription), null)));
-                binding.tvDescription.setMaxLines(Integer.MAX_VALUE);
-                binding.tvDescription.post(() -> {
-                    if (binding == null) return;
-                    int lineCount = binding.tvDescription.getLineCount();
-                    if (lineCount > 4) {
-                        binding.tvDescription.setMaxLines(4);
-                        binding.btnToggleDescription.setText(R.string.read_more);
-                        binding.btnToggleDescription.setVisibility(View.VISIBLE);
-                        binding.viewDescriptionGradient.setVisibility(View.VISIBLE);
-                    } else {
-                        binding.btnToggleDescription.setVisibility(View.GONE);
-                        binding.viewDescriptionGradient.setVisibility(View.GONE);
-                    }
-                });
+                // Description comes already translated from the server (product_translations overlay,
+                // now Google-translated). Just render it.
+                renderDescription(renderHtml(product.description));
             } else {
                 binding.tvDescription.setText("");
                 binding.btnToggleDescription.setVisibility(View.GONE);

@@ -60,6 +60,15 @@ public class LoginFragment extends Fragment {
                     .commit();
         });
 
+        binding.tvForgotPassword.setOnClickListener(v -> {
+            // Navigate to forgot password
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(android.R.id.content, new ForgotFragment())
+                    .addToBackStack(null)
+                    .commit();
+        });
+
         // Observers
         viewModel.isLoading().observe(getViewLifecycleOwner(), loading -> {
             binding.btnLogin.setEnabled(!loading);
@@ -67,7 +76,7 @@ public class LoginFragment extends Fragment {
         });
 
         viewModel.getError().observe(getViewLifecycleOwner(), error -> {
-            if (error != null) Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
+            if (error != null) com.unifurniture.mobile.util.CustomBlueDialog.showError(requireContext(), error);
         });
 
         viewModel.getAuthResult().observe(getViewLifecycleOwner(), result -> {
