@@ -10,6 +10,11 @@
         android:label="@string/nav_home" />
 
     <fragment
+        android:id="@+id/chatFragment"
+        android:name="com.unifurniture.mobile.ui.chat.ChatFragment"
+        android:label="@string/chat_title" />
+
+    <fragment
         android:id="@+id/categoryFragment"
         android:name="com.unifurniture.mobile.ui.product.CategoryFragment"
         android:label="@string/categories" />

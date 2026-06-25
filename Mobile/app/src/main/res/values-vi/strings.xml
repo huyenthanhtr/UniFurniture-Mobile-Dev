@@ -43,6 +43,15 @@
     <string name="favorites">Sản phẩm yêu thích</string>
     <string name="logout">Đăng xuất</string>
 
+    <!-- Chatbot -->
+    <string name="chat_title">Trợ lý UniFurniture</string>
+    <string name="chat_hint">Nhập tin nhắn…</string>
+    <string name="chat_send">Gửi</string>
+    <string name="chat_greeting">Xin chào! Mình là Trợ lý UniFurniture. Bạn có thể nhờ mình tìm sản phẩm, kiểm tra đơn hàng, hoặc hỏi về chính sách.</string>
+    <string name="chat_error">Không kết nối được trợ lý. Vui lòng thử lại.</string>
+    <string name="chat_retrying">Trợ lý đang bận, đang thử lại… (%1$d/%2$d)</string>
+    <string name="chat_empty">Chưa có phản hồi.</string>
+
     <!-- Checkout -->
     <string name="checkout_title">Đặt hàng</string>
     <string name="back">Quay lại</string>

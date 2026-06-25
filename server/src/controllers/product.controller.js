@@ -5,7 +5,7 @@ const ProductVariant = require("../models/ProductVariant");
 
 // Languages we have translated content for in `product_translations`.
 // "vi" is the source (original product docs) so it needs no overlay.
-const TRANSLATABLE_LANGS = new Set(["en"]);
+const TRANSLATABLE_LANGS = new Set(["en", "fr", "zh"]);
 
 /**
  * Overlay translated name/short_description/description from `product_translations`
@@ -538,70 +538,59 @@ async function removeProduct(req, res, next) {
   }
 }
 
+// True when two taxonomy/spec values overlap (handles both scalars and arrays).
+function valuesOverlap(a, b) {
+  if (a == null || b == null) return false;
+  const toArr = (x) => (Array.isArray(x) ? x.map(String) : [String(x)]);
+  const set = new Set(toArr(a));
+  return toArr(b).some((v) => set.has(v));
+}
+
+/**
+ * Real-time content-based recommendations (no precompute table). For a given product, score
+ * every other active product by how similar it is — same collection / category, price closeness,
+ * shared material / size, plus a small popularity boost — and return the top matches. Recommended
+ * item text is overlaid into the requested language (?lang=) like the rest of the catalog.
+ */
 async function getProductRecommendations(req, res, next) {
   try {
     const { slug } = req.params;
-    const { user_id } = req.query;
+    const { lang } = req.query;
 
-    const Recommendation = require('./../models/Recommendation');
-    const UserRec = require('./../models/UserRecommendation');
+    const seed = await Product.findOne({ slug, status: "active" })
+      .select("_id slug category_id collection_id min_price size material")
+      .lean();
+    if (!seed) return res.json({ items: [] });
 
-    const itemRecs = await Recommendation
-      .find({ product_slug: slug })
-      .sort({ score: -1 })
-      .limit(10)
+    const candidates = await Product.find({ _id: { $ne: seed._id }, status: "active" })
+      .select("name slug min_price compare_at_price thumbnail thumbnail_url sold category_id collection_id size material")
       .lean();
 
-    let personalRecs = [];
-    if (user_id && mongoose.Types.ObjectId.isValid(user_id)) {
-      personalRecs = await UserRec.find({ user_id }).lean();
-    }
+    const seedPrice = Number(seed.min_price) || 0;
+    const sameId = (a, b) => a != null && b != null && String(a) === String(b);
 
-    if ((!itemRecs || itemRecs.length === 0) && personalRecs.length === 0) {
-      return res.json({ items: [] });
-    }
-
-    const recommendedSlugs = [
-      ...new Set([
-        ...itemRecs.map(r => r.recommended_slug),
-        ...personalRecs.map(r => r.recommended_slug)
-      ])
-    ];
-
-    const products = await Product
-      .find({ slug: { $in: recommendedSlugs }, status: 'active' })
-      .select('name slug min_price compare_at_price thumbnail thumbnail_url sold category_id collection_id size material')
-      .lean();
-
-    const items = products.map((product) => {
-      const itemRec = itemRecs.find(r => r.recommended_slug === product.slug);
-      const personalRec = personalRecs.find(r => r.recommended_slug === product.slug);
-
-      let finalScore = (itemRec ? itemRec.score : 0);
-      if (personalRec) {
-        finalScore += (personalRec.score * 2);
+    const scored = candidates.map((p) => {
+      let score = 0;
+      if (sameId(p.collection_id, seed.collection_id)) score += 5; // same collection
+      if (sameId(p.category_id, seed.category_id)) score += 3;     // same category
+      if (seedPrice > 0 && p.min_price) {
+        // Price closeness: +2 when equal, decaying to 0 as it diverges by >= 100%.
+        const diffRatio = Math.min(Math.abs(Number(p.min_price) - seedPrice) / seedPrice, 1);
+        score += 2 * (1 - diffRatio);
       }
-
-      return {
-        _id: product._id,
-        name: product.name,
-        slug: product.slug,
-        min_price: product.min_price,
-        compare_at_price: product.compare_at_price,
-        thumbnail: product.thumbnail,
-        thumbnail_url: product.thumbnail_url,
-        sold: product.sold,
-        category_id: product.category_id,
-        collection_id: product.collection_id,
-        size: product.size,
-        material: product.material,
-        score: finalScore
-      };
+      if (valuesOverlap(p.material, seed.material)) score += 3; // shared material
+      if (valuesOverlap(p.size, seed.size)) score += 1;        // shared size
+      score += Math.log10((Number(p.sold) || 0) + 1) * 0.3;    // mild popularity boost
+      return { ...p, score };
     });
 
-    items.sort((a, b) => b.score - a.score);
+    scored.sort((a, b) => b.score - a.score);
+    let items = scored.slice(0, 8);
 
-    res.json({ items: items.slice(0, 8) });
+    // Translate recommended item text into the requested language (same overlay as other endpoints).
+    items = await overlayTranslations(items, lang);
+
+    res.json({ items });
   } catch (err) {
     next(err);
   }

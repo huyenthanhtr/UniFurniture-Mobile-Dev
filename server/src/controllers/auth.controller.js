@@ -168,7 +168,15 @@ async function login(req, res) {
                 id: profile._id,
                 name: profile.full_name,
                 phone: profile.phone,
-                email: profile.email
+                email: profile.email,
+                role: profile.role
+            },
+            profile: {
+                _id: profile._id,
+                full_name: profile.full_name,
+                phone: profile.phone,
+                email: profile.email,
+                role: profile.role
             }
         });
 

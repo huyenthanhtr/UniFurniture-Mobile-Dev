@@ -66,6 +66,17 @@ public class MainActivity extends AppCompatActivity {
 
         setupCartBadge();
         setupConnectivityBanner();
+
+        // Floating assistant button — available on every screen except the chat itself.
+        binding.fabChat.setOnClickListener(v -> {
+            if (navController.getCurrentDestination() != null
+                    && navController.getCurrentDestination().getId() == R.id.chatFragment) {
+                return;
+            }
+            try {
+                navController.navigate(R.id.chatFragment);
+            } catch (IllegalArgumentException ignored) {}
+        });
     }
 
     private android.net.ConnectivityManager.NetworkCallback networkCallback;
@@ -143,6 +154,8 @@ public class MainActivity extends AppCompatActivity {
         if (destination == null) return;
         int tabId = getParentTabId(destination.getId());
         binding.bottomNavigation.setVisibility(shouldShowBottomNav(destination.getId()) ? View.VISIBLE : View.GONE);
+        // Hide the floating chat button while the chat screen is open.
+        binding.fabChat.setVisibility(destination.getId() == R.id.chatFragment ? View.GONE : View.VISIBLE);
 
         Menu menu = binding.bottomNavigation.getMenu();
         for (int i = 0; i < menu.size(); i++) {
