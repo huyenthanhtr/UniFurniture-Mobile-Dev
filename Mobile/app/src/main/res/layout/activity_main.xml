@@ -32,6 +32,20 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:elevation="8dp" />
 
+    <!-- Floating chat button — opens the UniFurniture Assistant from any screen. -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabChat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_chat"
+        android:contentDescription="@string/chat_title"
+        app:backgroundTint="@color/primary"
+        app:tint="@color/white"
+        app:elevation="6dp"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <!-- Offline banner — shown when the device loses connectivity. -->
     <TextView
         android:id="@+id/tvOfflineBanner"
