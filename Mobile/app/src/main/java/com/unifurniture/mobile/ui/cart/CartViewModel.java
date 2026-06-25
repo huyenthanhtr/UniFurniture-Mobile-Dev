@@ -5,21 +5,35 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import com.unifurniture.mobile.UniFurnitureApp;
 import com.unifurniture.mobile.data.model.CartDto;
 import com.unifurniture.mobile.data.repository.CartRepository;
+import com.unifurniture.mobile.util.CartManager;
+import com.unifurniture.mobile.util.LiveDataUtil;
 import com.unifurniture.mobile.util.SessionManager;
 
 public class CartViewModel extends AndroidViewModel {
 
     private final CartRepository repository;
+    private final CartManager cartManager = CartManager.getInstance();
     private final MutableLiveData<CartDto> cart = new MutableLiveData<>();
     private final MutableLiveData<Boolean> loading = new MutableLiveData<>(false);
     private final MutableLiveData<String> error = new MutableLiveData<>();
+    private final Observer<CartDto> sharedCartObserver = sharedCart -> {
+        if (sharedCart != null) {
+            cart.setValue(sharedCart);
+        }
+    };
 
     public CartViewModel(@NonNull Application application) {
         super(application);
         repository = new CartRepository(UniFurnitureApp.getInstance().getApiService());
+        cartManager.getCart().observeForever(sharedCartObserver);
+        CartDto cachedCart = cartManager.getCurrentCart();
+        if (cachedCart != null) {
+            cart.setValue(cachedCart);
+        }
         loadCartIfNeeded();
     }
 
@@ -36,7 +50,12 @@ public class CartViewModel extends AndroidViewModel {
         String cartId = session.getCartId();
         
         if (customerId == null && cartId == null) {
-            cart.setValue(null);
+            CartDto cachedCart = cartManager.getCurrentCart();
+            if (cachedCart != null) {
+                cart.setValue(cachedCart);
+            } else {
+                cart.setValue(null);
+            }
             return;
         }
 
@@ -44,11 +63,14 @@ public class CartViewModel extends AndroidViewModel {
         if (showLoading) {
             loading.setValue(true);
         }
-        repository.getActiveCart(customerId, cartId).observeForever(c -> {
+        LiveDataUtil.observeOnce(repository.getActiveCart(customerId, cartId), c -> {
             if (c != null && c.id != null) {
                 session.saveCartId(c.id);
+                cart.setValue(c);
+                cartManager.updateCart(c);
+            } else if (cart.getValue() == null) {
+                cart.setValue(cartManager.getCurrentCart());
             }
-            cart.setValue(c);
             loading.setValue(false);
         });
     }
@@ -61,12 +83,12 @@ public class CartViewModel extends AndroidViewModel {
             removeItem(cartItemId);
             return;
         }
-        repository.updateCartItemQuantity(cartItemId, quantity)
-                .observeForever(c -> {
+        LiveDataUtil.observeOnce(repository.updateCartItemQuantity(cartItemId, quantity), c -> {
                     if (c != null && c.id != null) {
                         SessionManager.getInstance(getApplication()).saveCartId(c.id);
+                        cart.setValue(c);
+                        cartManager.updateCart(c);
                     }
-                    cart.setValue(c);
                 });
     }
 
@@ -74,11 +96,12 @@ public class CartViewModel extends AndroidViewModel {
         if (cartItemId == null || cartItemId.isEmpty()) {
             return;
         }
-        repository.removeCartItem(cartItemId).observeForever(c -> {
+        LiveDataUtil.observeOnce(repository.removeCartItem(cartItemId), c -> {
             if (c != null && c.id != null) {
                 SessionManager.getInstance(getApplication()).saveCartId(c.id);
+                cart.setValue(c);
+                cartManager.updateCart(c);
             }
-            cart.setValue(c);
         });
     }
 
@@ -87,11 +110,12 @@ public class CartViewModel extends AndroidViewModel {
             return;
         }
         loading.setValue(true);
-        repository.updateCartItemVariant(cartItemId, variantId).observeForever(c -> {
+        LiveDataUtil.observeOnce(repository.updateCartItemVariant(cartItemId, variantId), c -> {
             if (c != null && c.id != null) {
                 SessionManager.getInstance(getApplication()).saveCartId(c.id);
+                cart.setValue(c);
+                cartManager.updateCart(c);
             }
-            cart.setValue(c);
             loading.setValue(false);
         });
     }
@@ -142,4 +166,10 @@ public class CartViewModel extends AndroidViewModel {
     public LiveData<CartDto> getCart() { return cart; }
     public LiveData<Boolean> isLoading() { return loading; }
     public LiveData<String> getError() { return error; }
+
+    @Override
+    protected void onCleared() {
+        cartManager.getCart().removeObserver(sharedCartObserver);
+        super.onCleared();
+    }
 }

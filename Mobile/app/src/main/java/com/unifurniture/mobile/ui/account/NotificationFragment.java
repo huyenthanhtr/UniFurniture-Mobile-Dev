@@ -93,6 +93,12 @@ public class NotificationFragment extends Fragment {
             loadNotifications();
         });
 
+        binding.tabOther.setOnClickListener(v -> {
+            currentFilter = "other";
+            updateTabStyles();
+            loadNotifications();
+        });
+
         // Initial loading
         loadNotifications();
         updateTabStyles();
@@ -126,30 +132,21 @@ public class NotificationFragment extends Fragment {
     private void updateTabStyles() {
         if (binding == null) return;
 
-        int activeTextColor = ContextCompat.getColor(requireContext(), R.color.white);
-        int inactiveTextColor = ContextCompat.getColor(requireContext(), R.color.gray_600);
+        styleTab(binding.tabAll, R.color.primary, "all".equals(currentFilter));
+        styleTab(binding.tabOrders, R.color.notif_order, "order".equals(currentFilter));
+        styleTab(binding.tabAccount, R.color.notif_account, "account".equals(currentFilter));
+        styleTab(binding.tabOther, R.color.notif_other, "other".equals(currentFilter));
+    }
 
-        // Reset tabs style
-        binding.tabAll.setBackgroundResource(R.drawable.bg_tab_pill_unselected);
-        binding.tabAll.setTextColor(inactiveTextColor);
-
-        binding.tabOrders.setBackgroundResource(R.drawable.bg_tab_pill_unselected);
-        binding.tabOrders.setTextColor(inactiveTextColor);
-
-        binding.tabAccount.setBackgroundResource(R.drawable.bg_tab_pill_unselected);
-        binding.tabAccount.setTextColor(inactiveTextColor);
-
-        // Highlight active tab
-        if ("all".equals(currentFilter)) {
-            binding.tabAll.setBackgroundResource(R.drawable.bg_tab_pill_selected);
-            binding.tabAll.setTextColor(activeTextColor);
-        } else if ("order".equals(currentFilter)) {
-            binding.tabOrders.setBackgroundResource(R.drawable.bg_tab_pill_selected);
-            binding.tabOrders.setTextColor(activeTextColor);
-        } else if ("account".equals(currentFilter)) {
-            binding.tabAccount.setBackgroundResource(R.drawable.bg_tab_pill_selected);
-            binding.tabAccount.setTextColor(activeTextColor);
-        }
+    private void styleTab(TextView tab, int colorRes, boolean active) {
+        int typeColor = ContextCompat.getColor(requireContext(), colorRes);
+        tab.setBackgroundResource(active ? R.drawable.bg_tab_pill_selected : R.drawable.bg_tab_pill_unselected);
+        tab.setBackgroundTintList(ColorStateList.valueOf(active
+                ? typeColor
+                : ContextCompat.getColor(requireContext(), R.color.white)));
+        tab.setTextColor(active
+                ? ContextCompat.getColor(requireContext(), R.color.white)
+                : typeColor);
     }
 
     @Override

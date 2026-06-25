@@ -42,6 +42,11 @@ public class ForgotFragment extends Fragment {
 
         updateStepVisibility();
 
+        // Guests must always be able to return to Home without resetting a password.
+        binding.btnBackHome.setOnClickListener(v -> {
+            if (getActivity() != null) getActivity().finish();
+        });
+
         binding.btnSendOtp.setOnClickListener(v -> {
             String phone = binding.etForgotPhone.getText().toString().trim();
             if (phone.length() < 9 || phone.length() > 10) {
@@ -92,7 +97,7 @@ public class ForgotFragment extends Fragment {
 
         viewModel.getError().observe(getViewLifecycleOwner(), error -> {
             if (error != null) {
-                Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
+                com.unifurniture.mobile.util.CustomBlueDialog.showError(requireContext(), error);
             }
         });
 
@@ -102,6 +107,10 @@ public class ForgotFragment extends Fragment {
                     currentStep = "otp";
                     updateStepVisibility();
                     binding.tvOtpMessage.setText(getString(R.string.str_forgot_otp_instruction_format, phoneNum));
+                    // Demo mode: server returned the OTP (no SMS provider) → pre-fill it.
+                    if (result.otp != null && !result.otp.isEmpty()) {
+                        binding.etForgotOtp.setText(result.otp);
+                    }
                 } else if (currentStep.equals("newpass")) {
                     Toast.makeText(requireContext(), result.message != null ? result.message : getString(R.string.str_reset_password_success), Toast.LENGTH_LONG).show();
                     // Go back to login screen

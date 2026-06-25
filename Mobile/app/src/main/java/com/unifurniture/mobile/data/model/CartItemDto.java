@@ -19,6 +19,7 @@ public class CartItemDto {
     public ProductDto product;
     public ProductVariantDto variant;
 
+    public transient boolean isSelected = true;
     private transient boolean normalized;
 
     public String getVariantId() {

@@ -45,6 +45,20 @@
         android:layout_marginTop="6dp"
         android:lineSpacingMultiplier="1.4" />
 
+    <!-- Translate / See Original toggle (on-device translation of the original review text) -->
+    <TextView
+        android:id="@+id/tvTranslateToggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:padding="2dp"
+        android:text="@string/review_translate"
+        android:textSize="12sp"
+        android:textColor="@color/gray_600"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground" />
+
     <!-- Review images -->
     <HorizontalScrollView
         android:id="@+id/scrollImages"

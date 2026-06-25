@@ -192,6 +192,7 @@ public class ProductDetailViewModel extends AndroidViewModel {
     }
 
     private void loadRecommendations(String slug) {
+        // Recommendations are computed server-side (content-based, updates with the catalogue).
         String userId = SessionManager.getInstance(getApplication()).getCustomerId();
         LiveDataUtil.observeOnce(productRepo.getProductRecommendations(slug, userId), recommendations::setValue);
     }
@@ -226,6 +227,7 @@ public class ProductDetailViewModel extends AndroidViewModel {
                     if (cart != null && cart.id != null) {
                         session.saveCartId(cart.id);
                         addToCartResult.setValue(cart);
+                        com.unifurniture.mobile.util.CartManager.getInstance().updateCart(cart);
                     }
                     loading.setValue(false);
                 });

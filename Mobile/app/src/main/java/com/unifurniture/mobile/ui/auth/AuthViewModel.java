@@ -18,6 +18,8 @@ public class AuthViewModel extends AndroidViewModel {
     private final MutableLiveData<Boolean> otpSuccess = new MutableLiveData<>();
     private final MutableLiveData<Boolean> loading = new MutableLiveData<>(false);
     private final MutableLiveData<String> error = new MutableLiveData<>();
+    // Demo OTP returned by the server (no SMS provider). Lets the OTP screen pre-fill the code.
+    private String pendingOtp;
 
     public AuthViewModel(@NonNull Application application) {
         super(application);
@@ -83,13 +85,17 @@ public class AuthViewModel extends AndroidViewModel {
         repository.register(formatted, password, fullName, email).observeForever(response -> {
             loading.setValue(false);
             if (response != null && response.success) {
+                pendingOtp = response.otp;
+                if (response.otp != null) {
+                    showDebugOtpNotification(response.otp);
+                }
                 registerSuccess.setValue(formatted);
             } else {
                 error.setValue(msgOr(response, R.string.error_register_failed));
             }
         });
     }
-
+ 
     public void verifyOtp(String phone, String otp) {
         if (otp == null || otp.trim().isEmpty()) {
             error.setValue(str(R.string.error_fill_info));
@@ -105,22 +111,27 @@ public class AuthViewModel extends AndroidViewModel {
             }
         });
     }
-
+ 
     public void forgotPassword(String phone) {
+        String formatted = formatPhoneForApi(phone);
         loading.setValue(true);
-        repository.forgotPassword(phone).observeForever(response -> {
+        repository.forgotPassword(formatted).observeForever(response -> {
             loading.setValue(false);
             if (response != null) {
+                if (response.otp != null) {
+                    showDebugOtpNotification(response.otp);
+                }
                 authResult.setValue(response);
             } else {
                 error.setValue(str(R.string.error_phone_not_found));
             }
         });
     }
-
+ 
     public void resetPassword(String phone, String otp, String newPassword) {
+        String formatted = formatPhoneForApi(phone);
         loading.setValue(true);
-        repository.resetPassword(phone, otp, newPassword).observeForever(response -> {
+        repository.resetPassword(formatted, otp, newPassword).observeForever(response -> {
             loading.setValue(false);
             if (response != null) {
                 authResult.setValue(response);
@@ -130,10 +141,29 @@ public class AuthViewModel extends AndroidViewModel {
         });
     }
 
+    private void showDebugOtpNotification(String otp) {
+        if (otp == null || otp.trim().isEmpty()) return;
+        
+        // Show Toast immediately
+        android.widget.Toast.makeText(getApplication(), "DEBUG OTP: " + otp, android.widget.Toast.LENGTH_LONG).show();
+
+        // Add to local notification center in the app
+        com.unifurniture.mobile.util.NotificationManager.getInstance(getApplication())
+                .addNotification(
+                        "Mã OTP (Test)",
+                        "Mã OTP đăng ký/khôi phục của bạn là: " + otp,
+                        "otp",
+                        null
+                );
+    }
+ 
+    /** Demo OTP from the last register call (server returns it when no SMS provider is configured). */
+    public String getPendingOtp() { return pendingOtp; }
+
     // One-shot consumers clear these after handling so they don't re-fire on fragment re-creation.
     public void clearRegisterSuccess() { registerSuccess.setValue(null); }
     public void clearOtpSuccess() { otpSuccess.setValue(null); }
-
+ 
     public LiveData<AuthResponse> getAuthResult() { return authResult; }
     public LiveData<String> getRegisterSuccess() { return registerSuccess; }
     public LiveData<Boolean> getOtpSuccess() { return otpSuccess; }

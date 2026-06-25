@@ -15,15 +15,22 @@ import com.unifurniture.mobile.databinding.FragmentOtpBinding;
 public class OtpFragment extends Fragment {
 
     private static final String ARG_PHONE = "phone";
+    private static final String ARG_OTP = "otp";
 
     private FragmentOtpBinding binding;
     private AuthViewModel viewModel;
 
     /** Create the OTP screen for an already-formatted (84…) phone from registration. */
     public static OtpFragment newInstance(String formattedPhone) {
+        return newInstance(formattedPhone, null);
+    }
+
+    /** Same, but pre-fill a demo OTP (server returned it because no SMS provider is configured). */
+    public static OtpFragment newInstance(String formattedPhone, String demoOtp) {
         OtpFragment f = new OtpFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PHONE, formattedPhone);
+        args.putString(ARG_OTP, demoOtp);
         f.setArguments(args);
         return f;
     }
@@ -46,6 +53,19 @@ public class OtpFragment extends Fragment {
         binding.etPhone.setText(phone);
         binding.etPhone.setEnabled(false);
 
+        // Tell the user exactly which number the OTP was sent to (display as a local 0… number).
+        if (phone != null && !phone.isEmpty()) {
+            String display = phone.startsWith("84") && phone.length() > 2 ? "0" + phone.substring(2) : phone;
+            binding.tvSubtitle.setText(getString(R.string.otp_subtitle_format, display));
+        }
+
+        // Demo mode: server returned the OTP (no SMS provider), so pre-fill it for a one-tap verify.
+        String demoOtp = getArguments() != null ? getArguments().getString(ARG_OTP) : null;
+        if (demoOtp != null && !demoOtp.isEmpty()) {
+            binding.etOtp.setText(demoOtp);
+            binding.tvSubtitle.setText(getString(R.string.otp_subtitle_demo, demoOtp));
+        }
+
         binding.btnVerify.setOnClickListener(v -> {
             String otp = binding.etOtp.getText().toString().trim();
             viewModel.verifyOtp(binding.etPhone.getText().toString().trim(), otp);
@@ -55,7 +75,7 @@ public class OtpFragment extends Fragment {
                 binding.progressBar.setVisibility(loading ? View.VISIBLE : View.GONE));
 
         viewModel.getError().observe(getViewLifecycleOwner(), error -> {
-            if (error != null) Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
+            if (error != null) com.unifurniture.mobile.util.CustomBlueDialog.showError(requireContext(), error);
         });
 
         // OTP verified → account created (server returns no token). Like the web, go to Login.

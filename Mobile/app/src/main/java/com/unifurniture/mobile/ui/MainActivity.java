@@ -63,12 +63,99 @@ public class MainActivity extends AppCompatActivity {
         navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
             syncBottomNavigationState(destination);
         });
+
+        setupCartBadge();
+        setupConnectivityBanner();
+
+        // Floating assistant button — available on every screen except the chat itself.
+        binding.fabChat.setOnClickListener(v -> {
+            if (navController.getCurrentDestination() != null
+                    && navController.getCurrentDestination().getId() == R.id.chatFragment) {
+                return;
+            }
+            try {
+                navController.navigate(R.id.chatFragment);
+            } catch (IllegalArgumentException ignored) {}
+        });
+    }
+
+    private android.net.ConnectivityManager.NetworkCallback networkCallback;
+
+    /** Show a thin banner whenever the device is offline; hide it when connectivity returns. */
+    private void setupConnectivityBanner() {
+        binding.tvOfflineBanner.setVisibility(
+                com.unifurniture.mobile.util.NetworkUtil.isOnline(this) ? View.GONE : View.VISIBLE);
+
+        android.net.ConnectivityManager cm =
+                (android.net.ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        if (cm == null) return;
+        networkCallback = new android.net.ConnectivityManager.NetworkCallback() {
+            @Override
+            public void onAvailable(@androidx.annotation.NonNull android.net.Network network) {
+                runOnUiThread(() -> {
+                    if (binding != null) binding.tvOfflineBanner.setVisibility(View.GONE);
+                });
+            }
+            @Override
+            public void onLost(@androidx.annotation.NonNull android.net.Network network) {
+                runOnUiThread(() -> {
+                    if (binding != null && !com.unifurniture.mobile.util.NetworkUtil.isOnline(MainActivity.this))
+                        binding.tvOfflineBanner.setVisibility(View.VISIBLE);
+                });
+            }
+        };
+        cm.registerDefaultNetworkCallback(networkCallback);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (networkCallback != null) {
+            android.net.ConnectivityManager cm =
+                    (android.net.ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+            if (cm != null) {
+                try { cm.unregisterNetworkCallback(networkCallback); } catch (IllegalArgumentException ignored) {}
+            }
+            networkCallback = null;
+        }
+    }
+
+    private void setupCartBadge() {
+        com.unifurniture.mobile.util.CartManager.getInstance().getCartCount().observe(this, count -> {
+            var badge = binding.bottomNavigation.getOrCreateBadge(R.id.cartFragment);
+            if (count > 0) {
+                badge.setVisible(true);
+                badge.setNumber(count);
+            } else {
+                badge.setVisible(false);
+            }
+        });
+
+        // Initial fetch
+        com.unifurniture.mobile.data.remote.ApiService api = com.unifurniture.mobile.data.remote.ApiClient.getInstance();
+        com.unifurniture.mobile.util.SessionManager session = com.unifurniture.mobile.util.SessionManager.getInstance(this);
+        String customerId = session.getCustomerId();
+        String cartId = session.getCartId();
+        if (customerId != null || cartId != null) {
+            api.getActiveCart(customerId, cartId).enqueue(new retrofit2.Callback<com.unifurniture.mobile.data.model.CartDto>() {
+                @Override
+                public void onResponse(retrofit2.Call<com.unifurniture.mobile.data.model.CartDto> call, retrofit2.Response<com.unifurniture.mobile.data.model.CartDto> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        com.unifurniture.mobile.util.CartManager.getInstance().updateCart(response.body());
+                    }
+                }
+                @Override
+                public void onFailure(retrofit2.Call<com.unifurniture.mobile.data.model.CartDto> call, Throwable t) {}
+            });
+        }
     }
 
     private void syncBottomNavigationState(NavDestination destination) {
         if (destination == null) return;
         int tabId = getParentTabId(destination.getId());
         binding.bottomNavigation.setVisibility(shouldShowBottomNav(destination.getId()) ? View.VISIBLE : View.GONE);
+        // Hide the floating chat button while the chat screen is open.
+        binding.fabChat.setVisibility(destination.getId() == R.id.chatFragment ? View.GONE : View.VISIBLE);
 
         Menu menu = binding.bottomNavigation.getMenu();
         for (int i = 0; i < menu.size(); i++) {
@@ -84,6 +171,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean navigateToTopLevelDestination(@IdRes int destinationId) {
+        if (navController.popBackStack(destinationId, false)) {
+            return true;
+        }
+
         NavOptions navOptions = new NavOptions.Builder()
                 .setLaunchSingleTop(true)
                 .setRestoreState(true)

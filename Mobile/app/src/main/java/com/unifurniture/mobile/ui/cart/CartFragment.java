@@ -46,9 +46,36 @@ public class CartFragment extends Fragment {
         setupRecyclerView(savedInstanceState);
         observeData();
 
+        binding.cbSelectAll.setOnCheckedChangeListener((btn, checked) -> {
+            var cart = viewModel.getCart().getValue();
+            if (cart != null && cart.items != null) {
+                for (var item : cart.items) {
+                    item.isSelected = checked;
+                }
+                adapter.notifyDataSetChanged();
+                refreshPricing();
+            }
+        });
+
+        binding.btnDeleteAll.setOnClickListener(v -> {
+            new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.delete_all)
+                    .setMessage("Bạn có chắc chắn muốn xóa tất cả sản phẩm trong giỏ hàng?")
+                    .setPositiveButton(R.string.delete, (dialog, which) -> {
+                        var cart = viewModel.getCart().getValue();
+                        if (cart != null && cart.items != null) {
+                            for (var item : new java.util.ArrayList<>(cart.items)) {
+                                viewModel.removeItem(item.id);
+                            }
+                        }
+                    })
+                    .setNegativeButton(R.string.cancel, null)
+                    .show();
+        });
+
         binding.layoutVoucher.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
-            bundle.putDouble("subtotal", viewModel.getTotal());
+            bundle.putDouble("subtotal", getSelectedTotal());
             bundle.putString("entry_mode", "apply");
             Navigation.findNavController(requireView()).navigate(R.id.voucherListFragment, bundle);
         });
@@ -59,19 +86,42 @@ public class CartFragment extends Fragment {
         });
 
         binding.btnCheckout.setOnClickListener(v -> {
+            var selectedItems = getSelectedItems();
+            if (selectedItems.isEmpty()) {
+                Toast.makeText(getContext(), "Vui lòng chọn ít nhất một sản phẩm", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             Bundle bundle = new Bundle();
-            String couponCode = VoucherManager.getInstance(requireContext()).getSelectedVoucherCode();
-            if (couponCode != null) {
-                bundle.putString("coupon_code", couponCode);
+            VoucherDto selectedVoucher = VoucherManager.getInstance(requireContext()).getSelectedVoucher();
+            if (selectedVoucher != null) {
+                bundle.putString("coupon_code", selectedVoucher.code);
             }
-            if (viewModel.getCart().getValue() != null && viewModel.getCart().getValue().items != null) {
-                bundle.putString("cart_items_json", new com.google.gson.Gson().toJson(viewModel.getCart().getValue().items));
-            }
+            bundle.putString("cart_items_json", new com.google.gson.Gson().toJson(selectedItems));
             Navigation.findNavController(view).navigate(R.id.checkoutFragment, bundle);
         });
 
         binding.btnLoginPrompt.setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), AuthActivity.class)));
+    }
+
+    private java.util.List<com.unifurniture.mobile.data.model.CartItemDto> getSelectedItems() {
+        java.util.List<com.unifurniture.mobile.data.model.CartItemDto> selected = new java.util.ArrayList<>();
+        var cart = viewModel.getCart().getValue();
+        if (cart != null && cart.items != null) {
+            for (var item : cart.items) {
+                if (item.isSelected) selected.add(item);
+            }
+        }
+        return selected;
+    }
+
+    private double getSelectedTotal() {
+        double total = 0;
+        for (var item : getSelectedItems()) {
+            total += item.getTotalPrice();
+        }
+        return total;
     }
 
     private void setupRecyclerView(@Nullable Bundle savedInstanceState) {
@@ -88,11 +138,35 @@ public class CartFragment extends Fragment {
                         bundle.putString("slug", product.slug);
                         Navigation.findNavController(requireView()).navigate(R.id.productDetailFragment, bundle);
                     }
+                },
+                (item, isSelected) -> {
+                    updateSelectAllState();
+                    refreshPricing();
                 }
         );
         binding.rvCartItems.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvCartItems.setAdapter(adapter);
         rvState.bind(binding.rvCartItems, savedInstanceState);
+    }
+
+    private void updateSelectAllState() {
+        var cart = viewModel.getCart().getValue();
+        if (cart == null || cart.items == null || cart.items.isEmpty()) return;
+        
+        boolean allSelected = true;
+        for (var item : cart.items) {
+            if (!item.isSelected) {
+                allSelected = false;
+                break;
+            }
+        }
+        binding.cbSelectAll.setOnCheckedChangeListener(null);
+        binding.cbSelectAll.setChecked(allSelected);
+        binding.cbSelectAll.setOnCheckedChangeListener((btn, checked) -> {
+            for (var item : cart.items) item.isSelected = checked;
+            adapter.notifyDataSetChanged();
+            refreshPricing();
+        });
     }
 
     private void showVariantSelectionDialog(com.unifurniture.mobile.data.model.CartItemDto item) {
@@ -151,6 +225,7 @@ public class CartFragment extends Fragment {
             binding.layoutEmpty.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
             binding.layoutCart.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
             binding.cardCheckout.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+            binding.cardHeader.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
 
             if (isEmpty) {
                 Context context = getContext();
@@ -161,8 +236,11 @@ public class CartFragment extends Fragment {
                     binding.btnLoginPrompt.setVisibility(View.VISIBLE);
                 }
             } else {
-                adapter.submitList(cart.items, rvState.afterSubmitCallback());
-                refreshPricing();
+                adapter.submitList(cart.items, () -> {
+                    rvState.afterSubmitCallback().run();
+                    updateSelectAllState();
+                    refreshPricing();
+                });
             }
         });
 
@@ -180,10 +258,14 @@ public class CartFragment extends Fragment {
         Context context = getContext();
         if (context == null) return;
 
-        double subtotal = viewModel.getTotal();
+        double subtotal = getSelectedTotal();
+        int selectedCount = getSelectedItems().size();
+        binding.tvTotalItems.setText(getString(R.string.total_items_format, selectedCount));
+
         if (subtotal <= 0) {
             VoucherManager.getInstance(context).clearSelectedVoucherCode();
             binding.layoutPricingDetails.setVisibility(View.GONE);
+            binding.tvTotal.setText(FormatUtil.formatCurrency(0.0));
             return;
         }
 
@@ -224,6 +306,7 @@ public class CartFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        viewModel.loadCart();
         refreshPricing();
     }
 

@@ -21,6 +21,13 @@ function normalizePhone(phone) {
     return p;
 }
 
+// Demo OTP mode: return the OTP straight in the API response and skip the SMS provider, so the
+// app can display/auto-fill it without Vonage. Enabled when OTP_DEMO_MODE=true, or by default
+// whenever no SMS provider is configured (so a fresh deploy demos out of the box).
+function isDemoOtpMode() {
+    return process.env.OTP_DEMO_MODE === 'true' || !process.env.VONAGE_API_KEY;
+}
+
 async function register(req, res) {
     try {
         let { phone, email, password_hash, full_name, gender, date_of_birth, address } = req.body;
@@ -69,12 +76,17 @@ async function register(req, res) {
             expireAt: new Date(Date.now() + 5 * 60 * 1000)
         });
 
-        const smsSent = await sendOtpSms(phone, otp);
-        if (!smsSent) {
-            console.error("SMS failed to send for phone:", phone);
+        if (!isDemoOtpMode()) {
+            const smsSent = await sendOtpSms(phone, otp);
+            if (!smsSent) {
+                console.error("SMS failed to send for phone:", phone);
+            }
         }
 
-        return res.status(201).json({ message: "Registration initiated. Please verify the OTP sent to your phone." });
+        return res.status(201).json({
+            message: "Registration initiated. Please verify the OTP sent to your phone.",
+            otp: isDemoOtpMode() ? otp : undefined
+        });
 
     } catch (err) {
         console.error(err);
@@ -156,7 +168,15 @@ async function login(req, res) {
                 id: profile._id,
                 name: profile.full_name,
                 phone: profile.phone,
-                email: profile.email
+                email: profile.email,
+                role: profile.role
+            },
+            profile: {
+                _id: profile._id,
+                full_name: profile.full_name,
+                phone: profile.phone,
+                email: profile.email,
+                role: profile.role
             }
         });
 
@@ -190,12 +210,17 @@ async function forgotPassword(req, res) {
             expireAt: new Date(Date.now() + 5 * 60 * 1000)
         });
 
-        const smsSent = await sendOtpSms(phone, otp);
-        if (!smsSent) {
-            console.error("SMS failed to send for phone:", phone);
+        if (!isDemoOtpMode()) {
+            const smsSent = await sendOtpSms(phone, otp);
+            if (!smsSent) {
+                console.error("SMS failed to send for phone:", phone);
+            }
         }
 
-        return res.status(200).json({ message: "Mã OTP đã được gửi đến số điện thoại của bạn." });
+        return res.status(200).json({
+            message: "Mã OTP đã được gửi đến số điện thoại của bạn.",
+            otp: isDemoOtpMode() ? otp : undefined
+        });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ message: "Lỗi máy chủ", error: err.message });

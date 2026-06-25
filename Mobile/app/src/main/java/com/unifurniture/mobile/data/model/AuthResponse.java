@@ -4,6 +4,7 @@ public class AuthResponse {
     public String token;
     public CustomerDto customer;
     public String message;
+    public String otp;
 
     // Set by AuthRepository: true when the HTTP response was 2xx.
     // Lets callers tell a successful register/OTP (which carry no token) apart from an error.

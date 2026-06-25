@@ -1,10 +1,12 @@
 package com.unifurniture.mobile.ui.adapter;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
@@ -83,11 +85,23 @@ public class VoucherAdapter extends ListAdapter<VoucherDto, VoucherAdapter.ViewH
             }
 
             // Check eligibility against cart subtotal
+            boolean isUsed = item.isUsed;
             boolean isEligible = subtotal >= item.minOrderValue;
-            binding.btnUse.setEnabled(true);
-            binding.btnUse.setAlpha(1.0f);
+            binding.getRoot().setAlpha(isUsed ? 0.55f : 1.0f);
+            binding.layoutStub.setBackgroundColor(ContextCompat.getColor(context,
+                    isUsed ? R.color.gray_500 : R.color.primary));
+            binding.btnUse.setEnabled(!isUsed);
+            binding.btnUse.setAlpha(isUsed ? 0.8f : 1.0f);
+            binding.btnUse.setText(isUsed ? R.string.voucher_used_status : R.string.btn_use);
+            binding.btnUse.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(context,
+                    isUsed ? R.color.gray_400 : R.color.primary)));
             
-            if (isEligible) {
+            if (isUsed) {
+                binding.spacerCondition.setVisibility(View.GONE);
+                binding.tvConditionWarning.setText(R.string.voucher_already_used);
+                binding.tvConditionWarning.setTextColor(ContextCompat.getColor(context, R.color.gray_600));
+                binding.tvConditionWarning.setVisibility(View.VISIBLE);
+            } else if (isEligible) {
                 binding.tvConditionWarning.setVisibility(View.GONE);
                 binding.spacerCondition.setVisibility(View.VISIBLE);
             } else {
@@ -95,11 +109,12 @@ public class VoucherAdapter extends ListAdapter<VoucherDto, VoucherAdapter.ViewH
                 double needed = item.minOrderValue - subtotal;
                 binding.tvConditionWarning.setText(
                         context.getString(R.string.voucher_upsell, FormatUtil.formatCurrency(needed)));
+                binding.tvConditionWarning.setTextColor(ContextCompat.getColor(context, R.color.discount_red));
                 binding.tvConditionWarning.setVisibility(View.VISIBLE);
             }
 
             binding.btnUse.setOnClickListener(v -> {
-                if (listener != null) {
+                if (!item.isUsed && listener != null) {
                     listener.onVoucherClick(item);
                 }
             });

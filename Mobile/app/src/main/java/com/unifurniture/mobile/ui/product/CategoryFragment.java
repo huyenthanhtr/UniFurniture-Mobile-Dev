@@ -78,6 +78,12 @@ public class CategoryFragment extends Fragment {
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        rvState.savePending();
+    }
+
+    @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         rvState.save(outState);

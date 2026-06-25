@@ -58,34 +58,6 @@
                     android:text="1/1"
                     android:visibility="gone" />
 
-                <!-- Toolbar Overlay -->
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp">
-
-                    <ImageButton
-                        android:id="@+id/btnBack"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:background="@drawable/bg_circle_white_alpha"
-                        android:src="@drawable/ic_back"
-                        app:tint="@color/black"
-                        android:padding="8dp"
-                        android:elevation="2dp"
-                        android:contentDescription="@string/back_desc" />
-
-                    <ImageButton
-                        android:id="@+id/btnFavorite"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:layout_alignParentEnd="true"
-                        android:background="@drawable/bg_circle_white_alpha"
-                        android:src="@drawable/ic_favorite_border"
-                        android:padding="10dp"
-                        android:elevation="2dp"
-                        android:contentDescription="@string/favorites" />
-                </RelativeLayout>
             </FrameLayout>
 
             <!-- Main Product Info Card -->
@@ -253,6 +225,7 @@
 
             <!-- Variants Selection -->
             <LinearLayout
+                android:id="@+id/layoutVariantsSection"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
@@ -474,6 +447,37 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
+    <!-- Auto-hide Toolbar Overlay -->
+    <RelativeLayout
+        android:id="@+id/toolbarOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:padding="16dp">
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_circle_white_alpha"
+            android:src="@drawable/ic_back"
+            app:tint="@color/black"
+            android:padding="8dp"
+            android:elevation="2dp"
+            android:contentDescription="@string/back_desc" />
+
+        <ImageButton
+            android:id="@+id/btnFavorite"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:background="@drawable/bg_circle_white_alpha"
+            android:src="@drawable/ic_favorite_border"
+            android:padding="10dp"
+            android:elevation="2dp"
+            android:contentDescription="@string/favorites" />
+    </RelativeLayout>
+
     <!-- Progress Overlay -->
     <ProgressBar
         android:id="@+id/progressBar"
@@ -558,16 +562,46 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnAddToCart"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:text="@string/add_to_cart"
-                android:textAllCaps="false"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                app:cornerRadius="12dp"
-                style="@style/Widget.UniFurniture.Button.Primary" />
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnAddToCart"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:text="@string/add_to_cart"
+                    android:textAllCaps="false"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="12dp"
+                    app:icon="@drawable/ic_cart"
+                    app:iconGravity="textStart"
+                    app:iconPadding="8dp"
+                    app:iconTint="@color/primary"
+                    style="@style/Widget.UniFurniture.Button.Outline" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnBuyNow"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/buy_now"
+                    android:textAllCaps="false"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="12dp"
+                    app:icon="@drawable/ic_check"
+                    app:iconGravity="textStart"
+                    app:iconPadding="8dp"
+                    app:iconTint="@color/white"
+                    style="@style/Widget.UniFurniture.Button.Primary" />
+
+            </LinearLayout>
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>

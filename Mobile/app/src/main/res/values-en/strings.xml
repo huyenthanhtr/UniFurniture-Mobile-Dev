@@ -23,6 +23,8 @@
     <string name="have_account">Already have an account? Login</string>
     <string name="otp_title">OTP Verification</string>
     <string name="otp_subtitle">Enter the OTP sent via SMS</string>
+    <string name="otp_subtitle_format">Enter the 6-digit OTP sent via SMS to %s</string>
+    <string name="otp_subtitle_demo">Demo: your OTP is %s (pre-filled)</string>
     <string name="otp_code">OTP Code</string>
     <string name="btn_verify">Verify</string>
 
@@ -394,4 +396,21 @@
     <string name="quantity_one_placeholder">x1</string>
     <string name="address_list_empty_hint">You have no saved addresses yet.\nTap + to add a new address.</string>
     <string name="avatar_selected_hint">New avatar selected. Tap Save to update.</string>
+    <string name="mark_as_unread">Mark as unread</string>
+    <string name="view_wishlist">View wishlist</string>
+    <string name="used_vouchers_title">Used vouchers</string>
+    <string name="voucher_used_status">Used</string>
+    <string name="voucher_already_used">This voucher has already been used</string>
+    <!-- Reviews translation + recommendations + offline (added) -->
+    <string name="ok">OK</string>
+    <string name="error_title">Error</string>
+    <string name="review_translate">Translate</string>
+    <string name="review_see_original">See original</string>
+    <string name="review_translating">Translating…</string>
+    <string name="review_translate_failed">Couldn\'t translate this review</string>
+    <string name="you_may_be_interested">You may be interested</string>
+    <string name="no_internet_title">No internet connection</string>
+    <string name="no_internet_message">Please check your connection and try again.</string>
+    <string name="no_internet_banner">No internet connection</string>
+    <string name="retry">Retry</string>
 </resources>

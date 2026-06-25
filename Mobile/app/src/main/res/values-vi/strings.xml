@@ -23,6 +23,8 @@
     <string name="have_account">Đã có tài khoản? Đăng nhập</string>
     <string name="otp_title">Xác thực OTP</string>
     <string name="otp_subtitle">Nhập mã OTP đã gửi qua SMS</string>
+    <string name="otp_subtitle_format">Nhập mã OTP 6 số đã gửi qua SMS đến số %s</string>
+    <string name="otp_subtitle_demo">Demo: mã OTP của bạn là %s (đã tự điền sẵn)</string>
     <string name="otp_code">Mã OTP</string>
     <string name="btn_verify">Xác thực</string>
 
@@ -40,6 +42,15 @@
     <string name="my_orders">Đơn hàng của tôi</string>
     <string name="favorites">Sản phẩm yêu thích</string>
     <string name="logout">Đăng xuất</string>
+
+    <!-- Chatbot -->
+    <string name="chat_title">Trợ lý UniFurniture</string>
+    <string name="chat_hint">Nhập tin nhắn…</string>
+    <string name="chat_send">Gửi</string>
+    <string name="chat_greeting">Xin chào! Mình là Trợ lý UniFurniture. Bạn có thể nhờ mình tìm sản phẩm, kiểm tra đơn hàng, hoặc hỏi về chính sách.</string>
+    <string name="chat_error">Không kết nối được trợ lý. Vui lòng thử lại.</string>
+    <string name="chat_retrying">Trợ lý đang bận, đang thử lại… (%1$d/%2$d)</string>
+    <string name="chat_empty">Chưa có phản hồi.</string>
 
     <!-- Checkout -->
     <string name="checkout_title">Đặt hàng</string>
@@ -170,6 +181,7 @@
     <string name="new_notification_hint">Thông báo mới sẽ xuất hiện ở đây khi có hoạt động.</string>
     <string name="content_desc_mark_all_read">Đánh dấu tất cả đã đọc</string>
     <string name="label_orders">Đơn hàng</string>
+    <string name="label_account">Tài khoản</string>
     <string name="label_all">Tất cả</string>
 
     <!-- Wishlist -->
@@ -178,6 +190,7 @@
     <!-- Feedback & UI -->
     <string name="view_cart">Xem giỏ hàng</string>
     <string name="add_to_cart_success">Thêm vào giỏ hàng thành công</string>
+    <string name="buy_now">Mua ngay</string>
     <string name="add_to_cart_error">Không thể thêm vào giỏ hàng. Vui lòng thử lại.</string>
     <string name="content_desc_delete">Xóa</string>
     <string name="close">Đóng</string>
@@ -407,5 +420,34 @@
     <string name="price_placeholder">100.000 VNĐ</string>
     <string name="quantity_one_placeholder">x1</string>
     <string name="address_list_empty_hint">Bạn chưa có địa chỉ nào.\nNhấn + để thêm địa chỉ mới.</string>
-    <string name="avatar_selected_hint">ÄÃ£ chá»n avatar má»›i. Nháº¥n LÆ°u Ä‘á»ƒ cáº­p nháº­t.</string>
+    <string name="avatar_selected_hint">Đã chọn avatar mới. Nhấn Lưu để cập nhật.</string>
+    <string name="label_other">Khác</string>
+    <string name="optimal_voucher_section_title">Voucher tốt nhất cho đơn hàng này</string>
+    <string name="optimal_badge">Tốt nhất</string>
+    <string name="voucher_name_fixed">Voucher giảm %1$s</string>
+    <string name="voucher_desc_fixed">Áp dụng cho đơn hàng từ %1$s</string>
+    <string name="voucher_name_percent">Voucher giảm %1$d%%</string>
+    <string name="voucher_desc_percent">Áp dụng cho đơn hàng từ %1$s</string>
+    <string name="voucher_desc_percent_max">Áp dụng cho đơn hàng từ %1$s, giảm tối đa %2$s</string>
+    <string name="voucher_expiry_date">Hết hạn: %1$s</string>
+    <string name="select_all">Chọn tất cả</string>
+    <string name="delete_all">Xóa tất cả</string>
+    <string name="total_items_format">Tổng (%1$d sản phẩm):</string>
+    <string name="mark_as_unread">Đánh dấu là chưa đọc</string>
+    <string name="view_wishlist">Xem sản phẩm yêu thích</string>
+    <string name="used_vouchers_title">Voucher đã sử dụng</string>
+    <string name="voucher_used_status">Đã sử dụng</string>
+    <string name="voucher_already_used">Voucher này đã được sử dụng</string>
+    <!-- Reviews translation + recommendations + offline (added) -->
+    <string name="ok">OK</string>
+    <string name="error_title">Lỗi</string>
+    <string name="review_translate">Dịch</string>
+    <string name="review_see_original">Xem bản gốc</string>
+    <string name="review_translating">Đang dịch…</string>
+    <string name="review_translate_failed">Không thể dịch đánh giá này</string>
+    <string name="you_may_be_interested">Có thể bạn quan tâm</string>
+    <string name="no_internet_title">Không có kết nối mạng</string>
+    <string name="no_internet_message">Vui lòng kiểm tra kết nối và thử lại.</string>
+    <string name="no_internet_banner">Không có kết nối mạng</string>
+    <string name="retry">Thử lại</string>
 </resources>

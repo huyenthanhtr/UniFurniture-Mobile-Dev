@@ -23,6 +23,8 @@
     <string name="have_account">Already have an account? Login</string>
     <string name="otp_title">OTP Verification</string>
     <string name="otp_subtitle">Enter the OTP sent via SMS</string>
+    <string name="otp_subtitle_format">Enter the 6-digit OTP sent via SMS to %s</string>
+    <string name="otp_subtitle_demo">Demo: your OTP is %s (pre-filled)</string>
     <string name="otp_code">OTP Code</string>
     <string name="btn_verify">Verify</string>
 
@@ -40,6 +42,15 @@
     <string name="my_orders">My Orders</string>
     <string name="favorites">Favorites</string>
     <string name="logout">Logout</string>
+
+    <!-- Chatbot -->
+    <string name="chat_title">UniFurniture Assistant</string>
+    <string name="chat_hint">Type a message…</string>
+    <string name="chat_send">Send</string>
+    <string name="chat_greeting">Hi! I\'m the UniFurniture Assistant. Ask me to find products, check an order, or about our policies.</string>
+    <string name="chat_error">Couldn\'t reach the assistant. Please try again.</string>
+    <string name="chat_retrying">Assistant is busy, retrying… (%1$d/%2$d)</string>
+    <string name="chat_empty">No reply.</string>
 
     <!-- Checkout -->
     <string name="checkout_title">Order</string>
@@ -179,6 +190,7 @@
     <!-- Feedback & UI -->
     <string name="view_cart">View Cart</string>
     <string name="add_to_cart_success">Added to cart successfully</string>
+    <string name="buy_now">Buy now</string>
     <string name="add_to_cart_error">Could not add to cart. Please try again.</string>
     <string name="content_desc_delete">Delete</string>
     <string name="close">Close</string>
@@ -425,7 +437,26 @@
     <string name="voucher_name_fixed">Voucher %1$s</string>
     <string name="voucher_desc_fixed">Applicable for orders from %1$s</string>
     <string name="voucher_name_percent">Discount %1$d%%</string>
-    <string name="voucher_desc_percent">Apply for orders from %1$s</string>
-    <string name="voucher_desc_percent_max">Apply for orders from %1$s, max discount %2$s</string>
+    <string name="voucher_desc_percent">Applicable for orders from %1$s</string>
+    <string name="voucher_desc_percent_max">Applicable for orders from %1$s, max discount %2$s</string>
     <string name="voucher_expiry_date">Expires: %1$s</string>
+    <string name="select_all">Select all</string>
+    <string name="delete_all">Delete all</string>
+    <string name="total_items_format">Total (%1$d items):</string>
+    <string name="view_wishlist">View wishlist</string>
+    <string name="used_vouchers_title">Used vouchers</string>
+    <string name="voucher_used_status">Used</string>
+    <string name="voucher_already_used">This voucher has already been used</string>
+    <!-- Reviews translation + recommendations + offline (added) -->
+    <string name="ok">OK</string>
+    <string name="error_title">Error</string>
+    <string name="review_translate">Translate</string>
+    <string name="review_see_original">See original</string>
+    <string name="review_translating">Translating…</string>
+    <string name="review_translate_failed">Couldn\'t translate this review</string>
+    <string name="you_may_be_interested">You may be interested</string>
+    <string name="no_internet_title">No internet connection</string>
+    <string name="no_internet_message">Please check your connection and try again.</string>
+    <string name="no_internet_banner">No internet connection</string>
+    <string name="retry">Retry</string>
 </resources>
