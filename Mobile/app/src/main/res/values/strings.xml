@@ -249,6 +249,7 @@
     <string name="order_success_desc">Your order has been placed successfully.</string>
     <string name="order_success_ref">Order Reference: %1$s</string>
     <string name="go_home">Continue Shopping</string>
+    <string name="view_order_detail">View Order Details</string>
     <string name="invalid_phone">Invalid phone number. Must be 10 digits starting with 0.</string>
     <string name="invalid_email">Invalid email format.</string>
     <string name="invalid_province">Please enter a valid province.</string>
@@ -397,7 +398,11 @@
     <string name="order_status_title">Order Status</string>
     <string name="order_date_placeholder">Date: 2023-10-10</string>
     <string name="order_date_placeholder_short">2023-10-10</string>
-    <string name="account_community_title">Community</string>
+    <string name="account_community_title">About UniFurniture</string>
+    <string name="about_uni_subtitle">Furniture solutions for warm, practical, modern homes.</string>
+    <string name="about_uni_intro">UniFurniture brings together product quality, thoughtful service, and transparent information so every home setup feels easier to finish.</string>
+    <string name="about_uni_value_sustainable">Sustainable</string>
+    <string name="blog_empty_message">No published blog posts are available yet.</string>
 
     <!-- Timeline Labels -->
     <string name="timeline_step_1">Pending</string>
@@ -407,6 +412,9 @@
     <string name="timeline_cancel_pending_hint">Waiting for cancellation confirmation</string>
     <string name="cod_short">COD</string>
     <string name="payment_unpaid">Unpaid</string>
+    <string name="payment_paid">Paid</string>
+    <string name="payment_pending">Pending payment</string>
+    <string name="payment_failed">Payment failed</string>
     <string name="zero_amount">0</string>
     <string name="review_content_placeholder">Review content goes here</string>
     <string name="shop_reply_placeholder">Thank you for supporting us!</string>

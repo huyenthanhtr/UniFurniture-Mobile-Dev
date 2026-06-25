@@ -9,6 +9,16 @@ function buildSlug(value) {
   });
 }
 
+const TranslationSchema = new mongoose.Schema(
+  {
+    title: { type: String, default: "", trim: true },
+    caption: { type: String, default: "", trim: true },
+    content: { type: String, default: "" },
+    post_category: { type: String, default: "Blog", trim: true },
+  },
+  { _id: false }
+);
+
 const PostSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, trim: true },
@@ -24,11 +34,18 @@ const PostSchema = new mongoose.Schema(
       index: true,
     },
     published_at: { type: Date, default: null },
+    translations: {
+      vi: { type: TranslationSchema, default: undefined },
+      en: { type: TranslationSchema, default: undefined },
+      fr: { type: TranslationSchema, default: undefined },
+      zh: { type: TranslationSchema, default: undefined },
+    },
+    is_seed: { type: Boolean, default: false },
   },
   { timestamps: true, collection: "posts" }
 );
 
-PostSchema.pre("validate", function preValidate(next) {
+PostSchema.pre("validate", function preValidate() {
   if (!this.slug && this.title) {
     this.slug = buildSlug(this.title);
   } else if (this.slug) {
@@ -38,8 +55,6 @@ PostSchema.pre("validate", function preValidate(next) {
   if (this.status === "published" && !this.published_at) {
     this.published_at = new Date();
   }
-
-  next();
 });
 
 PostSchema.statics.buildSlug = buildSlug;

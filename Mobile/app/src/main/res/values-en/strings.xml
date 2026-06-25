@@ -233,6 +233,7 @@
     <string name="order_success_desc">Your order has been placed successfully.</string>
     <string name="order_success_ref">Order Reference: %1$s</string>
     <string name="go_home">Continue Shopping</string>
+    <string name="view_order_detail">View Order Details</string>
     <string name="invalid_phone">Invalid phone number. Must be 10 digits starting with 0.</string>
     <string name="invalid_email">Invalid email format.</string>
     <string name="invalid_province">Please enter a valid province.</string>
@@ -303,7 +304,14 @@
     <string name="status_cancelled">Cancelled</string>
     <string name="account_about_title">About UniFurniture</string>
     <string name="account_policy_title">Policies</string>
-    <string name="account_community_title">Community</string>
+    <string name="account_community_title">About UniFurniture</string>
+    <string name="about_uni_subtitle">Furniture solutions for warm, practical, modern homes.</string>
+    <string name="about_uni_intro">UniFurniture brings together product quality, thoughtful service, and transparent information so every home setup feels easier to finish.</string>
+    <string name="home_value_quality">Carefully crafted quality</string>
+    <string name="home_value_elegant">Elegant and practical design</string>
+    <string name="home_value_dedicated">Dedicated after-sales support</string>
+    <string name="about_uni_value_sustainable">Sustainable</string>
+    <string name="blog_empty_message">No published blog posts are available yet.</string>
     <string name="tracking_code_required">Please enter a tracking code</string>
     <string name="tracking_not_found">No order found with this code</string>
     <string name="tracking_not_found_title">Tracking code not found</string>
@@ -378,6 +386,9 @@
     <string name="status_cancel_pending">Cancellation Requested</string>
     <string name="cod_short">COD</string>
     <string name="payment_unpaid">Unpaid</string>
+    <string name="payment_paid">Paid</string>
+    <string name="payment_pending">Pending payment</string>
+    <string name="payment_failed">Payment failed</string>
     <string name="zero_amount">0</string>
     <string name="review_content_placeholder">Review content goes here</string>
     <string name="shop_reply_placeholder">Thank you for supporting us!</string>

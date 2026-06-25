@@ -14,6 +14,7 @@ import { AdminCustomerAddressDetail } from './pages/admin-customer-address-detai
 import { AdminCollections } from './pages/admin-collections/admin-collections';
 import { AdminReview } from './pages/admin-review/admin-review';
 import { AdminDashboard } from './pages/admin-dashboard/admin-dashboard';
+import { AdminBlogs } from './pages/admin-blogs/admin-blogs';
 type PendingChangesComponent = {
   canDeactivate: () => boolean | Promise<boolean>;
 };
@@ -33,6 +34,7 @@ export const routes: Routes = [
       { path: 'promotions', component: AdminCoupons },
       { path: 'categories', component: AdminCategoryList},
       { path: 'collections', component: AdminCollections},
+      { path: 'blogs', component: AdminBlogs },
       { path: 'reviews', component: AdminReview },
       { path: 'dashboard', component: AdminDashboard},
       { path: 'products', component: AdminProducts },

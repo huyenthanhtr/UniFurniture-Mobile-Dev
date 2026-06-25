@@ -250,6 +250,7 @@
     <string name="order_success_desc">Đơn hàng của bạn đã được đặt thành công.</string>
     <string name="order_success_ref">Mã đơn hàng: %1$s</string>
     <string name="go_home">Tiếp tục mua sắm</string>
+    <string name="view_order_detail">Xem chi tiết đơn hàng</string>
     <string name="invalid_phone">Số điện thoại không hợp lệ. Phải gồm 10 chữ số bắt đầu bằng 0.</string>
     <string name="invalid_email">Định dạng email không hợp lệ.</string>
     <string name="invalid_province">Vui lòng nhập Tỉnh/Thành phố.</string>
@@ -393,7 +394,14 @@
     <string name="order_status_title">Trạng thái đơn hàng</string>
     <string name="order_date_placeholder">Ngày: 2023-10-10</string>
     <string name="order_date_placeholder_short">2023-10-10</string>
-    <string name="account_community_title">Cộng đồng</string>
+    <string name="account_community_title">Về UniFurniture</string>
+    <string name="about_uni_subtitle">Giải pháp nội thất ấm áp, tiện dụng và hiện đại cho tổ ấm của bạn.</string>
+    <string name="about_uni_intro">UniFurniture kết hợp chất lượng sản phẩm, dịch vụ tận tâm và thông tin minh bạch để việc hoàn thiện không gian sống trở nên nhẹ nhàng hơn.</string>
+    <string name="home_value_quality">Chất lượng được chăm chút kỹ</string>
+    <string name="home_value_elegant">Thiết kế đẹp và tiện dụng</string>
+    <string name="home_value_dedicated">Hỗ trợ hậu mãi tận tâm</string>
+    <string name="about_uni_value_sustainable">Bền vững</string>
+    <string name="blog_empty_message">Chưa có bài blog nào được xuất bản.</string>
 
     <!-- Timeline Labels -->
     <string name="timeline_step_1">Chờ xác nhận</string>
@@ -403,6 +411,9 @@
     <string name="timeline_cancel_pending_hint">Đang chờ xác nhận hủy đơn</string>
     <string name="cod_short">COD</string>
     <string name="payment_unpaid">Chưa thanh toán</string>
+    <string name="payment_paid">Đã thanh toán</string>
+    <string name="payment_pending">Chờ thanh toán</string>
+    <string name="payment_failed">Thanh toán thất bại</string>
     <string name="zero_amount">0</string>
     <string name="review_content_placeholder">Nội dung đánh giá</string>
     <string name="shop_reply_placeholder">Cảm ơn bạn đã ủng hộ!</string>

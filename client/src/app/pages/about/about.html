@@ -1,14 +1,14 @@
 ﻿<section class="about-hero">
   <div class="about-hero__content">
-    <span class="eyebrow">Về U-Home Furni</span>
-    <h1>U-HOME FURNI - Sống lành, bền đẹp theo năm tháng</h1>
+    <span class="eyebrow">Về UniFurniture</span>
+    <h1>UniFurniture - Sống lành, bền đẹp theo năm tháng</h1>
     <p>
-      U-Home Furni là thương hiệu nội thất hiện đại, tập trung vào thiết kế tối giản, thân thiện sức khỏe và
+      UniFurniture là thương hiệu nội thất hiện đại, tập trung vào thiết kế tối giản, thân thiện sức khỏe và
       tối ưu không gian sống cho gia đình trẻ.
     </p>
     <div class="hero-actions">
       <a routerLink="/products" class="btn-primary">Khám phá bộ sưu tập</a>
-      <a routerLink="/cong-dong" class="btn-secondary">Cộng đồng U-Home</a>
+      <a href="#uni-blogs" class="btn-secondary">Xem Blog</a>
     </div>
     <div class="hero-metrics">
       <div class="metric">
@@ -180,6 +180,55 @@
         <p>BIFMA là chứng nhận về độ bền và an toàn của nội thất, đặc biệt là nội thất văn phòng.</p>
       </div>
     </article>
+  </div>
+</section>
+
+<section id="uni-blogs" class="about-section blog-section">
+  <div class="section-header">
+    <h2>Blogs</h2>
+    <p>Câu chuyện, kinh nghiệm và ghi chú thiết kế mới nhất từ UniFurniture.</p>
+  </div>
+
+  <div class="blog-loading" *ngIf="blogsLoading">Đang tải bài viết...</div>
+
+  <div class="blog-filter-row" *ngIf="!blogsLoading && blogPosts.length > 0">
+    <button
+      type="button"
+      class="blog-filter-chip"
+      [class.active]="selectedBlogCategory === 'all'"
+      (click)="selectBlogCategory('all')"
+    >
+      Tất cả
+    </button>
+    <button
+      type="button"
+      class="blog-filter-chip"
+      *ngFor="let category of blogCategories"
+      [class.active]="selectedBlogCategory === category"
+      (click)="selectBlogCategory(category)"
+    >
+      {{ category }}
+    </button>
+  </div>
+
+  <div class="blog-carousel" *ngIf="!blogsLoading && filteredBlogPosts.length > 0">
+    <article class="blog-card" *ngFor="let post of filteredBlogPosts">
+      <img *ngIf="post.thumbnailUrl" [src]="post.thumbnailUrl" [alt]="post.title" />
+      <div class="blog-thumb-placeholder" *ngIf="!post.thumbnailUrl">UniFurniture</div>
+      <div class="blog-card__body">
+        <span>{{ post.category }}</span>
+        <h3>{{ post.title }}</h3>
+        <p>{{ post.caption || post.content }}</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="blog-loading" *ngIf="!blogsLoading && blogPosts.length === 0">
+    Chưa có bài blog nào được xuất bản.
+  </div>
+
+  <div class="blog-loading" *ngIf="!blogsLoading && blogPosts.length > 0 && filteredBlogPosts.length === 0">
+    Chưa có bài blog phù hợp với bộ lọc.
   </div>
 </section>
 

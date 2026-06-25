@@ -1,0 +1,263 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Quản lý Blog</h1>
+      <p>{{ totalItems }} bài viết</p>
+    </div>
+
+    <button class="btn btn-primary" (click)="openCreate()">
+      <i class="fas fa-plus"></i>
+      Thêm bài viết
+    </button>
+  </div>
+
+  <div class="filter-bar card">
+    <input
+      type="text"
+      class="search-input"
+      placeholder="Tìm theo tiêu đề, caption, danh mục..."
+      [(ngModel)]="filter.search"
+      (input)="onFilterChange()"
+    />
+
+    <select class="toolbar-select" [(ngModel)]="filter.status" (change)="onFilterChange()">
+      <option value="">Tất cả trạng thái</option>
+      <option value="published">Đã xuất bản</option>
+      <option value="draft">Bản nháp</option>
+    </select>
+
+    <button class="btn btn-ghost btn-icon" (click)="resetFilters()" title="Đặt lại">
+      <i class="fas fa-undo"></i>
+    </button>
+  </div>
+
+  <div *ngIf="resultMessage" class="notice">
+    <span>{{ resultMessage }}</span>
+    <button type="button" (click)="resultMessage = ''">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <div class="table-wrap card">
+    <div *ngIf="loading" class="state">Đang tải blog...</div>
+
+    <table *ngIf="!loading">
+      <thead>
+        <tr>
+          <th>Bài viết</th>
+          <th>Danh mục</th>
+          <th>Trạng thái</th>
+          <th>Ngày đăng</th>
+          <th class="th-actions">Hành động</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngIf="posts.length === 0">
+          <td colspan="5" class="state">Chưa có bài blog phù hợp.</td>
+        </tr>
+
+        <tr *ngFor="let post of posts">
+          <td>
+            <div class="post-cell">
+              <img
+                *ngIf="post.thumbnail_url"
+                [src]="imageUrl(post.thumbnail_url)"
+                [alt]="post.title"
+                class="thumb"
+              />
+              <div class="thumb placeholder" *ngIf="!post.thumbnail_url">
+                <i class="fas fa-image"></i>
+              </div>
+
+              <div>
+                <strong>{{ post.title }}</strong>
+                <p>{{ post.caption }}</p>
+                <span *ngIf="post.slug">/{{ post.slug }}</span>
+              </div>
+            </div>
+          </td>
+          <td>{{ post.post_category || 'Blog' }}</td>
+          <td>
+            <span class="status-pill" [class.published]="post.status === 'published'">
+              {{ statusLabel(post.status) }}
+            </span>
+          </td>
+          <td>{{ formatDate(post.published_at || post.createdAt) }}</td>
+          <td>
+            <div class="actions">
+              <button class="btn btn-ghost btn-sm btn-icon-only" (click)="openPreview(post)" title="Xem preview">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button class="btn btn-ghost btn-sm btn-icon-only" (click)="openEdit(post)" title="Sửa">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-danger btn-sm btn-icon-only" (click)="deletePost(post)" title="Xóa">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination" *ngIf="totalPages > 1">
+    <button class="pg pg-arrow" (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1">
+      &#8249;
+    </button>
+
+    <button
+      class="pg"
+      *ngFor="let page of visiblePages"
+      [class.active]="page === currentPage"
+      (click)="changePage(page)"
+    >
+      {{ page }}
+    </button>
+
+    <button
+      class="pg pg-arrow"
+      (click)="changePage(currentPage + 1)"
+      [disabled]="currentPage === totalPages"
+    >
+      &#8250;
+    </button>
+  </div>
+
+  <div class="modal-overlay" *ngIf="showModal">
+    <div class="modal-card">
+      <div class="modal-card-header">
+        <h3>{{ isEdit ? 'Chỉnh sửa Blog' : 'Thêm Blog' }}</h3>
+        <button class="close-modal" (click)="closeModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="modal-card-body">
+        <div *ngIf="validationError" class="validation-alert">
+          <i class="fas fa-exclamation-triangle"></i>
+          {{ validationError }}
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Slug</label>
+            <input
+              class="search-input"
+              type="text"
+              [(ngModel)]="currentPost.slug"
+              placeholder="Tự tạo từ tiêu đề tiếng Việt nếu bỏ trống"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Trạng thái</label>
+            <select class="toolbar-select" [(ngModel)]="currentPost.status">
+              <option value="draft">Bản nháp</option>
+              <option value="published">Đã xuất bản</option>
+            </select>
+          </div>
+
+          <div class="form-group full-width">
+            <label>Ảnh thumbnail</label>
+            <input
+              class="search-input"
+              type="text"
+              [(ngModel)]="currentPost.thumbnail_url"
+              placeholder="https://... hoặc /assets/images/..."
+            />
+          </div>
+
+          <div class="form-group full-width">
+            <label>Ngôn ngữ nội dung</label>
+            <div class="language-tabs">
+              <button
+                type="button"
+                *ngFor="let lang of languages"
+                class="language-tab"
+                [class.active]="activeLanguage === lang.code"
+                (click)="setActiveLanguage(lang.code)"
+              >
+                {{ lang.label }}
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group full-width">
+            <label>Tiêu đề *</label>
+            <input class="search-input" type="text" [(ngModel)]="currentPost.translations[activeLanguage].title" />
+          </div>
+
+          <div class="form-group full-width">
+            <label>Danh mục</label>
+            <input class="search-input" type="text" [(ngModel)]="currentPost.translations[activeLanguage].post_category" />
+          </div>
+
+          <div class="form-group full-width">
+            <label>Caption *</label>
+            <textarea rows="3" [(ngModel)]="currentPost.translations[activeLanguage].caption"></textarea>
+          </div>
+
+          <div class="form-group full-width">
+            <label>Nội dung *</label>
+            <textarea rows="9" [(ngModel)]="currentPost.translations[activeLanguage].content"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-card-footer">
+        <button class="btn btn-ghost" (click)="closeModal()">Hủy</button>
+        <button class="btn btn-primary" [disabled]="saving" (click)="savePost()">
+          {{ saving ? 'Đang lưu...' : 'Lưu bài viết' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" *ngIf="previewPost">
+    <div class="modal-card preview-card">
+      <div class="modal-card-header">
+        <h3>Xem preview Blog</h3>
+        <button class="close-modal" (click)="closePreview()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="modal-card-body" *ngIf="previewTranslation as preview">
+        <div class="language-tabs preview-tabs">
+          <button
+            type="button"
+            *ngFor="let lang of languages"
+            class="language-tab"
+            [class.active]="previewLanguage === lang.code"
+            (click)="setPreviewLanguage(lang.code)"
+          >
+            {{ lang.label }}
+          </button>
+        </div>
+
+        <article class="preview-article">
+          <img
+            *ngIf="previewPost.thumbnail_url"
+            [src]="imageUrl(previewPost.thumbnail_url)"
+            [alt]="preview.title"
+            class="preview-image"
+          />
+          <span class="preview-category">{{ preview.post_category || 'Blog' }}</span>
+          <h2>{{ preview.title }}</h2>
+          <p class="preview-caption">{{ preview.caption }}</p>
+          <div class="preview-content" [innerHTML]="preview.content"></div>
+        </article>
+      </div>
+
+      <div class="modal-card-footer">
+        <button class="btn btn-ghost" (click)="closePreview()">Đóng</button>
+        <button class="btn btn-primary" (click)="editFromPreview()">
+          <i class="fas fa-edit"></i>
+          Chỉnh sửa
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
