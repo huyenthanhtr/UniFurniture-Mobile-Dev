@@ -1,6 +1,5 @@
 package com.unifurniture.mobile.ui.account;
 
-import android.content.Intent;
 import android.util.TypedValue;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -16,7 +15,7 @@ import com.unifurniture.mobile.data.model.ProfileDto;
 import com.unifurniture.mobile.data.remote.ApiClient;
 import com.unifurniture.mobile.data.remote.ApiService;
 import com.unifurniture.mobile.databinding.FragmentAccountBinding;
-import com.unifurniture.mobile.ui.auth.AuthActivity;
+import com.unifurniture.mobile.ui.MainActivity;
 import com.unifurniture.mobile.util.SessionManager;
 import com.unifurniture.mobile.util.ToastUtil;
 import com.bumptech.glide.Glide;
@@ -56,7 +55,7 @@ public class AccountFragment extends Fragment {
             binding.btnLogout.setVisibility(View.GONE);
             
             binding.btnLoginPrompt.setOnClickListener(v ->
-                    startActivity(new Intent(requireContext(), AuthActivity.class)));
+                    ((MainActivity) requireActivity()).launchAuth());
             
             binding.itemOrders.setOnClickListener(v -> 
                     ToastUtil.show(requireContext(), R.string.toast_login_required_orders));
@@ -108,8 +107,13 @@ public class AccountFragment extends Fragment {
             
             binding.btnLogout.setOnClickListener(v -> {
                 session.logout();
-                startActivity(new Intent(requireContext(), AuthActivity.class));
-                requireActivity().finish();
+                MainActivity main = (MainActivity) requireActivity();
+                // MainActivity stays alive (its ViewModels and caches are preserved), so refresh
+                // the now-guest cart badge, leave the stale logged-in account screen, then show
+                // the auth screen on top.
+                main.refreshCart();
+                main.goToHome();
+                main.launchAuth();
             });
         }
 
