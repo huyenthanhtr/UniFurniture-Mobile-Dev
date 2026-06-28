@@ -1,6 +1,5 @@
 package com.unifurniture.mobile.ui.auth;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +11,6 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.databinding.FragmentLoginBinding;
-import com.unifurniture.mobile.ui.MainActivity;
 import com.unifurniture.mobile.util.SessionManager;
 
 public class LoginFragment extends Fragment {
@@ -115,20 +113,18 @@ public class LoginFragment extends Fragment {
                                 null
                         );
 
-                // Go to MainActivity
-                startActivity(new Intent(requireContext(), MainActivity.class));
-                requireActivity().finish();
+                // Login succeeded — hand control back to the still-alive MainActivity, which
+                // navigates to Home in place (no recreate).
+                if (getActivity() instanceof AuthActivity) {
+                    ((AuthActivity) getActivity()).finishLoggedIn();
+                }
             }
         });
     }
 
-    /**
-     * Sec 6: Return the guest to the shopping experience (Home). AuthActivity sits on top of
-     * MainActivity, so finishing it drops the user straight back where they were browsing.
-     */
     private void goHome() {
-        if (getActivity() != null) {
-            getActivity().finish();
+        if (getActivity() instanceof AuthActivity) {
+            ((AuthActivity) getActivity()).goHome();
         }
     }
 

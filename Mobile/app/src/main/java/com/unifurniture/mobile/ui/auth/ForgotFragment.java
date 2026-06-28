@@ -44,7 +44,7 @@ public class ForgotFragment extends Fragment {
 
         // Guests must always be able to return to Home without resetting a password.
         binding.btnBackHome.setOnClickListener(v -> {
-            if (getActivity() != null) getActivity().finish();
+            if (getActivity() instanceof AuthActivity) ((AuthActivity) getActivity()).goHome();
         });
 
         binding.btnSendOtp.setOnClickListener(v -> {

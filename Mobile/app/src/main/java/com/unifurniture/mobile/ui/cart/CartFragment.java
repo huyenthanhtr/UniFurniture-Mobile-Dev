@@ -1,7 +1,6 @@
 package com.unifurniture.mobile.ui.cart;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,8 +14,8 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.databinding.FragmentCartBinding;
+import com.unifurniture.mobile.ui.MainActivity;
 import com.unifurniture.mobile.ui.adapter.CartItemAdapter;
-import com.unifurniture.mobile.ui.auth.AuthActivity;
 import com.unifurniture.mobile.util.FormatUtil;
 import com.unifurniture.mobile.util.NavViewModelProvider;
 import com.unifurniture.mobile.util.RecyclerViewStateHelper;
@@ -102,7 +101,7 @@ public class CartFragment extends Fragment {
         });
 
         binding.btnLoginPrompt.setOnClickListener(v ->
-                startActivity(new Intent(requireContext(), AuthActivity.class)));
+                ((MainActivity) requireActivity()).launchAuth());
     }
 
     private java.util.List<com.unifurniture.mobile.data.model.CartItemDto> getSelectedItems() {

@@ -1,10 +1,13 @@
 package com.unifurniture.mobile.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.IdRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
@@ -13,6 +16,7 @@ import androidx.navigation.NavOptions;
 import androidx.navigation.fragment.NavHostFragment;
 import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.databinding.ActivityMainBinding;
+import com.unifurniture.mobile.ui.auth.AuthActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -22,6 +26,22 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private NavController navController;
     private boolean syncingBottomNav = false;
+
+    // Auth runs as a result-returning activity on top of MainActivity, so this activity (and its
+    // ViewModels / caches / FragmentManager) stays alive while the user logs in or backs out.
+    private final ActivityResultLauncher<Intent> authLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                int code = result.getResultCode();
+                if (code == AuthActivity.RESULT_GO_HOME || code == AuthActivity.RESULT_LOGGED_IN) {
+                    goToHome();
+                }
+                if (code == AuthActivity.RESULT_LOGGED_IN) {
+                    // Session changed but this activity wasn't recreated, so re-fetch the cart for
+                    // the new session to keep the bottom-nav badge in sync.
+                    refreshCart();
+                }
+            });
+
     private float chatFabDownRawX;
     private float chatFabDownRawY;
     private float chatFabDownX;
@@ -93,6 +113,19 @@ public class MainActivity extends AppCompatActivity {
         setupDraggableChatFab();
     }
 
+    /** Open the login / registration flow without leaving MainActivity. The outcome is handled by
+     *  {@link #authLauncher}. Call this from fragments instead of starting AuthActivity directly. */
+    public void launchAuth() {
+        authLauncher.launch(new Intent(this, AuthActivity.class));
+    }
+
+    /** Reset navigation to the Home tab in place — no Activity recreation, ViewModels preserved. */
+    public void goToHome() {
+        if (navController != null) {
+            navigateToTopLevelDestination(R.id.homeFragment);
+        }
+    }
+
     private android.net.ConnectivityManager.NetworkCallback networkCallback;
 
     /** Show a thin banner whenever the device is offline; hide it when connectivity returns. */
@@ -145,23 +178,35 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Initial fetch
-        com.unifurniture.mobile.data.remote.ApiService api = com.unifurniture.mobile.data.remote.ApiClient.getInstance();
-        com.unifurniture.mobile.util.SessionManager session = com.unifurniture.mobile.util.SessionManager.getInstance(this);
+        refreshCart();
+    }
+
+    /**
+     * Re-fetch the active cart for the current session into CartManager so the bottom-nav badge
+     * stays correct after login/logout. This activity is no longer recreated when the session
+     * changes (auth runs via {@link #authLauncher}), so the old onCreate fetch is no longer enough.
+     * With no session (guest / just logged out) we clear the cart so a stale badge doesn't linger.
+     */
+    public void refreshCart() {
+        com.unifurniture.mobile.util.SessionManager session =
+                com.unifurniture.mobile.util.SessionManager.getInstance(this);
         String customerId = session.getCustomerId();
         String cartId = session.getCartId();
-        if (customerId != null || cartId != null) {
-            api.getActiveCart(customerId, cartId).enqueue(new retrofit2.Callback<com.unifurniture.mobile.data.model.CartDto>() {
-                @Override
-                public void onResponse(retrofit2.Call<com.unifurniture.mobile.data.model.CartDto> call, retrofit2.Response<com.unifurniture.mobile.data.model.CartDto> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        com.unifurniture.mobile.util.CartManager.getInstance().updateCart(response.body());
-                    }
-                }
-                @Override
-                public void onFailure(retrofit2.Call<com.unifurniture.mobile.data.model.CartDto> call, Throwable t) {}
-            });
+        if (customerId == null && cartId == null) {
+            com.unifurniture.mobile.util.CartManager.getInstance().updateCart(null);
+            return;
         }
+        com.unifurniture.mobile.data.remote.ApiService api = com.unifurniture.mobile.data.remote.ApiClient.getInstance();
+        api.getActiveCart(customerId, cartId).enqueue(new retrofit2.Callback<com.unifurniture.mobile.data.model.CartDto>() {
+            @Override
+            public void onResponse(retrofit2.Call<com.unifurniture.mobile.data.model.CartDto> call, retrofit2.Response<com.unifurniture.mobile.data.model.CartDto> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    com.unifurniture.mobile.util.CartManager.getInstance().updateCart(response.body());
+                }
+            }
+            @Override
+            public void onFailure(retrofit2.Call<com.unifurniture.mobile.data.model.CartDto> call, Throwable t) {}
+        });
     }
 
     private void setupDraggableChatFab() {
