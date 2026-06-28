@@ -26,6 +26,7 @@ const productModels3dRoutes = require("./src/routes/product-model-3d.routes");
 const reviewRoutes = require('./src/routes/review.routes');
 const wishlistRoutes = require("./src/routes/wishlist.routes");
 const loyaltyRoutes = require("./src/routes/loyalty.routes");
+const notificationsRoutes = require("./src/routes/notifications.routes");
 const postsRoutes = require("./src/routes/posts.routes");
 const { normalizeSystemCodes } = require("./src/utils/normalize-system-codes");
 const app = express();
@@ -59,6 +60,7 @@ app.use("/api/product-models-3d", productModels3dRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/loyalty", loyaltyRoutes);
+app.use("/api/notifications", notificationsRoutes);
 app.use("/api/posts", postsRoutes);
 app.use('/api/admin/dashboard', dashboardRoutes);
 connectDB().then(async () => {

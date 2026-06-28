@@ -157,6 +157,7 @@
     <string name="voucher_expiry">Expiry: %1$s</string>
     <string name="copy_code">Copy code</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
+    <string name="birthday_reward_subtle">Birthday offer saved for your account.</string>
     <string name="voucher_discount_amount">Discount %1$s</string>
     <string name="voucher_condition">Applied for orders from %1$s.</string>
     <string name="voucher_upsell">Buy %1$s more to apply</string>
@@ -344,13 +345,11 @@
     <string name="coupon_min_order">Orders from %1$s</string>
     <string name="coupon_no_min">No minimum order</string>
 
-    <!-- Birthday popup -->
-    <string name="birthday_popup_title">🎉 Happy Birthday!</string>
-    <string name="birthday_popup_message">UniFurniture is giving you a 50%% discount voucher (Code: BDAY50) for your birthday this month!</string>
-    <string name="birthday_popup_btn">Amazing!</string>
 
     <!-- Product list -->
     <string name="load_more">Load more</string>
+    <string name="read_more">Read more</string>
+    <string name="read_less">Read less</string>
 
     <!-- Voucher stub labels -->
     <string name="discount_percent_stub">-%1$d%%</string>
@@ -374,43 +373,127 @@
     <string name="track_order_action">Track</string>
     <string name="order_placeholder">Order #123456</string>
     <string name="status_pending">Pending</string>
-    <string name="status_confirmed">Confirmed</string>
-    <string name="status_processing">Processing</string>
     <string name="order_date_placeholder">Date: 2023-10-10</string>
     <string name="order_date_placeholder_short">2023-10-10</string>
     <string name="order_status_title">Order Status</string>
     <string name="status_packed">Packed</string>
     <string name="status_shipping">Shipping</string>
     <string name="status_completed">Completed</string>
-    <string name="status_delivered">Delivered</string>
-    <string name="status_cancel_pending">Cancellation Requested</string>
     <string name="cod_short">COD</string>
     <string name="payment_unpaid">Unpaid</string>
-    <string name="payment_paid">Paid</string>
-    <string name="payment_pending">Pending payment</string>
-    <string name="payment_failed">Payment failed</string>
     <string name="zero_amount">0</string>
     <string name="review_content_placeholder">Review content goes here</string>
     <string name="shop_reply_placeholder">Thank you for supporting us!</string>
     <string name="price_placeholder">100,000 VND</string>
     <string name="quantity_one_placeholder">x1</string>
     <string name="address_list_empty_hint">You have no saved addresses yet.\nTap + to add a new address.</string>
+
+    <string name="home_about_tagline">Thoughtful furniture for calmer living.</string>
+    <string name="notif_birthday_title">Happy Birthday!</string>
+    <string name="notif_birthday_content">UniFurniture gives you a 50,000 VND voucher with code GIAM50 in your birthday month.</string>
+    <string name="notif_order_title_prefix">Order </string>
+
+    <string name="birthday_popup_title">Happy Birthday!</string>
+    <string name="birthday_popup_message">UniFurniture gives you a 50,000 VND voucher with code GIAM50 in your birthday month.</string>
+    <string name="birthday_popup_btn">Amazing!</string>
     <string name="avatar_selected_hint">New avatar selected. Tap Save to update.</string>
-    <string name="mark_as_unread">Mark as unread</string>
-    <string name="view_wishlist">View wishlist</string>
-    <string name="used_vouchers_title">Used vouchers</string>
-    <string name="voucher_used_status">Used</string>
-    <string name="voucher_already_used">This voucher has already been used</string>
-    <!-- Reviews translation + recommendations + offline (added) -->
+
+    <!-- Chat -->
+    <string name="chat_title">Chat</string>
+    <string name="chat_greeting">Hello! How can we help you today?</string>
+    <string name="chat_hint">Type a message...</string>
+    <string name="chat_send">Send</string>
+    <string name="chat_retrying">Retrying (%1$d/%2$d)...</string>
+    <string name="chat_error">Could not reach the assistant.</string>
+
+    <!-- Cart Advanced -->
+    <string name="select_all">Select All</string>
+    <string name="delete_all">Delete All</string>
+    <string name="total_items_format">Total (%1$d items):</string>
+
+    <!-- Policies -->
+    <string name="policy_sales">Sales Policy</string>
+    <string name="policy_shipping">Shipping Policy</string>
+    <string name="policy_warranty">Warranty Policy</string>
+    <string name="policy_return">Return Policy</string>
+    <string name="policy_loyalty">U-HOMIE Loyalty</string>
+    <string name="policy_partner">Partner Policy</string>
+
+    <!-- Status & Timeline -->
+    <string name="status_confirmed">Confirmed</string>
+    <string name="status_processing">Processing</string>
+    <string name="status_delivered">Delivered</string>
+    <string name="status_cancel_pending">Cancel Pending</string>
+    <string name="timeline_step_1">Pending</string>
+    <string name="timeline_step_2">Confirmed</string>
+    <string name="timeline_step_3">Shipping</string>
+    <string name="timeline_step_4">Completed</string>
+    <string name="timeline_cancel_pending_hint">Waiting for cancellation confirmation</string>
+
+    <!-- Reviews Advanced -->
     <string name="ok">OK</string>
     <string name="error_title">Error</string>
     <string name="review_translate">Translate</string>
-    <string name="review_see_original">See original</string>
-    <string name="review_translating">Translating…</string>
-    <string name="review_translate_failed">Couldn\'t translate this review</string>
-    <string name="you_may_be_interested">You may be interested</string>
-    <string name="no_internet_title">No internet connection</string>
-    <string name="no_internet_message">Please check your connection and try again.</string>
-    <string name="no_internet_banner">No internet connection</string>
+    <string name="review_see_original">See Original</string>
+    <string name="review_translating">Translating...</string>
+    <string name="review_translate_failed">Could not translate review</string>
+    <string name="review_status_pending">Pending</string>
+    <string name="review_status_approved">Approved</string>
+    <string name="review_status_rejected">Rejected</string>
+    <string name="review_write">Write a review</string>
+    <string name="review_submit">Submit Review</string>
+    <string name="review_dialog_title">Rate this Product</string>
+    <string name="review_dialog_note">Your review will be saved and moderated before being public.</string>
+    <string name="review_comment_hint">Share your experience (optional)</string>
+    <string name="review_add_images">Add Images</string>
+    <string name="review_add_videos">Add Videos</string>
+    <string name="review_no_images_selected">No images selected</string>
+    <string name="review_no_videos_selected">No videos selected</string>
+    <string name="review_selected_images_count">%1$d image(s) selected</string>
+    <string name="review_selected_videos_count">%1$d video(s) selected</string>
+    <string name="review_media_rules">Up to %1$d images, %2$d videos, %3$d MB per file.</string>
+    <string name="review_upload_progress">Uploading media... %1$d%%</string>
+    <string name="review_images_limit_reached">Maximum %1$d images allowed.</string>
+    <string name="review_videos_limit_reached">Maximum %1$d videos allowed.</string>
+    <string name="review_rating_required">Please select at least 1 star</string>
+    <string name="review_submit_success">Review submitted successfully</string>
+    <string name="review_submit_success_with_points">Review submitted! You earned %1$d points.</string>
+    <string name="review_submit_failed">Could not submit review</string>
+    <string name="review_media_prepare_failed">Could not prepare media files.</string>
+    <string name="review_media_upload_failed">Could not upload review media.</string>
+    <string name="review_available_after_delivery">You can review this product once it\'s delivered.</string>
+    <string name="review_submitted_waiting">Your review has been submitted and is pending approval.</string>
+    <string name="review_already_visible">Your review is visible on the product page.</string>
+    <string name="review_rejected_notice">This review was rejected during moderation.</string>
+    <string name="review_summary_with_rating">%1$d★ - %2$s</string>
+    <string name="review_videos">Videos</string>
+    <string name="review_video_label">Video %1$d</string>
+
+    <!-- Other missing strings -->
+    <string name="buy_now">Buy Now</string>
+    <string name="empty_categories">No categories found</string>
+    <string name="label_other">Other</string>
+    <string name="mark_as_unread">Mark as unread</string>
+    <string name="no_internet_banner">No Internet Connection</string>
+    <string name="no_internet_message">Please check your network and try again.</string>
+    <string name="no_internet_title">No Internet</string>
     <string name="retry">Retry</string>
+    <string name="optimal_badge">Best Value</string>
+    <string name="optimal_voucher_section_title">Best voucher for this order</string>
+    <string name="payment_failed">Payment Failed</string>
+    <string name="payment_paid">Paid</string>
+    <string name="payment_pending">Payment Pending</string>
+    <string name="rating_display">%1$s stars</string>
+    <string name="used_vouchers_title">Used Vouchers</string>
+    <string name="view_product">View Product</string>
+    <string name="view_wishlist">View Wishlist</string>
+    <string name="voucher_already_used">Voucher already used</string>
+    <string name="voucher_desc_fixed">Applied for orders from %1$s</string>
+    <string name="voucher_desc_percent">Applied for orders from %1$s</string>
+    <string name="voucher_desc_percent_max">Applied for orders from %1$s, max discount %2$s</string>
+    <string name="voucher_expiry_date">Expiry: %1$s</string>
+    <string name="voucher_name_fixed">Voucher %1$s</string>
+    <string name="voucher_name_percent">Discount %1$d%%</string>
+    <string name="voucher_used_status">Used</string>
+    <string name="you_may_be_interested">You may also like</string>
 </resources>

@@ -164,8 +164,9 @@ async function login(req, res) {
             message: "Đăng nhập thành công",
             token: profile._id.toString(),
             customer: {
-                _id: profile._id,
-                id: profile._id,
+                _id: profile.customer_id || profile._id,
+                id: profile.customer_id || profile._id,
+                profile_id: profile._id,
                 name: profile.full_name,
                 phone: profile.phone,
                 email: profile.email,

@@ -1,5 +1,6 @@
 export interface Review {
   _id: string;
+  id?: string;
   order_detail_id: {
     _id: string;
     product_name: string;
@@ -16,6 +17,13 @@ export interface Review {
     full_name: string;
     phone: string;
   } | null;
+  orderId?: string;
+  orderCode?: string;
+  productName?: string;
+  customerId?: string;
+  customerCode?: string;
+  customerName?: string;
+  customerPhone?: string;
   productImageUrl?: string;
   rating: number;
   content: string;

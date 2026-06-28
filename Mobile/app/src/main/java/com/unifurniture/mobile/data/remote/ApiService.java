@@ -3,6 +3,9 @@ package com.unifurniture.mobile.data.remote;
 import com.unifurniture.mobile.data.model.*;
 import java.util.List;
 import java.util.Map;
+import okhttp3.MultipartBody;
+import retrofit2.http.Multipart;
+import retrofit2.http.Part;
 import retrofit2.Call;
 import retrofit2.http.*;
 
@@ -132,6 +135,19 @@ public interface ApiService {
 
     @GET("reviews/product/{productId}")
     Call<ReviewSummaryDto> getProductReviews(@Path("productId") String productId);
+
+    @GET("reviews/order/{orderId}/status")
+    Call<OrderReviewStatusDto> getOrderReviewStatus(@Path("orderId") String orderId);
+
+    @GET("reviews/media-config")
+    Call<ReviewMediaConfigDto> getReviewMediaConfig();
+
+    @Multipart
+    @POST("reviews/media")
+    Call<ReviewMediaUploadResponseDto> uploadReviewMedia(@Part List<MultipartBody.Part> files);
+
+    @POST("reviews")
+    Call<ReviewSubmissionResponseDto> submitOrderReviews(@Body ReviewSubmissionRequestDto body);
 
     // ── Wishlist ──────────────────────────────────────────────────────────────
     @GET("wishlist")

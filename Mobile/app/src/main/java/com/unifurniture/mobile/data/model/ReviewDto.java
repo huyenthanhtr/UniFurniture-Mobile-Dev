@@ -6,11 +6,19 @@ import java.util.List;
 public class ReviewDto {
     @SerializedName("_id")
     public String id;
+    @SerializedName(value = "order_detail_id", alternate = {"orderDetailId"})
+    public String orderDetailId;
     public String productId;
+    public String productSlug;
+    public String productName;
+    public String productImageUrl;
     public String customerId;
+    public String orderCode;
     public Integer rating;
     public String content;
     public List<String> images;
+    public List<String> videos;
+    public String status;
     public String createdAt;
     public String customerName;
     public ReviewReplyDto reply;
@@ -50,12 +58,44 @@ public class ReviewDto {
         this.productId = productId;
     }
 
+    public String getProductSlug() {
+        return productSlug;
+    }
+
+    public void setProductSlug(String productSlug) {
+        this.productSlug = productSlug;
+    }
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
+    public String getProductImageUrl() {
+        return productImageUrl;
+    }
+
+    public void setProductImageUrl(String productImageUrl) {
+        this.productImageUrl = productImageUrl;
+    }
+
     public String getCustomerId() {
         return customerId;
     }
 
     public void setCustomerId(String customerId) {
         this.customerId = customerId;
+    }
+
+    public String getOrderCode() {
+        return orderCode;
+    }
+
+    public void setOrderCode(String orderCode) {
+        this.orderCode = orderCode;
     }
 
     public Integer getRating() {
@@ -82,12 +122,36 @@ public class ReviewDto {
         this.images = images;
     }
 
+    public List<String> getVideos() {
+        return videos;
+    }
+
+    public void setVideos(List<String> videos) {
+        this.videos = videos;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     public String getCreatedAt() {
         return createdAt;
     }
 
     public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getOrderDetailId() {
+        return orderDetailId;
+    }
+
+    public void setOrderDetailId(String orderDetailId) {
+        this.orderDetailId = orderDetailId;
     }
 
     public String getCustomerName() {
@@ -110,11 +174,18 @@ public class ReviewDto {
     public String toString() {
         return "ReviewDto{" +
                 "id='" + id + '\'' +
+                ", orderDetailId='" + orderDetailId + '\'' +
                 ", productId='" + productId + '\'' +
+                ", productSlug='" + productSlug + '\'' +
+                ", productName='" + productName + '\'' +
+                ", productImageUrl='" + productImageUrl + '\'' +
                 ", customerId='" + customerId + '\'' +
+                ", orderCode='" + orderCode + '\'' +
                 ", rating=" + rating +
                 ", content='" + content + '\'' +
                 ", images=" + images +
+                ", videos=" + videos +
+                ", status='" + status + '\'' +
                 ", createdAt='" + createdAt + '\'' +
                 ", customerName='" + customerName + '\'' +
                 ", reply=" + reply +

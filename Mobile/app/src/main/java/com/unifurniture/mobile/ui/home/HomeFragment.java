@@ -6,6 +6,7 @@ import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -13,9 +14,13 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.BuildConfig;
+import com.unifurniture.mobile.UniFurnitureApp;
+import com.unifurniture.mobile.data.model.ApiListResponse;
 import com.unifurniture.mobile.data.model.CollectionDto;
+import com.unifurniture.mobile.data.model.NotificationDto;
 import com.unifurniture.mobile.data.model.ProductDto;
 import com.unifurniture.mobile.databinding.FragmentHomeBinding;
+import com.unifurniture.mobile.data.remote.ApiService;
 import com.unifurniture.mobile.ui.adapter.CategoryAdapter;
 import com.unifurniture.mobile.ui.adapter.CollectionAdapter;
 import com.unifurniture.mobile.ui.adapter.CouponHomeAdapter;
@@ -25,11 +30,16 @@ import com.unifurniture.mobile.ui.adapter.RecentlyViewedAdapter;
 import com.unifurniture.mobile.ui.adapter.SearchHistoryAdapter;
 import com.unifurniture.mobile.ui.adapter.SearchSuggestionAdapter;
 import com.unifurniture.mobile.util.NavViewModelProvider;
+import com.unifurniture.mobile.util.NotificationManager;
 import com.unifurniture.mobile.util.RecentlyViewedManager;
 import com.unifurniture.mobile.util.ScrollStateHelper;
 import com.unifurniture.mobile.util.SearchHistoryManager;
+import com.unifurniture.mobile.util.SessionManager;
 import java.util.ArrayList;
 import java.util.List;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class HomeFragment extends Fragment {
 
@@ -51,6 +61,7 @@ public class HomeFragment extends Fragment {
     private CouponHomeAdapter couponHomeAdapter;
     private ProductCardAdapter recommendedAdapter;
     private final ScrollStateHelper scrollState = new ScrollStateHelper("home");
+    private ApiService apiService;
 
     @Nullable
     @Override
@@ -64,6 +75,7 @@ public class HomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         viewModel = NavViewModelProvider.get(this, R.id.homeFragment, HomeViewModel.class);
+        apiService = UniFurnitureApp.getInstance().getApiService();
         scrollState.read(savedInstanceState);
 
         setupRecyclerViews();
@@ -147,19 +159,101 @@ public class HomeFragment extends Fragment {
 
         scrollState.restore(binding.homeScrollView);
 
-        // Birthday Popup
-        if (com.unifurniture.mobile.util.SessionManager.getInstance(requireContext()).isLoggedIn()) {
-            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
-                if (isAdded() && getContext() != null) {
-                    new android.app.AlertDialog.Builder(requireContext())
-                        .setTitle(getString(R.string.birthday_popup_title))
-                        .setMessage(getString(R.string.birthday_popup_message))
-                        .setPositiveButton(getString(R.string.birthday_popup_btn),
-                                (dialog, which) -> dialog.dismiss())
-                        .show();
-                }
-            }, 3000);
+        syncBirthdayNotifications();
+    }
+
+    private void syncBirthdayNotifications() {
+        SessionManager sessionManager = SessionManager.getInstance(requireContext());
+        if (!sessionManager.isLoggedIn()) {
+            return;
         }
+
+        String customerId = sessionManager.getCustomerId();
+        if (customerId == null || customerId.trim().isEmpty()) {
+            return;
+        }
+
+        apiService.getNotifications(customerId, 20).enqueue(new Callback<ApiListResponse<NotificationDto>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiListResponse<NotificationDto>> call,
+                                   @NonNull Response<ApiListResponse<NotificationDto>> response) {
+                if (!isAdded()) return;
+                if (!response.isSuccessful() || response.body() == null || response.body().items == null) {
+                    return;
+                }
+
+                NotificationManager manager = NotificationManager.getInstance(requireContext());
+                manager.syncRemoteNotifications(response.body().items);
+
+                for (NotificationDto item : manager.getNotifications()) {
+                    if (item == null) continue;
+                    if (!"birthday_reward".equals(item.eventKey) || item.isRead) continue;
+                    showBirthdayRewardDialog(item, manager);
+                    break;
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiListResponse<NotificationDto>> call, @NonNull Throwable t) {
+            }
+        });
+    }
+
+    private void showBirthdayRewardDialog(NotificationDto item, NotificationManager manager) {
+        if (!isAdded()) return;
+
+        android.app.Dialog dialog = new android.app.Dialog(requireContext());
+        dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_birthday_reward);
+        dialog.setCancelable(true);
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(
+                    new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+        }
+
+        TextView titleView = dialog.findViewById(R.id.tvBirthdayTitle);
+        TextView messageView = dialog.findViewById(R.id.tvBirthdayMessage);
+        TextView codeView = dialog.findViewById(R.id.tvCouponCode);
+        TextView subtleView = dialog.findViewById(R.id.tvBirthdaySubtle);
+        com.google.android.material.button.MaterialButton closeButton =
+                dialog.findViewById(R.id.btnCloseBirthday);
+        com.google.android.material.button.MaterialButton copyButton =
+                dialog.findViewById(R.id.btnCopyBirthdayCode);
+
+        titleView.setText(R.string.birthday_popup_title);
+        messageView.setText(R.string.birthday_popup_message);
+        subtleView.setText(getString(R.string.birthday_reward_subtle));
+        closeButton.setText(R.string.close);
+        copyButton.setText(R.string.copy_code);
+
+        String couponCode = item.couponCode == null ? "" : item.couponCode.trim();
+        if (couponCode.isEmpty()) {
+            codeView.setVisibility(View.GONE);
+            copyButton.setVisibility(View.GONE);
+        } else {
+            codeView.setVisibility(View.VISIBLE);
+            codeView.setText(couponCode);
+            copyButton.setVisibility(View.VISIBLE);
+            copyButton.setOnClickListener(v -> {
+                android.content.ClipboardManager clipboard =
+                        (android.content.ClipboardManager) requireContext().getSystemService(android.content.Context.CLIPBOARD_SERVICE);
+                if (clipboard != null) {
+                    clipboard.setPrimaryClip(android.content.ClipData.newPlainText("coupon_code", couponCode));
+                    android.widget.Toast.makeText(requireContext(), getString(R.string.copied_to_clipboard), android.widget.Toast.LENGTH_SHORT).show();
+                }
+                manager.markAsRead(item.id);
+                dialog.dismiss();
+            });
+        }
+
+        closeButton.setOnClickListener(v -> {
+            manager.markAsRead(item.id);
+            dialog.dismiss();
+        });
+
+        dialog.setOnDismissListener(d -> manager.markAsRead(item.id));
+        dialog.show();
     }
 
     private void setupBanner() {

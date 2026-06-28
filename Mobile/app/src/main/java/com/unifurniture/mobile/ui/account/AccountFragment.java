@@ -23,7 +23,6 @@ import com.bumptech.glide.Glide;
 
 import android.content.res.ColorStateList;
 import androidx.core.content.ContextCompat;
-import android.widget.Toast;
 
 import retrofit2.Call;
 import retrofit2.Callback;

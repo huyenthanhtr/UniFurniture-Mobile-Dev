@@ -51,7 +51,7 @@ export class AdminReview implements OnInit {
     private readonly reviewService: AdminReviews,
     private readonly cdr: ChangeDetectorRef,
     private readonly router: Router,
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     const savedPage = sessionStorage.getItem('adminReviewPage');
@@ -63,22 +63,51 @@ export class AdminReview implements OnInit {
 
   loadReviews(): void {
     this.reviewService.getReviews().subscribe((data) => {
-      this.reviews = data;
+      this.reviews = Array.isArray(data) ? data : [];
       this.applyFilters(false);
     });
   }
 
+  getProductName(review: Review): string {
+    return String(review?.productName || review?.order_detail_id?.product_name || '').trim();
+  }
+
+  getOrderCode(review: Review): string {
+    return String(review?.orderCode || review?.order_detail_id?.order_id?.order_code || '').trim();
+  }
+
+  getCustomerName(review: Review): string {
+    return String(
+      review?.customerName ||
+      review?.order_detail_id?.order_id?.shipping_name ||
+      review?.customer_id?.full_name ||
+      ''
+    ).trim();
+  }
+
+  getCustomerCode(review: Review): string {
+    return String(review?.customerCode || review?.customer_id?.customer_code || '').trim();
+  }
+
+  getCustomerPhone(review: Review): string {
+    return String(review?.customerPhone || review?.customer_id?.phone || '').trim();
+  }
+
   applyFilters(resetPage: boolean = false): void {
     let filtered = this.reviews.filter((r) => {
-      const customerName = r.order_detail_id?.order_id?.shipping_name || r.customer_id?.full_name || '';
+      const customerName = this.getCustomerName(r);
+      const customerCode = this.getCustomerCode(r);
+      const customerPhone = this.getCustomerPhone(r);
       const content = String(r.content || '').toLowerCase();
-      const productName = r.order_detail_id?.product_name || '';
-      const orderCode = r.order_detail_id?.order_id?.order_code || '';
+      const productName = this.getProductName(r);
+      const orderCode = this.getOrderCode(r);
 
       const keyword = this.searchTerm.toLowerCase();
       const matchSearch =
         content.includes(keyword) ||
         customerName.toLowerCase().includes(keyword) ||
+        customerCode.toLowerCase().includes(keyword) ||
+        customerPhone.toLowerCase().includes(keyword) ||
         productName.toLowerCase().includes(keyword) ||
         orderCode.toLowerCase().includes(keyword);
 
@@ -94,16 +123,16 @@ export class AdminReview implements OnInit {
 
         switch (this.sortColumn) {
           case 'product_name':
-            valA = a.order_detail_id?.product_name || '';
-            valB = b.order_detail_id?.product_name || '';
+            valA = this.getProductName(a);
+            valB = this.getProductName(b);
             break;
           case 'order_code':
-            valA = a.order_detail_id?.order_id?.order_code || '';
-            valB = b.order_detail_id?.order_id?.order_code || '';
+            valA = this.getOrderCode(a);
+            valB = this.getOrderCode(b);
             break;
           case 'customer_name':
-            valA = a.order_detail_id?.order_id?.shipping_name || a.customer_id?.full_name || '';
-            valB = b.order_detail_id?.order_id?.shipping_name || b.customer_id?.full_name || '';
+            valA = this.getCustomerName(a);
+            valB = this.getCustomerName(b);
             break;
           case 'rating':
             valA = a.rating;
@@ -181,15 +210,14 @@ export class AdminReview implements OnInit {
 
     if (total <= 5) {
       for (let i = 1; i <= total; i++) pages.push(i);
+    } else if (current <= 3) {
+      pages.push(1, 2, 3, 4, 5);
+    } else if (current >= total - 2) {
+      pages.push(total - 4, total - 3, total - 2, total - 1, total);
     } else {
-      if (current <= 3) {
-        pages.push(1, 2, 3, 4, 5);
-      } else if (current >= total - 2) {
-        pages.push(total - 4, total - 3, total - 2, total - 1, total);
-      } else {
-        pages.push(current - 2, current - 1, current, current + 1, current + 2);
-      }
+      pages.push(current - 2, current - 1, current, current + 1, current + 2);
     }
+
     return pages;
   }
 
@@ -238,7 +266,7 @@ export class AdminReview implements OnInit {
 
   goToOrderDetail(item: Review): void {
     const rawOrder = item.order_detail_id?.order_id as any;
-    const orderKey = rawOrder?.order_code || rawOrder?._id || rawOrder;
+    const orderKey = this.getOrderCode(item) || item.orderId || rawOrder?._id || rawOrder;
     if (orderKey) {
       this.router.navigate(['/admin/orders', orderKey]);
     } else {
@@ -318,8 +346,7 @@ export class AdminReview implements OnInit {
   }
 
   get activeMedia(): ReviewMediaItem | null {
-    const current = this.selectedMedia[this.activeMediaAbsoluteIndex];
-    return current || null;
+    return this.selectedMedia[this.activeMediaAbsoluteIndex] || null;
   }
 
   slideMedia(delta: number): void {
@@ -327,7 +354,10 @@ export class AdminReview implements OnInit {
     const maxOffset = Math.max(this.selectedMedia.length - this.mediaPageSize, 0);
     this.mediaOffset = Math.max(0, Math.min(nextOffset, maxOffset));
 
-    if (this.activeMediaAbsoluteIndex < this.mediaOffset || this.activeMediaAbsoluteIndex >= this.mediaOffset + this.mediaPageSize) {
+    if (
+      this.activeMediaAbsoluteIndex < this.mediaOffset ||
+      this.activeMediaAbsoluteIndex >= this.mediaOffset + this.mediaPageSize
+    ) {
       this.activeMediaAbsoluteIndex = this.mediaOffset;
     }
   }

@@ -1,6 +1,7 @@
 package com.unifurniture.mobile.ui;
 
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,9 +16,17 @@ import com.unifurniture.mobile.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final float CHAT_FAB_DRAG_THRESHOLD_PX = 12f;
+    private static final float CHAT_FAB_EDGE_MARGIN_PX = 16f;
+
     private ActivityMainBinding binding;
     private NavController navController;
     private boolean syncingBottomNav = false;
+    private float chatFabDownRawX;
+    private float chatFabDownRawY;
+    private float chatFabDownX;
+    private float chatFabDownY;
+    private boolean chatFabDragged;
 
     private static final int[] TOP_LEVEL_DESTINATIONS = {
             R.id.homeFragment,
@@ -69,6 +78,10 @@ public class MainActivity extends AppCompatActivity {
 
         // Floating assistant button — available on every screen except the chat itself.
         binding.fabChat.setOnClickListener(v -> {
+            if (chatFabDragged) {
+                chatFabDragged = false;
+                return;
+            }
             if (navController.getCurrentDestination() != null
                     && navController.getCurrentDestination().getId() == R.id.chatFragment) {
                 return;
@@ -77,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
                 navController.navigate(R.id.chatFragment);
             } catch (IllegalArgumentException ignored) {}
         });
+        setupDraggableChatFab();
     }
 
     private android.net.ConnectivityManager.NetworkCallback networkCallback;
@@ -148,6 +162,61 @@ public class MainActivity extends AppCompatActivity {
                 public void onFailure(retrofit2.Call<com.unifurniture.mobile.data.model.CartDto> call, Throwable t) {}
             });
         }
+    }
+
+    private void setupDraggableChatFab() {
+        binding.fabChat.setOnTouchListener((view, event) -> {
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    chatFabDragged = false;
+                    chatFabDownRawX = event.getRawX();
+                    chatFabDownRawY = event.getRawY();
+                    chatFabDownX = view.getX();
+                    chatFabDownY = view.getY();
+                    return true;
+                case MotionEvent.ACTION_MOVE:
+                    float deltaX = event.getRawX() - chatFabDownRawX;
+                    float deltaY = event.getRawY() - chatFabDownRawY;
+                    if (!chatFabDragged && (Math.abs(deltaX) > CHAT_FAB_DRAG_THRESHOLD_PX
+                            || Math.abs(deltaY) > CHAT_FAB_DRAG_THRESHOLD_PX)) {
+                        chatFabDragged = true;
+                    }
+                    if (!chatFabDragged) {
+                        return false;
+                    }
+
+                    float nextX = chatFabDownX + deltaX;
+                    float nextY = chatFabDownY + deltaY;
+                    view.setX(clampChatFabX(nextX, view));
+                    view.setY(clampChatFabY(nextY, view));
+                    return true;
+                case MotionEvent.ACTION_UP:
+                    if (!chatFabDragged) {
+                        view.performClick();
+                    }
+                    return true;
+                case MotionEvent.ACTION_CANCEL:
+                    return chatFabDragged;
+                default:
+                    return false;
+            }
+        });
+    }
+
+    private float clampChatFabX(float targetX, View fab) {
+        float maxX = Math.max(CHAT_FAB_EDGE_MARGIN_PX,
+                binding.getRoot().getWidth() - fab.getWidth() - CHAT_FAB_EDGE_MARGIN_PX);
+        return Math.max(CHAT_FAB_EDGE_MARGIN_PX, Math.min(targetX, maxX));
+    }
+
+    private float clampChatFabY(float targetY, View fab) {
+        float topLimit = CHAT_FAB_EDGE_MARGIN_PX + binding.tvOfflineBanner.getHeight();
+        float bottomInset = binding.bottomNavigation.getVisibility() == View.VISIBLE
+                ? binding.bottomNavigation.getHeight() + CHAT_FAB_EDGE_MARGIN_PX
+                : CHAT_FAB_EDGE_MARGIN_PX;
+        float maxY = Math.max(topLimit,
+                binding.getRoot().getHeight() - fab.getHeight() - bottomInset);
+        return Math.max(topLimit, Math.min(targetY, maxY));
     }
 
     private void syncBottomNavigationState(NavDestination destination) {

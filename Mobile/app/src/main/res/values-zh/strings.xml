@@ -157,6 +157,7 @@
     <string name="voucher_expiry">有效期至：%1$s</string>
     <string name="copy_code">复制代码</string>
     <string name="copied_to_clipboard">已复制</string>
+    <string name="birthday_reward_subtle">生日优惠已保存到您的账户。</string>
     <string name="voucher_discount_amount">优惠 %1$s</string>
     <string name="voucher_condition">适用于满 %1$s 的订单。</string>
     <string name="voucher_upsell">再购买 %1$s 即可使用</string>
@@ -336,10 +337,6 @@
     <string name="coupon_min_order">满 %1$s 可用</string>
     <string name="coupon_no_min">无最低消费限制</string>
 
-    <!-- Birthday popup -->
-    <string name="birthday_popup_title">🎉 生日快乐！</string>
-    <string name="birthday_popup_message">UniFurniture 祝您生日快乐，本月为您提供5折优惠券（码：BDAY50）！</string>
-    <string name="birthday_popup_btn">太棒了！</string>
 
     <!-- Product list -->
     <string name="load_more">加载更多</string>
@@ -423,6 +420,12 @@
     <string name="timeline_cancel_pending_hint">等待取消确认</string>
     <string name="empty_categories">暂无分类</string>
     <string name="home_about_tagline">用心打造，让生活更宁静。</string>
+    <string name="notif_birthday_title">生日快乐！</string>
+    <string name="notif_birthday_content">UniFurniture 在您的生日月份赠送您一张 50,000 VND 的优惠券，代码为 GIAM50。</string>
+    <string name="notif_order_title_prefix">订单 </string>
+
+    <string name="birthday_popup_title">生日快乐！</string>
+    <string name="birthday_popup_message">UniFurniture 在您的生日月份赠送您一张 50,000 VND 的优惠券，代码为 GIAM50。</string>
     <string name="home_value_quality">精心打造的品质</string>
     <string name="home_value_elegant">优雅而实用的设计</string>
     <string name="home_value_dedicated">贴心的售后支持</string>
@@ -446,9 +449,47 @@
     <string name="review_see_original">查看原文</string>
     <string name="review_translating">翻译中…</string>
     <string name="review_translate_failed">无法翻译此评价</string>
+    <string name="review_status_pending">等待审核</string>
+    <string name="review_status_approved">已审核</string>
+    <string name="review_status_rejected">已拒绝</string>
+    <string name="review_write">写评价</string>
+    <string name="review_submit">提交评价</string>
+    <string name="review_dialog_title">评价这件商品</string>
+    <string name="review_dialog_note">您的评价将保存到账号中，并在公开显示前经过审核。</string>
+    <string name="review_comment_hint">分享您的体验（可选）</string>
+    <string name="review_add_images">添加图片</string>
+    <string name="review_add_videos">添加视频</string>
+    <string name="review_no_images_selected">未选择图片</string>
+    <string name="review_no_videos_selected">未选择视频</string>
+    <string name="review_selected_images_count">已选择 %1$d 张图片</string>
+    <string name="review_selected_videos_count">已选择 %1$d 个视频</string>
+    <string name="review_media_rules">最多 %1$d 张图片、%2$d 个视频、每个文件 %3$d MB。</string>
+    <string name="review_upload_progress">正在上传媒体... %1$d%%</string>
+    <string name="review_images_limit_reached">最多只能选择 %1$d 张图片。</string>
+    <string name="review_videos_limit_reached">最多只能选择 %1$d 个视频。</string>
+    <string name="review_rating_required">请至少选择 1 星</string>
+    <string name="review_submit_success">评价提交成功</string>
+    <string name="review_submit_success_with_points">评价提交成功。您获得了 %1$d 积分。</string>
+    <string name="review_submit_failed">无法提交评价</string>
+    <string name="review_media_prepare_failed">无法准备所选文件</string>
+    <string name="review_media_upload_failed">无法上传评价图片或视频</string>
+    <string name="review_available_after_delivery">订单送达后您可以评价该商品。</string>
+    <string name="review_submitted_waiting">您的评价已提交，正在等待审核。</string>
+    <string name="review_already_visible">您的评价已显示在商品页面上。</string>
+    <string name="review_rejected_notice">该评价未通过审核。</string>
+    <string name="review_summary_with_rating">%1$d★ - %2$s</string>
+    <string name="review_videos">附加视频</string>
+    <string name="review_video_label">视频 %1$d</string>
+    <string name="view_product">查看商品</string>
     <string name="you_may_be_interested">你可能感兴趣</string>
     <string name="no_internet_title">无网络连接</string>
     <string name="no_internet_message">请检查网络连接后重试。</string>
     <string name="no_internet_banner">无网络连接</string>
     <string name="retry">重试</string>
+
+    <!-- Chat -->
+    <string name="chat_title">聊天</string>
+    <string name="chat_greeting">您好！请问有什么可以帮您的？</string>
+    <string name="chat_hint">输入消息...</string>
+    <string name="chat_send">发送</string>
 </resources>

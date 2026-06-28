@@ -13,19 +13,27 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.unifurniture.mobile.R;
+import com.unifurniture.mobile.UniFurnitureApp;
+import com.unifurniture.mobile.data.model.ApiListResponse;
 import com.unifurniture.mobile.data.model.NotificationDto;
+import com.unifurniture.mobile.data.remote.ApiService;
 import com.unifurniture.mobile.databinding.FragmentNotificationBinding;
 import com.unifurniture.mobile.ui.adapter.NotificationAdapter;
 import com.unifurniture.mobile.util.NotificationManager;
+import com.unifurniture.mobile.util.SessionManager;
 import com.unifurniture.mobile.util.ToastUtil;
 import java.util.ArrayList;
 import java.util.List;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class NotificationFragment extends Fragment {
 
     private FragmentNotificationBinding binding;
     private NotificationAdapter adapter;
     private String currentFilter = "all"; // "all", "order", "account"
+    private ApiService apiService;
 
     @Nullable
     @Override
@@ -39,6 +47,7 @@ public class NotificationFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        apiService = UniFurnitureApp.getInstance().getApiService();
 
         // Setup Back press
         binding.btnBack.setOnClickListener(v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
@@ -100,8 +109,36 @@ public class NotificationFragment extends Fragment {
         });
 
         // Initial loading
-        loadNotifications();
+        fetchNotificationsFromServer();
         updateTabStyles();
+    }
+
+    private void fetchNotificationsFromServer() {
+        if (binding == null) return;
+
+        String customerId = SessionManager.getInstance(requireContext()).getCustomerId();
+        if (customerId == null || customerId.trim().isEmpty()) {
+            loadNotifications();
+            return;
+        }
+
+        apiService.getNotifications(customerId, 20).enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiListResponse<NotificationDto>> call,
+                                   @NonNull Response<ApiListResponse<NotificationDto>> response) {
+                if (!isAdded()) return;
+                if (response.isSuccessful() && response.body() != null && response.body().items != null) {
+                    NotificationManager.getInstance(requireContext()).syncRemoteNotifications(response.body().items);
+                }
+                loadNotifications();
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiListResponse<NotificationDto>> call, @NonNull Throwable t) {
+                if (!isAdded()) return;
+                loadNotifications();
+            }
+        });
     }
 
     private void loadNotifications() {

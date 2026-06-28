@@ -323,7 +323,7 @@ public class ProductDetailFragment extends Fragment {
 
     private void setupReviews() {
         String serverHost = BuildConfig.API_BASE_URL.replace("/api/", "");
-        reviewAdapter = new ReviewAdapter(serverHost);
+        reviewAdapter = new ReviewAdapter(serverHost, getChildFragmentManager());
         binding.rvReviews.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvReviews.setAdapter(reviewAdapter);
     }
@@ -806,12 +806,12 @@ public class ProductDetailFragment extends Fragment {
 
     private void restoreAddToCartButtonStyle() {
         if (binding == null) return;
-        int primary = ContextCompat.getColor(requireContext(), R.color.primary);
-        binding.btnAddToCart.setTextColor(primary);
-        binding.btnAddToCart.setIconTint(ColorStateList.valueOf(primary));
-        binding.btnAddToCart.setStrokeColor(ColorStateList.valueOf(primary));
-        binding.btnAddToCart.setBackgroundTintList(ColorStateList.valueOf(
-                ContextCompat.getColor(requireContext(), R.color.white)));
+        int gold = ContextCompat.getColor(requireContext(), R.color.accent);
+        int white = ContextCompat.getColor(requireContext(), R.color.white);
+        binding.btnAddToCart.setTextColor(white);
+        binding.btnAddToCart.setIconTint(ColorStateList.valueOf(white));
+        binding.btnAddToCart.setStrokeWidth(0);
+        binding.btnAddToCart.setBackgroundTintList(ColorStateList.valueOf(gold));
     }
 
     private void updateVariantChipStyle(com.google.android.material.chip.Chip chip, boolean selected) {

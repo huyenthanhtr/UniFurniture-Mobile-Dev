@@ -62,12 +62,52 @@ public class NotificationManager {
                 title,
                 content,
                 type,
+                "",
+                "",
                 System.currentTimeMillis(),
                 false,
                 orderId
         );
         list.add(0, notification);
         saveNotifications(list);
+    }
+
+    public synchronized void syncRemoteNotifications(List<NotificationDto> remoteNotifications) {
+        List<NotificationDto> localNotifications = getNotifications();
+        java.util.LinkedHashMap<String, NotificationDto> mergedMap = new java.util.LinkedHashMap<>();
+        java.util.HashMap<String, Boolean> readStateMap = new java.util.HashMap<>();
+
+        for (NotificationDto item : localNotifications) {
+            if (item != null && item.id != null && !item.id.isEmpty()) {
+                readStateMap.put(item.id, item.isRead);
+            }
+        }
+
+        if (remoteNotifications != null) {
+            for (NotificationDto item : remoteNotifications) {
+                if (item == null || item.id == null || item.id.isEmpty()) {
+                    continue;
+                }
+                Boolean savedReadState = readStateMap.get(item.id);
+                if (savedReadState != null) {
+                    item.isRead = savedReadState;
+                }
+                mergedMap.put(item.id, item);
+            }
+        }
+
+        for (NotificationDto item : localNotifications) {
+            if (item == null || item.id == null || item.id.isEmpty()) {
+                continue;
+            }
+            if (!mergedMap.containsKey(item.id)) {
+                mergedMap.put(item.id, item);
+            }
+        }
+
+        List<NotificationDto> mergedList = new ArrayList<>(mergedMap.values());
+        Collections.sort(mergedList, (n1, n2) -> Long.compare(n2.timestamp, n1.timestamp));
+        saveNotifications(mergedList);
     }
 
     public synchronized void markAsRead(String id) {

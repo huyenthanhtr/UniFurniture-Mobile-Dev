@@ -1,5 +1,5 @@
 <!-- Floating Contact Widget -->
-<div class="contact-float-wrap">
+<div class="contact-float-wrap" [ngStyle]="wrapperStyles" [class.contact-float-wrap--dragging]="ui.isContactOpen()">
 
     <!-- Channel Buttons (expand on open) -->
     @if (ui.isContactOpen()) {
@@ -57,7 +57,12 @@
     }
 
     <!-- Main Toggle Button -->
-    <button class="contact-toggle-btn" (click)="ui.toggleContact()" [class.open]="ui.isContactOpen()"
+    <button
+        class="contact-toggle-btn"
+        (mousedown)="startDrag($event)"
+        (touchstart)="startDrag($event)"
+        (click)="onToggleClick($event)"
+        [class.open]="ui.isContactOpen()"
         aria-label="Liên hệ">
         @if (!ui.isContactOpen()) {
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
