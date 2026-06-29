@@ -124,7 +124,7 @@ public class CartItemAdapter extends ListAdapter<CartItemDto, CartItemAdapter.Vi
             }
             ProductVariantDto variant = item.getVariant();
             if (variant != null) {
-                binding.tvVariant.setText(FormatUtil.getVariantLabel(variant));
+                binding.tvVariant.setText(FormatUtil.getVariantLabel(binding.tvVariant.getContext(), variant));
                 binding.tvVariant.setVisibility(View.VISIBLE);
 
                 // Show Shopee-style pricing

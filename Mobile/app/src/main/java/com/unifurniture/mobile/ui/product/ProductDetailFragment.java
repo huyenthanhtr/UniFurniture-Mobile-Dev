@@ -58,6 +58,7 @@ public class ProductDetailFragment extends Fragment {
     private final List<ReviewDto> allReviews = new ArrayList<>();
     private final Handler cartRestoreHandler = new Handler(Looper.getMainLooper());
     private final ScrollStateHelper scrollState = new ScrollStateHelper("product_detail");
+    private boolean isBuyNowAction = false;
 
     @Nullable
     @Override
@@ -160,13 +161,8 @@ public class ProductDetailFragment extends Fragment {
                     return;
                 }
             }
+            isBuyNowAction = true;
             viewModel.addToCart(selectedVariantId, quantity);
-            // Navigate to cart after a short delay to allow cart to update
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                if (isAdded()) {
-                    Navigation.findNavController(requireView()).navigate(R.id.cartFragment);
-                }
-            }, 300);
         });
         binding.btnBack.setOnClickListener(v ->
                 Navigation.findNavController(requireView()).navigateUp());
@@ -473,6 +469,9 @@ public class ProductDetailFragment extends Fragment {
                     }
                 }
 
+                // Clear listener during initialization to prevent premature triggers
+                binding.chipGroupVariants.setOnCheckedStateChangeListener(null);
+
                 int idx = 0;
                 for (var variant : validVariants) {
                     if (variant.id != null) {
@@ -483,28 +482,53 @@ public class ProductDetailFragment extends Fragment {
                     chip.setId(View.generateViewId());
                     chip.setText(getVariantChipText(variant));
                     chip.setCheckable(true);
-                    chip.setChipBackgroundColor(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.white)));
-                    chip.setChipStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.gray_300)));
-                    chip.setChipStrokeWidth(FormatUtil.dpToPx(requireContext(), 1));
-                    chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.black));
-
-                    chip.setOnCheckedChangeListener((btn, checked) -> {
-                        if (checked) {
-                            selectedVariantId = variant.id;
-                            updateStockStatus(variant.id);
-                            updatePricingUI(variant.price, variant.compareAtPrice);
-                            updateVariantChipStyle((com.google.android.material.chip.Chip) btn, true);
-                        } else {
-                            updateVariantChipStyle((com.google.android.material.chip.Chip) btn, false);
-                        }
-                    });
+                    chip.setTag(variant); // Cache variant metadata inside the view's tag
 
                     binding.chipGroupVariants.addView(chip);
-                    if (idx == selectedIndex) {
-                        chip.setChecked(true);
+                    boolean isSelected = (idx == selectedIndex);
+                    chip.setChecked(isSelected);
+                    updateVariantChipStyle(chip, isSelected);
+
+                    if (isSelected) {
+                        selectedVariantId = variant.id;
+                        updateStockStatus(variant.id);
+                        updatePricingUI(variant.price, variant.compareAtPrice);
                     }
                     idx++;
                 }
+
+                // Monitor selection state at the ChipGroup level after initialization
+                binding.chipGroupVariants.setOnCheckedStateChangeListener((group, checkedIds) -> {
+                    if (checkedIds.isEmpty()) {
+                        selectedVariantId = null;
+                        updateStockStatus(null);
+                        ProductDto product = viewModel.getProduct().getValue();
+                        if (product != null) {
+                            updatePricingUI(product.minPrice, product.getEffectiveCompareAtPrice());
+                        }
+                    } else {
+                        int checkedId = checkedIds.get(0);
+                        com.google.android.material.chip.Chip checkedChip = group.findViewById(checkedId);
+                        if (checkedChip != null) {
+                            com.unifurniture.mobile.data.model.ProductVariantDto variant =
+                                    (com.unifurniture.mobile.data.model.ProductVariantDto) checkedChip.getTag();
+                            if (variant != null) {
+                                selectedVariantId = variant.id;
+                                updateStockStatus(variant.id);
+                                updatePricingUI(variant.price, variant.compareAtPrice);
+                            }
+                        }
+                    }
+
+                    // Dynamically refresh visual styling (stroke, background, text colors) for all chips
+                    for (int i = 0; i < group.getChildCount(); i++) {
+                        View child = group.getChildAt(i);
+                        if (child instanceof com.google.android.material.chip.Chip) {
+                            com.google.android.material.chip.Chip c = (com.google.android.material.chip.Chip) child;
+                            updateVariantChipStyle(c, c.isChecked());
+                        }
+                    }
+                });
 
                 binding.layoutVariantsSection.setVisibility(View.VISIBLE);
                 binding.chipGroupVariants.setVisibility(View.VISIBLE);
@@ -545,6 +569,12 @@ public class ProductDetailFragment extends Fragment {
 
         viewModel.getAddToCartResult().observe(getViewLifecycleOwner(), cart -> {
             if (cart != null) {
+                if (isBuyNowAction) {
+                    isBuyNowAction = false;
+                    Navigation.findNavController(requireView()).navigate(R.id.cartFragment);
+                    return;
+                }
+
                 // Show premium success dialog popup
                 android.app.Dialog dialog = new android.app.Dialog(requireContext());
                 dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
@@ -579,6 +609,7 @@ public class ProductDetailFragment extends Fragment {
                     restoreAddToCartButtonStyle();
                 }, 1500);
             } else {
+                isBuyNowAction = false;
                 // Nếu result là null nhưng không có lỗi set trong LiveData error
                 if (viewModel.getError().getValue() == null) {
                     Toast.makeText(requireContext(), R.string.add_to_cart_error, Toast.LENGTH_SHORT).show();
@@ -587,7 +618,10 @@ public class ProductDetailFragment extends Fragment {
         });
 
         viewModel.getError().observe(getViewLifecycleOwner(), error -> {
-            if (error != null) Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
+            if (error != null) {
+                isBuyNowAction = false;
+                Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
+            }
         });
 
         viewModel.getRecommendations().observe(getViewLifecycleOwner(), items -> {
@@ -776,8 +810,9 @@ public class ProductDetailFragment extends Fragment {
     }
 
     private String getVariantChipText(com.unifurniture.mobile.data.model.ProductVariantDto variant) {
-        String label = getRawVariantLabel(variant);
-        return label != null ? label : "";
+        // Display the localized label (color_i18n / ColorUi fallback). getRawVariantLabel stays for
+        // the raw validity check in getValidVariants().
+        return com.unifurniture.mobile.util.FormatUtil.getVariantLabel(requireContext(), variant);
     }
 
     private String getRawVariantLabel(com.unifurniture.mobile.data.model.ProductVariantDto variant) {

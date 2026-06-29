@@ -260,9 +260,11 @@ public class OrderDetailFragment extends Fragment {
         }
         itemBinding.tvProductName.setText(title);
 
+        // Orders store a plain variant snapshot string; localize any color word via the ColorUi fallback.
         String variantName = item.getVariantName();
-        itemBinding.tvVariantName.setText(variantName != null && !variantName.trim().isEmpty()
-                ? variantName
+        String localizedVariant = com.unifurniture.mobile.util.ColorUi.label(requireContext(), variantName);
+        itemBinding.tvVariantName.setText(!localizedVariant.isEmpty()
+                ? localizedVariant
                 : getString(R.string.variant_default_name));
 
         itemBinding.tvPrice.setText(FormatUtil.formatCurrency(item.getUnitPrice()));

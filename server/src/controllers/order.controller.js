@@ -1,4 +1,4 @@
-﻿const mongoose = require("mongoose");
+const mongoose = require("mongoose");
 const Order = require("../models/Order");
 const OrderDetail = require("../models/OrderDetail");
 const Customer = require("../models/Customer");
@@ -1209,6 +1209,26 @@ async function patchOrderStatus(req, res, next) {
     }
 
     await doc.save();
+
+    // Trigger Push Notification for status update
+    try {
+      const { sendToCustomer } = require("../utils/push");
+      let statusMsg = "";
+      switch (nextStatus) {
+        case "confirmed": statusMsg = "đã được xác nhận"; break;
+        case "shipping": statusMsg = "đang được giao đến bạn"; break;
+        case "completed": statusMsg = "đã giao thành công"; break;
+        case "cancelled": statusMsg = "đã bị hủy"; break;
+        default: statusMsg = `đã chuyển sang trạng thái ${nextStatus}`; break;
+      }
+      await sendToCustomer(doc.customer_id.toString(), {
+        title: "Cập nhật đơn hàng",
+        body: `Đơn hàng ${doc._id} của bạn ${statusMsg}.`,
+        type: "order"
+      });
+    } catch (pushErr) {
+      console.error("[push] Failed to send order status notification:", pushErr);
+    }
 
     if (nextStatus === "completed") {
       try {

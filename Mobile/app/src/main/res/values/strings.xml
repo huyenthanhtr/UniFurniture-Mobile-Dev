@@ -98,6 +98,28 @@
     <string name="added_to_cart">Added to cart!</string>
     <string name="product_default_name">Product</string>
     <string name="variant_default_name">Default</string>
+    <!-- Product color names (client fallback localization via ColorUi) -->
+    <string name="color_white">White</string>
+    <string name="color_black">Black</string>
+    <string name="color_gray">Gray</string>
+    <string name="color_brown">Brown</string>
+    <string name="color_beige">Beige</string>
+    <string name="color_cream">Cream</string>
+    <string name="color_orange">Orange</string>
+    <string name="color_yellow">Yellow</string>
+    <string name="color_blue">Blue</string>
+    <string name="color_green">Green</string>
+    <string name="color_red">Red</string>
+    <string name="color_pink">Pink</string>
+    <string name="color_purple">Purple</string>
+    <string name="color_natural">Natural</string>
+    <string name="color_camel">Camel</string>
+    <string name="color_olive">Olive</string>
+    <!-- Notification channels (ids are non-translatable; names are shown in system settings) -->
+    <string name="fcm_default_channel_id" translatable="false">general</string>
+    <string name="channel_orders_name">Orders</string>
+    <string name="channel_promotions_name">Promotions</string>
+    <string name="channel_general_name">General</string>
     <string name="in_stock">In Stock</string>
     <string name="out_of_stock">Out of Stock</string>
     <string name="shop_reply">Reply from store</string>

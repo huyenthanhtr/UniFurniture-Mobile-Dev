@@ -1,11 +1,51 @@
 package com.unifurniture.mobile.util;
 
+import android.content.Context;
 import android.text.format.DateFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
+import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.data.model.ProductVariantDto;
 
 public class FormatUtil {
+
+    /**
+     * Localized variant label (Cách 3): resolves the color from the server {@code color_i18n} map
+     * for the current language, falling back to the client-side {@link ColorUi} localizer. The spec
+     * part is also run through {@link ColorUi} so any color word inside it is localized too. Use this
+     * overload wherever a {@link Context} is available; the context-less one below is for non-display
+     * use (e.g. search matching) and stays raw.
+     */
+    public static String getVariantLabel(Context ctx, ProductVariantDto variant) {
+        if (variant == null) return ctx.getString(R.string.variant_default_name);
+
+        String color = LocalizedText.pickColor(ctx, variant.colorI18n, variant.color);
+        color = (color == null) ? "" : color.trim();
+
+        String spec = "";
+        if (notBlank(variant.variantName)) spec = variant.variantName.trim();
+        else if (notBlank(variant.name)) spec = variant.name.trim();
+        else if (notBlank(variant.label)) spec = variant.label.trim();
+        if (spec.startsWith("Combo Bàn Ăn ")) spec = spec.substring("Combo Bàn Ăn ".length());
+        spec = ColorUi.label(ctx, spec);
+
+        if (!color.isEmpty() && !spec.isEmpty()) {
+            if (color.equalsIgnoreCase(spec)) return color;
+            if (spec.toLowerCase().contains(color.toLowerCase())) return spec;
+            if (color.toLowerCase().contains(spec.toLowerCase())) return color;
+            return color + " - " + spec;
+        } else if (!color.isEmpty()) {
+            return color;
+        } else if (!spec.isEmpty()) {
+            return spec;
+        } else {
+            return ctx.getString(R.string.variant_default_name);
+        }
+    }
+
+    private static boolean notBlank(String s) {
+        return s != null && !s.trim().isEmpty() && !s.equals("undefined");
+    }
 
     public static String getVariantLabel(ProductVariantDto variant) {
         if (variant == null) return "Mặc định";
