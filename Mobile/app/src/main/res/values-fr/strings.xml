@@ -391,6 +391,15 @@
     <string name="quantity_one_placeholder">x1</string>
     <string name="address_list_empty_hint">Vous n’avez pas encore d’adresse enregistrée.\nAppuyez sur + pour ajouter une adresse.</string>
     <string name="avatar_selected_hint">Nouvel avatar sélectionné. Appuyez sur Enregistrer pour mettre à jour.</string>
+    <string name="blog_section_title">Blogs</string>
+    <string name="blog_default_category">Blog</string>
+    <string name="order_total_label">Total :</string>
+    <string name="order_total_details">Détails du total de la commande</string>
+    <string name="order_items_subtotal">Sous-total des articles</string>
+    <string name="order_deposit_amount">Acompte</string>
+    <string name="order_promotion_discount">Réduction promotionnelle</string>
+    <string name="order_promotion_with_code">Promotion %1$s</string>
+    <string name="view_product">Voir le produit</string>
     <string name="view_order_detail">Voir le détail de la commande</string>
     <string name="payment_paid">Payé</string>
     <string name="payment_pending">Paiement en attente</string>

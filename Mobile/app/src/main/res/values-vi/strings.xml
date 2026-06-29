@@ -401,6 +401,8 @@
     <string name="home_value_elegant">Thiết kế đẹp và tiện dụng</string>
     <string name="home_value_dedicated">Hỗ trợ hậu mãi tận tâm</string>
     <string name="about_uni_value_sustainable">Bền vững</string>
+    <string name="blog_section_title">Blog</string>
+    <string name="blog_default_category">Blog</string>
     <string name="blog_empty_message">Chưa có bài blog nào được xuất bản.</string>
 
     <!-- Timeline Labels -->
@@ -424,6 +426,13 @@
     <string name="label_other">Khác</string>
     <string name="optimal_voucher_section_title">Voucher tốt nhất cho đơn hàng này</string>
     <string name="optimal_badge">Tốt nhất</string>
+    <string name="order_total_label">Thành tiền:</string>
+    <string name="order_total_details">Chi tiết thành tiền</string>
+    <string name="order_items_subtotal">Tổng tiền hàng</string>
+    <string name="order_deposit_amount">Tiền cọc</string>
+    <string name="order_promotion_discount">Giảm khuyến mãi</string>
+    <string name="order_promotion_with_code">Khuyến mãi %1$s</string>
+    <string name="view_product">Xem sản phẩm</string>
     <string name="voucher_name_fixed">Voucher giảm %1$s</string>
     <string name="voucher_desc_fixed">Áp dụng cho đơn hàng từ %1$s</string>
     <string name="voucher_name_percent">Voucher giảm %1$d%%</string>

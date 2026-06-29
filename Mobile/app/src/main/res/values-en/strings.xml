@@ -396,6 +396,15 @@
     <string name="quantity_one_placeholder">x1</string>
     <string name="address_list_empty_hint">You have no saved addresses yet.\nTap + to add a new address.</string>
     <string name="avatar_selected_hint">New avatar selected. Tap Save to update.</string>
+    <string name="blog_section_title">Blogs</string>
+    <string name="blog_default_category">Blog</string>
+    <string name="order_total_label">Total:</string>
+    <string name="order_total_details">Order total details</string>
+    <string name="order_items_subtotal">Items subtotal</string>
+    <string name="order_deposit_amount">Deposit</string>
+    <string name="order_promotion_discount">Promotion discount</string>
+    <string name="order_promotion_with_code">Promotion %1$s</string>
+    <string name="view_product">View product</string>
     <string name="mark_as_unread">Mark as unread</string>
     <string name="view_wishlist">View wishlist</string>
     <string name="used_vouchers_title">Used vouchers</string>

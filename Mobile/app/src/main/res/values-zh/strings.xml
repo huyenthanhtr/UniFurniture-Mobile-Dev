@@ -387,6 +387,15 @@
     <string name="quantity_one_placeholder">x1</string>
     <string name="address_list_empty_hint">您还没有保存地址。\n点击 + 添加新地址。</string>
     <string name="avatar_selected_hint">已选择新头像。点击保存即可更新。</string>
+    <string name="blog_section_title">博客</string>
+    <string name="blog_default_category">博客</string>
+    <string name="order_total_label">总计：</string>
+    <string name="order_total_details">订单总计明细</string>
+    <string name="order_items_subtotal">商品小计</string>
+    <string name="order_deposit_amount">订金</string>
+    <string name="order_promotion_discount">促销优惠</string>
+    <string name="order_promotion_with_code">促销 %1$s</string>
+    <string name="view_product">查看商品</string>
     <string name="view_order_detail">查看订单详情</string>
     <string name="payment_paid">已付款</string>
     <string name="payment_pending">待付款</string>

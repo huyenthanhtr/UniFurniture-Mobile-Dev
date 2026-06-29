@@ -9,6 +9,8 @@ public class OrderDetailDto {
     private String orderId;
     @SerializedName("product_id")
     private String productId;
+    @SerializedName("product_slug")
+    private String productSlug;
     @SerializedName("variant_id")
     private String variantId;
     private Integer quantity;
@@ -58,6 +60,14 @@ public class OrderDetailDto {
 
     public void setProductId(String productId) {
         this.productId = productId;
+    }
+
+    public String getProductSlug() {
+        return productSlug;
+    }
+
+    public void setProductSlug(String productSlug) {
+        this.productSlug = productSlug;
     }
 
     public String getVariantId() {
@@ -130,6 +140,7 @@ public class OrderDetailDto {
                 "id='" + id + '\'' +
                 ", orderId='" + orderId + '\'' +
                 ", productId='" + productId + '\'' +
+                ", productSlug='" + productSlug + '\'' +
                 ", variantId='" + variantId + '\'' +
                 ", quantity=" + quantity +
                 ", unitPrice=" + unitPrice +

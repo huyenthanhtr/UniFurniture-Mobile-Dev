@@ -23,7 +23,6 @@ import com.bumptech.glide.Glide;
 
 import android.content.res.ColorStateList;
 import androidx.core.content.ContextCompat;
-import android.widget.Toast;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -33,6 +32,7 @@ public class AccountFragment extends Fragment {
 
     private FragmentAccountBinding binding;
     private ApiService apiService;
+    private boolean policiesExpanded = false;
 
     @Nullable
     @Override
@@ -132,12 +132,9 @@ public class AccountFragment extends Fragment {
 
         String baseUrl = com.unifurniture.mobile.BuildConfig.API_BASE_URL.replace("/api/", "");
 
-        binding.itemAbout.setOnClickListener(v -> {
-            Bundle bundle = new Bundle();
-            bundle.putString("title", getString(R.string.account_about_title));
-            bundle.putString("url", baseUrl + "/ve-unifurniture");
-            androidx.navigation.Navigation.findNavController(requireView()).navigate(R.id.contentFragment, bundle);
-        });
+        setPoliciesExpanded(false);
+        binding.itemAbout.setOnClickListener(v -> openAbout(baseUrl));
+        binding.btnTogglePolicies.setOnClickListener(v -> setPoliciesExpanded(!policiesExpanded));
 
         binding.cardPolicySales.setOnClickListener(v -> openPolicy(baseUrl, "chinh-sach-ban-hang", getString(R.string.policy_sales)));
         binding.cardPolicyShipping.setOnClickListener(v -> openPolicy(baseUrl, "giao-hang-lap-dat", getString(R.string.policy_shipping)));
@@ -161,6 +158,19 @@ public class AccountFragment extends Fragment {
         bundle.putString("title", title);
         bundle.putString("url", baseUrl + "/chinh-sach/" + slug);
         androidx.navigation.Navigation.findNavController(requireView()).navigate(R.id.contentFragment, bundle);
+    }
+
+    private void openAbout(String baseUrl) {
+        Bundle bundle = new Bundle();
+        bundle.putString("title", getString(R.string.account_about_title));
+        bundle.putString("url", baseUrl + "/ve-unifurniture");
+        androidx.navigation.Navigation.findNavController(requireView()).navigate(R.id.contentFragment, bundle);
+    }
+
+    private void setPoliciesExpanded(boolean expanded) {
+        policiesExpanded = expanded;
+        binding.layoutPolicyChildren.setVisibility(expanded ? View.VISIBLE : View.GONE);
+        binding.btnTogglePolicies.setImageResource(expanded ? R.drawable.ic_arrow_drop_up : R.drawable.ic_arrow_drop_down);
     }
 
     private void loadProfileAvatar(SessionManager session) {
