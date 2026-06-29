@@ -90,16 +90,16 @@ public interface ApiService {
     );
 
     @POST("cart/items/upsert")
-    Call<CartDto> upsertCartItem(@Body Map<String, Object> body);
+    Call<com.google.gson.JsonObject> upsertCartItem(@Body Map<String, Object> body);
 
     @PATCH("cart/items/{id}")
-    Call<CartDto> updateCartItem(
+    Call<com.google.gson.JsonObject> updateCartItem(
             @Path("id") String cartItemId,
             @Body Map<String, Object> body
     );
 
     @DELETE("cart/items/{id}")
-    Call<CartDto> deleteCartItem(@Path("id") String cartItemId);
+    Call<com.google.gson.JsonObject> deleteCartItem(@Path("id") String cartItemId);
 
     // ── Orders ────────────────────────────────────────────────────────────────
     @GET("orders")
@@ -215,6 +215,13 @@ public interface ApiService {
             @Query("customer_id") String customerId,
             @Query("limit") int limit
     );
+
+    // ── Push device tokens (FCM) ──────────────────────────────────────────────
+    @POST("device-tokens")
+    Call<Void> registerDeviceToken(@Body DeviceTokenRequest body);
+
+    @HTTP(method = "DELETE", path = "device-tokens", hasBody = true)
+    Call<Void> unregisterDeviceToken(@Body DeviceTokenRequest body);
 
     // ── Vouchers ──────────────────────────────────────────────────────────────
     @GET("vouchers")

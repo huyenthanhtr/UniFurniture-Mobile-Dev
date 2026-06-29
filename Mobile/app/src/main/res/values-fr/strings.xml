@@ -98,6 +98,27 @@
     <string name="added_to_cart">Ajouté au panier !</string>
     <string name="product_default_name">Produit</string>
     <string name="variant_default_name">Par défaut</string>
+    <!-- Noms de couleurs produit (localisation de repli via ColorUi) -->
+    <string name="color_white">Blanc</string>
+    <string name="color_black">Noir</string>
+    <string name="color_gray">Gris</string>
+    <string name="color_brown">Marron</string>
+    <string name="color_beige">Beige</string>
+    <string name="color_cream">Crème</string>
+    <string name="color_orange">Orange</string>
+    <string name="color_yellow">Jaune</string>
+    <string name="color_blue">Bleu</string>
+    <string name="color_green">Vert</string>
+    <string name="color_red">Rouge</string>
+    <string name="color_pink">Rose</string>
+    <string name="color_purple">Violet</string>
+    <string name="color_natural">Naturel</string>
+    <string name="color_camel">Camel</string>
+    <string name="color_olive">Olive</string>
+    <!-- Noms des canaux de notification -->
+    <string name="channel_orders_name">Commandes</string>
+    <string name="channel_promotions_name">Promotions</string>
+    <string name="channel_general_name">Général</string>
     <string name="in_stock">En stock</string>
     <string name="out_of_stock">En rupture de stock</string>
     <string name="shop_reply">Réponse du magasin</string>

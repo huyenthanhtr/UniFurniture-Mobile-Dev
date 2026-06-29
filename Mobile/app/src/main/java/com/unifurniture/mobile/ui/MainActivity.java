@@ -27,6 +27,10 @@ public class MainActivity extends AppCompatActivity {
     private NavController navController;
     private boolean syncingBottomNav = false;
 
+    // POST_NOTIFICATIONS runtime permission (Android 13+). Result ignored — we just ask once.
+    private final ActivityResultLauncher<String> notificationPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {});
+
     // Auth runs as a result-returning activity on top of MainActivity, so this activity (and its
     // ViewModels / caches / FragmentManager) stays alive while the user logs in or backs out.
     private final ActivityResultLauncher<Intent> authLauncher =
@@ -37,8 +41,10 @@ public class MainActivity extends AppCompatActivity {
                 }
                 if (code == AuthActivity.RESULT_LOGGED_IN) {
                     // Session changed but this activity wasn't recreated, so re-fetch the cart for
-                    // the new session to keep the bottom-nav badge in sync.
+                    // the new session to keep the bottom-nav badge in sync, and register the FCM
+                    // token against the now-logged-in customer.
                     refreshCart();
+                    com.unifurniture.mobile.messaging.DeviceTokenManager.syncToken(this);
                 }
             });
 
@@ -96,6 +102,12 @@ public class MainActivity extends AppCompatActivity {
         setupCartBadge();
         setupConnectivityBanner();
 
+        // Push notifications: ask for permission (13+), register the FCM token, and honor any
+        // deep link the launching notification carried.
+        requestNotificationPermissionIfNeeded();
+        com.unifurniture.mobile.messaging.DeviceTokenManager.syncToken(this);
+        handleNotificationIntent(getIntent());
+
         // Floating assistant button — available on every screen except the chat itself.
         binding.fabChat.setOnClickListener(v -> {
             if (chatFabDragged) {
@@ -111,6 +123,43 @@ public class MainActivity extends AppCompatActivity {
             } catch (IllegalArgumentException ignored) {}
         });
         setupDraggableChatFab();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleNotificationIntent(intent);
+    }
+
+    private void requestNotificationPermissionIfNeeded() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU
+                && androidx.core.content.ContextCompat.checkSelfPermission(this,
+                        android.Manifest.permission.POST_NOTIFICATIONS)
+                != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS);
+        }
+    }
+
+    /** Route a notification tap (carried as intent extras) to the relevant screen. */
+    private void handleNotificationIntent(Intent intent) {
+        if (intent == null || navController == null) return;
+        String orderId = intent.getStringExtra(com.unifurniture.mobile.messaging.FcmService.EXTRA_ORDER_ID);
+        String deepLink = intent.getStringExtra(com.unifurniture.mobile.messaging.FcmService.EXTRA_DEEP_LINK);
+        if (orderId == null && deepLink == null) return;
+        try {
+            if (orderId != null && !orderId.isEmpty()) {
+                Bundle args = new Bundle();
+                args.putString("order_id", orderId);
+                navController.navigate(R.id.orderDetailFragment, args);
+            } else {
+                navController.navigate(R.id.notificationFragment);
+            }
+        } catch (IllegalArgumentException ignored) {
+        }
+        // Consume so a config change / re-entry doesn't navigate again.
+        intent.removeExtra(com.unifurniture.mobile.messaging.FcmService.EXTRA_ORDER_ID);
+        intent.removeExtra(com.unifurniture.mobile.messaging.FcmService.EXTRA_DEEP_LINK);
     }
 
     /** Open the login / registration flow without leaving MainActivity. The outcome is handled by
@@ -202,6 +251,7 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(retrofit2.Call<com.unifurniture.mobile.data.model.CartDto> call, retrofit2.Response<com.unifurniture.mobile.data.model.CartDto> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     com.unifurniture.mobile.util.CartManager.getInstance().updateCart(response.body());
+                    session.saveCartId(response.body().id);
                 }
             }
             @Override

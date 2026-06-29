@@ -1,0 +1,233 @@
+{
+  "Beige": {
+    "vi": "Be",
+    "en": "Beige",
+    "fr": "Beige",
+    "zh": "米色",
+    "_reviewed": true
+  },
+  "Cam": {
+    "vi": "Cam",
+    "en": "Orange",
+    "fr": "Orange",
+    "zh": "橙色",
+    "_reviewed": true
+  },
+  "Camel": {
+    "vi": "Camel",
+    "en": "Camel",
+    "fr": "Camel",
+    "zh": "驼色",
+    "_reviewed": true
+  },
+  "Combo Màu Tự Nhiên Đệm Be": {
+    "vi": "Combo Tự nhiên Đệm Be",
+    "en": "Natural Combo, Beige Cushion",
+    "fr": "Combo naturel, coussin beige",
+    "zh": "原木色组合 米色坐垫",
+    "_reviewed": true
+  },
+  "Combo Nâu": {
+    "vi": "Combo Nâu",
+    "en": "Brown Combo",
+    "fr": "Combo marron",
+    "zh": "棕色组合",
+    "_reviewed": true
+  },
+  "Giường Màu Trắng 1m6": {
+    "vi": "Giường Trắng 1m6",
+    "en": "White Bed 1.6m",
+    "fr": "Lit blanc 1.6m",
+    "zh": "白色床 1.6米",
+    "_reviewed": true
+  },
+  "Giường Màu Trắng 1m8": {
+    "vi": "Giường Trắng 1m8",
+    "en": "White Bed 1.8m",
+    "fr": "Lit blanc 1.8m",
+    "zh": "白色床 1.8米",
+    "_reviewed": true
+  },
+  "Giường Trắng 1m6": {
+    "vi": "Giường Trắng 1m6",
+    "en": "White Bed 1.6m",
+    "fr": "Lit blanc 1.6m",
+    "zh": "白色床 1.6米",
+    "_reviewed": true
+  },
+  "Giường Trắng 1m8": {
+    "vi": "Giường Trắng 1m8",
+    "en": "White Bed 1.8m",
+    "fr": "Lit blanc 1.8m",
+    "zh": "白色床 1.8米",
+    "_reviewed": true
+  },
+  "Giường Tự Nhiên 1m6": {
+    "vi": "Giường Tự nhiên 1m6",
+    "en": "Natural Bed 1.6m",
+    "fr": "Lit naturel 1.6m",
+    "zh": "原木色床 1.6米",
+    "_reviewed": true
+  },
+  "Gỗ Phối Trắng": {
+    "vi": "Gỗ phối Trắng",
+    "en": "Wood & White",
+    "fr": "Bois et blanc",
+    "zh": "木色拼白色",
+    "_reviewed": true
+  },
+  "Gỗ phối trắng": {
+    "vi": "Gỗ phối Trắng",
+    "en": "Wood & White",
+    "fr": "Bois et blanc",
+    "zh": "木色拼白色",
+    "_reviewed": true
+  },
+  "Màu Nâu": {
+    "vi": "Nâu",
+    "en": "Brown",
+    "fr": "Marron",
+    "zh": "棕色",
+    "_reviewed": true
+  },
+  "Màu Nâu/Xám": {
+    "vi": "Nâu / Xám",
+    "en": "Brown / Gray",
+    "fr": "Marron / Gris",
+    "zh": "棕色 / 灰色",
+    "_reviewed": true
+  },
+  "Màu Trắng": {
+    "vi": "Trắng",
+    "en": "White",
+    "fr": "Blanc",
+    "zh": "白色",
+    "_reviewed": true
+  },
+  "Màu Tự Nhiên": {
+    "vi": "Tự nhiên",
+    "en": "Natural",
+    "fr": "Naturel",
+    "zh": "原木色",
+    "_reviewed": true
+  },
+  "Màu Tự nhiên": {
+    "vi": "Tự nhiên",
+    "en": "Natural",
+    "fr": "Naturel",
+    "zh": "原木色",
+    "_reviewed": true
+  },
+  "Màu nâu": {
+    "vi": "Nâu",
+    "en": "Brown",
+    "fr": "Marron",
+    "zh": "棕色",
+    "_reviewed": true
+  },
+  "Màu nâu/Nệm xám": {
+    "vi": "Nâu / Nệm xám",
+    "en": "Brown / Gray cushion",
+    "fr": "Marron / Coussin gris",
+    "zh": "棕色 / 灰色坐垫",
+    "_reviewed": true
+  },
+  "Màu tự nhiên": {
+    "vi": "Tự nhiên",
+    "en": "Natural",
+    "fr": "Naturel",
+    "zh": "原木色",
+    "_reviewed": true
+  },
+  "Nau": {
+    "vi": "Nâu",
+    "en": "Brown",
+    "fr": "Marron",
+    "zh": "棕色",
+    "_reviewed": true
+  },
+  "Nâu": {
+    "vi": "Nâu",
+    "en": "Brown",
+    "fr": "Marron",
+    "zh": "棕色",
+    "_reviewed": true
+  },
+  "Nâu Be": {
+    "vi": "Nâu - Be",
+    "en": "Brown - Beige",
+    "fr": "Marron - Beige",
+    "zh": "棕色 - 米色",
+    "_reviewed": true
+  },
+  "Nâu Phối Trắng": {
+    "vi": "Nâu phối Trắng",
+    "en": "Brown & White",
+    "fr": "Marron et blanc",
+    "zh": "棕色拼白色",
+    "_reviewed": true
+  },
+  "Olive": {
+    "vi": "Ô liu",
+    "en": "Olive",
+    "fr": "Olive",
+    "zh": "橄榄色",
+    "_reviewed": true
+  },
+  "Sofa nệm be": {
+    "vi": "Sofa nệm Be",
+    "en": "Beige Cushion Sofa",
+    "fr": "Canapé coussin beige",
+    "zh": "米色坐垫沙发",
+    "_reviewed": true
+  },
+  "Sofa nệm xám": {
+    "vi": "Sofa nệm Xám",
+    "en": "Gray Cushion Sofa",
+    "fr": "Canapé coussin gris",
+    "zh": "灰色坐垫沙发",
+    "_reviewed": true
+  },
+  "Trắng": {
+    "vi": "Trắng",
+    "en": "White",
+    "fr": "Blanc",
+    "zh": "白色",
+    "_reviewed": true
+  },
+  "Trắng - Xám": {
+    "vi": "Trắng - Xám",
+    "en": "White - Gray",
+    "fr": "Blanc - Gris",
+    "zh": "白色 - 灰色",
+    "_reviewed": true
+  },
+  "Xanh Dương": {
+    "vi": "Xanh dương",
+    "en": "Blue",
+    "fr": "Bleu",
+    "zh": "蓝色",
+    "_reviewed": true
+  },
+  "Xám": {
+    "vi": "Xám",
+    "en": "Gray",
+    "fr": "Gris",
+    "zh": "灰色",
+    "_reviewed": true
+  },
+  "vàng": {
+    "vi": "Vàng",
+    "en": "Yellow",
+    "fr": "Jaune",
+    "zh": "黄色",
+    "_reviewed": true
+  },
+  "Đen": {
+    "vi": "Đen",
+    "en": "Black",
+    "fr": "Noir",
+    "zh": "黑色",
+    "_reviewed": true
+  }
+}

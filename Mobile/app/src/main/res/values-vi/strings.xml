@@ -96,6 +96,27 @@
     <string name="added_to_cart">Đã thêm vào giỏ hàng!</string>
     <string name="product_default_name">Sản phẩm</string>
     <string name="variant_default_name">Mặc định</string>
+    <!-- Tên màu sản phẩm (bản địa hoá dự phòng qua ColorUi) -->
+    <string name="color_white">Trắng</string>
+    <string name="color_black">Đen</string>
+    <string name="color_gray">Xám</string>
+    <string name="color_brown">Nâu</string>
+    <string name="color_beige">Be</string>
+    <string name="color_cream">Kem</string>
+    <string name="color_orange">Cam</string>
+    <string name="color_yellow">Vàng</string>
+    <string name="color_blue">Xanh dương</string>
+    <string name="color_green">Xanh lá</string>
+    <string name="color_red">Đỏ</string>
+    <string name="color_pink">Hồng</string>
+    <string name="color_purple">Tím</string>
+    <string name="color_natural">Tự nhiên</string>
+    <string name="color_camel">Camel</string>
+    <string name="color_olive">Ô liu</string>
+    <!-- Tên kênh thông báo -->
+    <string name="channel_orders_name">Đơn hàng</string>
+    <string name="channel_promotions_name">Khuyến mãi</string>
+    <string name="channel_general_name">Chung</string>
     <string name="in_stock">Còn hàng</string>
     <string name="out_of_stock">Hết hàng</string>
     <string name="shop_reply">Phản hồi từ cửa hàng</string>

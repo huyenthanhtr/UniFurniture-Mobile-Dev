@@ -450,13 +450,17 @@ public class CheckoutFragment extends Fragment {
             pruneCheckedOutItems(items);
             for (CartItemDto item : items) {
                 if (item.id != null) {
-                    UniFurnitureApp.getInstance().getApiService().deleteCartItem(item.id).enqueue(new retrofit2.Callback<com.unifurniture.mobile.data.model.CartDto>() {
-                        @Override public void onResponse(@NonNull retrofit2.Call<com.unifurniture.mobile.data.model.CartDto> call, @NonNull retrofit2.Response<com.unifurniture.mobile.data.model.CartDto> response) {
+                    UniFurnitureApp.getInstance().getApiService().deleteCartItem(item.id).enqueue(new retrofit2.Callback<com.google.gson.JsonObject>() {
+                        @Override public void onResponse(@NonNull retrofit2.Call<com.google.gson.JsonObject> call, @NonNull retrofit2.Response<com.google.gson.JsonObject> response) {
                             if (response.isSuccessful() && response.body() != null) {
-                                CartManager.getInstance().updateCart(response.body());
+                                com.google.gson.JsonObject jsonObj = response.body();
+                                if (!jsonObj.has("deleted")) {
+                                    com.unifurniture.mobile.data.model.CartDto cart = new com.google.gson.Gson().fromJson(jsonObj, com.unifurniture.mobile.data.model.CartDto.class);
+                                    CartManager.getInstance().updateCart(cart);
+                                }
                             }
                         }
-                        @Override public void onFailure(@NonNull retrofit2.Call<com.unifurniture.mobile.data.model.CartDto> call, @NonNull Throwable t) {}
+                        @Override public void onFailure(@NonNull retrofit2.Call<com.google.gson.JsonObject> call, @NonNull Throwable t) {}
                     });
                 }
             }

@@ -106,6 +106,9 @@ public class AccountFragment extends Fragment {
             });
             
             binding.btnLogout.setOnClickListener(v -> {
+                // Unregister this device's push token before the session is cleared.
+                com.unifurniture.mobile.messaging.DeviceTokenManager.unregister(
+                        requireContext(), session.getCustomerId());
                 session.logout();
                 MainActivity main = (MainActivity) requireActivity();
                 // MainActivity stays alive (its ViewModels and caches are preserved), so refresh
