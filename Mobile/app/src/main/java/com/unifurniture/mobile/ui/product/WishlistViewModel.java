@@ -72,14 +72,26 @@ public class WishlistViewModel extends AndroidViewModel {
         });
     }
 
-    public void removeFromWishlist(String wishlistItemId) {
-        if (wishlistItemId.startsWith("local_")) {
-            String productId = wishlistItemId.substring(6);
+    public void removeFromWishlist(WishlistItemDto item) {
+        if (item == null) return;
+        String productId = item.productId;
+
+        // Guest / locally-added items are not on the server.
+        if (item.id != null && item.id.startsWith("local_")) {
             SessionManager.getInstance(getApplication()).removeFromLocalWishlist(productId);
             loadWishlist();
             return;
         }
-        LiveDataUtil.observeOnce(repository.removeFromWishlist(wishlistItemId), success -> {
+
+        SessionManager session = SessionManager.getInstance(getApplication());
+        String profileId = session.getCustomerId();
+        if (profileId == null) {
+            session.removeFromLocalWishlist(productId);
+            loadWishlist();
+            return;
+        }
+
+        LiveDataUtil.observeOnce(repository.removeFromWishlist(profileId, productId), success -> {
             if (Boolean.TRUE.equals(success)) {
                 loadWishlist(); // Reload after removal
             } else {

@@ -115,54 +115,20 @@ public class ProductDetailViewModel extends AndroidViewModel {
 
         // Logged in mode
         if (Boolean.TRUE.equals(isFavorite.getValue())) {
-            if (wishlistItemId != null) {
-                loading.setValue(true);
-                LiveDataUtil.observeOnce(productRepo.removeFromWishlist(wishlistItemId), success -> {
-                    loading.setValue(false);
-                    if (Boolean.TRUE.equals(success)) {
-                        isFavorite.setValue(false);
-                        wishlistItemId = null;
-                        session.removeFromLocalWishlist(p.id);
-                        snackbarMessage.setValue(getApplication().getString(R.string.removed_from_favorites));
-                    } else {
-                        error.setValue(getApplication().getString(R.string.wishlist_remove_error));
-                    }
-                });
-            } else {
-                // If isFavorite is true but wishlistItemId is null, fetch wishlist to resolve the ID
-                loading.setValue(true);
-                LiveDataUtil.observeOnce(productRepo.getWishlist(customerId), list -> {
-                    String foundItemId = null;
-                    if (list != null) {
-                        for (WishlistItemDto item : list) {
-                            if (item.productId != null && item.productId.equals(p.id)) {
-                                foundItemId = item.id;
-                                break;
-                            }
-                        }
-                    }
-                    if (foundItemId != null) {
-                        wishlistItemId = foundItemId;
-                        LiveDataUtil.observeOnce(productRepo.removeFromWishlist(wishlistItemId), success -> {
-                            loading.setValue(false);
-                            if (Boolean.TRUE.equals(success)) {
-                                isFavorite.setValue(false);
-                                wishlistItemId = null;
-                                session.removeFromLocalWishlist(p.id);
-                                snackbarMessage.setValue(getApplication().getString(R.string.removed_from_favorites));
-                            } else {
-                                error.setValue(getApplication().getString(R.string.wishlist_remove_error));
-                            }
-                        });
-                    } else {
-                        // Not actually in server wishlist, just reset local state
-                        loading.setValue(false);
-                        isFavorite.setValue(false);
-                        session.removeFromLocalWishlist(p.id);
-                        snackbarMessage.setValue(getApplication().getString(R.string.removed_from_favorites));
-                    }
-                });
-            }
+            // Backend deletes by (profileId, productId), so there is no need to resolve
+            // the wishlist row id first.
+            loading.setValue(true);
+            LiveDataUtil.observeOnce(productRepo.removeFromWishlist(customerId, p.id), success -> {
+                loading.setValue(false);
+                if (Boolean.TRUE.equals(success)) {
+                    isFavorite.setValue(false);
+                    wishlistItemId = null;
+                    session.removeFromLocalWishlist(p.id);
+                    snackbarMessage.setValue(getApplication().getString(R.string.removed_from_favorites));
+                } else {
+                    error.setValue(getApplication().getString(R.string.wishlist_remove_error));
+                }
+            });
         } else {
             loading.setValue(true);
             LiveDataUtil.observeOnce(productRepo.addToWishlist(customerId, p.id), item -> {
