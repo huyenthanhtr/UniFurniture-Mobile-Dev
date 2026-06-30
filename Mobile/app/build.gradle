@@ -7,12 +7,16 @@ Properties properties = new Properties()
 if (project.rootProject.file('local.properties').exists()) {
     properties.load(project.rootProject.file('local.properties').newDataInputStream())
 }
-// Debug builds use the developer's local backend (override in local.properties via api.base.url).
-// Default falls back to the production URL for convenience.
-def localApiBaseUrl = properties.getProperty("api.base.url", "https://unifur-git-454662189896.europe-west1.run.app/api/")
-// Release/APK builds ALWAYS ship the deployed production backend so installed APKs
-// load data on any real device, regardless of local.properties.
+// The deployed production backend. ALL build types (debug + release) ship this URL so the app
+// works the same on every machine, emulator and real device — independent of local.properties,
+// which is git-ignored and differs per developer.
 def prodApiBaseUrl = "https://unifur-git-454662189896.europe-west1.run.app/api/"
+// Opt-in local backend for development: set `dev.api.base.url` in local.properties ONLY if you
+// are actually running the backend locally (e.g. http://10.0.2.2:3000/api/ for the emulator).
+// Leave it UNSET to use production. NOTE: the key is `dev.api.base.url` — the old `api.base.url`
+// is intentionally ignored so a stale entry left on a teammate's machine can never break the app.
+def localApiBaseUrl = properties.getProperty("dev.api.base.url", "").trim()
+def debugApiBaseUrl = localApiBaseUrl.isEmpty() ? prodApiBaseUrl : localApiBaseUrl
 
 android {
     namespace 'com.unifurniture.mobile'
@@ -33,7 +37,7 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField "String", "API_BASE_URL", "\"${localApiBaseUrl}\""
+            buildConfigField "String", "API_BASE_URL", "\"${debugApiBaseUrl}\""
         }
         release {
             minifyEnabled false

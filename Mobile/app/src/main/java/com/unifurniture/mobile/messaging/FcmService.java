@@ -10,14 +10,14 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.ui.MainActivity;
-import com.unifurniture.mobile.util.NotificationManager;
 
 import java.util.Map;
 
 /**
- * Receives FCM pushes. Each message is (1) shown as a system notification on the channel mapped from
- * its {@code type}, and (2) persisted into the existing in-app list ({@link NotificationManager}) so
- * the NotificationFragment list and the account badge update for free.
+ * Receives FCM pushes. Each message is shown as a system notification on the channel mapped from its
+ * {@code type}. The in-app list is NOT written here: the backend already persists every notification
+ * (sendToCustomer) and the app syncs it from {@code /api/notifications}, so a local copy would be a
+ * duplicate (local UUID vs server _id never merge).
  *
  * Expected data payload keys: {@code type} (order|promotion|review|account|recommendation),
  * {@code title}, {@code body}, optional {@code orderId}, {@code couponCode}, {@code deepLink}.
@@ -43,10 +43,9 @@ public class FcmService extends FirebaseMessagingService {
         String orderId = data.get("orderId");
         String deepLink = data.get("deepLink");
 
-        // Persist into the in-app list (drives NotificationFragment + the account badge).
-        NotificationManager.getInstance(getApplicationContext())
-                .addNotification(title, body, type != null ? type : "other", orderId);
-
+        // The in-app list is server-sourced (synced via /api/notifications); the backend already
+        // persisted this notification in sendToCustomer. Adding a local copy here would duplicate it
+        // (local UUID vs server _id never merge), so we only surface the system notification.
         showSystemNotification(title, body, type, orderId, deepLink);
     }
 

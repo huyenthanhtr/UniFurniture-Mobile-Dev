@@ -385,9 +385,8 @@ public class CheckoutFragment extends Fragment {
         String orderId = response.orderId;
         String orderCode = response.orderCode != null ? response.orderCode : "UF-XXXXXX";
 
-        com.unifurniture.mobile.util.NotificationManager.getInstance(requireContext())
-                .addNotification(getString(R.string.order_success_notif_title),
-                        getString(R.string.order_success_notif_msg, orderCode), "order", orderCode);
+        // The backend persists this "order placed" notification (createCheckoutOrder -> sendToCustomer)
+        // and the app syncs it from /api/notifications; adding a local copy here would duplicate it.
 
         Bundle bundle = new Bundle();
         bundle.putString("order_id", orderId);
