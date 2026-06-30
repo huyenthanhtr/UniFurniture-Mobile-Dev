@@ -33,6 +33,10 @@ public class ProductVariantDto {
     /** Per-locale color names ({"vi":..,"en":..,"fr":..,"zh":..}) — source of truth for translation. */
     @SerializedName(value = "color_i18n", alternate = {"colorI18n"})
     public java.util.Map<String, String> colorI18n;
+    /** Per-locale variant spec/name ({"vi":..,"en":..,"fr":..,"zh":..}) — source of truth for the
+     *  non-color part of the label (combos, sizes, cabinet configs). Null on legacy variants. */
+    @SerializedName(value = "name_i18n", alternate = {"nameI18n", "variant_name_i18n", "variantNameI18n"})
+    public java.util.Map<String, String> nameI18n;
     public Double price;
     @SerializedName(value = "compare_at_price", alternate = {"compareAtPrice"})
     public Double compareAtPrice;

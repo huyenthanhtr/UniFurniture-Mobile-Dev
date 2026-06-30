@@ -16,6 +16,14 @@ public final class LocalizedText {
     private LocalizedText() {}
 
     public static String pickColor(Context ctx, Map<String, String> i18n, String rawFallback) {
+        return pick(ctx, i18n, rawFallback);
+    }
+
+    /**
+     * Generic resolver for any localized product field (color OR variant spec/name). Order:
+     * i18n[currentLang] → {@link ColorUi} on the raw value → i18n["vi"] → raw value.
+     */
+    public static String pick(Context ctx, Map<String, String> i18n, String rawFallback) {
         if (i18n != null) {
             String value = i18n.get(LanguageHelper.getLanguage(ctx));
             if (value != null && !value.trim().isEmpty()) {
