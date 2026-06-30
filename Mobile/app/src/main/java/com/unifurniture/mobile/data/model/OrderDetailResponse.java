@@ -9,6 +9,7 @@ public class OrderDetailResponse {
     private List<PaymentDto> payments;
     @SerializedName("payment_summary")
     private PaymentSummaryDto paymentSummary;
+    private PricingDto pricing;
 
     public OrderDetailResponse() {
     }
@@ -50,6 +51,14 @@ public class OrderDetailResponse {
         this.paymentSummary = paymentSummary;
     }
 
+    public PricingDto getPricing() {
+        return pricing;
+    }
+
+    public void setPricing(PricingDto pricing) {
+        this.pricing = pricing;
+    }
+
     @Override
     public String toString() {
         return "OrderDetailResponse{" +
@@ -57,6 +66,7 @@ public class OrderDetailResponse {
                 ", items=" + items +
                 ", payments=" + payments +
                 ", paymentSummary=" + paymentSummary +
+                ", pricing=" + pricing +
                 '}';
     }
 }

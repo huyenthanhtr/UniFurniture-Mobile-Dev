@@ -6,6 +6,7 @@ const Profile = require("../models/Profile");
 const CustomerAddress = require("../models/CustomerAddress");
 const Payment = require("../models/Payment");
 const Product = require("../models/Product");
+const ProductTranslation = require("../models/ProductTranslation");
 const ProductVariant = require("../models/ProductVariant");
 const ProductImage = require("../models/ProductImage");
 const Coupon = require("../models/Coupon");
@@ -40,6 +41,43 @@ const CANCELLATION_GRACE_HOURS = 24;
 const WARRANTY_YEARS = 5;
 const SOLD_COUNT_STATUSES = new Set(["completed"]);
 const MEMBERSHIP_TIER_RANK = { dong: 1, bac: 2, vang: 3, kim_cuong: 4 };
+const PRODUCT_TRANSLATION_LANGS = new Set(["en", "fr", "zh"]);
+
+async function overlayProductTranslations(products, langRaw) {
+  const lang = String(langRaw || "").trim().toLowerCase();
+  if (!PRODUCT_TRANSLATION_LANGS.has(lang)) return products;
+
+  const list = Array.isArray(products) ? products : [products];
+  const ids = list.map((product) => product?._id).filter(Boolean);
+  if (!ids.length) return products;
+
+  const translations = await ProductTranslation.find({
+    product_id: { $in: ids },
+    language_code: lang,
+  }).lean();
+
+  const byProductId = new Map(translations.map((item) => [String(item.product_id), item]));
+  for (const product of list) {
+    const translation = byProductId.get(String(product?._id || ""));
+    if (!translation) continue;
+    if (translation.name) product.name = translation.name;
+    if (translation.short_description) product.short_description = translation.short_description;
+    if (translation.description) product.description = translation.description;
+  }
+  return products;
+}
+
+function serializeOrderProduct(product) {
+  if (!product) return null;
+  return {
+    _id: product._id,
+    id: product._id,
+    name: String(product.name || "").trim(),
+    slug: String(product.slug || "").trim(),
+    thumbnail: String(product.thumbnail || "").trim(),
+    thumbnail_url: String(product.thumbnail_url || "").trim(),
+  };
+}
 
 function getExpectedDepositAmount(totalAmount, depositAmount) {
   const total = Math.max(Number(totalAmount || 0), 0);
@@ -779,12 +817,18 @@ async function getOrders(req, res, next) {
     )];
 
     const products = productIds.length
-      ? await Product.find({ _id: { $in: productIds } }).select({ _id: 1, thumbnail: 1, thumbnail_url: 1 }).lean()
+      ? await Product.find({ _id: { $in: productIds } }).select({ _id: 1, name: 1, slug: 1, thumbnail: 1, thumbnail_url: 1 }).lean()
       : [];
+    await overlayProductTranslations(products, req.query.lang);
+
+    const productNameMap = new Map();
+    const productSlugMap = new Map();
     const productThumbMap = new Map();
     for (const product of products) {
       const key = String(product?._id || "");
       if (!key) continue;
+      productNameMap.set(key, String(product?.name || "").trim());
+      productSlugMap.set(key, String(product?.slug || "").trim());
       const thumb = String(product?.thumbnail || "").trim() || String(product?.thumbnail_url || "").trim();
       productThumbMap.set(key, thumb);
     }
@@ -829,8 +873,9 @@ async function getOrders(req, res, next) {
       orderItemsMap.get(orderKey).push({
         _id: detail._id,
         product_id: variant?.product_id || null,
+        product_slug: productSlugMap.get(productId) || "",
         variant_id: detail.variant_id || null,
-        product_name: String(detail.product_name || "").trim(),
+        product_name: productNameMap.get(productId) || String(detail.product_name || "").trim(),
         variant_name: String(detail.variant_name || "").trim(),
         quantity: Math.max(1, Number(detail.quantity || 1)),
         unit_price: Math.max(0, Number(detail.unit_price || 0)),
@@ -927,9 +972,13 @@ async function getOrderById(req, res, next) {
       )
     );
     const products = productIds.length
-      ? await Product.find({ _id: { $in: productIds } }).select({ _id: 1, slug: 1, thumbnail: 1, thumbnail_url: 1 }).lean()
+      ? await Product.find({ _id: { $in: productIds } }).select({ _id: 1, name: 1, slug: 1, thumbnail: 1, thumbnail_url: 1 }).lean()
       : [];
+    await overlayProductTranslations(products, req.query.lang);
+
+    const productMap = new Map(products.map((product) => [String(product._id), product]));
     const productSlugMap = new Map(products.map((product) => [String(product._id), String(product.slug || "").trim()]));
+    const productNameMap = new Map(products.map((product) => [String(product._id), String(product.name || "").trim()]));
     const productThumbMap = new Map();
     for (const product of products) {
       const key = String(product?._id || "");
@@ -958,17 +1007,19 @@ async function getOrderById(req, res, next) {
     const normalizedItems = items.map((item) => {
       const variant = variantMap.get(String(item.variant_id || ""));
       const productId = String(variant?.product_id || "");
+      const localizedProduct = productMap.get(productId);
       return {
         ...item,
         product_id: variant?.product_id || null,
         product_slug: productSlugMap.get(String(variant?.product_id || "")) || "",
+        product: serializeOrderProduct(localizedProduct),
         image_url:
           imageMap.get(String(item.variant_id || "")) ||
           productThumbMap.get(productId) ||
           productImageMap.get(productId) ||
           "",
-        variant_name: item.variant_name || variant?.variant_name || variant?.name || "-",
-        product_name: item.product_name || "-",
+        variant_name: item.variant_name || variant?.variant_name || variant?.name || "",
+        product_name: productNameMap.get(productId) || item.product_name || "",
         sku: item.sku || variant?.sku || "-",
       };
     });
