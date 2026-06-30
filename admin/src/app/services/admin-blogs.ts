@@ -37,7 +37,8 @@ export interface AdminBlogListResponse {
 @Injectable({ providedIn: 'root' })
 export class AdminBlogsService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:3000/api/posts';
+  private baseUrl = 'http://localhost:3000/api';
+  private apiUrl = `${this.baseUrl}/posts`;
 
   getPosts(params: Record<string, string | number | undefined>): Observable<AdminBlogListResponse> {
     let httpParams = new HttpParams();
@@ -59,5 +60,12 @@ export class AdminBlogsService {
 
   deletePost(id: string): Observable<{ success: boolean }> {
     return this.http.delete<{ success: boolean }>(`${this.apiUrl}/${id}`);
+  }
+
+  uploadImage(dataUrl: string, imageName: string): Observable<{ filename: string; image_url: string }> {
+    return this.http.post<{ filename: string; image_url: string }>(`${this.baseUrl}/product-images/upload`, {
+      dataUrl,
+      productName: imageName || 'blog',
+    });
   }
 }

@@ -6,19 +6,43 @@
     android:orientation="horizontal"
     android:paddingVertical="8dp">
 
-    <ImageView
-        android:id="@+id/ivProductImage"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:background="@color/gray_200"
-        android:scaleType="centerCrop" />
+    <LinearLayout
+        android:id="@+id/layoutProductLink"
+        android:layout_width="72dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackgroundBorderless">
+
+        <ImageView
+            android:id="@+id/ivProductImage"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:background="@color/gray_200"
+            android:scaleType="centerCrop"
+            android:contentDescription="@string/view_product" />
+
+        <TextView
+            android:id="@+id/tvViewProduct"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="1"
+            android:text="@string/view_product"
+            android:textColor="@color/gray_600"
+            android:textSize="11sp" />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:layout_marginStart="12dp">
+        android:layout_marginStart="10dp">
 
         <TextView
             android:id="@+id/tvProductName"

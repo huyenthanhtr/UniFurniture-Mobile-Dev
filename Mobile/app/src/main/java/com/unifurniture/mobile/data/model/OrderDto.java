@@ -13,6 +13,8 @@ public class OrderDto {
     private String status;
     @SerializedName("total_amount")
     private Double totalAmount;
+    @SerializedName("deposit_amount")
+    private Double depositAmount;
     @SerializedName(value = "created_at", alternate = {"createdAt", "ordered_at"})
     private String createdAt;
     @SerializedName("shipping_name")
@@ -90,6 +92,14 @@ public class OrderDto {
         this.totalAmount = totalAmount;
     }
 
+    public Double getDepositAmount() {
+        return depositAmount;
+    }
+
+    public void setDepositAmount(Double depositAmount) {
+        this.depositAmount = depositAmount;
+    }
+
     public String getCreatedAt() {
         return createdAt;
     }
@@ -163,16 +173,7 @@ public class OrderDto {
     }
 
     public String getStatusLabel() {
-        if (status == null) return "Không xác định";
-        switch (status) {
-            case "pending":      return "Chờ xác nhận";
-            case "confirmed":    return "Đã xác nhận";
-            case "shipping":     return "Đang giao";
-            case "delivered":    return "Đã giao";
-            case "cancelled":    return "Đã huỷ";
-            case "cancel_requested": return "Yêu cầu huỷ";
-            default:             return status;
-        }
+        return status != null ? status : "";
     }
 
     @Override
@@ -183,6 +184,7 @@ public class OrderDto {
                 ", customerId='" + customerId + '\'' +
                 ", status='" + status + '\'' +
                 ", totalAmount=" + totalAmount +
+                ", depositAmount=" + depositAmount +
                 ", createdAt='" + createdAt + '\'' +
                 ", shippingName='" + shippingName + '\'' +
                 ", shippingPhone='" + shippingPhone + '\'' +

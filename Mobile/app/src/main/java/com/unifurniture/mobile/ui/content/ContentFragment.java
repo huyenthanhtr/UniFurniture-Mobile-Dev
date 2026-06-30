@@ -149,8 +149,11 @@ public class ContentFragment extends Fragment {
 
     private String buildAboutPageHtml(List<PostDto> posts) {
         Map<String, String> categoryKeys = new LinkedHashMap<>();
+        String defaultBlogCategory = getString(R.string.blog_default_category);
         StringBuilder blogSection = new StringBuilder();
-        blogSection.append("<div class='section-title'>Blogs</div>");
+        blogSection.append("<div class='section-title'>")
+                .append(html(getString(R.string.blog_section_title)))
+                .append("</div>");
         blogSection.append("<div class='filter-row blog-filter-row'>");
         blogSection.append("<button class='filter-chip active' type='button' onclick=\"filterBlogs('all',this)\">")
                 .append(html(getString(R.string.filter_all)))
@@ -159,7 +162,7 @@ public class ContentFragment extends Fragment {
         if (posts != null && !posts.isEmpty()) {
             for (PostDto post : posts) {
                 if (post == null || isBlank(post.getId())) continue;
-                String category = isBlank(post.getCategory()) ? "Blog" : post.getCategory().trim();
+                String category = isBlank(post.getCategory()) ? defaultBlogCategory : post.getCategory().trim();
                 if (!categoryKeys.containsKey(category)) {
                     String key = "cat-" + categoryKeys.size();
                     categoryKeys.put(category, key);
@@ -178,9 +181,9 @@ public class ContentFragment extends Fragment {
             for (PostDto post : posts) {
                 if (post == null || isBlank(post.getId())) continue;
 
+                String category = isBlank(post.getCategory()) ? defaultBlogCategory : post.getCategory().trim();
                 String thumb = resolveMediaUrl(post.getThumbnailUrl());
-                String caption = isBlank(post.getCaption()) ? post.getCategory() : post.getCaption();
-                String category = isBlank(post.getCategory()) ? "Blog" : post.getCategory().trim();
+                String caption = isBlank(post.getCaption()) ? category : post.getCaption();
                 String categoryKey = categoryKeys.containsKey(category) ? categoryKeys.get(category) : "cat-0";
                 blogSection.append("<button class='blog-card' data-category='")
                         .append(attr(categoryKey))

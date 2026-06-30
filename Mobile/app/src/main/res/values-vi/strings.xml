@@ -516,4 +516,12 @@
     <string name="home_value_dedicated">Hỗ trợ sau bán hàng tận tâm</string>
     <string name="otp_subtitle_format">Nhập mã OTP gồm 6 chữ số đã được gửi qua SMS đến %s</string>
     <string name="otp_subtitle_demo">Demo: mã OTP của bạn là %s (đã điền sẵn)</string>
+    <string name="blog_section_title">Blog</string>
+    <string name="blog_default_category">Blog</string>
+    <string name="order_total_label">Th&#224;nh ti&#7873;n:</string>
+    <string name="order_total_details">Chi ti&#7871;t th&#224;nh ti&#7873;n</string>
+    <string name="order_items_subtotal">T&#7893;ng ti&#7873;n h&#224;ng</string>
+    <string name="order_deposit_amount">Ti&#7873;n c&#7885;c</string>
+    <string name="order_promotion_discount">Gi&#7843;m khuy&#7871;n m&#227;i</string>
+    <string name="order_promotion_with_code">Khuy&#7871;n m&#227;i %1$s</string>
 </resources>

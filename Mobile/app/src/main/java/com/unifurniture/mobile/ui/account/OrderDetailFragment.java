@@ -16,8 +16,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
-
 import com.bumptech.glide.Glide;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
@@ -32,6 +32,8 @@ import com.unifurniture.mobile.data.model.OrderReviewItemDto;
 import com.unifurniture.mobile.data.model.OrderReviewStatusDto;
 import com.unifurniture.mobile.data.model.PaymentDto;
 import com.unifurniture.mobile.data.model.PaymentSummaryDto;
+import com.unifurniture.mobile.data.model.PricingDto;
+import com.unifurniture.mobile.data.model.ProductDto;
 import com.unifurniture.mobile.data.model.ReviewMediaConfigDto;
 import com.unifurniture.mobile.data.model.ReviewMediaUploadResponseDto;
 import com.unifurniture.mobile.data.model.ReviewSubmissionItemDto;
@@ -50,6 +52,7 @@ import com.unifurniture.mobile.util.FormatUtil;
 import com.unifurniture.mobile.util.OrderStatusUi;
 import com.unifurniture.mobile.util.SessionManager;
 import com.unifurniture.mobile.util.ToastUtil;
+import java.text.Normalizer;
 
 import org.json.JSONObject;
 
@@ -76,6 +79,7 @@ public class OrderDetailFragment extends Fragment {
     private FragmentOrderDetailBinding binding;
     private ApiService apiService;
     private String orderId;
+    private boolean pricingExpanded = false;
     private final Map<String, OrderReviewItemDto> reviewStatusMap = new HashMap<>();
     private List<OrderDetailDto> currentItems = new ArrayList<>();
     private OrderDto currentOrder;
@@ -127,6 +131,7 @@ public class OrderDetailFragment extends Fragment {
         loadReviewMediaConfig();
 
         binding.toolbar.setNavigationOnClickListener(v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
+        binding.pricingHeader.setOnClickListener(v -> togglePricingDetails());
 
         if (getArguments() != null) {
             orderId = getArguments().getString("order_id");
@@ -231,11 +236,12 @@ public class OrderDetailFragment extends Fragment {
                 latestPayment != null ? latestPayment.getStatus() : null
         );
         binding.tvPaymentStatus.setText(formatPaymentStatus(paymentStatus));
-        binding.tvTotalAmount.setText(FormatUtil.formatCurrency(currentOrder.getTotalAmount()));
 
         currentItems = detailResponse.getItems() != null ? detailResponse.getItems() : currentOrder.getDetails();
         if (currentItems == null) currentItems = Collections.emptyList();
 
+        pricingExpanded = false;
+        bindPricingSummary(currentOrder, detailResponse, currentItems);
         renderOrderItems();
         updateTimeline(currentOrder.getStatus());
         loadOrderReviewStatus();
@@ -251,21 +257,8 @@ public class OrderDetailFragment extends Fragment {
     }
 
     private void bindOrderItemContent(ItemOrderDetailBinding itemBinding, OrderDetailDto item) {
-        String title = item.getProductName();
-        if ((title == null || title.isEmpty()) && item.getProduct() != null) {
-            title = item.getProduct().getTitle();
-        }
-        if (title == null || title.isEmpty()) {
-            title = getString(R.string.product_default_name);
-        }
-        itemBinding.tvProductName.setText(title);
-
-        // Orders store a plain variant snapshot string; localize any color word via the ColorUi fallback.
-        String variantName = item.getVariantName();
-        String localizedVariant = com.unifurniture.mobile.util.ColorUi.label(requireContext(), variantName);
-        itemBinding.tvVariantName.setText(!localizedVariant.isEmpty()
-                ? localizedVariant
-                : getString(R.string.variant_default_name));
+        itemBinding.tvProductName.setText(resolveProductTitle(item));
+        itemBinding.tvVariantName.setText(resolveVariantTitle(item));
 
         itemBinding.tvPrice.setText(FormatUtil.formatCurrency(item.getUnitPrice()));
         itemBinding.tvQuantity.setText(getString(R.string.quantity_format, item.getQuantity() != null ? item.getQuantity() : 1));
@@ -278,6 +271,8 @@ public class OrderDetailFragment extends Fragment {
         } else {
             itemBinding.ivProductImage.setImageResource(R.drawable.placeholder_product);
         }
+
+        itemBinding.layoutProductLink.setOnClickListener(v -> openProductDetail(item));
     }
 
     private void loadOrderReviewStatus() {
@@ -717,6 +712,144 @@ public class OrderDetailFragment extends Fragment {
 
     private int getMaxFileSizeMb() {
         return reviewMediaConfig != null && reviewMediaConfig.getMaxFileSizeMb() != null ? reviewMediaConfig.getMaxFileSizeMb() : 30;
+    }
+
+    private void bindPricingSummary(OrderDto order, OrderDetailResponse detailResponse, List<OrderDetailDto> details) {
+        PricingDto pricing = detailResponse.getPricing();
+        double total = positiveAmount(pricing != null ? pricing.getGrandTotal() : null);
+        if (total <= 0) total = positiveAmount(order.getTotalAmount());
+        if (total <= 0 && order.getPaymentSummary() != null) {
+            total = positiveAmount(order.getPaymentSummary().getTotalAmount());
+        }
+        if (total <= 0 && detailResponse.getPaymentSummary() != null) {
+            total = positiveAmount(detailResponse.getPaymentSummary().getTotalAmount());
+        }
+
+        double subtotal = positiveAmount(pricing != null ? pricing.getItemsSubtotal() : null);
+        if (subtotal <= 0) subtotal = calculateItemsSubtotal(details);
+
+        double discount = nonNegativeAmount(pricing != null ? pricing.getDiscountAmount() : null);
+        if (discount <= 0 && subtotal > total && total > 0) {
+            discount = subtotal - total;
+        }
+        if (subtotal <= 0 && total > 0) {
+            subtotal = Math.max(0, total + discount);
+        }
+
+        double deposit = resolveDepositAmount(order, detailResponse);
+
+        binding.tvTotalAmount.setText(FormatUtil.formatCurrency(total));
+        binding.tvItemsSubtotal.setText(FormatUtil.formatCurrency(subtotal));
+        binding.rowDeposit.setVisibility(deposit > 0 ? View.VISIBLE : View.GONE);
+        binding.tvDepositAmount.setText(FormatUtil.formatCurrency(deposit));
+
+        String couponCode = pricing != null ? pricing.getCouponCode() : null;
+        boolean hasDiscount = discount > 0 || (couponCode != null && !couponCode.trim().isEmpty());
+        binding.rowDiscount.setVisibility(hasDiscount ? View.VISIBLE : View.GONE);
+        if (hasDiscount) {
+            binding.tvDiscountLabel.setText(couponCode != null && !couponCode.trim().isEmpty()
+                    ? getString(R.string.order_promotion_with_code, couponCode.trim())
+                    : getString(R.string.order_promotion_discount));
+            binding.tvDiscountAmount.setText(discount > 0
+                    ? "-" + FormatUtil.formatCurrency(discount)
+                    : FormatUtil.formatCurrency(0));
+        }
+
+        updatePricingExpandedState(false);
+    }
+
+    private double calculateItemsSubtotal(List<OrderDetailDto> details) {
+        if (details == null) return 0;
+        double subtotal = 0;
+        for (OrderDetailDto item : details) {
+            if (item == null) continue;
+            double lineTotal = positiveAmount(item.getTotal());
+            if (lineTotal <= 0) {
+                int quantity = item.getQuantity() != null ? Math.max(1, item.getQuantity()) : 1;
+                lineTotal = positiveAmount(item.getUnitPrice()) * quantity;
+            }
+            subtotal += lineTotal;
+        }
+        return subtotal;
+    }
+
+    private double resolveDepositAmount(OrderDto order, OrderDetailResponse detailResponse) {
+        double deposit = positiveAmount(order != null ? order.getDepositAmount() : null);
+        if (deposit <= 0 && order != null && order.getPaymentSummary() != null) {
+            deposit = positiveAmount(order.getPaymentSummary().getDepositAmount());
+        }
+        if (deposit <= 0 && detailResponse != null && detailResponse.getPaymentSummary() != null) {
+            deposit = positiveAmount(detailResponse.getPaymentSummary().getDepositAmount());
+        }
+        return deposit;
+    }
+
+    private double positiveAmount(Double value) {
+        if (value == null || value.isNaN() || value.isInfinite()) return 0;
+        return value > 0 ? value : 0;
+    }
+
+    private double nonNegativeAmount(Double value) {
+        if (value == null || value.isNaN() || value.isInfinite()) return 0;
+        return Math.max(0, value);
+    }
+
+    private void togglePricingDetails() {
+        pricingExpanded = !pricingExpanded;
+        updatePricingExpandedState(true);
+    }
+
+    private void updatePricingExpandedState(boolean animate) {
+        if (binding == null) return;
+        binding.llPricingDetails.setVisibility(pricingExpanded ? View.VISIBLE : View.GONE);
+        if (animate) {
+            binding.ivPricingChevron.animate().rotation(pricingExpanded ? 180f : 0f).setDuration(160).start();
+        } else {
+            binding.ivPricingChevron.setRotation(pricingExpanded ? 180f : 0f);
+        }
+    }
+
+    private void openProductDetail(OrderDetailDto item) {
+        String slug = null;
+        ProductDto product = item != null ? item.getProduct() : null;
+        if (product != null) {
+            slug = firstNonBlank(product.slug);
+        }
+        if (slug == null && item != null) {
+            slug = firstNonBlank(item.getProductSlug(), item.getProductId());
+        }
+        if (slug == null) return;
+
+        Bundle args = new Bundle();
+        args.putString("slug", slug);
+        Navigation.findNavController(requireView()).navigate(R.id.productDetailFragment, args);
+    }
+
+    private String resolveProductTitle(OrderDetailDto item) {
+        ProductDto product = item != null ? item.getProduct() : null;
+        String title = firstNonBlank(
+                item != null ? item.getProductName() : null,
+                product != null ? product.getTitle() : null
+        );
+        return title != null ? title : getString(R.string.product_default_name);
+    }
+
+    private String resolveVariantTitle(OrderDetailDto item) {
+        String variantName = item != null ? item.getVariantName() : null;
+        if (isDefaultVariantName(variantName)) {
+            return getString(R.string.variant_default_name);
+        }
+        return variantName.trim();
+    }
+
+    private boolean isDefaultVariantName(String value) {
+        if (value == null) return true;
+        String normalized = value.trim().toLowerCase();
+        String folded = Normalizer.normalize(normalized, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+        return normalized.isEmpty()
+                || "-".equals(normalized)
+                || "default".equals(normalized)
+                || "mac dinh".equals(folded);
     }
 
     private String safeText(String value) {

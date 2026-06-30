@@ -405,6 +405,8 @@
     <string name="status_pending">Pending</string>
     <string name="order_date_placeholder">Date: 2023-10-10</string>
     <string name="order_date_placeholder_short">2023-10-10</string>
+    <string name="blog_section_title">Blogs</string>
+    <string name="blog_default_category">Blog</string>
     <string name="order_status_title">Order Status</string>
     <string name="status_packed">Packed</string>
     <string name="status_shipping">Shipping</string>
@@ -427,6 +429,12 @@
     <string name="read_more">Read more</string>
     <string name="read_less">Read less</string>
     <string name="avatar_selected_hint">New avatar selected. Tap Save to update.</string>
+    <string name="order_total_label">Total:</string>
+    <string name="order_total_details">Order total details</string>
+    <string name="order_items_subtotal">Items subtotal</string>
+    <string name="order_deposit_amount">Deposit</string>
+    <string name="order_promotion_discount">Promotion discount</string>
+    <string name="order_promotion_with_code">Promotion %1$s</string>
 
     <!-- Chat -->
     <string name="chat_title">Chat</string>

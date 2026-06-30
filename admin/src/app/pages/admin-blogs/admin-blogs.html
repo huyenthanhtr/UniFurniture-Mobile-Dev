@@ -160,13 +160,36 @@
           </div>
 
           <div class="form-group full-width">
-            <label>Ảnh thumbnail</label>
-            <input
-              class="search-input"
-              type="text"
-              [(ngModel)]="currentPost.thumbnail_url"
-              placeholder="https://... hoặc /assets/images/..."
-            />
+            <label>Ảnh đại diện hiển thị ngoài blog</label>
+            <div class="cover-uploader">
+              <div class="cover-preview" *ngIf="coverImageSrc(); else emptyCover">
+                <img [src]="coverImageSrc()" [alt]="currentPost.translations[activeLanguage].title || 'Blog'" />
+              </div>
+              <ng-template #emptyCover>
+                <div class="cover-empty">
+                  <i class="fas fa-image"></i>
+                  <span>Chưa có ảnh đại diện</span>
+                </div>
+              </ng-template>
+
+              <div class="cover-actions">
+                <button class="btn btn-ghost" type="button" [disabled]="coverUploading" (click)="coverInput.click()">
+                  <i class="fas fa-upload"></i>
+                  {{ coverUploading ? 'Đang tải...' : 'Chọn ảnh từ máy' }}
+                </button>
+                <button
+                  class="btn btn-danger"
+                  type="button"
+                  *ngIf="currentPost.thumbnail_url || coverPreviewUrl"
+                  [disabled]="coverUploading"
+                  (click)="removeCoverImage()"
+                >
+                  <i class="fas fa-trash"></i>
+                  Xóa ảnh
+                </button>
+              </div>
+              <input #coverInput type="file" accept="image/*" hidden (change)="onCoverImageSelected($event)" />
+            </div>
           </div>
 
           <div class="form-group full-width">
@@ -201,7 +224,84 @@
 
           <div class="form-group full-width">
             <label>Nội dung *</label>
-            <textarea rows="9" [(ngModel)]="currentPost.translations[activeLanguage].content"></textarea>
+            <div class="editor-shell">
+              <div class="editor-toolbar" (mousedown)="preventToolbarFocus($event)">
+                <button type="button" class="toolbar-btn" title="In đậm" (click)="formatContent('bold')"><b>B</b></button>
+                <button type="button" class="toolbar-btn" title="In nghiêng" (click)="formatContent('italic')"><i>I</i></button>
+                <button type="button" class="toolbar-btn" title="Gạch chân" (click)="formatContent('underline')"><u>U</u></button>
+                <span class="toolbar-sep"></span>
+                <button type="button" class="toolbar-btn mini-btn" title="Đoạn thường" (click)="formatBlock('p')">P</button>
+                <button type="button" class="toolbar-btn mini-btn" title="Tiêu đề lớn" (click)="formatBlock('h2')">H2</button>
+                <button type="button" class="toolbar-btn mini-btn" title="Tiêu đề nhỏ" (click)="formatBlock('h3')">H3</button>
+                <button type="button" class="toolbar-btn mini-btn" title="Trích dẫn" (click)="formatBlock('blockquote')">"</button>
+                <span class="toolbar-sep"></span>
+                <button type="button" class="toolbar-btn icon-btn" title="Căn trái" (click)="alignContent('justifyLeft')">
+                  <i class="fas fa-align-left"></i>
+                </button>
+                <button type="button" class="toolbar-btn icon-btn" title="Căn giữa" (click)="alignContent('justifyCenter')">
+                  <i class="fas fa-align-center"></i>
+                </button>
+                <button type="button" class="toolbar-btn icon-btn" title="Căn phải" (click)="alignContent('justifyRight')">
+                  <i class="fas fa-align-right"></i>
+                </button>
+                <span class="toolbar-sep"></span>
+                <button type="button" class="toolbar-btn icon-btn" title="Danh sách chấm" (click)="toggleList('insertUnorderedList')">
+                  <i class="fas fa-list-ul"></i>
+                </button>
+                <button type="button" class="toolbar-btn icon-btn" title="Danh sách số" (click)="toggleList('insertOrderedList')">
+                  <i class="fas fa-list-ol"></i>
+                </button>
+                <button type="button" class="toolbar-btn icon-btn" title="Chèn liên kết" (click)="insertLink()">
+                  <i class="fas fa-link"></i>
+                </button>
+                <button type="button" class="toolbar-btn icon-btn" title="Xóa định dạng" (click)="clearFormatting()">Tx</button>
+                <span class="toolbar-sep"></span>
+                <div class="blog-image-menu">
+                  <button type="button" class="toolbar-btn icon-btn" title="Chèn ảnh" (click)="toggleImageMenu($event)">
+                    <i class="fas fa-image"></i>
+                  </button>
+                  <div class="image-dropdown" *ngIf="showImageMenu">
+                    <button type="button" (click)="insertImageFromUrl()">Nhập URL ảnh</button>
+                    <button type="button" (click)="openImagePicker(blogImageInput)">Tải ảnh từ máy</button>
+                  </div>
+                  <input #blogImageInput type="file" accept="image/*" hidden (change)="onEditorImageFileSelected($event)" />
+                </div>
+
+                <div class="image-size-tools" *ngIf="selectedEditorImage">
+                  <button type="button" class="toolbar-btn" title="Thu nhỏ ảnh" (click)="decreaseSelectedImage()">-</button>
+                  <button
+                    type="button"
+                    class="toolbar-btn percent-display"
+                    *ngIf="!isEditingImagePercent"
+                    title="Double click để nhập %"
+                    (dblclick)="startEditImagePercent()"
+                  >
+                    {{ selectedImagePercent }}%
+                  </button>
+                  <input
+                    *ngIf="isEditingImagePercent"
+                    type="number"
+                    min="10"
+                    max="100"
+                    [(ngModel)]="draftImagePercent"
+                    [ngModelOptions]="{ standalone: true }"
+                    (blur)="applyDraftImagePercent()"
+                    (keydown)="onPercentInputKeydown($event)"
+                  />
+                  <button type="button" class="toolbar-btn" title="Phóng to ảnh" (click)="increaseSelectedImage()">+</button>
+                </div>
+              </div>
+              <div
+                #contentEditor
+                class="editor-content"
+                contenteditable="true"
+                (input)="onContentInput()"
+                (click)="onEditorClick($event)"
+                (mouseup)="captureSelection()"
+                (keyup)="captureSelection()"
+                (blur)="captureSelection()"
+              ></div>
+            </div>
           </div>
         </div>
       </div>

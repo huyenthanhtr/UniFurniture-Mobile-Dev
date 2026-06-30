@@ -418,6 +418,14 @@
     <string name="birthday_popup_message">UniFurniture gives you a 50,000 VND voucher with code GIAM50 in your birthday month.</string>
     <string name="birthday_popup_btn">Amazing!</string>
     <string name="avatar_selected_hint">New avatar selected. Tap Save to update.</string>
+    <string name="blog_section_title">Blogs</string>
+    <string name="blog_default_category">Blog</string>
+    <string name="order_total_label">Total:</string>
+    <string name="order_total_details">Order total details</string>
+    <string name="order_items_subtotal">Items subtotal</string>
+    <string name="order_deposit_amount">Deposit</string>
+    <string name="order_promotion_discount">Promotion discount</string>
+    <string name="order_promotion_with_code">Promotion %1$s</string>
 
     <!-- Chat -->
     <string name="chat_title">Chat</string>
