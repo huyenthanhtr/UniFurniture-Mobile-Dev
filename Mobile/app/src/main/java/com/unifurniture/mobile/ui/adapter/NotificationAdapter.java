@@ -71,8 +71,38 @@ public class NotificationAdapter extends ListAdapter<NotificationDto, Notificati
         }
 
         public void bind(NotificationDto item, OnNotificationClickListener listener) {
-            binding.tvTitle.setText(item.title);
-            binding.tvContent.setText(item.content);
+            String title = item.title;
+            String content = item.content;
+
+            // Apply local translations based on eventKey or type to handle server strings with no accents
+            if ("birthday_reward".equals(item.eventKey)) {
+                title = context.getString(R.string.notif_birthday_title);
+                content = context.getString(R.string.notif_birthday_content);
+            } else if ("order".equals(item.type)) {
+                if (title != null && title.toLowerCase().startsWith("don hang")) {
+                    String orderCode = title.substring(title.lastIndexOf(" ") + 1);
+                    title = context.getString(R.string.notif_order_title_prefix) + orderCode;
+                }
+                if (content != null && content.toLowerCase().startsWith("trang thai hien tai")) {
+                    String lowerContent = content.toLowerCase();
+                    int statusResId = -1;
+                    if (lowerContent.contains("cho xac nhan")) statusResId = R.string.status_pending;
+                    else if (lowerContent.contains("da xac nhan")) statusResId = R.string.status_confirmed;
+                    else if (lowerContent.contains("dang xu ly")) statusResId = R.string.status_processing;
+                    else if (lowerContent.contains("da dong goi")) statusResId = R.string.status_packed;
+                    else if (lowerContent.contains("dang giao")) statusResId = R.string.status_shipping;
+                    else if (lowerContent.contains("da giao")) statusResId = R.string.status_delivered;
+                    else if (lowerContent.contains("hoan thanh")) statusResId = R.string.status_completed;
+                    else if (lowerContent.contains("da huy")) statusResId = R.string.status_cancelled;
+
+                    if (statusResId != -1) {
+                        content = context.getString(R.string.notif_order_status_update, context.getString(statusResId).toLowerCase());
+                    }
+                }
+            }
+
+            binding.tvTitle.setText(title);
+            binding.tvContent.setText(content);
 
             // Relative Time formatting
             CharSequence relativeTime = DateUtils.getRelativeTimeSpanString(

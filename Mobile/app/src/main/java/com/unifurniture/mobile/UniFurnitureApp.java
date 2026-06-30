@@ -14,6 +14,7 @@ public class UniFurnitureApp extends Application {
         super.onCreate();
         instance = this;
         apiService = ApiClient.getInstance();
+        com.unifurniture.mobile.messaging.NotificationChannels.createAll(this);
     }
 
     public static UniFurnitureApp getInstance() {

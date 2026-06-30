@@ -23,8 +23,6 @@
     <string name="have_account">Đã có tài khoản? Đăng nhập</string>
     <string name="otp_title">Xác thực OTP</string>
     <string name="otp_subtitle">Nhập mã OTP đã gửi qua SMS</string>
-    <string name="otp_subtitle_format">Nhập mã OTP 6 số đã gửi qua SMS đến số %s</string>
-    <string name="otp_subtitle_demo">Demo: mã OTP của bạn là %s (đã tự điền sẵn)</string>
     <string name="otp_code">Mã OTP</string>
     <string name="btn_verify">Xác thực</string>
 
@@ -42,15 +40,6 @@
     <string name="my_orders">Đơn hàng của tôi</string>
     <string name="favorites">Sản phẩm yêu thích</string>
     <string name="logout">Đăng xuất</string>
-
-    <!-- Chatbot -->
-    <string name="chat_title">Trợ lý UniFurniture</string>
-    <string name="chat_hint">Nhập tin nhắn…</string>
-    <string name="chat_send">Gửi</string>
-    <string name="chat_greeting">Xin chào! Mình là Trợ lý UniFurniture. Bạn có thể nhờ mình tìm sản phẩm, kiểm tra đơn hàng, hoặc hỏi về chính sách.</string>
-    <string name="chat_error">Không kết nối được trợ lý. Vui lòng thử lại.</string>
-    <string name="chat_retrying">Trợ lý đang bận, đang thử lại… (%1$d/%2$d)</string>
-    <string name="chat_empty">Chưa có phản hồi.</string>
 
     <!-- Checkout -->
     <string name="checkout_title">Đặt hàng</string>
@@ -107,6 +96,27 @@
     <string name="added_to_cart">Đã thêm vào giỏ hàng!</string>
     <string name="product_default_name">Sản phẩm</string>
     <string name="variant_default_name">Mặc định</string>
+    <!-- Tên màu sản phẩm (bản địa hoá dự phòng qua ColorUi) -->
+    <string name="color_white">Trắng</string>
+    <string name="color_black">Đen</string>
+    <string name="color_gray">Xám</string>
+    <string name="color_brown">Nâu</string>
+    <string name="color_beige">Be</string>
+    <string name="color_cream">Kem</string>
+    <string name="color_orange">Cam</string>
+    <string name="color_yellow">Vàng</string>
+    <string name="color_blue">Xanh dương</string>
+    <string name="color_green">Xanh lá</string>
+    <string name="color_red">Đỏ</string>
+    <string name="color_pink">Hồng</string>
+    <string name="color_purple">Tím</string>
+    <string name="color_natural">Tự nhiên</string>
+    <string name="color_camel">Camel</string>
+    <string name="color_olive">Ô liu</string>
+    <!-- Tên kênh thông báo -->
+    <string name="channel_orders_name">Đơn hàng</string>
+    <string name="channel_promotions_name">Khuyến mãi</string>
+    <string name="channel_general_name">Chung</string>
     <string name="in_stock">Còn hàng</string>
     <string name="out_of_stock">Hết hàng</string>
     <string name="shop_reply">Phản hồi từ cửa hàng</string>
@@ -181,8 +191,8 @@
     <string name="new_notification_hint">Thông báo mới sẽ xuất hiện ở đây khi có hoạt động.</string>
     <string name="content_desc_mark_all_read">Đánh dấu tất cả đã đọc</string>
     <string name="label_orders">Đơn hàng</string>
-    <string name="label_account">Tài khoản</string>
     <string name="label_all">Tất cả</string>
+    <string name="label_account">Tài khoản</string>
 
     <!-- Wishlist -->
     <string name="empty_wishlist">Danh sách yêu thích trống</string>
@@ -190,7 +200,6 @@
     <!-- Feedback & UI -->
     <string name="view_cart">Xem giỏ hàng</string>
     <string name="add_to_cart_success">Thêm vào giỏ hàng thành công</string>
-    <string name="buy_now">Mua ngay</string>
     <string name="add_to_cart_error">Không thể thêm vào giỏ hàng. Vui lòng thử lại.</string>
     <string name="content_desc_delete">Xóa</string>
     <string name="close">Đóng</string>
@@ -250,7 +259,6 @@
     <string name="order_success_desc">Đơn hàng của bạn đã được đặt thành công.</string>
     <string name="order_success_ref">Mã đơn hàng: %1$s</string>
     <string name="go_home">Tiếp tục mua sắm</string>
-    <string name="view_order_detail">Xem chi tiết đơn hàng</string>
     <string name="invalid_phone">Số điện thoại không hợp lệ. Phải gồm 10 chữ số bắt đầu bằng 0.</string>
     <string name="invalid_email">Định dạng email không hợp lệ.</string>
     <string name="invalid_province">Vui lòng nhập Tỉnh/Thành phố.</string>
@@ -311,14 +319,10 @@
     <string name="order_number_format">Đơn hàng %1$s</string>
     <string name="order_date_format">Ngày: %1$s</string>
     <string name="quantity_format">x%1$d</string>
+    <string name="status_cancelled">Đã hủy</string>
     <string name="account_about_title">Về UniFurniture</string>
-    <string name="account_policy_title">Chính sách</string>
-    <string name="policy_sales">Bán hàng</string>
-    <string name="policy_shipping">Giao hàng</string>
-    <string name="policy_warranty">Bảo hành</string>
-    <string name="policy_return">Đổi trả</string>
-    <string name="policy_loyalty">U-HOMIE</string>
-    <string name="policy_partner">Đối tác</string>
+    <string name="account_policy_title">Chính sách bảo mật</string>
+    <string name="account_community_title">Cộng đồng</string>
     <string name="tracking_code_required">Vui lòng nhập mã vận đơn</string>
     <string name="tracking_not_found">Không tìm thấy đơn hàng với mã này</string>
     <string name="tracking_not_found_title">Không tìm thấy mã đơn</string>
@@ -352,7 +356,7 @@
     <string name="coupon_no_min">Không giới hạn đơn tối thiểu</string>
 
     <!-- Birthday popup -->
-    <string name="birthday_popup_title">🎉 Chúc mừng sinh nhật!</string>
+    <string name="birthday_popup_title">Chúc mừng sinh nhật!</string>
     <string name="birthday_popup_message">UniFurniture tặng bạn voucher giảm giá 50%% (Mã: BDAY50) nhân dịp sinh nhật của bạn trong tháng này!</string>
     <string name="birthday_popup_btn">Tuyệt vời</string>
 
@@ -383,80 +387,141 @@
     <string name="track_order_action">Tra cứu</string>
     <string name="order_placeholder">Đơn hàng #123456</string>
     <string name="status_pending">Chờ xác nhận</string>
-    <string name="status_confirmed">Đã xác nhận</string>
-    <string name="status_processing">Đang xử lý</string>
-    <string name="status_shipping">Đang giao</string>
-    <string name="status_delivered">Đã giao</string>
-    <string name="status_completed">Hoàn tất</string>
-    <string name="status_cancel_pending">Chờ xác nhận hủy</string>
-    <string name="status_cancelled">Đã hủy</string>
-    <string name="status_packed">Đã đóng gói</string>
-    <string name="order_status_title">Trạng thái đơn hàng</string>
     <string name="order_date_placeholder">Ngày: 2023-10-10</string>
     <string name="order_date_placeholder_short">2023-10-10</string>
-    <string name="account_community_title">Về UniFurniture</string>
-    <string name="about_uni_subtitle">Giải pháp nội thất ấm áp, tiện dụng và hiện đại cho tổ ấm của bạn.</string>
-    <string name="about_uni_intro">UniFurniture kết hợp chất lượng sản phẩm, dịch vụ tận tâm và thông tin minh bạch để việc hoàn thiện không gian sống trở nên nhẹ nhàng hơn.</string>
-    <string name="home_value_quality">Chất lượng được chăm chút kỹ</string>
-    <string name="home_value_elegant">Thiết kế đẹp và tiện dụng</string>
-    <string name="home_value_dedicated">Hỗ trợ hậu mãi tận tâm</string>
-    <string name="about_uni_value_sustainable">Bền vững</string>
-    <string name="blog_section_title">Blog</string>
-    <string name="blog_default_category">Blog</string>
-    <string name="blog_empty_message">Chưa có bài blog nào được xuất bản.</string>
-
-    <!-- Timeline Labels -->
-    <string name="timeline_step_1">Chờ xác nhận</string>
-    <string name="timeline_step_2">Đã xác nhận</string>
-    <string name="timeline_step_3">Đang giao</string>
-    <string name="timeline_step_4">Hoàn tất</string>
-    <string name="timeline_cancel_pending_hint">Đang chờ xác nhận hủy đơn</string>
+    <string name="order_status_title">Trạng thái đơn hàng</string>
+    <string name="status_packed">Đã đóng gói</string>
+    <string name="status_shipping">Đang giao</string>
+    <string name="status_completed">Hoàn thành</string>
     <string name="cod_short">COD</string>
     <string name="payment_unpaid">Chưa thanh toán</string>
-    <string name="payment_paid">Đã thanh toán</string>
-    <string name="payment_pending">Chờ thanh toán</string>
-    <string name="payment_failed">Thanh toán thất bại</string>
     <string name="zero_amount">0</string>
     <string name="review_content_placeholder">Nội dung đánh giá</string>
     <string name="shop_reply_placeholder">Cảm ơn bạn đã ủng hộ!</string>
     <string name="price_placeholder">100.000 VNĐ</string>
     <string name="quantity_one_placeholder">x1</string>
     <string name="address_list_empty_hint">Bạn chưa có địa chỉ nào.\nNhấn + để thêm địa chỉ mới.</string>
+
+    <string name="view_order_detail">Xem chi tiết đơn hàng</string>
     <string name="avatar_selected_hint">Đã chọn avatar mới. Nhấn Lưu để cập nhật.</string>
-    <string name="label_other">Khác</string>
-    <string name="optimal_voucher_section_title">Voucher tốt nhất cho đơn hàng này</string>
-    <string name="optimal_badge">Tốt nhất</string>
-    <string name="order_total_label">Thành tiền:</string>
-    <string name="order_total_details">Chi tiết thành tiền</string>
-    <string name="order_items_subtotal">Tổng tiền hàng</string>
-    <string name="order_deposit_amount">Tiền cọc</string>
-    <string name="order_promotion_discount">Giảm khuyến mãi</string>
-    <string name="order_promotion_with_code">Khuyến mãi %1$s</string>
-    <string name="view_product">Xem sản phẩm</string>
-    <string name="voucher_name_fixed">Voucher giảm %1$s</string>
-    <string name="voucher_desc_fixed">Áp dụng cho đơn hàng từ %1$s</string>
-    <string name="voucher_name_percent">Voucher giảm %1$d%%</string>
-    <string name="voucher_desc_percent">Áp dụng cho đơn hàng từ %1$s</string>
-    <string name="voucher_desc_percent_max">Áp dụng cho đơn hàng từ %1$s, giảm tối đa %2$s</string>
-    <string name="voucher_expiry_date">Hết hạn: %1$s</string>
+    <string name="home_about_tagline">Nội thất tinh tế cho cuộc sống bình yên.</string>
+    <string name="notif_birthday_title">Chúc mừng sinh nhật!</string>
+    <string name="notif_birthday_content">UniFurniture gửi tặng bạn voucher 50.000 đ với mã GIAM50 trong tháng sinh nhật của bạn.</string>
+    <string name="notif_order_title_prefix">Đơn hàng </string>
+    <string name="notif_order_status_update">Trạng thái hiện tại của đơn hàng là %s.</string>
+    <string name="birthday_reward_subtle">Ưu đãi sinh nhật đã được lưu cho tài khoản của bạn.</string>
+
+    <!-- Chat -->
+    <string name="chat_title">Chat</string>
+    <string name="chat_greeting">Xin chào! Chúng tôi có thể giúp gì cho bạn?</string>
+    <string name="chat_hint">Nhập tin nhắn...</string>
+    <string name="chat_send">Gửi</string>
+
+    <!-- Cart Advanced -->
     <string name="select_all">Chọn tất cả</string>
     <string name="delete_all">Xóa tất cả</string>
-    <string name="total_items_format">Tổng (%1$d sản phẩm):</string>
-    <string name="mark_as_unread">Đánh dấu là chưa đọc</string>
-    <string name="view_wishlist">Xem sản phẩm yêu thích</string>
-    <string name="used_vouchers_title">Voucher đã sử dụng</string>
-    <string name="voucher_used_status">Đã sử dụng</string>
-    <string name="voucher_already_used">Voucher này đã được sử dụng</string>
-    <!-- Reviews translation + recommendations + offline (added) -->
+    <string name="total_items_format">Tổng cộng (%1$d sản phẩm):</string>
+
+    <!-- Policies -->
+    <string name="policy_sales">Chính sách bán hàng</string>
+    <string name="policy_shipping">Chính sách vận chuyển</string>
+    <string name="policy_warranty">Chính sách bảo hành</string>
+    <string name="policy_return">Chính sách đổi trả</string>
+    <string name="policy_loyalty">Khách hàng thân thiết U-HOMIE</string>
+    <string name="policy_partner">Chính sách đối tác</string>
+
+    <!-- Status & Timeline -->
+    <string name="status_confirmed">Đã xác nhận</string>
+    <string name="status_processing">Đang xử lý</string>
+    <string name="status_delivered">Đã giao hàng</string>
+    <string name="status_cancel_pending">Chờ hủy</string>
+    <string name="timeline_step_1">Chờ xác nhận</string>
+    <string name="timeline_step_2">Đã xác nhận</string>
+    <string name="timeline_step_3">Đang giao hàng</string>
+    <string name="timeline_step_4">Hoàn thành</string>
+    <string name="timeline_cancel_pending_hint">Đang chờ xác nhận hủy đơn hàng</string>
+
+    <!-- Reviews Advanced -->
     <string name="ok">OK</string>
     <string name="error_title">Lỗi</string>
     <string name="review_translate">Dịch</string>
     <string name="review_see_original">Xem bản gốc</string>
-    <string name="review_translating">Đang dịch…</string>
+    <string name="review_translating">Đang dịch...</string>
     <string name="review_translate_failed">Không thể dịch đánh giá này</string>
-    <string name="you_may_be_interested">Có thể bạn quan tâm</string>
-    <string name="no_internet_title">Không có kết nối mạng</string>
-    <string name="no_internet_message">Vui lòng kiểm tra kết nối và thử lại.</string>
-    <string name="no_internet_banner">Không có kết nối mạng</string>
+    <string name="review_status_pending">Chờ duyệt</string>
+    <string name="review_status_approved">Đã duyệt</string>
+    <string name="review_status_rejected">Đã từ chối</string>
+    <string name="review_write">Viết đánh giá</string>
+    <string name="review_submit">Gửi đánh giá</string>
+    <string name="review_dialog_title">Đánh giá sản phẩm này</string>
+    <string name="review_dialog_note">Đánh giá của bạn sẽ được lưu và kiểm duyệt trước khi hiển thị công khai.</string>
+    <string name="review_comment_hint">Chia sẻ trải nghiệm của bạn (tùy chọn)</string>
+    <string name="review_add_images">Thêm ảnh</string>
+    <string name="review_add_videos">Thêm video</string>
+    <string name="review_no_images_selected">Chưa chọn ảnh</string>
+    <string name="review_no_videos_selected">Chưa chọn video</string>
+    <string name="review_selected_images_count">Đã chọn %1$d ảnh</string>
+    <string name="review_selected_videos_count">Đã chọn %1$d video</string>
+    <string name="review_media_rules">Tối đa %1$d ảnh, %2$d video, %3$d MB mỗi file.</string>
+    <string name="review_upload_progress">Đang tải lên... %1$d%%</string>
+    <string name="review_images_limit_reached">Chỉ có thể chọn tối đa %1$d ảnh.</string>
+    <string name="review_videos_limit_reached">Chỉ có thể chọn tối đa %1$d video.</string>
+    <string name="review_rating_required">Vui lòng chọn ít nhất 1 sao</string>
+    <string name="review_submit_success">Gửi đánh giá thành công</string>
+    <string name="review_submit_success_with_points">Gửi đánh giá thành công. Bạn nhận được %1$d điểm.</string>
+    <string name="review_submit_failed">Không thể gửi đánh giá</string>
+    <string name="review_media_prepare_failed">Không thể chuẩn bị file phương tiện</string>
+    <string name="review_media_upload_failed">Lỗi khi tải lên ảnh/video đánh giá</string>
+    <string name="review_available_after_delivery">Bạn có thể đánh giá sản phẩm sau khi đơn hàng được giao.</string>
+    <string name="review_submitted_waiting">Đánh giá của bạn đã được gửi và đang chờ duyệt.</string>
+    <string name="review_already_visible">Đánh giá của bạn đã hiển thị trên trang sản phẩm.</string>
+    <string name="review_rejected_notice">Đánh giá này đã bị từ chối khi kiểm duyệt.</string>
+    <string name="review_summary_with_rating">%1$d★ - %2$s</string>
+    <string name="review_videos">Video đính kèm</string>
+    <string name="review_video_label">Video %1$d</string>
+
+    <!-- Other missing strings -->
+    <string name="buy_now">Mua ngay</string>
+    <string name="empty_categories">Không có danh mục nào</string>
+    <string name="label_other">Khác</string>
+    <string name="mark_as_unread">Đánh dấu chưa đọc</string>
+    <string name="no_internet_banner">Không có kết nối Internet</string>
+    <string name="no_internet_message">Vui lòng kiểm tra kết nối mạng và thử lại.</string>
+    <string name="no_internet_title">Mất kết nối</string>
     <string name="retry">Thử lại</string>
+    <string name="optimal_badge">Tốt nhất</string>
+    <string name="optimal_voucher_section_title">Voucher tốt nhất cho đơn hàng này</string>
+    <string name="payment_failed">Thanh toán thất bại</string>
+    <string name="payment_paid">Đã thanh toán</string>
+    <string name="payment_pending">Đang chờ thanh toán</string>
+    <string name="rating_display">%1$s sao</string>
+    <string name="used_vouchers_title">Voucher đã dùng</string>
+    <string name="view_product">Xem sản phẩm</string>
+    <string name="view_wishlist">Xem yêu thích</string>
+    <string name="voucher_already_used">Voucher đã được sử dụng</string>
+    <string name="voucher_desc_fixed">Áp dụng cho đơn hàng từ %1$s</string>
+    <string name="voucher_desc_percent">Áp dụng cho đơn hàng từ %1$s</string>
+    <string name="voucher_desc_percent_max">Áp dụng cho đơn hàng từ %1$s, giảm tối đa %2$s</string>
+    <string name="voucher_expiry_date">Hết hạn: %1$s</string>
+    <string name="voucher_name_fixed">Voucher %1$s</string>
+    <string name="voucher_name_percent">Giảm %1$d%%</string>
+    <string name="voucher_used_status">Đã dùng</string>
+    <string name="you_may_be_interested">Có thể bạn quan tâm</string>
+    <string name="about_uni_subtitle">Giải pháp nội thất cho ngôi nhà ấm cúng, tiện nghi và hiện đại.</string>
+    <string name="about_uni_intro">UniFurniture kết hợp chất lượng sản phẩm, dịch vụ tận tâm và thông tin minh bạch để mọi việc trang trí nhà cửa trở nên dễ dàng hơn.</string>
+    <string name="about_uni_value_sustainable">Bền vững</string>
+    <string name="blog_empty_message">Chưa có bài viết blog nào được xuất bản.</string>
+    <string name="home_value_quality">Chất lượng được chế tác cẩn thận</string>
+    <string name="home_value_elegant">Thiết kế thanh lịch và tiện dụng</string>
+    <string name="home_value_dedicated">Hỗ trợ sau bán hàng tận tâm</string>
+    <string name="otp_subtitle_format">Nhập mã OTP gồm 6 chữ số đã được gửi qua SMS đến %s</string>
+    <string name="otp_subtitle_demo">Demo: mã OTP của bạn là %s (đã điền sẵn)</string>
+    <string name="blog_section_title">Blog</string>
+    <string name="blog_default_category">Blog</string>
+    <string name="order_total_label">Th&#224;nh ti&#7873;n:</string>
+    <string name="order_total_details">Chi ti&#7871;t th&#224;nh ti&#7873;n</string>
+    <string name="order_items_subtotal">T&#7893;ng ti&#7873;n h&#224;ng</string>
+    <string name="order_deposit_amount">Ti&#7873;n c&#7885;c</string>
+    <string name="order_promotion_discount">Gi&#7843;m khuy&#7871;n m&#227;i</string>
+    <string name="order_promotion_with_code">Khuy&#7871;n m&#227;i %1$s</string>
 </resources>

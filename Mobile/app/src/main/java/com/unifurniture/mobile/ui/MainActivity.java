@@ -1,9 +1,13 @@
 package com.unifurniture.mobile.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.IdRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
@@ -12,12 +16,43 @@ import androidx.navigation.NavOptions;
 import androidx.navigation.fragment.NavHostFragment;
 import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.databinding.ActivityMainBinding;
+import com.unifurniture.mobile.ui.auth.AuthActivity;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final float CHAT_FAB_DRAG_THRESHOLD_PX = 12f;
+    private static final float CHAT_FAB_EDGE_MARGIN_PX = 16f;
 
     private ActivityMainBinding binding;
     private NavController navController;
     private boolean syncingBottomNav = false;
+
+    // POST_NOTIFICATIONS runtime permission (Android 13+). Result ignored — we just ask once.
+    private final ActivityResultLauncher<String> notificationPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {});
+
+    // Auth runs as a result-returning activity on top of MainActivity, so this activity (and its
+    // ViewModels / caches / FragmentManager) stays alive while the user logs in or backs out.
+    private final ActivityResultLauncher<Intent> authLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                int code = result.getResultCode();
+                if (code == AuthActivity.RESULT_GO_HOME || code == AuthActivity.RESULT_LOGGED_IN) {
+                    goToHome();
+                }
+                if (code == AuthActivity.RESULT_LOGGED_IN) {
+                    // Session changed but this activity wasn't recreated, so re-fetch the cart for
+                    // the new session to keep the bottom-nav badge in sync, and register the FCM
+                    // token against the now-logged-in customer.
+                    refreshCart();
+                    com.unifurniture.mobile.messaging.DeviceTokenManager.syncToken(this);
+                }
+            });
+
+    private float chatFabDownRawX;
+    private float chatFabDownRawY;
+    private float chatFabDownX;
+    private float chatFabDownY;
+    private boolean chatFabDragged;
 
     private static final int[] TOP_LEVEL_DESTINATIONS = {
             R.id.homeFragment,
@@ -67,8 +102,18 @@ public class MainActivity extends AppCompatActivity {
         setupCartBadge();
         setupConnectivityBanner();
 
+        // Push notifications: ask for permission (13+), register the FCM token, and honor any
+        // deep link the launching notification carried.
+        requestNotificationPermissionIfNeeded();
+        com.unifurniture.mobile.messaging.DeviceTokenManager.syncToken(this);
+        handleNotificationIntent(getIntent());
+
         // Floating assistant button — available on every screen except the chat itself.
         binding.fabChat.setOnClickListener(v -> {
+            if (chatFabDragged) {
+                chatFabDragged = false;
+                return;
+            }
             if (navController.getCurrentDestination() != null
                     && navController.getCurrentDestination().getId() == R.id.chatFragment) {
                 return;
@@ -77,6 +122,57 @@ public class MainActivity extends AppCompatActivity {
                 navController.navigate(R.id.chatFragment);
             } catch (IllegalArgumentException ignored) {}
         });
+        setupDraggableChatFab();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleNotificationIntent(intent);
+    }
+
+    private void requestNotificationPermissionIfNeeded() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU
+                && androidx.core.content.ContextCompat.checkSelfPermission(this,
+                        android.Manifest.permission.POST_NOTIFICATIONS)
+                != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS);
+        }
+    }
+
+    /** Route a notification tap (carried as intent extras) to the relevant screen. */
+    private void handleNotificationIntent(Intent intent) {
+        if (intent == null || navController == null) return;
+        String orderId = intent.getStringExtra(com.unifurniture.mobile.messaging.FcmService.EXTRA_ORDER_ID);
+        String deepLink = intent.getStringExtra(com.unifurniture.mobile.messaging.FcmService.EXTRA_DEEP_LINK);
+        if (orderId == null && deepLink == null) return;
+        try {
+            if (orderId != null && !orderId.isEmpty()) {
+                Bundle args = new Bundle();
+                args.putString("order_id", orderId);
+                navController.navigate(R.id.orderDetailFragment, args);
+            } else {
+                navController.navigate(R.id.notificationFragment);
+            }
+        } catch (IllegalArgumentException ignored) {
+        }
+        // Consume so a config change / re-entry doesn't navigate again.
+        intent.removeExtra(com.unifurniture.mobile.messaging.FcmService.EXTRA_ORDER_ID);
+        intent.removeExtra(com.unifurniture.mobile.messaging.FcmService.EXTRA_DEEP_LINK);
+    }
+
+    /** Open the login / registration flow without leaving MainActivity. The outcome is handled by
+     *  {@link #authLauncher}. Call this from fragments instead of starting AuthActivity directly. */
+    public void launchAuth() {
+        authLauncher.launch(new Intent(this, AuthActivity.class));
+    }
+
+    /** Reset navigation to the Home tab in place — no Activity recreation, ViewModels preserved. */
+    public void goToHome() {
+        if (navController != null) {
+            navigateToTopLevelDestination(R.id.homeFragment);
+        }
     }
 
     private android.net.ConnectivityManager.NetworkCallback networkCallback;
@@ -131,23 +227,91 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Initial fetch
-        com.unifurniture.mobile.data.remote.ApiService api = com.unifurniture.mobile.data.remote.ApiClient.getInstance();
-        com.unifurniture.mobile.util.SessionManager session = com.unifurniture.mobile.util.SessionManager.getInstance(this);
+        refreshCart();
+    }
+
+    /**
+     * Re-fetch the active cart for the current session into CartManager so the bottom-nav badge
+     * stays correct after login/logout. This activity is no longer recreated when the session
+     * changes (auth runs via {@link #authLauncher}), so the old onCreate fetch is no longer enough.
+     * With no session (guest / just logged out) we clear the cart so a stale badge doesn't linger.
+     */
+    public void refreshCart() {
+        com.unifurniture.mobile.util.SessionManager session =
+                com.unifurniture.mobile.util.SessionManager.getInstance(this);
         String customerId = session.getCustomerId();
         String cartId = session.getCartId();
-        if (customerId != null || cartId != null) {
-            api.getActiveCart(customerId, cartId).enqueue(new retrofit2.Callback<com.unifurniture.mobile.data.model.CartDto>() {
-                @Override
-                public void onResponse(retrofit2.Call<com.unifurniture.mobile.data.model.CartDto> call, retrofit2.Response<com.unifurniture.mobile.data.model.CartDto> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        com.unifurniture.mobile.util.CartManager.getInstance().updateCart(response.body());
-                    }
-                }
-                @Override
-                public void onFailure(retrofit2.Call<com.unifurniture.mobile.data.model.CartDto> call, Throwable t) {}
-            });
+        if (customerId == null && cartId == null) {
+            com.unifurniture.mobile.util.CartManager.getInstance().updateCart(null);
+            return;
         }
+        com.unifurniture.mobile.data.remote.ApiService api = com.unifurniture.mobile.data.remote.ApiClient.getInstance();
+        api.getActiveCart(customerId, cartId).enqueue(new retrofit2.Callback<com.unifurniture.mobile.data.model.CartDto>() {
+            @Override
+            public void onResponse(retrofit2.Call<com.unifurniture.mobile.data.model.CartDto> call, retrofit2.Response<com.unifurniture.mobile.data.model.CartDto> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    com.unifurniture.mobile.util.CartManager.getInstance().updateCart(response.body());
+                    session.saveCartId(response.body().id);
+                }
+            }
+            @Override
+            public void onFailure(retrofit2.Call<com.unifurniture.mobile.data.model.CartDto> call, Throwable t) {}
+        });
+    }
+
+    private void setupDraggableChatFab() {
+        binding.fabChat.setOnTouchListener((view, event) -> {
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    chatFabDragged = false;
+                    chatFabDownRawX = event.getRawX();
+                    chatFabDownRawY = event.getRawY();
+                    chatFabDownX = view.getX();
+                    chatFabDownY = view.getY();
+                    return true;
+                case MotionEvent.ACTION_MOVE:
+                    float deltaX = event.getRawX() - chatFabDownRawX;
+                    float deltaY = event.getRawY() - chatFabDownRawY;
+                    if (!chatFabDragged && (Math.abs(deltaX) > CHAT_FAB_DRAG_THRESHOLD_PX
+                            || Math.abs(deltaY) > CHAT_FAB_DRAG_THRESHOLD_PX)) {
+                        chatFabDragged = true;
+                    }
+                    if (!chatFabDragged) {
+                        return false;
+                    }
+
+                    float nextX = chatFabDownX + deltaX;
+                    float nextY = chatFabDownY + deltaY;
+                    view.setX(clampChatFabX(nextX, view));
+                    view.setY(clampChatFabY(nextY, view));
+                    return true;
+                case MotionEvent.ACTION_UP:
+                    if (!chatFabDragged) {
+                        view.performClick();
+                    }
+                    return true;
+                case MotionEvent.ACTION_CANCEL:
+                    return chatFabDragged;
+                default:
+                    return false;
+            }
+        });
+    }
+
+    private float clampChatFabX(float targetX, View fab) {
+        float maxX = Math.max(CHAT_FAB_EDGE_MARGIN_PX,
+                binding.getRoot().getWidth() - fab.getWidth() - CHAT_FAB_EDGE_MARGIN_PX);
+        return Math.max(CHAT_FAB_EDGE_MARGIN_PX, Math.min(targetX, maxX));
+    }
+
+    private float clampChatFabY(float targetY, View fab) {
+        float topLimit = CHAT_FAB_EDGE_MARGIN_PX + binding.tvOfflineBanner.getHeight();
+        float bottomInset = binding.bottomNavigation.getVisibility() == View.VISIBLE
+                ? binding.bottomNavigation.getHeight() + CHAT_FAB_EDGE_MARGIN_PX
+                : CHAT_FAB_EDGE_MARGIN_PX;
+        float maxY = Math.max(topLimit,
+                binding.getRoot().getHeight() - fab.getHeight() - bottomInset);
+        return Math.max(topLimit, Math.min(targetY, maxY));
     }
 
     private void syncBottomNavigationState(NavDestination destination) {

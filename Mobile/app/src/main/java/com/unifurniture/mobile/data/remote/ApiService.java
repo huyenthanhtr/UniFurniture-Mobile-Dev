@@ -3,6 +3,9 @@ package com.unifurniture.mobile.data.remote;
 import com.unifurniture.mobile.data.model.*;
 import java.util.List;
 import java.util.Map;
+import okhttp3.MultipartBody;
+import retrofit2.http.Multipart;
+import retrofit2.http.Part;
 import retrofit2.Call;
 import retrofit2.http.*;
 
@@ -87,16 +90,16 @@ public interface ApiService {
     );
 
     @POST("cart/items/upsert")
-    Call<CartDto> upsertCartItem(@Body Map<String, Object> body);
+    Call<com.google.gson.JsonObject> upsertCartItem(@Body Map<String, Object> body);
 
     @PATCH("cart/items/{id}")
-    Call<CartDto> updateCartItem(
+    Call<com.google.gson.JsonObject> updateCartItem(
             @Path("id") String cartItemId,
             @Body Map<String, Object> body
     );
 
     @DELETE("cart/items/{id}")
-    Call<CartDto> deleteCartItem(@Path("id") String cartItemId);
+    Call<com.google.gson.JsonObject> deleteCartItem(@Path("id") String cartItemId);
 
     // ── Orders ────────────────────────────────────────────────────────────────
     @GET("orders")
@@ -132,6 +135,19 @@ public interface ApiService {
 
     @GET("reviews/product/{productId}")
     Call<ReviewSummaryDto> getProductReviews(@Path("productId") String productId);
+
+    @GET("reviews/order/{orderId}/status")
+    Call<OrderReviewStatusDto> getOrderReviewStatus(@Path("orderId") String orderId);
+
+    @GET("reviews/media-config")
+    Call<ReviewMediaConfigDto> getReviewMediaConfig();
+
+    @Multipart
+    @POST("reviews/media")
+    Call<ReviewMediaUploadResponseDto> uploadReviewMedia(@Part List<MultipartBody.Part> files);
+
+    @POST("reviews")
+    Call<ReviewSubmissionResponseDto> submitOrderReviews(@Body ReviewSubmissionRequestDto body);
 
     // ── Wishlist ──────────────────────────────────────────────────────────────
     @GET("wishlist")
@@ -199,6 +215,13 @@ public interface ApiService {
             @Query("customer_id") String customerId,
             @Query("limit") int limit
     );
+
+    // ── Push device tokens (FCM) ──────────────────────────────────────────────
+    @POST("device-tokens")
+    Call<Void> registerDeviceToken(@Body DeviceTokenRequest body);
+
+    @HTTP(method = "DELETE", path = "device-tokens", hasBody = true)
+    Call<Void> unregisterDeviceToken(@Body DeviceTokenRequest body);
 
     // ── Vouchers ──────────────────────────────────────────────────────────────
     @GET("vouchers")

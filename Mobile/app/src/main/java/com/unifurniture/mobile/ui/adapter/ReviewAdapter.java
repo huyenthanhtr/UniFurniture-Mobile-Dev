@@ -18,16 +18,20 @@ import com.bumptech.glide.request.RequestOptions;
 import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.data.model.ReviewDto;
 import com.unifurniture.mobile.databinding.ItemReviewBinding;
+import com.unifurniture.mobile.ui.common.ReviewImageViewerDialogFragment;
+import com.unifurniture.mobile.ui.common.ReviewVideoViewerDialogFragment;
 import com.unifurniture.mobile.util.LanguageHelper;
 import com.unifurniture.mobile.util.ReviewTranslator;
 
 public class ReviewAdapter extends ListAdapter<ReviewDto, ReviewAdapter.ViewHolder> {
 
     private final String serverHost;
+    private final androidx.fragment.app.FragmentManager fragmentManager;
 
-    public ReviewAdapter(String serverHost) {
+    public ReviewAdapter(String serverHost, androidx.fragment.app.FragmentManager fragmentManager) {
         super(DIFF_CALLBACK);
         this.serverHost = serverHost;
+        this.fragmentManager = fragmentManager;
     }
 
     private static final DiffUtil.ItemCallback<ReviewDto> DIFF_CALLBACK =
@@ -55,7 +59,7 @@ public class ReviewAdapter extends ListAdapter<ReviewDto, ReviewAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.bind(getItem(position), serverHost, this);
+        holder.bind(getItem(position), serverHost, this, fragmentManager);
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -66,7 +70,7 @@ public class ReviewAdapter extends ListAdapter<ReviewDto, ReviewAdapter.ViewHold
             this.binding = binding;
         }
 
-        void bind(ReviewDto review, String serverHost, ReviewAdapter adapter) {
+        void bind(ReviewDto review, String serverHost, ReviewAdapter adapter, androidx.fragment.app.FragmentManager fragmentManager) {
             binding.tvCustomerName.setText(review.customerName != null ? review.customerName : itemView.getContext().getString(R.string.guest_customer));
             bindContentAndToggle(review, adapter);
             binding.ratingBar.setRating(review.rating != null ? review.rating : 0);
@@ -95,10 +99,66 @@ public class ReviewAdapter extends ListAdapter<ReviewDto, ReviewAdapter.ViewHold
                                     new MultiTransformation<>(new CenterCrop(), new RoundedCorners(cornerPx))))
                             .transition(DrawableTransitionOptions.withCrossFade(150))
                             .into(iv);
+                    final int clickedIndex = binding.layoutImages.getChildCount();
+                    iv.setOnClickListener(v -> {
+                        java.util.List<String> normalizedUrls = new java.util.ArrayList<>();
+                        for (String image : review.images) {
+                            normalizedUrls.add(image.replace("http://localhost:3000", serverHost));
+                        }
+                        ReviewImageViewerDialogFragment.newInstance(normalizedUrls, clickedIndex)
+                                .show(fragmentManager, "review_image_viewer");
+                    });
                     binding.layoutImages.addView(iv);
                 }
             } else {
                 binding.scrollImages.setVisibility(View.GONE);
+            }
+
+            if (review.videos != null && !review.videos.isEmpty()) {
+                binding.scrollVideos.setVisibility(View.VISIBLE);
+                binding.layoutVideos.removeAllViews();
+                int widthPx = dpToPx(120);
+                int heightPx = dpToPx(80);
+                int marginPx = dpToPx(8);
+                int cornerPx = dpToPx(6);
+                for (String url : review.videos) {
+                    String videoUrl = url.replace("http://localhost:3000", serverHost);
+                    android.widget.FrameLayout frameLayout = new android.widget.FrameLayout(binding.getRoot().getContext());
+                    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(widthPx, heightPx);
+                    lp.setMarginEnd(marginPx);
+                    frameLayout.setLayoutParams(lp);
+
+                    ImageView preview = new ImageView(binding.getRoot().getContext());
+                    preview.setLayoutParams(new android.widget.FrameLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT
+                    ));
+                    preview.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                    Glide.with(binding.getRoot().getContext())
+                            .load(videoUrl)
+                            .placeholder(R.drawable.placeholder_product)
+                            .error(R.drawable.placeholder_product)
+                            .apply(new RequestOptions().transform(
+                                    new MultiTransformation<>(new CenterCrop(), new RoundedCorners(cornerPx))))
+                            .transition(DrawableTransitionOptions.withCrossFade(150))
+                            .into(preview);
+
+                    ImageView playBadge = new ImageView(binding.getRoot().getContext());
+                    android.widget.FrameLayout.LayoutParams badgeParams = new android.widget.FrameLayout.LayoutParams(
+                            dpToPx(28), dpToPx(28), android.view.Gravity.CENTER);
+                    playBadge.setLayoutParams(badgeParams);
+                    playBadge.setImageResource(android.R.drawable.ic_media_play);
+                    playBadge.setColorFilter(android.graphics.Color.WHITE);
+
+                    frameLayout.addView(preview);
+                    frameLayout.addView(playBadge);
+                    frameLayout.setOnClickListener(v -> ReviewVideoViewerDialogFragment
+                            .newInstance(videoUrl)
+                            .show(fragmentManager, "review_video_viewer"));
+                    binding.layoutVideos.addView(frameLayout);
+                }
+            } else {
+                binding.scrollVideos.setVisibility(View.GONE);
             }
 
             // Admin reply

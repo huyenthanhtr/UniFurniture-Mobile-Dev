@@ -32,7 +32,7 @@ public class RegisterFragment extends Fragment {
 
         // Guests must always be able to return to Home without registering.
         binding.btnBackHome.setOnClickListener(v -> {
-            if (getActivity() != null) getActivity().finish();
+            if (getActivity() instanceof AuthActivity) ((AuthActivity) getActivity()).goHome();
         });
 
         binding.btnRegister.setOnClickListener(v -> {

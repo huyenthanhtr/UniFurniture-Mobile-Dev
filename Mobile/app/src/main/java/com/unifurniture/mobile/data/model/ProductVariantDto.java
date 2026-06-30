@@ -30,6 +30,9 @@ public class ProductVariantDto {
     }
     @SerializedName(value = "color", alternate = {"color_name", "colorName"})
     public String color;
+    /** Per-locale color names ({"vi":..,"en":..,"fr":..,"zh":..}) — source of truth for translation. */
+    @SerializedName(value = "color_i18n", alternate = {"colorI18n"})
+    public java.util.Map<String, String> colorI18n;
     public Double price;
     @SerializedName(value = "compare_at_price", alternate = {"compareAtPrice"})
     public Double compareAtPrice;

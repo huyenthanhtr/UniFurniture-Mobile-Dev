@@ -98,6 +98,27 @@
     <string name="added_to_cart">Ajouté au panier !</string>
     <string name="product_default_name">Produit</string>
     <string name="variant_default_name">Par défaut</string>
+    <!-- Noms de couleurs produit (localisation de repli via ColorUi) -->
+    <string name="color_white">Blanc</string>
+    <string name="color_black">Noir</string>
+    <string name="color_gray">Gris</string>
+    <string name="color_brown">Marron</string>
+    <string name="color_beige">Beige</string>
+    <string name="color_cream">Crème</string>
+    <string name="color_orange">Orange</string>
+    <string name="color_yellow">Jaune</string>
+    <string name="color_blue">Bleu</string>
+    <string name="color_green">Vert</string>
+    <string name="color_red">Rouge</string>
+    <string name="color_pink">Rose</string>
+    <string name="color_purple">Violet</string>
+    <string name="color_natural">Naturel</string>
+    <string name="color_camel">Camel</string>
+    <string name="color_olive">Olive</string>
+    <!-- Noms des canaux de notification -->
+    <string name="channel_orders_name">Commandes</string>
+    <string name="channel_promotions_name">Promotions</string>
+    <string name="channel_general_name">Général</string>
     <string name="in_stock">En stock</string>
     <string name="out_of_stock">En rupture de stock</string>
     <string name="shop_reply">Réponse du magasin</string>
@@ -157,6 +178,7 @@
     <string name="voucher_expiry">Expiration : %1$s</string>
     <string name="copy_code">Copier le code</string>
     <string name="copied_to_clipboard">Copié dans le presse-papiers</string>
+    <string name="birthday_reward_subtle">L\'offre d\'anniversaire a bien été enregistrée sur votre compte.</string>
     <string name="voucher_discount_amount">Réduction %1$s</string>
     <string name="voucher_condition">Applicable aux commandes à partir de %1$s.</string>
     <string name="voucher_upsell">Achetez %1$s de plus pour appliquer</string>
@@ -340,10 +362,6 @@
     <string name="coupon_min_order">Commande dès %1$s</string>
     <string name="coupon_no_min">Sans montant minimum</string>
 
-    <!-- Birthday popup -->
-    <string name="birthday_popup_title">🎉 Joyeux Anniversaire !</string>
-    <string name="birthday_popup_message">UniFurniture vous offre un bon de réduction de 50%% (Code : BDAY50) pour votre anniversaire ce mois-ci !</string>
-    <string name="birthday_popup_btn">Génial !</string>
 
     <!-- Product list -->
     <string name="load_more">Charger plus</string>
@@ -453,9 +471,46 @@
     <string name="review_see_original">Voir l\'original</string>
     <string name="review_translating">Traduction…</string>
     <string name="review_translate_failed">Impossible de traduire cet avis</string>
+    <string name="review_status_pending">En attente d\'approbation</string>
+    <string name="review_status_approved">Approuvé</string>
+    <string name="review_status_rejected">Refusé</string>
+    <string name="review_write">Rédiger un avis</string>
+    <string name="review_submit">Envoyer l\'avis</string>
+    <string name="review_dialog_title">Évaluer ce produit</string>
+    <string name="review_dialog_note">Votre avis sera enregistré sur votre compte et modéré avant d\'être affiché publiquement.</string>
+    <string name="review_comment_hint">Partagez votre expérience (facultatif)</string>
+    <string name="review_add_images">Ajouter des images</string>
+    <string name="review_add_videos">Ajouter des vidéos</string>
+    <string name="review_no_images_selected">Aucune image sélectionnée</string>
+    <string name="review_no_videos_selected">Aucune vidéo sélectionnée</string>
+    <string name="review_selected_images_count">%1$d image(s) sélectionnée(s)</string>
+    <string name="review_selected_videos_count">%1$d vidéo(s) sélectionnée(s)</string>
+    <string name="review_media_rules">Jusqu’à %1$d images, %2$d vidéos, %3$d MB par fichier.</string>
+    <string name="review_upload_progress">Envoi des médias... %1$d%%</string>
+    <string name="review_images_limit_reached">Seulement %1$d images peuvent être sélectionnées.</string>
+    <string name="review_videos_limit_reached">Seulement %1$d vidéos peuvent être sélectionnées.</string>
+    <string name="review_rating_required">Veuillez sélectionner au moins 1 étoile</string>
+    <string name="review_submit_success">Avis envoyé avec succès</string>
+    <string name="review_submit_success_with_points">Avis envoyé avec succès. Vous avez gagné %1$d points.</string>
+    <string name="review_submit_failed">Impossible d\'envoyer l\'avis</string>
+    <string name="review_media_prepare_failed">Impossible de préparer les fichiers sélectionnés</string>
+    <string name="review_media_upload_failed">Impossible d\'envoyer les images/vidéos de l\'avis</string>
+    <string name="review_available_after_delivery">Vous pourrez évaluer ce produit une fois la commande livrée.</string>
+    <string name="review_submitted_waiting">Votre avis a été envoyé et attend une validation.</string>
+    <string name="review_already_visible">Votre avis est visible sur la page produit.</string>
+    <string name="review_rejected_notice">Cet avis a été refusé lors de la modération.</string>
+    <string name="review_summary_with_rating">%1$d★ - %2$s</string>
+    <string name="review_videos">Vidéos jointes</string>
+    <string name="review_video_label">Vidéo %1$d</string>
     <string name="you_may_be_interested">Vous pourriez aimer</string>
     <string name="no_internet_title">Pas de connexion Internet</string>
     <string name="no_internet_message">Veuillez vérifier votre connexion et réessayer.</string>
     <string name="no_internet_banner">Pas de connexion Internet</string>
     <string name="retry">Réessayer</string>
+
+    <!-- Chat -->
+    <string name="chat_title">Chat</string>
+    <string name="chat_greeting">Bonjour ! Comment pouvons-nous vous aider ?</string>
+    <string name="chat_hint">Tapez un message...</string>
+    <string name="chat_send">Envoyer</string>
 </resources>

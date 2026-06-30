@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 public class ApiClient {
 
     private static ApiService INSTANCE;
+    private static OkHttpClient RAW_CLIENT;
 
     public static ApiService getInstance() {
         if (INSTANCE == null) {
@@ -66,6 +67,9 @@ public class ApiClient {
                         // Only add it to GET endpoints that support translation and don't fail on extra query params.
                         String lang = com.unifurniture.mobile.util.LanguageHelper
                                 .getLanguage(UniFurnitureApp.getInstance());
+                        if (lang != null && !lang.isEmpty()) {
+                            builder.header("Accept-Language", lang);
+                        }
                         String path = original.url().encodedPath();
                         boolean shouldAppendLang = "GET".equals(original.method())
                                 && ((path.contains("/products") && !path.contains("/product-images") && !path.contains("/product-variants"))
@@ -101,6 +105,7 @@ public class ApiClient {
                     .readTimeout(30, TimeUnit.SECONDS)
                     .writeTimeout(30, TimeUnit.SECONDS)
                     .build();
+            RAW_CLIENT = okHttpClient;
 
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(BuildConfig.API_BASE_URL)
@@ -115,6 +120,11 @@ public class ApiClient {
 
     public static ApiService getClient() {
         return getInstance();
+    }
+
+    public static OkHttpClient getRawClient() {
+        getInstance();
+        return RAW_CLIENT;
     }
 
     private ApiClient() {}

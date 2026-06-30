@@ -4,33 +4,25 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.unifurniture.mobile.R;
 import com.unifurniture.mobile.data.model.ReviewDto;
-import com.unifurniture.mobile.data.remote.ApiClient;
-import com.unifurniture.mobile.data.remote.ApiService;
 import com.unifurniture.mobile.databinding.FragmentMyReviewsBinding;
 import com.unifurniture.mobile.ui.adapter.MyReviewsAdapter;
 import com.unifurniture.mobile.util.SessionManager;
 import com.unifurniture.mobile.util.ToastUtil;
 
-import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
 public class MyReviewsFragment extends Fragment {
 
     private FragmentMyReviewsBinding binding;
     private MyReviewsAdapter adapter;
-    private ApiService apiService;
+    private MyReviewsViewModel viewModel;
     private String customerId;
 
     @Nullable
@@ -42,16 +34,25 @@ public class MyReviewsFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        apiService = ApiClient.getInstance();
+        viewModel = new ViewModelProvider(this).get(MyReviewsViewModel.class);
         customerId = SessionManager.getInstance(requireContext()).getCustomerId();
 
         setupToolbar();
         setupRecyclerView();
+        observeViewModel();
 
         if (customerId != null) {
-            loadReviews();
+            viewModel.loadReviewsIfNeeded();
         } else {
             binding.tvEmpty.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (viewModel != null && SessionManager.getInstance(requireContext()).getCustomerId() != null) {
+            viewModel.refresh();
         }
     }
 
@@ -60,41 +61,48 @@ public class MyReviewsFragment extends Fragment {
     }
 
     private void setupRecyclerView() {
-        adapter = new MyReviewsAdapter();
+        String serverHost = com.unifurniture.mobile.BuildConfig.API_BASE_URL.replace("/api/", "");
+        adapter = new MyReviewsAdapter(serverHost, review -> {
+            String slug = review.getProductSlug();
+            if (slug == null || slug.trim().isEmpty()) {
+                slug = review.getProductId();
+            }
+            if (slug == null || slug.trim().isEmpty() || !isAdded()) {
+                return;
+            }
+            Bundle args = new Bundle();
+            args.putString("slug", slug);
+            Navigation.findNavController(requireView()).navigate(R.id.productDetailFragment, args);
+        });
         binding.rvReviews.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvReviews.setAdapter(adapter);
     }
 
-    private void loadReviews() {
-        binding.progressBar.setVisibility(View.VISIBLE);
-        binding.tvEmpty.setVisibility(View.GONE);
+    private void observeViewModel() {
+        viewModel.isLoading().observe(getViewLifecycleOwner(), loading -> {
+            if (binding == null) return;
+            binding.progressBar.setVisibility(Boolean.TRUE.equals(loading) ? View.VISIBLE : View.GONE);
+        });
 
-        apiService.getReviews(customerId).enqueue(new Callback<List<ReviewDto>>() {
-            @Override
-            public void onResponse(Call<List<ReviewDto>> call, Response<List<ReviewDto>> response) {
-                if (isAdded()) {
-                    binding.progressBar.setVisibility(View.GONE);
-                    List<ReviewDto> reviews = response.body();
-                    if (response.isSuccessful() && reviews != null) {
-                        if (!reviews.isEmpty()) {
-                            adapter.submitList(reviews);
-                        } else {
-                            binding.tvEmpty.setVisibility(View.VISIBLE);
-                        }
-                    } else {
-                        ToastUtil.error(requireContext(), R.string.error_unknown);
-                        binding.tvEmpty.setVisibility(View.VISIBLE);
-                    }
-                }
+        viewModel.getReviews().observe(getViewLifecycleOwner(), reviews -> {
+            if (binding == null) return;
+            if (reviews != null && !reviews.isEmpty()) {
+                adapter.submitList(reviews);
+                binding.rvReviews.setVisibility(View.VISIBLE);
+                binding.tvEmpty.setVisibility(View.GONE);
+            } else {
+                adapter.submitList(java.util.Collections.emptyList());
+                binding.rvReviews.setVisibility(View.GONE);
+                binding.tvEmpty.setVisibility(View.VISIBLE);
             }
+        });
 
-            @Override
-            public void onFailure(Call<List<ReviewDto>> call, Throwable t) {
-                if (isAdded()) {
-                    binding.progressBar.setVisibility(View.GONE);
-                    ToastUtil.error(requireContext(), getString(R.string.error_network, t.getMessage()));
-                    binding.tvEmpty.setVisibility(View.VISIBLE);
-                }
+        viewModel.getErrorMessage().observe(getViewLifecycleOwner(), error -> {
+            if (binding == null || error == null || error.isEmpty()) return;
+            if ("load_failed".equals(error)) {
+                ToastUtil.error(requireContext(), R.string.error_unknown);
+            } else {
+                ToastUtil.error(requireContext(), getString(R.string.error_network, error));
             }
         });
     }

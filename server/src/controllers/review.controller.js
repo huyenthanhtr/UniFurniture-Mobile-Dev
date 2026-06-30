@@ -4,6 +4,7 @@ const Order = require('../models/Order');
 const OrderDetail = require('../models/OrderDetail');
 const Profile = require('../models/Profile');
 const PointTransaction = require('../models/PointTransaction');
+const { REVIEW_MEDIA_RULES } = require('../middlewares/upload-review-media');
 
 const REVIEW_EARN_POINTS = 10;
 const MEMBERSHIP_TIER_RANK = { dong: 1, bac: 2, vang: 3, kim_cuong: 4 };
@@ -121,6 +122,21 @@ exports.uploadReviewMedia = async (req, res) => {
       urls,
       images,
       videos,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getReviewMediaConfig = async (req, res) => {
+  try {
+    return res.status(200).json({
+      maxImages: REVIEW_MEDIA_RULES.maxImages,
+      maxVideos: REVIEW_MEDIA_RULES.maxVideos,
+      maxTotalFiles: REVIEW_MEDIA_RULES.maxTotalFiles,
+      maxFileSizeBytes: REVIEW_MEDIA_RULES.maxFileSizeBytes,
+      maxFileSizeMb: REVIEW_MEDIA_RULES.maxFileSizeMb,
+      acceptedTypes: REVIEW_MEDIA_RULES.acceptedTypes,
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -370,6 +386,11 @@ exports.getAllReviews = async (req, res) => {
 
     const normalized = reviews.map((review) => {
       let productImageUrl = '';
+      let productId = '';
+      let productSlug = '';
+      let productName = '';
+      let orderCode = '';
+      let orderDetailId = '';
       if (review.order_detail_id?.variant_id) {
         const variant = review.order_detail_id.variant_id;
         if (variant.image) {
@@ -378,10 +399,43 @@ exports.getAllReviews = async (req, res) => {
           const prod = variant.product_id;
           productImageUrl = prod.thumbnail_url || prod.thumbnail || '';
         }
+        if (variant.product_id) {
+          const prod = variant.product_id;
+          productId = String(prod._id || '');
+          productSlug = String(prod.slug || '').trim();
+        }
       }
 
+      productName = String(review.order_detail_id?.product_name || '').trim();
+      orderCode = String(review.order_detail_id?.order_id?.order_code || '').trim();
+      orderDetailId = String(review.order_detail_id?._id || '').trim();
+
       return {
-        ...review.toObject(),
+        _id: review._id,
+        id: String(review._id || ''),
+        order_detail_id: orderDetailId,
+        orderId: String(review.order_detail_id?.order_id?._id || '').trim(),
+        productId,
+        productSlug,
+        productName,
+        customerId: String(review.customer_id?._id || review.customer_id || ''),
+        customerCode: String(review.customer_id?.customer_code || '').trim(),
+        customerPhone: String(review.customer_id?.phone || '').trim(),
+        customerName:
+          review.order_detail_id?.order_id?.shipping_name ||
+          review.customer_id?.full_name ||
+          'Khach hang da mua',
+        orderCode,
+        rating: review.rating,
+        content: review.content,
+        status: String(review.status || 'pending'),
+        reply: review.reply?.content
+          ? {
+              content: review.reply.content,
+              repliedAt: review.reply.repliedAt || null,
+            }
+          : null,
+        createdAt: review.createdAt,
         productImageUrl: toPublicAssetUrl(req, productImageUrl),
         images: Array.isArray(review.images)
           ? review.images.map((image) => toPublicAssetUrl(req, image)).filter(Boolean)
