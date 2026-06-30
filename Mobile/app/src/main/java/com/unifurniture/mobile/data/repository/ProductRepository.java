@@ -163,11 +163,13 @@ public class ProductRepository {
 
     // ── Wishlist ──────────────────────────────────────────────────────────────
 
-    public LiveData<List<WishlistItemDto>> getWishlist(String customerId) {
+    // profileId is the session "customer id" (== profile._id); the backend keys wishlist
+    // rows off the profile.
+    public LiveData<List<WishlistItemDto>> getWishlist(String profileId) {
         MutableLiveData<List<WishlistItemDto>> result = new MutableLiveData<>();
-        apiService.getWishlist(customerId).enqueue(new Callback<ApiListResponse<WishlistItemDto>>() {
+        apiService.getWishlist(profileId).enqueue(new Callback<WishlistListResponse>() {
             @Override
-            public void onResponse(Call<ApiListResponse<WishlistItemDto>> call, Response<ApiListResponse<WishlistItemDto>> response) {
+            public void onResponse(Call<WishlistListResponse> call, Response<WishlistListResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     result.setValue(response.body().items);
                 } else {
@@ -175,25 +177,28 @@ public class ProductRepository {
                 }
             }
             @Override
-            public void onFailure(Call<ApiListResponse<WishlistItemDto>> call, Throwable t) {
+            public void onFailure(Call<WishlistListResponse> call, Throwable t) {
                 result.setValue(null);
             }
         });
         return result;
     }
 
-    public LiveData<WishlistItemDto> addToWishlist(String customerId, String productId) {
+    public LiveData<WishlistItemDto> addToWishlist(String profileId, String productId) {
         MutableLiveData<WishlistItemDto> result = new MutableLiveData<>();
         java.util.Map<String, String> body = new java.util.HashMap<>();
-        body.put("customer_id", customerId);
         body.put("product_id", productId);
-        apiService.addToWishlist(body).enqueue(new Callback<WishlistItemDto>() {
+        apiService.addToWishlist(profileId, body).enqueue(new Callback<WishlistUpsertResponse>() {
             @Override
-            public void onResponse(Call<WishlistItemDto> call, Response<WishlistItemDto> response) {
-                result.setValue(response.isSuccessful() ? response.body() : null);
+            public void onResponse(Call<WishlistUpsertResponse> call, Response<WishlistUpsertResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    result.setValue(response.body().item);
+                } else {
+                    result.setValue(null);
+                }
             }
             @Override
-            public void onFailure(Call<WishlistItemDto> call, Throwable t) {
+            public void onFailure(Call<WishlistUpsertResponse> call, Throwable t) {
                 result.setValue(null);
             }
         });
@@ -224,9 +229,9 @@ public class ProductRepository {
         return result;
     }
 
-    public LiveData<Boolean> removeFromWishlist(String wishlistItemId) {
+    public LiveData<Boolean> removeFromWishlist(String profileId, String productId) {
         MutableLiveData<Boolean> result = new MutableLiveData<>();
-        apiService.removeFromWishlist(wishlistItemId).enqueue(new Callback<Void>() {
+        apiService.removeFromWishlist(profileId, productId).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 result.setValue(response.isSuccessful());

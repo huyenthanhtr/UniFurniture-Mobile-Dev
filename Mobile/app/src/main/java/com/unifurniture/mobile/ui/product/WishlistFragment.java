@@ -56,7 +56,7 @@ public class WishlistFragment extends Fragment {
 
             @Override
             public void onRemove(com.unifurniture.mobile.data.model.WishlistItemDto item) {
-                viewModel.removeFromWishlist(item.id);
+                viewModel.removeFromWishlist(item);
             }
         });
 

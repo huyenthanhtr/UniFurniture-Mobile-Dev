@@ -150,14 +150,21 @@ public interface ApiService {
     Call<ReviewSubmissionResponseDto> submitOrderReviews(@Body ReviewSubmissionRequestDto body);
 
     // ── Wishlist ──────────────────────────────────────────────────────────────
-    @GET("wishlist")
-    Call<ApiListResponse<WishlistItemDto>> getWishlist(@Query("customer_id") String customerId);
+    // Backend is profile-based: routes are mounted under /wishlist/profiles/:profileId.
+    // The session "customer id" equals profile._id (see auth login response), so it is
+    // passed straight through as the profileId path param.
+    @GET("wishlist/profiles/{profileId}")
+    Call<WishlistListResponse> getWishlist(@Path("profileId") String profileId);
 
-    @POST("wishlist")
-    Call<WishlistItemDto> addToWishlist(@Body Map<String, String> body);
+    @POST("wishlist/profiles/{profileId}/items")
+    Call<WishlistUpsertResponse> addToWishlist(
+            @Path("profileId") String profileId,
+            @Body Map<String, String> body);
 
-    @DELETE("wishlist/{id}")
-    Call<Void> removeFromWishlist(@Path("id") String wishlistItemId);
+    @DELETE("wishlist/profiles/{profileId}/items/{productId}")
+    Call<Void> removeFromWishlist(
+            @Path("profileId") String profileId,
+            @Path("productId") String productId);
 
     // ── Profile ───────────────────────────────────────────────────────────────
     @GET("profiles")
