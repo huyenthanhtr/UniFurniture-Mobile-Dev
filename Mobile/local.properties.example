@@ -4,5 +4,8 @@
 # Đường dẫn SDK Android của bạn (nếu Android Studio chưa tự động cấu hình)
 # sdk.dir=/path/to/your/Android/Sdk
 
-# IP và URL kết nối API (Dùng IP máy tính chạy Node.js backend)
-api.base.url=http://10.0.2.2:3000/api/
+# (TÙY CHỌN) Chạy backend Node.js trên máy bạn? Bỏ comment dòng dưới để build DEBUG
+# trỏ về backend local. Để nguyên (comment) thì app dùng backend production trên Cloud Run.
+# Lưu ý key là `dev.api.base.url` — key cũ `api.base.url` đã bị bỏ, không còn tác dụng.
+# 10.0.2.2 = localhost của máy host khi chạy trên Android Emulator.
+# dev.api.base.url=http://10.0.2.2:3000/api/
