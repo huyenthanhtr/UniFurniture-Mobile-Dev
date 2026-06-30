@@ -22,6 +22,11 @@ const ProductVariantSchema = new mongoose.Schema(
     // Localized color names; populated by scripts/color-i18n-migration.js. Kept ALONGSIDE `color`
     // (never replacing it) so descriptive info in the raw value is preserved.
     color_i18n: { type: LocalizedStringSchema, default: undefined },
+    // Localized variant spec/name ("Combo Bàn Ăn 6 Ghế", "Tủ 3 cánh thanh treo", ...); populated by
+    // scripts/variant-name-i18n-migration.js. Built from the displayed spec (variant_name || name)
+    // and kept ALONGSIDE the raw fields. The mobile app reads name_i18n[<lang>] for the spec part of
+    // the variant label and falls back to the raw string + ColorUi when a locale is missing.
+    name_i18n: { type: LocalizedStringSchema, default: undefined },
     price: { type: Number, required: true, default: 0 },
     compare_at_price: { type: Number, default: 0 },
     stock_quantity: { type: Number, default: 0 },

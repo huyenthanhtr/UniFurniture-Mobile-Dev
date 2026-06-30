@@ -22,12 +22,14 @@ public class FormatUtil {
         String color = LocalizedText.pickColor(ctx, variant.colorI18n, variant.color);
         color = (color == null) ? "" : color.trim();
 
-        String spec = "";
-        if (notBlank(variant.variantName)) spec = variant.variantName.trim();
-        else if (notBlank(variant.name)) spec = variant.name.trim();
-        else if (notBlank(variant.label)) spec = variant.label.trim();
-        if (spec.startsWith("Combo Bàn Ăn ")) spec = spec.substring("Combo Bàn Ăn ".length());
-        spec = ColorUi.label(ctx, spec);
+        String specRaw = "";
+        if (notBlank(variant.variantName)) specRaw = variant.variantName.trim();
+        else if (notBlank(variant.name)) specRaw = variant.name.trim();
+        else if (notBlank(variant.label)) specRaw = variant.label.trim();
+        if (specRaw.startsWith("Combo Bàn Ăn ")) specRaw = specRaw.substring("Combo Bàn Ăn ".length());
+        // Prefer the server-provided localized spec (name_i18n, Cách 3); fall back to the ColorUi
+        // word localizer on the raw string for legacy variants without name_i18n.
+        String spec = specRaw.isEmpty() ? "" : LocalizedText.pick(ctx, variant.nameI18n, specRaw);
 
         if (!color.isEmpty() && !spec.isEmpty()) {
             if (color.equalsIgnoreCase(spec)) return color;

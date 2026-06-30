@@ -1,0 +1,1466 @@
+{
+  "1 Ghế Băng Dài + 1 Ghế Băng Tựa": {
+    "vi": "1 Ghế Băng Dài + 1 Ghế Băng Tựa",
+    "en": "1 long bench / 1 backrest bench",
+    "fr": "1 banc long / 1 banc à dossier",
+    "zh": "1 条长凳 / 1 条靠背长凳"
+  },
+  "1 Ghế Băng Dài + 2 Ghế Đơn": {
+    "vi": "1 Ghế Băng Dài + 2 Ghế Đơn",
+    "en": "1 long bench / 2 single chairs",
+    "fr": "1 banc long / 2 chaises simples",
+    "zh": "1 条长凳 / 2 把单椅"
+  },
+  "1 Ghế Băng Tựa + 2 Ghế Đơn": {
+    "vi": "1 Ghế Băng Tựa + 2 Ghế Đơn",
+    "en": "1 backrest bench / 2 single chairs",
+    "fr": "1 banc à dossier / 2 chaises simples",
+    "zh": "1 条靠背长凳 / 2 把单椅"
+  },
+  "1 băng+ 2 ghế PLANK": {
+    "vi": "1 băng+ 2 ghế PLANK",
+    "en": "1 bench / 2 PLANK chairs",
+    "fr": "1 banc / 2 chaises PLANK",
+    "zh": "1 条长凳 / 2 把椅子 PLANK"
+  },
+  "1 băng+ 4 ghế PLANK": {
+    "vi": "1 băng+ 4 ghế PLANK",
+    "en": "1 bench / 4 PLANK chairs",
+    "fr": "1 banc / 4 chaises PLANK",
+    "zh": "1 条长凳 / 4 把椅子 PLANK"
+  },
+  "140 / Combo 4 ghế": {
+    "vi": "140 / Combo 4 ghế",
+    "en": "140 / Combo 4 chairs",
+    "fr": "140 / Combo 4 chaises",
+    "zh": "140 / 组合 4 把椅子"
+  },
+  "140 / Combo 6 ghế": {
+    "vi": "140 / Combo 6 ghế",
+    "en": "140 / Combo 6 chairs",
+    "fr": "140 / Combo 6 chaises",
+    "zh": "140 / 组合 6 把椅子"
+  },
+  "160 / Combo 4 ghế": {
+    "vi": "160 / Combo 4 ghế",
+    "en": "160 / Combo 4 chairs",
+    "fr": "160 / Combo 4 chaises",
+    "zh": "160 / 组合 4 把椅子"
+  },
+  "160 / Combo 6 ghế": {
+    "vi": "160 / Combo 6 ghế",
+    "en": "160 / Combo 6 chairs",
+    "fr": "160 / Combo 6 chaises",
+    "zh": "160 / 组合 6 把椅子"
+  },
+  "1m2": {
+    "vi": "1m2",
+    "en": "1.2m",
+    "fr": "1.2m",
+    "zh": "1.2m"
+  },
+  "1m2 / Tấm Phản": {
+    "vi": "1m2 / Tấm Phản",
+    "en": "1.2m / platform",
+    "fr": "1.2m / plateau",
+    "zh": "1.2m / 床板"
+  },
+  "1m25": {
+    "vi": "1m25",
+    "en": "1.25m",
+    "fr": "1.25m",
+    "zh": "1.25m"
+  },
+  "1m4": {
+    "vi": "1m4",
+    "en": "1.4m",
+    "fr": "1.4m",
+    "zh": "1.4m"
+  },
+  "1m4 / Tấm Phản": {
+    "vi": "1m4 / Tấm Phản",
+    "en": "1.4m / platform",
+    "fr": "1.4m / plateau",
+    "zh": "1.4m / 床板"
+  },
+  "1m6": {
+    "vi": "1m6",
+    "en": "1.6m",
+    "fr": "1.6m",
+    "zh": "1.6m"
+  },
+  "1m6 / Tấm Phản": {
+    "vi": "1m6 / Tấm Phản",
+    "en": "1.6m / platform",
+    "fr": "1.6m / plateau",
+    "zh": "1.6m / 床板"
+  },
+  "1m8": {
+    "vi": "1m8",
+    "en": "1.8m",
+    "fr": "1.8m",
+    "zh": "1.8m"
+  },
+  "1m8 / Tấm Phản": {
+    "vi": "1m8 / Tấm Phản",
+    "en": "1.8m / platform",
+    "fr": "1.8m / plateau",
+    "zh": "1.8m / 床板"
+  },
+  "2 Ghế": {
+    "vi": "2 Ghế",
+    "en": "2 chairs",
+    "fr": "2 chaises",
+    "zh": "2 把椅子"
+  },
+  "2 Ghế Băng Dài": {
+    "vi": "2 Ghế Băng Dài",
+    "en": "2 long benches",
+    "fr": "2 bancs longs",
+    "zh": "2 条长凳"
+  },
+  "2 Ghế Băng Tựa": {
+    "vi": "2 Ghế Băng Tựa",
+    "en": "2 backrest benches",
+    "fr": "2 bancs à dossier",
+    "zh": "2 条靠背长凳"
+  },
+  "2 Ghế Ăn": {
+    "vi": "2 Ghế Ăn",
+    "en": "2 dining chairs",
+    "fr": "2 chaises à manger",
+    "zh": "2 把餐椅"
+  },
+  "2 băng PLANK": {
+    "vi": "2 băng PLANK",
+    "en": "2 PLANK benches",
+    "fr": "2 bancs PLANK",
+    "zh": "2 条长凳 PLANK"
+  },
+  "2 cánh kệ góc": {
+    "vi": "2 cánh kệ góc",
+    "en": "2-door corner shelf",
+    "fr": "2 portes étagère d'angle",
+    "zh": "2 扇门 转角架"
+  },
+  "2 ghế FINGAL + 1 băng PLANK": {
+    "vi": "2 ghế FINGAL + 1 băng PLANK",
+    "en": "2 FINGAL chairs / 1 bench PLANK",
+    "fr": "2 chaises FINGAL / 1 banc PLANK",
+    "zh": "2 把椅子 FINGAL / 1 条长凳 PLANK"
+  },
+  "2 ghế FINGAL + 2 băng PLANK": {
+    "vi": "2 ghế FINGAL + 2 băng PLANK",
+    "en": "2 FINGAL chairs / 2 PLANK benches",
+    "fr": "2 chaises FINGAL / 2 bancs PLANK",
+    "zh": "2 把椅子 FINGAL / 2 条长凳 PLANK"
+  },
+  "2 ghế LYH + 1 băng PLANK": {
+    "vi": "2 ghế LYH + 1 băng PLANK",
+    "en": "2 LYH chairs / 1 bench PLANK",
+    "fr": "2 chaises LYH / 1 banc PLANK",
+    "zh": "2 把椅子 LYH / 1 条长凳 PLANK"
+  },
+  "2 ghế LYH + 2 băng PLANK": {
+    "vi": "2 ghế LYH + 2 băng PLANK",
+    "en": "2 LYH chairs / 2 PLANK benches",
+    "fr": "2 chaises LYH / 2 bancs PLANK",
+    "zh": "2 把椅子 LYH / 2 条长凳 PLANK"
+  },
+  "2 ghế PLANK + 2 băng PLANK": {
+    "vi": "2 ghế PLANK + 2 băng PLANK",
+    "en": "2 PLANK chairs / 2 PLANK benches",
+    "fr": "2 chaises PLANK / 2 bancs PLANK",
+    "zh": "2 把椅子 PLANK / 2 条长凳 PLANK"
+  },
+  "3  Cánh thanh treo": {
+    "vi": "3  Cánh thanh treo",
+    "en": "3-door hanging rail",
+    "fr": "3 portes tringle",
+    "zh": "3 扇门 挂衣杆"
+  },
+  "3 Cánh ngăn kệ": {
+    "vi": "3 Cánh ngăn kệ",
+    "en": "3-door shelf",
+    "fr": "3 portes étagère",
+    "zh": "3 扇门 搁板"
+  },
+  "3 cánh hộc kéo": {
+    "vi": "3 cánh hộc kéo",
+    "en": "3-door drawer",
+    "fr": "3 portes tiroir",
+    "zh": "3 扇门 抽屉"
+  },
+  "3 cánh ngăn kệ": {
+    "vi": "3 cánh ngăn kệ",
+    "en": "3-door shelf",
+    "fr": "3 portes étagère",
+    "zh": "3 扇门 搁板"
+  },
+  "3 cánh thanh treo": {
+    "vi": "3 cánh thanh treo",
+    "en": "3-door hanging rail",
+    "fr": "3 portes tringle",
+    "zh": "3 扇门 挂衣杆"
+  },
+  "3 món (Sofa + Bàn Cafe + Tủ TV)": {
+    "vi": "3 món (Sofa + Bàn Cafe + Tủ TV)",
+    "en": "3 items (Sofa / Coffee table / TV cabinet)",
+    "fr": "3 pièces (Canapé / Table basse / Meuble TV)",
+    "zh": "3 件 (沙发 / 咖啡桌 / 电视柜)"
+  },
+  "4 Cánh ngăn kệ - hộc kéo": {
+    "vi": "4 Cánh ngăn kệ - hộc kéo",
+    "en": "4-door shelf - drawer",
+    "fr": "4 portes étagère - tiroir",
+    "zh": "4 扇门 搁板 - 抽屉"
+  },
+  "4 Cánh ngăn kệ - thanh treo": {
+    "vi": "4 Cánh ngăn kệ - thanh treo",
+    "en": "4-door shelf - hanging rail",
+    "fr": "4 portes étagère - tringle",
+    "zh": "4 扇门 搁板 - 挂衣杆"
+  },
+  "4 Cánh thanh treo - hộc kéo": {
+    "vi": "4 Cánh thanh treo - hộc kéo",
+    "en": "4-door hanging rail - drawer",
+    "fr": "4 portes tringle - tiroir",
+    "zh": "4 扇门 挂衣杆 - 抽屉"
+  },
+  "4 Ghế": {
+    "vi": "4 Ghế",
+    "en": "4 chairs",
+    "fr": "4 chaises",
+    "zh": "4 把椅子"
+  },
+  "4 Ghế / Ghế FYN": {
+    "vi": "4 Ghế / Ghế FYN",
+    "en": "4 chairs / FYN chair",
+    "fr": "4 chaises / chaise FYN",
+    "zh": "4 把椅子 / 椅 FYN"
+  },
+  "4 Ghế / Ghế MILAN": {
+    "vi": "4 Ghế / Ghế MILAN",
+    "en": "4 chairs / MILAN chair",
+    "fr": "4 chaises / chaise MILAN",
+    "zh": "4 把椅子 / 椅 MILAN"
+  },
+  "4 Ghế / Ghế OSLO": {
+    "vi": "4 Ghế / Ghế OSLO",
+    "en": "4 chairs / OSLO chair",
+    "fr": "4 chaises / chaise OSLO",
+    "zh": "4 把椅子 / 椅 OSLO"
+  },
+  "4 Ghế FYN": {
+    "vi": "4 Ghế FYN",
+    "en": "4 FYN chairs",
+    "fr": "4 chaises FYN",
+    "zh": "4 把椅子 FYN"
+  },
+  "4 Ghế MALAGA": {
+    "vi": "4 Ghế MALAGA",
+    "en": "4 MALAGA chairs",
+    "fr": "4 chaises MALAGA",
+    "zh": "4 把椅子 MALAGA"
+  },
+  "4 Ghế MILAN": {
+    "vi": "4 Ghế MILAN",
+    "en": "4 MILAN chairs",
+    "fr": "4 chaises MILAN",
+    "zh": "4 把椅子 MILAN"
+  },
+  "4 Ghế NEXO": {
+    "vi": "4 Ghế NEXO",
+    "en": "4 NEXO chairs",
+    "fr": "4 chaises NEXO",
+    "zh": "4 把椅子 NEXO"
+  },
+  "4 Ghế ODESSA": {
+    "vi": "4 Ghế ODESSA",
+    "en": "4 ODESSA chairs",
+    "fr": "4 chaises ODESSA",
+    "zh": "4 把椅子 ODESSA"
+  },
+  "4 Ghế OSLO": {
+    "vi": "4 Ghế OSLO",
+    "en": "4 OSLO chairs",
+    "fr": "4 chaises OSLO",
+    "zh": "4 把椅子 OSLO"
+  },
+  "4 Ghế SORO": {
+    "vi": "4 Ghế SORO",
+    "en": "4 SORO chairs",
+    "fr": "4 chaises SORO",
+    "zh": "4 把椅子 SORO"
+  },
+  "4 Ghế VERONA Màu Navy": {
+    "vi": "4 Ghế VERONA Màu Navy",
+    "en": "4 VERONA chairs Navy",
+    "fr": "4 chaises VERONA Marine",
+    "zh": "4 把椅子 VERONA 藏青色"
+  },
+  "4 Ghế VIBORG Màu Xám": {
+    "vi": "4 Ghế VIBORG Màu Xám",
+    "en": "4 VIBORG chairs Gray",
+    "fr": "4 chaises VIBORG Gris",
+    "zh": "4 把椅子 VIBORG 灰色"
+  },
+  "4 Ghế VLINE": {
+    "vi": "4 Ghế VLINE",
+    "en": "4 VLINE chairs",
+    "fr": "4 chaises VLINE",
+    "zh": "4 把椅子 VLINE"
+  },
+  "4 Ghế VLINE CAO": {
+    "vi": "4 Ghế VLINE CAO",
+    "en": "4 VLINE chairs Tall",
+    "fr": "4 chaises VLINE Haut",
+    "zh": "4 把椅子 VLINE 高"
+  },
+  "4 Ghế Vline Cao": {
+    "vi": "4 Ghế Vline Cao",
+    "en": "4 chairs Vline Tall",
+    "fr": "4 chaises Vline Haut",
+    "zh": "4 把椅子 Vline 高"
+  },
+  "4 Ghế Ăn": {
+    "vi": "4 Ghế Ăn",
+    "en": "4 dining chairs",
+    "fr": "4 chaises à manger",
+    "zh": "4 把餐椅"
+  },
+  "4 Ghế Đơn": {
+    "vi": "4 Ghế Đơn",
+    "en": "4 single chairs",
+    "fr": "4 chaises simples",
+    "zh": "4 把单椅"
+  },
+  "4 cánh": {
+    "vi": "4 cánh",
+    "en": "4 doors",
+    "fr": "4 portes",
+    "zh": "4 扇门"
+  },
+  "4 cánh kệ góc": {
+    "vi": "4 cánh kệ góc",
+    "en": "4-door corner shelf",
+    "fr": "4 portes étagère d'angle",
+    "zh": "4 扇门 转角架"
+  },
+  "4 ghế": {
+    "vi": "4 ghế",
+    "en": "4 chairs",
+    "fr": "4 chaises",
+    "zh": "4 把椅子"
+  },
+  "4 ghế FINGAL": {
+    "vi": "4 ghế FINGAL",
+    "en": "4 FINGAL chairs",
+    "fr": "4 chaises FINGAL",
+    "zh": "4 把椅子 FINGAL"
+  },
+  "4 ghế FINGAL+ 1 băng PLANK": {
+    "vi": "4 ghế FINGAL+ 1 băng PLANK",
+    "en": "4 FINGAL chairs / 1 bench PLANK",
+    "fr": "4 chaises FINGAL / 1 banc PLANK",
+    "zh": "4 把椅子 FINGAL / 1 条长凳 PLANK"
+  },
+  "4 ghế LYH": {
+    "vi": "4 ghế LYH",
+    "en": "4 LYH chairs",
+    "fr": "4 chaises LYH",
+    "zh": "4 把椅子 LYH"
+  },
+  "4 ghế LYH + 1 băng PLANK": {
+    "vi": "4 ghế LYH + 1 băng PLANK",
+    "en": "4 LYH chairs / 1 bench PLANK",
+    "fr": "4 chaises LYH / 1 banc PLANK",
+    "zh": "4 把椅子 LYH / 1 条长凳 PLANK"
+  },
+  "4 ghế PLANK": {
+    "vi": "4 ghế PLANK",
+    "en": "4 PLANK chairs",
+    "fr": "4 chaises PLANK",
+    "zh": "4 把椅子 PLANK"
+  },
+  "4 món (Sofa + Sofa Góc + Bàn Cafe + Tủ TV)": {
+    "vi": "4 món (Sofa + Sofa Góc + Bàn Cafe + Tủ TV)",
+    "en": "4 items (Sofa / Corner sofa / Coffee table / TV cabinet)",
+    "fr": "4 pièces (Canapé / Canapé d'angle / Table basse / Meuble TV)",
+    "zh": "4 件 (沙发 / 转角沙发 / 咖啡桌 / 电视柜)"
+  },
+  "6 Ghế / Ghế FYN": {
+    "vi": "6 Ghế / Ghế FYN",
+    "en": "6 chairs / FYN chair",
+    "fr": "6 chaises / chaise FYN",
+    "zh": "6 把椅子 / 椅 FYN"
+  },
+  "6 Ghế / Ghế MILAN": {
+    "vi": "6 Ghế / Ghế MILAN",
+    "en": "6 chairs / MILAN chair",
+    "fr": "6 chaises / chaise MILAN",
+    "zh": "6 把椅子 / 椅 MILAN"
+  },
+  "6 Ghế / Ghế OSLO": {
+    "vi": "6 Ghế / Ghế OSLO",
+    "en": "6 chairs / OSLO chair",
+    "fr": "6 chaises / chaise OSLO",
+    "zh": "6 把椅子 / 椅 OSLO"
+  },
+  "6 Ghế FYN": {
+    "vi": "6 Ghế FYN",
+    "en": "6 FYN chairs",
+    "fr": "6 chaises FYN",
+    "zh": "6 把椅子 FYN"
+  },
+  "6 Ghế MALAGA": {
+    "vi": "6 Ghế MALAGA",
+    "en": "6 MALAGA chairs",
+    "fr": "6 chaises MALAGA",
+    "zh": "6 把椅子 MALAGA"
+  },
+  "6 Ghế MILAN": {
+    "vi": "6 Ghế MILAN",
+    "en": "6 MILAN chairs",
+    "fr": "6 chaises MILAN",
+    "zh": "6 把椅子 MILAN"
+  },
+  "6 Ghế NEXO": {
+    "vi": "6 Ghế NEXO",
+    "en": "6 NEXO chairs",
+    "fr": "6 chaises NEXO",
+    "zh": "6 把椅子 NEXO"
+  },
+  "6 Ghế ODESSA": {
+    "vi": "6 Ghế ODESSA",
+    "en": "6 ODESSA chairs",
+    "fr": "6 chaises ODESSA",
+    "zh": "6 把椅子 ODESSA"
+  },
+  "6 Ghế OSLO": {
+    "vi": "6 Ghế OSLO",
+    "en": "6 OSLO chairs",
+    "fr": "6 chaises OSLO",
+    "zh": "6 把椅子 OSLO"
+  },
+  "6 Ghế SORO": {
+    "vi": "6 Ghế SORO",
+    "en": "6 SORO chairs",
+    "fr": "6 chaises SORO",
+    "zh": "6 把椅子 SORO"
+  },
+  "6 Ghế VERONA Màu Navy": {
+    "vi": "6 Ghế VERONA Màu Navy",
+    "en": "6 VERONA chairs Navy",
+    "fr": "6 chaises VERONA Marine",
+    "zh": "6 把椅子 VERONA 藏青色"
+  },
+  "6 Ghế VIBORG Màu Xám": {
+    "vi": "6 Ghế VIBORG Màu Xám",
+    "en": "6 VIBORG chairs Gray",
+    "fr": "6 chaises VIBORG Gris",
+    "zh": "6 把椅子 VIBORG 灰色"
+  },
+  "6 ghế": {
+    "vi": "6 ghế",
+    "en": "6 chairs",
+    "fr": "6 chaises",
+    "zh": "6 把椅子"
+  },
+  "6 ghế FINGAL": {
+    "vi": "6 ghế FINGAL",
+    "en": "6 FINGAL chairs",
+    "fr": "6 chaises FINGAL",
+    "zh": "6 把椅子 FINGAL"
+  },
+  "6 ghế LYH": {
+    "vi": "6 ghế LYH",
+    "en": "6 LYH chairs",
+    "fr": "6 chaises LYH",
+    "zh": "6 把椅子 LYH"
+  },
+  "6 ghế PLANK": {
+    "vi": "6 ghế PLANK",
+    "en": "6 PLANK chairs",
+    "fr": "6 chaises PLANK",
+    "zh": "6 把椅子 PLANK"
+  },
+  "60cm": {
+    "vi": "60cm",
+    "en": "60cm",
+    "fr": "60cm",
+    "zh": "60cm"
+  },
+  "Be": {
+    "vi": "Be",
+    "en": "Beige",
+    "fr": "Beige",
+    "zh": "米色"
+  },
+  "Cam": {
+    "vi": "Cam",
+    "en": "Orange",
+    "fr": "Orange",
+    "zh": "橙色"
+  },
+  "Camel": {
+    "vi": "Camel",
+    "en": "Camel",
+    "fr": "Camel",
+    "zh": "驼色"
+  },
+  "Cao thông thường - 46cm": {
+    "vi": "Cao thông thường - 46cm",
+    "en": "Standard height - 46cm",
+    "fr": "Hauteur standard - 46cm",
+    "zh": "标准高度 - 46cm"
+  },
+  "Cao thông thường - 80cm": {
+    "vi": "Cao thông thường - 80cm",
+    "en": "Standard height - 80cm",
+    "fr": "Hauteur standard - 80cm",
+    "zh": "标准高度 - 80cm"
+  },
+  "Combo 1": {
+    "vi": "Combo 1",
+    "en": "Combo 1",
+    "fr": "Combo 1",
+    "zh": "组合 1"
+  },
+  "Combo 1 / Giường 1m6": {
+    "vi": "Combo 1 / Giường 1m6",
+    "en": "Combo 1 / Bed 1.6m",
+    "fr": "Combo 1 / Lit 1.6m",
+    "zh": "组合 1 / 床 1.6m"
+  },
+  "Combo 1 / Giường 1m8": {
+    "vi": "Combo 1 / Giường 1m8",
+    "en": "Combo 1 / Bed 1.8m",
+    "fr": "Combo 1 / Lit 1.8m",
+    "zh": "组合 1 / 床 1.8m"
+  },
+  "Combo 2": {
+    "vi": "Combo 2",
+    "en": "Combo 2",
+    "fr": "Combo 2",
+    "zh": "组合 2"
+  },
+  "Combo 2 - Sofa Trái": {
+    "vi": "Combo 2 - Sofa Trái",
+    "en": "Combo 2 - Left-facing sofa",
+    "fr": "Combo 2 - Canapé gauche",
+    "zh": "组合 2 - 沙发 左"
+  },
+  "Combo 2 / Giường 1m6": {
+    "vi": "Combo 2 / Giường 1m6",
+    "en": "Combo 2 / Bed 1.6m",
+    "fr": "Combo 2 / Lit 1.6m",
+    "zh": "组合 2 / 床 1.6m"
+  },
+  "Combo 2 / Giường 1m8": {
+    "vi": "Combo 2 / Giường 1m8",
+    "en": "Combo 2 / Bed 1.8m",
+    "fr": "Combo 2 / Lit 1.8m",
+    "zh": "组合 2 / 床 1.8m"
+  },
+  "Combo 3": {
+    "vi": "Combo 3",
+    "en": "Combo 3",
+    "fr": "Combo 3",
+    "zh": "组合 3"
+  },
+  "Combo 3 - Sofa Phải": {
+    "vi": "Combo 3 - Sofa Phải",
+    "en": "Combo 3 - Right-facing sofa",
+    "fr": "Combo 3 - Canapé droite",
+    "zh": "组合 3 - 沙发 右"
+  },
+  "Combo 3 / Giường 1m6": {
+    "vi": "Combo 3 / Giường 1m6",
+    "en": "Combo 3 / Bed 1.6m",
+    "fr": "Combo 3 / Lit 1.6m",
+    "zh": "组合 3 / 床 1.6m"
+  },
+  "Combo 3 / Giường 1m8": {
+    "vi": "Combo 3 / Giường 1m8",
+    "en": "Combo 3 / Bed 1.8m",
+    "fr": "Combo 3 / Lit 1.8m",
+    "zh": "组合 3 / 床 1.8m"
+  },
+  "Combo 4": {
+    "vi": "Combo 4",
+    "en": "Combo 4",
+    "fr": "Combo 4",
+    "zh": "组合 4"
+  },
+  "Combo 4 - Sofa Trái": {
+    "vi": "Combo 4 - Sofa Trái",
+    "en": "Combo 4 - Left-facing sofa",
+    "fr": "Combo 4 - Canapé gauche",
+    "zh": "组合 4 - 沙发 左"
+  },
+  "Combo 4 / Giường 1m6": {
+    "vi": "Combo 4 / Giường 1m6",
+    "en": "Combo 4 / Bed 1.6m",
+    "fr": "Combo 4 / Lit 1.6m",
+    "zh": "组合 4 / 床 1.6m"
+  },
+  "Combo 4 / Giường 1m8": {
+    "vi": "Combo 4 / Giường 1m8",
+    "en": "Combo 4 / Bed 1.8m",
+    "fr": "Combo 4 / Lit 1.8m",
+    "zh": "组合 4 / 床 1.8m"
+  },
+  "Combo BS 1": {
+    "vi": "Combo BS 1",
+    "en": "Combo BS 1",
+    "fr": "Combo BS 1",
+    "zh": "组合 BS 1"
+  },
+  "Combo BS 2": {
+    "vi": "Combo BS 2",
+    "en": "Combo BS 2",
+    "fr": "Combo BS 2",
+    "zh": "组合 BS 2"
+  },
+  "Combo Basic 1 (Giường 1m6 , BS, MS)": {
+    "vi": "Combo Basic 1 (Giường 1m6 , BS, MS)",
+    "en": "Combo Basic 1 (Bed 1.6m, BS, MS)",
+    "fr": "Combo Basic 1 (Lit 1.6m, BS, MS)",
+    "zh": "组合 基础 1 (床 1.6m, BS, MS)"
+  },
+  "Combo Basic 1 - Sofa Phải": {
+    "vi": "Combo Basic 1 - Sofa Phải",
+    "en": "Combo Basic 1 - Right-facing sofa",
+    "fr": "Combo Basic 1 - Canapé droite",
+    "zh": "组合 基础 1 - 沙发 右"
+  },
+  "Combo Basic 1: BN, BS V1": {
+    "vi": "Combo Basic 1: BN, BS V1",
+    "en": "Combo Basic 1: BN, BS V1",
+    "fr": "Combo Basic 1: BN, BS V1",
+    "zh": "组合 基础 1: BN, BS V1"
+  },
+  "Combo Basic 2 (Giường 1m6, BS, MH)": {
+    "vi": "Combo Basic 2 (Giường 1m6, BS, MH)",
+    "en": "Combo Basic 2 (Bed 1.6m, BS, MH)",
+    "fr": "Combo Basic 2 (Lit 1.6m, BS, MH)",
+    "zh": "组合 基础 2 (床 1.6m, BS, MH)"
+  },
+  "Combo Basic 2 món ( Giường 1m6, Tủ Quần Áo)": {
+    "vi": "Combo Basic 2 món ( Giường 1m6, Tủ Quần Áo)",
+    "en": "Combo Basic 2 items (Bed 1.6m, Wardrobe)",
+    "fr": "Combo Basic 2 pièces (Lit 1.6m, Armoire)",
+    "zh": "组合 基础 2 件 (床 1.6m, 衣柜)"
+  },
+  "Combo Basic 2 món ( Giường 1m8, Tủ Quần Áo)": {
+    "vi": "Combo Basic 2 món ( Giường 1m8, Tủ Quần Áo)",
+    "en": "Combo Basic 2 items (Bed 1.8m, Wardrobe)",
+    "fr": "Combo Basic 2 pièces (Lit 1.8m, Armoire)",
+    "zh": "组合 基础 2 件 (床 1.8m, 衣柜)"
+  },
+  "Combo Basic 2: BN, BS V2": {
+    "vi": "Combo Basic 2: BN, BS V2",
+    "en": "Combo Basic 2: BN, BS V2",
+    "fr": "Combo Basic 2: BN, BS V2",
+    "zh": "组合 基础 2: BN, BS V2"
+  },
+  "Combo Basic 3 (Giường 1m8, BS, MS)": {
+    "vi": "Combo Basic 3 (Giường 1m8, BS, MS)",
+    "en": "Combo Basic 3 (Bed 1.8m, BS, MS)",
+    "fr": "Combo Basic 3 (Lit 1.8m, BS, MS)",
+    "zh": "组合 基础 3 (床 1.8m, BS, MS)"
+  },
+  "Combo Basic 3: BN, WR120": {
+    "vi": "Combo Basic 3: BN, WR120",
+    "en": "Combo Basic 3: BN, WR120",
+    "fr": "Combo Basic 3: BN, WR120",
+    "zh": "组合 基础 3: BN, WR120"
+  },
+  "Combo Basic 4 (Giường 1m8, BS, MH)": {
+    "vi": "Combo Basic 4 (Giường 1m8, BS, MH)",
+    "en": "Combo Basic 4 (Bed 1.8m, BS, MH)",
+    "fr": "Combo Basic 4 (Lit 1.8m, BS, MH)",
+    "zh": "组合 基础 4 (床 1.8m, BS, MH)"
+  },
+  "Combo Giường 1m6, BS, SMH": {
+    "vi": "Combo Giường 1m6, BS, SMH",
+    "en": "Combo Bed 1.6m, BS, SMH",
+    "fr": "Combo Lit 1.6m, BS, SMH",
+    "zh": "组合 床 1.6m, BS, SMH"
+  },
+  "Combo Giường 1m8, BS, SMH": {
+    "vi": "Combo Giường 1m8, BS, SMH",
+    "en": "Combo Bed 1.8m, BS, SMH",
+    "fr": "Combo Lit 1.8m, BS, SMH",
+    "zh": "组合 床 1.8m, BS, SMH"
+  },
+  "Combo Mix / Giường 1m2": {
+    "vi": "Combo Mix / Giường 1m2",
+    "en": "Combo Mix / Bed 1.2m",
+    "fr": "Combo Mix / Lit 1.2m",
+    "zh": "组合 混搭 / 床 1.2m"
+  },
+  "Combo Mix / Giường 1m4": {
+    "vi": "Combo Mix / Giường 1m4",
+    "en": "Combo Mix / Bed 1.4m",
+    "fr": "Combo Mix / Lit 1.4m",
+    "zh": "组合 混搭 / 床 1.4m"
+  },
+  "Combo Mix / Giường 1m6": {
+    "vi": "Combo Mix / Giường 1m6",
+    "en": "Combo Mix / Bed 1.6m",
+    "fr": "Combo Mix / Lit 1.6m",
+    "zh": "组合 混搭 / 床 1.6m"
+  },
+  "Combo Nat / Giường 1m2": {
+    "vi": "Combo Nat / Giường 1m2",
+    "en": "Combo Natural / Bed 1.2m",
+    "fr": "Combo Naturel / Lit 1.2m",
+    "zh": "组合 原木色 / 床 1.2m"
+  },
+  "Combo Nat / Giường 1m4": {
+    "vi": "Combo Nat / Giường 1m4",
+    "en": "Combo Natural / Bed 1.4m",
+    "fr": "Combo Naturel / Lit 1.4m",
+    "zh": "组合 原木色 / 床 1.4m"
+  },
+  "Combo Nat / Giường 1m6": {
+    "vi": "Combo Nat / Giường 1m6",
+    "en": "Combo Natural / Bed 1.6m",
+    "fr": "Combo Naturel / Lit 1.6m",
+    "zh": "组合 原木色 / 床 1.6m"
+  },
+  "Combo PN 1 / Giường 1m6": {
+    "vi": "Combo PN 1 / Giường 1m6",
+    "en": "Combo PN 1 / Bed 1.6m",
+    "fr": "Combo PN 1 / Lit 1.6m",
+    "zh": "组合 PN 1 / 床 1.6m"
+  },
+  "Combo PN 1 / Giường 1m8": {
+    "vi": "Combo PN 1 / Giường 1m8",
+    "en": "Combo PN 1 / Bed 1.8m",
+    "fr": "Combo PN 1 / Lit 1.8m",
+    "zh": "组合 PN 1 / 床 1.8m"
+  },
+  "Combo PN 2 / Giường 1m6": {
+    "vi": "Combo PN 2 / Giường 1m6",
+    "en": "Combo PN 2 / Bed 1.6m",
+    "fr": "Combo PN 2 / Lit 1.6m",
+    "zh": "组合 PN 2 / 床 1.6m"
+  },
+  "Combo PN 2 / Giường 1m8": {
+    "vi": "Combo PN 2 / Giường 1m8",
+    "en": "Combo PN 2 / Bed 1.8m",
+    "fr": "Combo PN 2 / Lit 1.8m",
+    "zh": "组合 PN 2 / 床 1.8m"
+  },
+  "Combo sofa góc phải": {
+    "vi": "Combo sofa góc phải",
+    "en": "Combo Right-facing corner sofa",
+    "fr": "Combo Canapé d'angle droite",
+    "zh": "组合 转角沙发 右"
+  },
+  "Combo sofa góc trái": {
+    "vi": "Combo sofa góc trái",
+    "en": "Combo Left-facing corner sofa",
+    "fr": "Combo Canapé d'angle gauche",
+    "zh": "组合 转角沙发 左"
+  },
+  "Combo đầy đủ 2 món": {
+    "vi": "Combo đầy đủ 2 món",
+    "en": "Combo Full 2 items",
+    "fr": "Combo Complet 2 pièces",
+    "zh": "组合 全套 2 件"
+  },
+  "Combo đầy đủ 3 món": {
+    "vi": "Combo đầy đủ 3 món",
+    "en": "Combo Full 3 items",
+    "fr": "Combo Complet 3 pièces",
+    "zh": "组合 全套 3 件"
+  },
+  "Combo đầy đủ 4 món": {
+    "vi": "Combo đầy đủ 4 món",
+    "en": "Combo Full 4 items",
+    "fr": "Combo Complet 4 pièces",
+    "zh": "组合 全套 4 件"
+  },
+  "Default Title": {
+    "vi": "Default Title",
+    "en": "Default",
+    "fr": "Défaut",
+    "zh": "默认"
+  },
+  "Full Combo 1": {
+    "vi": "Full Combo 1",
+    "en": "Full Combo 1",
+    "fr": "Complet Combo 1",
+    "zh": "全套 组合 1"
+  },
+  "Full Combo 1 - Sofa Phải": {
+    "vi": "Full Combo 1 - Sofa Phải",
+    "en": "Full Combo 1 - Right-facing sofa",
+    "fr": "Complet Combo 1 - Canapé droite",
+    "zh": "全套 组合 1 - 沙发 右"
+  },
+  "Full Combo 2": {
+    "vi": "Full Combo 2",
+    "en": "Full Combo 2",
+    "fr": "Complet Combo 2",
+    "zh": "全套 组合 2"
+  },
+  "Full Combo 2 - Sofa Trái": {
+    "vi": "Full Combo 2 - Sofa Trái",
+    "en": "Full Combo 2 - Left-facing sofa",
+    "fr": "Complet Combo 2 - Canapé gauche",
+    "zh": "全套 组合 2 - 沙发 左"
+  },
+  "Full Combo 4 (SMH) / Giường 1m6": {
+    "vi": "Full Combo 4 (SMH) / Giường 1m6",
+    "en": "Full Combo 4 (SMH) / Bed 1.6m",
+    "fr": "Complet Combo 4 (SMH) / Lit 1.6m",
+    "zh": "全套 组合 4 (SMH) / 床 1.6m"
+  },
+  "Full Combo 4 (SMH) / Giường 1m8": {
+    "vi": "Full Combo 4 (SMH) / Giường 1m8",
+    "en": "Full Combo 4 (SMH) / Bed 1.8m",
+    "fr": "Complet Combo 4 (SMH) / Lit 1.8m",
+    "zh": "全套 组合 4 (SMH) / 床 1.8m"
+  },
+  "Full Combo Tủ Ngăn Kệ / Giường 1m6": {
+    "vi": "Full Combo Tủ Ngăn Kệ / Giường 1m6",
+    "en": "Full Combo Cabinet shelf / Bed 1.6m",
+    "fr": "Complet Combo Meuble étagère / Lit 1.6m",
+    "zh": "全套 组合 柜 搁板 / 床 1.6m"
+  },
+  "Full Combo Tủ Ngăn Kệ / Giường 1m8": {
+    "vi": "Full Combo Tủ Ngăn Kệ / Giường 1m8",
+    "en": "Full Combo Cabinet shelf / Bed 1.8m",
+    "fr": "Complet Combo Meuble étagère / Lit 1.8m",
+    "zh": "全套 组合 柜 搁板 / 床 1.8m"
+  },
+  "Full Combo Tủ Thanh Treo / Giường 1m6": {
+    "vi": "Full Combo Tủ Thanh Treo / Giường 1m6",
+    "en": "Full Combo Cabinet hanging rail / Bed 1.6m",
+    "fr": "Complet Combo Meuble tringle / Lit 1.6m",
+    "zh": "全套 组合 柜 挂衣杆 / 床 1.6m"
+  },
+  "Full Combo Tủ Thanh Treo / Giường 1m8": {
+    "vi": "Full Combo Tủ Thanh Treo / Giường 1m8",
+    "en": "Full Combo Cabinet hanging rail / Bed 1.8m",
+    "fr": "Complet Combo Meuble tringle / Lit 1.8m",
+    "zh": "全套 组合 柜 挂衣杆 / 床 1.8m"
+  },
+  "Full combo - Giường 1m6": {
+    "vi": "Full combo - Giường 1m6",
+    "en": "Full Combo - Bed 1.6m",
+    "fr": "Complet Combo - Lit 1.6m",
+    "zh": "全套 组合 - 床 1.6m"
+  },
+  "Full combo 1 (BS + MS) / Giường 1m6": {
+    "vi": "Full combo 1 (BS + MS) / Giường 1m6",
+    "en": "Full Combo 1 (BS / MS) / Bed 1.6m",
+    "fr": "Complet Combo 1 (BS / MS) / Lit 1.6m",
+    "zh": "全套 组合 1 (BS / MS) / 床 1.6m"
+  },
+  "Full combo 1 (BS + MS) / Giường 1m8": {
+    "vi": "Full combo 1 (BS + MS) / Giường 1m8",
+    "en": "Full Combo 1 (BS / MS) / Bed 1.8m",
+    "fr": "Complet Combo 1 (BS / MS) / Lit 1.8m",
+    "zh": "全套 组合 1 (BS / MS) / 床 1.8m"
+  },
+  "Full combo 1: BN, MS": {
+    "vi": "Full combo 1: BN, MS",
+    "en": "Full Combo 1: BN, MS",
+    "fr": "Complet Combo 1: BN, MS",
+    "zh": "全套 组合 1: BN, MS"
+  },
+  "Full combo 2 (BS + MH) / Giường 1m6": {
+    "vi": "Full combo 2 (BS + MH) / Giường 1m6",
+    "en": "Full Combo 2 (BS / MH) / Bed 1.6m",
+    "fr": "Complet Combo 2 (BS / MH) / Lit 1.6m",
+    "zh": "全套 组合 2 (BS / MH) / 床 1.6m"
+  },
+  "Full combo 2 (BS + MH) / Giường 1m8": {
+    "vi": "Full combo 2 (BS + MH) / Giường 1m8",
+    "en": "Full Combo 2 (BS / MH) / Bed 1.8m",
+    "fr": "Complet Combo 2 (BS / MH) / Lit 1.8m",
+    "zh": "全套 组合 2 (BS / MH) / 床 1.8m"
+  },
+  "Full combo 2 - Giường 1m8": {
+    "vi": "Full combo 2 - Giường 1m8",
+    "en": "Full Combo 2 - Bed 1.8m",
+    "fr": "Complet Combo 2 - Lit 1.8m",
+    "zh": "全套 组合 2 - 床 1.8m"
+  },
+  "Full combo 2: BN, MS, BS V1": {
+    "vi": "Full combo 2: BN, MS, BS V1",
+    "en": "Full Combo 2: BN, MS, BS V1",
+    "fr": "Complet Combo 2: BN, MS, BS V1",
+    "zh": "全套 组合 2: BN, MS, BS V1"
+  },
+  "Full combo 3 (BS + MD) / Giường 1m6": {
+    "vi": "Full combo 3 (BS + MD) / Giường 1m6",
+    "en": "Full Combo 3 (BS / MD) / Bed 1.6m",
+    "fr": "Complet Combo 3 (BS / MD) / Lit 1.6m",
+    "zh": "全套 组合 3 (BS / MD) / 床 1.6m"
+  },
+  "Full combo 3 (BS + MD) / Giường 1m8": {
+    "vi": "Full combo 3 (BS + MD) / Giường 1m8",
+    "en": "Full Combo 3 (BS / MD) / Bed 1.8m",
+    "fr": "Complet Combo 3 (BS / MD) / Lit 1.8m",
+    "zh": "全套 组合 3 (BS / MD) / 床 1.8m"
+  },
+  "Full combo 3: BN, MS, BS V2": {
+    "vi": "Full combo 3: BN, MS, BS V2",
+    "en": "Full Combo 3: BN, MS, BS V2",
+    "fr": "Complet Combo 3: BN, MS, BS V2",
+    "zh": "全套 组合 3: BN, MS, BS V2"
+  },
+  "Ghế FYN / Bộ 4 Ghế": {
+    "vi": "Ghế FYN / Bộ 4 Ghế",
+    "en": "FYN chair / Set of 4 chairs",
+    "fr": "chaise FYN / Lot de 4 chaises",
+    "zh": "椅 FYN / 套 4 把椅子"
+  },
+  "Ghế FYN / Bộ 6 Ghế": {
+    "vi": "Ghế FYN / Bộ 6 Ghế",
+    "en": "FYN chair / Set of 6 chairs",
+    "fr": "chaise FYN / Lot de 6 chaises",
+    "zh": "椅 FYN / 套 6 把椅子"
+  },
+  "Ghế HOBRO / Bộ 4 Ghế": {
+    "vi": "Ghế HOBRO / Bộ 4 Ghế",
+    "en": "HOBRO chair / Set of 4 chairs",
+    "fr": "chaise HOBRO / Lot de 4 chaises",
+    "zh": "椅 HOBRO / 套 4 把椅子"
+  },
+  "Ghế HOBRO / Bộ 6 Ghế": {
+    "vi": "Ghế HOBRO / Bộ 6 Ghế",
+    "en": "HOBRO chair / Set of 6 chairs",
+    "fr": "chaise HOBRO / Lot de 6 chaises",
+    "zh": "椅 HOBRO / 套 6 把椅子"
+  },
+  "Ghế MILAN / Bộ 4 Ghế": {
+    "vi": "Ghế MILAN / Bộ 4 Ghế",
+    "en": "MILAN chair / Set of 4 chairs",
+    "fr": "chaise MILAN / Lot de 4 chaises",
+    "zh": "椅 MILAN / 套 4 把椅子"
+  },
+  "Ghế MILAN / Bộ 6 Ghế": {
+    "vi": "Ghế MILAN / Bộ 6 Ghế",
+    "en": "MILAN chair / Set of 6 chairs",
+    "fr": "chaise MILAN / Lot de 6 chaises",
+    "zh": "椅 MILAN / 套 6 把椅子"
+  },
+  "Ghế Sofa": {
+    "vi": "Ghế Sofa",
+    "en": "Sofa chair",
+    "fr": "Fauteuil",
+    "zh": "沙发椅"
+  },
+  "Ghế Sofa Góc": {
+    "vi": "Ghế Sofa Góc",
+    "en": "Corner sofa",
+    "fr": "Canapé d'angle",
+    "zh": "转角沙发"
+  },
+  "Ghế sofa Olly Lounge Chair ( vải xanh) - màu gỗ nâu": {
+    "vi": "Ghế sofa Olly Lounge Chair ( vải xanh) - màu gỗ nâu",
+    "en": "Sofa chair Olly Lounge Chair (Blue fabric) - Brown wood",
+    "fr": "Fauteuil Olly Lounge Chair (Tissu bleu) - Bois Marron",
+    "zh": "沙发椅 Olly Lounge Chair (蓝色布艺) - 木色 棕色"
+  },
+  "Ghế Đôn": {
+    "vi": "Ghế Đôn",
+    "en": "Stool",
+    "fr": "Tabouret",
+    "zh": "凳子"
+  },
+  "Giường + Tủ quần áo": {
+    "vi": "Giường + Tủ quần áo",
+    "en": "Bed / Wardrobe",
+    "fr": "Lit / Armoire",
+    "zh": "床 / 衣柜"
+  },
+  "Giường + Tủ đầu giường": {
+    "vi": "Giường + Tủ đầu giường",
+    "en": "Bed / Nightstand",
+    "fr": "Lit / Table de chevet",
+    "zh": "床 / 床头柜"
+  },
+  "Giường + Tủ đầu giường + Tủ quần áo": {
+    "vi": "Giường + Tủ đầu giường + Tủ quần áo",
+    "en": "Bed / Nightstand / Wardrobe",
+    "fr": "Lit / Table de chevet / Armoire",
+    "zh": "床 / 床头柜 / 衣柜"
+  },
+  "Giường 1m2": {
+    "vi": "Giường 1m2",
+    "en": "Bed 1.2m",
+    "fr": "Lit 1.2m",
+    "zh": "床 1.2m"
+  },
+  "Giường 1m4": {
+    "vi": "Giường 1m4",
+    "en": "Bed 1.4m",
+    "fr": "Lit 1.4m",
+    "zh": "床 1.4m"
+  },
+  "Giường 1m6": {
+    "vi": "Giường 1m6",
+    "en": "Bed 1.6m",
+    "fr": "Lit 1.6m",
+    "zh": "床 1.6m"
+  },
+  "Giường 1m6 - Tủ 2 cánh": {
+    "vi": "Giường 1m6 - Tủ 2 cánh",
+    "en": "Bed 1.6m - 2-door cabinet",
+    "fr": "Lit 1.6m - Meuble 2 portes",
+    "zh": "床 1.6m - 柜 2 扇门"
+  },
+  "Giường 1m6 - Tủ 2 cánh kệ góc": {
+    "vi": "Giường 1m6 - Tủ 2 cánh kệ góc",
+    "en": "Bed 1.6m - 2-door cabinet with corner shelf",
+    "fr": "Lit 1.6m - Meuble 2 portes étagère d'angle",
+    "zh": "床 1.6m - 柜 2 扇门 转角架"
+  },
+  "Giường 1m6 - Tủ 3 cánh ngăn kệ": {
+    "vi": "Giường 1m6 - Tủ 3 cánh ngăn kệ",
+    "en": "Bed 1.6m - 3-door cabinet with shelf",
+    "fr": "Lit 1.6m - Meuble 3 portes étagère",
+    "zh": "床 1.6m - 柜 3 扇门 搁板"
+  },
+  "Giường 1m6 - Tủ 3 cánh thanh treo": {
+    "vi": "Giường 1m6 - Tủ 3 cánh thanh treo",
+    "en": "Bed 1.6m - 3-door cabinet with hanging rail",
+    "fr": "Lit 1.6m - Meuble 3 portes tringle",
+    "zh": "床 1.6m - 柜 3 扇门 挂衣杆"
+  },
+  "Giường 1m6 - Tủ 4 cánh kệ góc": {
+    "vi": "Giường 1m6 - Tủ 4 cánh kệ góc",
+    "en": "Bed 1.6m - 4-door cabinet with corner shelf",
+    "fr": "Lit 1.6m - Meuble 4 portes étagère d'angle",
+    "zh": "床 1.6m - 柜 4 扇门 转角架"
+  },
+  "Giường 1m8 -  Tủ 4 cánh kệ góc": {
+    "vi": "Giường 1m8 -  Tủ 4 cánh kệ góc",
+    "en": "Bed 1.8m - 4-door cabinet with corner shelf",
+    "fr": "Lit 1.8m - Meuble 4 portes étagère d'angle",
+    "zh": "床 1.8m - 柜 4 扇门 转角架"
+  },
+  "Giường 1m8 - Tủ 2 cánh": {
+    "vi": "Giường 1m8 - Tủ 2 cánh",
+    "en": "Bed 1.8m - 2-door cabinet",
+    "fr": "Lit 1.8m - Meuble 2 portes",
+    "zh": "床 1.8m - 柜 2 扇门"
+  },
+  "Giường 1m8 - Tủ 2 cánh kệ góc": {
+    "vi": "Giường 1m8 - Tủ 2 cánh kệ góc",
+    "en": "Bed 1.8m - 2-door cabinet with corner shelf",
+    "fr": "Lit 1.8m - Meuble 2 portes étagère d'angle",
+    "zh": "床 1.8m - 柜 2 扇门 转角架"
+  },
+  "Giường 1m8 - Tủ 3 cánh ngăn kệ": {
+    "vi": "Giường 1m8 - Tủ 3 cánh ngăn kệ",
+    "en": "Bed 1.8m - 3-door cabinet with shelf",
+    "fr": "Lit 1.8m - Meuble 3 portes étagère",
+    "zh": "床 1.8m - 柜 3 扇门 搁板"
+  },
+  "Giường 1m8 - Tủ 3 cánh thanh treo": {
+    "vi": "Giường 1m8 - Tủ 3 cánh thanh treo",
+    "en": "Bed 1.8m - 3-door cabinet with hanging rail",
+    "fr": "Lit 1.8m - Meuble 3 portes tringle",
+    "zh": "床 1.8m - 柜 3 扇门 挂衣杆"
+  },
+  "Giường Màu Trắng 1m6": {
+    "vi": "Giường Màu Trắng 1m6",
+    "en": "Bed White 1.6m",
+    "fr": "Lit Blanc 1.6m",
+    "zh": "床 白色 1.6m"
+  },
+  "Giường Màu Trắng 1m8": {
+    "vi": "Giường Màu Trắng 1m8",
+    "en": "Bed White 1.8m",
+    "fr": "Lit Blanc 1.8m",
+    "zh": "床 白色 1.8m"
+  },
+  "Gỗ Phối Trắng": {
+    "vi": "Gỗ Phối Trắng",
+    "en": "Wood White",
+    "fr": "Bois Blanc",
+    "zh": "木色 白色"
+  },
+  "Gỗ phối trắng": {
+    "vi": "Gỗ phối trắng",
+    "en": "Wood White",
+    "fr": "Bois Blanc",
+    "zh": "木色 白色"
+  },
+  "Hộc Ngăn Kéo": {
+    "vi": "Hộc Ngăn Kéo",
+    "en": "drawer",
+    "fr": "tiroir",
+    "zh": "抽屉"
+  },
+  "Hộc kéo": {
+    "vi": "Hộc kéo",
+    "en": "drawer",
+    "fr": "tiroir",
+    "zh": "抽屉"
+  },
+  "Hộc kéo / Thanh Treo H60": {
+    "vi": "Hộc kéo / Thanh Treo H60",
+    "en": "drawer / hanging rail H60",
+    "fr": "tiroir / tringle H60",
+    "zh": "抽屉 / 挂衣杆 H60"
+  },
+  "Kệ Góc N60": {
+    "vi": "Kệ Góc N60",
+    "en": "corner shelf N60",
+    "fr": "étagère d'angle N60",
+    "zh": "转角架 N60"
+  },
+  "Mau tu nhien": {
+    "vi": "Mau tu nhien",
+    "en": "Natural",
+    "fr": "Naturel",
+    "zh": "原木色"
+  },
+  "Mix": {
+    "vi": "Mix",
+    "en": "Mix",
+    "fr": "Mix",
+    "zh": "混搭"
+  },
+  "Mix / Set Tủ 3 Cánh": {
+    "vi": "Mix / Set Tủ 3 Cánh",
+    "en": "Mix / Set 3-door cabinet",
+    "fr": "Mix / Ensemble Meuble 3 portes",
+    "zh": "混搭 / 套 柜 3 扇门"
+  },
+  "Mix / Set Tủ 4 Cánh": {
+    "vi": "Mix / Set Tủ 4 Cánh",
+    "en": "Mix / Set 4-door cabinet",
+    "fr": "Mix / Ensemble Meuble 4 portes",
+    "zh": "混搭 / 套 柜 4 扇门"
+  },
+  "Mix / Tủ 1 Cánh": {
+    "vi": "Mix / Tủ 1 Cánh",
+    "en": "Mix / 1-door cabinet",
+    "fr": "Mix / Meuble 1 porte",
+    "zh": "混搭 / 柜 1 扇门"
+  },
+  "Mix / Tủ 2 Cánh": {
+    "vi": "Mix / Tủ 2 Cánh",
+    "en": "Mix / 2-door cabinet",
+    "fr": "Mix / Meuble 2 portes",
+    "zh": "混搭 / 柜 2 扇门"
+  },
+  "Mix / Tủ 2 cánh": {
+    "vi": "Mix / Tủ 2 cánh",
+    "en": "Mix / 2-door cabinet",
+    "fr": "Mix / Meuble 2 portes",
+    "zh": "混搭 / 柜 2 扇门"
+  },
+  "Mix / Tủ 3 cánh - Kệ ngăn": {
+    "vi": "Mix / Tủ 3 cánh - Kệ ngăn",
+    "en": "Mix / 3-door cabinet - shelf compartment",
+    "fr": "Mix / Meuble 3 portes - étagère compartiment",
+    "zh": "混搭 / 柜 3 扇门 - 架 格"
+  },
+  "Mix / Tủ 3 cánh - Thanh treo": {
+    "vi": "Mix / Tủ 3 cánh - Thanh treo",
+    "en": "Mix / 3-door cabinet - hanging rail",
+    "fr": "Mix / Meuble 3 portes - tringle",
+    "zh": "混搭 / 柜 3 扇门 - 挂衣杆"
+  },
+  "Mix / Tủ 4 cánh": {
+    "vi": "Mix / Tủ 4 cánh",
+    "en": "Mix / 4-door cabinet",
+    "fr": "Mix / Meuble 4 portes",
+    "zh": "混搭 / 柜 4 扇门"
+  },
+  "Màu Nâu": {
+    "vi": "Màu Nâu",
+    "en": "Brown",
+    "fr": "Marron",
+    "zh": "棕色"
+  },
+  "Màu Trắng": {
+    "vi": "Màu Trắng",
+    "en": "White",
+    "fr": "Blanc",
+    "zh": "白色"
+  },
+  "Màu Tự Nhiên": {
+    "vi": "Màu Tự Nhiên",
+    "en": "Natural",
+    "fr": "Naturel",
+    "zh": "原木色"
+  },
+  "Màu nâu": {
+    "vi": "Màu nâu",
+    "en": "Brown",
+    "fr": "Marron",
+    "zh": "棕色"
+  },
+  "Màu tự nhiên": {
+    "vi": "Màu tự nhiên",
+    "en": "Natural",
+    "fr": "Naturel",
+    "zh": "原木色"
+  },
+  "Nau": {
+    "vi": "Nau",
+    "en": "Brown",
+    "fr": "Marron",
+    "zh": "棕色"
+  },
+  "Ngăn Kệ": {
+    "vi": "Ngăn Kệ",
+    "en": "shelf",
+    "fr": "étagère",
+    "zh": "搁板"
+  },
+  "Ngăn Kệ S60": {
+    "vi": "Ngăn Kệ S60",
+    "en": "shelf S60",
+    "fr": "étagère S60",
+    "zh": "搁板 S60"
+  },
+  "Ngăn kệ": {
+    "vi": "Ngăn kệ",
+    "en": "shelf",
+    "fr": "étagère",
+    "zh": "搁板"
+  },
+  "Nâu": {
+    "vi": "Nâu",
+    "en": "Brown",
+    "fr": "Marron",
+    "zh": "棕色"
+  },
+  "Nâu Be": {
+    "vi": "Nâu Be",
+    "en": "Brown Beige",
+    "fr": "Marron Beige",
+    "zh": "棕色 米色"
+  },
+  "Nâu Phối Trắng": {
+    "vi": "Nâu Phối Trắng",
+    "en": "Brown White",
+    "fr": "Marron Blanc",
+    "zh": "棕色 白色"
+  },
+  "Nệm xám": {
+    "vi": "Nệm xám",
+    "en": "Gray cushion",
+    "fr": "coussin Gris",
+    "zh": "坐垫 灰色"
+  },
+  "Olive": {
+    "vi": "Olive",
+    "en": "Olive",
+    "fr": "Olive",
+    "zh": "橄榄色"
+  },
+  "Set Ghế bành kèm đôn": {
+    "vi": "Set Ghế bành kèm đôn",
+    "en": "Set Armchair with stool",
+    "fr": "Ensemble Fauteuil avec tabouret",
+    "zh": "套 扶手椅 配 凳子"
+  },
+  "Set Tủ 3 Cánh": {
+    "vi": "Set Tủ 3 Cánh",
+    "en": "Set 3-door cabinet",
+    "fr": "Ensemble Meuble 3 portes",
+    "zh": "套 柜 3 扇门"
+  },
+  "Set Tủ 4 Cánh": {
+    "vi": "Set Tủ 4 Cánh",
+    "en": "Set 4-door cabinet",
+    "fr": "Ensemble Meuble 4 portes",
+    "zh": "套 柜 4 扇门"
+  },
+  "Sofa không tay tựa": {
+    "vi": "Sofa không tay tựa",
+    "en": "Sofa armless",
+    "fr": "Canapé sans accoudoir",
+    "zh": "沙发 无扶手"
+  },
+  "Sofa tay tựa": {
+    "vi": "Sofa tay tựa",
+    "en": "Sofa with armrests",
+    "fr": "Canapé avec accoudoirs",
+    "zh": "沙发 扶手"
+  },
+  "Thanh Treo": {
+    "vi": "Thanh Treo",
+    "en": "hanging rail",
+    "fr": "tringle",
+    "zh": "挂衣杆"
+  },
+  "Thanh treo": {
+    "vi": "Thanh treo",
+    "en": "hanging rail",
+    "fr": "tringle",
+    "zh": "挂衣杆"
+  },
+  "Trắng": {
+    "vi": "Trắng",
+    "en": "White",
+    "fr": "Blanc",
+    "zh": "白色"
+  },
+  "Trắng - Xám": {
+    "vi": "Trắng - Xám",
+    "en": "White - Gray",
+    "fr": "Blanc - Gris",
+    "zh": "白色 - 灰色"
+  },
+  "Tủ 1 Cánh": {
+    "vi": "Tủ 1 Cánh",
+    "en": "1-door cabinet",
+    "fr": "Meuble 1 porte",
+    "zh": "柜 1 扇门"
+  },
+  "Tủ 2 Cánh": {
+    "vi": "Tủ 2 Cánh",
+    "en": "2-door cabinet",
+    "fr": "Meuble 2 portes",
+    "zh": "柜 2 扇门"
+  },
+  "Tủ 2 cánh": {
+    "vi": "Tủ 2 cánh",
+    "en": "2-door cabinet",
+    "fr": "Meuble 2 portes",
+    "zh": "柜 2 扇门"
+  },
+  "Tủ 3 cánh - Kệ ngăn": {
+    "vi": "Tủ 3 cánh - Kệ ngăn",
+    "en": "3-door cabinet - shelf compartment",
+    "fr": "Meuble 3 portes - étagère compartiment",
+    "zh": "柜 3 扇门 - 架 格"
+  },
+  "Tủ 3 cánh - Thanh treo": {
+    "vi": "Tủ 3 cánh - Thanh treo",
+    "en": "3-door cabinet - hanging rail",
+    "fr": "Meuble 3 portes - tringle",
+    "zh": "柜 3 扇门 - 挂衣杆"
+  },
+  "Tủ 4 cánh": {
+    "vi": "Tủ 4 cánh",
+    "en": "4-door cabinet",
+    "fr": "Meuble 4 portes",
+    "zh": "柜 4 扇门"
+  },
+  "Tủ Mix": {
+    "vi": "Tủ Mix",
+    "en": "Cabinet Mix",
+    "fr": "Meuble Mix",
+    "zh": "柜 混搭"
+  },
+  "Tủ Màu Gỗ / Giường Màu Gỗ 1m6": {
+    "vi": "Tủ Màu Gỗ / Giường Màu Gỗ 1m6",
+    "en": "Cabinet Wood / Bed Wood 1.6m",
+    "fr": "Meuble Bois / Lit Bois 1.6m",
+    "zh": "柜 木色 / 床 木色 1.6m"
+  },
+  "Tủ Màu Mix / Giường Màu Gỗ 1m6": {
+    "vi": "Tủ Màu Mix / Giường Màu Gỗ 1m6",
+    "en": "Cabinet Mix / Bed Wood 1.6m",
+    "fr": "Meuble Mix / Lit Bois 1.6m",
+    "zh": "柜 混搭 / 床 木色 1.6m"
+  },
+  "Tủ Nâu": {
+    "vi": "Tủ Nâu",
+    "en": "Cabinet Brown",
+    "fr": "Meuble Marron",
+    "zh": "柜 棕色"
+  },
+  "Tủ Tự Nhiên": {
+    "vi": "Tủ Tự Nhiên",
+    "en": "Cabinet Natural",
+    "fr": "Meuble Naturel",
+    "zh": "柜 原木色"
+  },
+  "Tủ đôi - kệ ngăn - 3 ngăn kéo": {
+    "vi": "Tủ đôi - kệ ngăn - 3 ngăn kéo",
+    "en": "Cabinet double - shelf compartment - 3 drawers",
+    "fr": "Meuble double - étagère compartiment - 3 tiroirs",
+    "zh": "柜 双 - 架 格 - 3 个抽屉"
+  },
+  "Tủ đôi - kệ ngăn - thanh treo": {
+    "vi": "Tủ đôi - kệ ngăn - thanh treo",
+    "en": "Cabinet double - shelf compartment - hanging rail",
+    "fr": "Meuble double - étagère compartiment - tringle",
+    "zh": "柜 双 - 架 格 - 挂衣杆"
+  },
+  "Tủ đôi - thanh treo - 3 ngăn kéo": {
+    "vi": "Tủ đôi - thanh treo - 3 ngăn kéo",
+    "en": "Cabinet double - hanging rail - 3 drawers",
+    "fr": "Meuble double - tringle - 3 tiroirs",
+    "zh": "柜 双 - 挂衣杆 - 3 个抽屉"
+  },
+  "U-HOME FURNI Signature - 38cm": {
+    "vi": "U-HOME FURNI Signature - 38cm",
+    "en": "U-HOME FURNI Signature - 38cm",
+    "fr": "U-HOME FURNI Signature - 38cm",
+    "zh": "U-HOME FURNI Signature - 38cm"
+  },
+  "U-HOME FURNI Signature - 70cm": {
+    "vi": "U-HOME FURNI Signature - 70cm",
+    "en": "U-HOME FURNI Signature - 70cm",
+    "fr": "U-HOME FURNI Signature - 70cm",
+    "zh": "U-HOME FURNI Signature - 70cm"
+  },
+  "Ver 2": {
+    "vi": "Ver 2",
+    "en": "Version 2",
+    "fr": "Version 2",
+    "zh": "版本 2"
+  },
+  "Xanh Dương": {
+    "vi": "Xanh Dương",
+    "en": "Blue",
+    "fr": "Bleu",
+    "zh": "蓝色"
+  },
+  "Xám": {
+    "vi": "Xám",
+    "en": "Gray",
+    "fr": "Gris",
+    "zh": "灰色"
+  },
+  "Xám nhạt": {
+    "vi": "Xám nhạt",
+    "en": "Light gray",
+    "fr": "Gris clair",
+    "zh": "灰色 浅"
+  },
+  "Xám Đậm": {
+    "vi": "Xám Đậm",
+    "en": "Dark gray",
+    "fr": "Gris foncé",
+    "zh": "灰色 深"
+  },
+  "vàng trơn": {
+    "vi": "vàng trơn",
+    "en": "Plain yellow",
+    "fr": "Jaune uni",
+    "zh": "黄色 纯色"
+  },
+  "Đệm Xám Nhạt": {
+    "vi": "Đệm Xám Nhạt",
+    "en": "Light gray cushion",
+    "fr": "coussin Gris clair",
+    "zh": "坐垫 灰色 浅"
+  },
+  "Đệm Xám Đậm": {
+    "vi": "Đệm Xám Đậm",
+    "en": "Dark gray cushion",
+    "fr": "coussin Gris foncé",
+    "zh": "坐垫 灰色 深"
+  }
+}
