@@ -98,9 +98,13 @@ public class ProductDetailFragment extends Fragment {
             }
         });
         binding.btnIncrease.setOnClickListener(v -> {
-            if (quantity < 99) {
+            Integer stockLimit = getSelectedStockLimit();
+            int maxQuantity = stockLimit != null ? Math.min(99, stockLimit) : 99;
+            if (quantity < maxQuantity) {
                 quantity++;
                 binding.tvQuantity.setText(String.valueOf(quantity));
+            } else if (stockLimit != null) {
+                Toast.makeText(requireContext(), getString(R.string.stock_quantity_limit, stockLimit), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -117,12 +121,14 @@ public class ProductDetailFragment extends Fragment {
                 if (!val.isEmpty()) {
                     try {
                         int parsed = Integer.parseInt(val);
-                        if (parsed >= 1 && parsed <= 99) {
+                        Integer stockLimit = getSelectedStockLimit();
+                        int maxQuantity = stockLimit != null ? Math.min(99, Math.max(1, stockLimit)) : 99;
+                        if (parsed >= 1 && parsed <= maxQuantity) {
                             quantity = parsed;
-                        } else if (parsed > 99) {
-                            quantity = 99;
-                            binding.tvQuantity.setText(getString(R.string.max_quantity_value));
-                            binding.tvQuantity.setSelection(2);
+                        } else if (parsed > maxQuantity) {
+                            quantity = maxQuantity;
+                            binding.tvQuantity.setText(String.valueOf(maxQuantity));
+                            binding.tvQuantity.setSelection(String.valueOf(maxQuantity).length());
                         }
                     } catch (NumberFormatException e) {
                         // Ignore
@@ -149,6 +155,7 @@ public class ProductDetailFragment extends Fragment {
                     return;
                 }
             }
+            if (!ensureRequestedQuantityAvailable()) return;
             viewModel.addToCart(selectedVariantId, quantity);
             com.unifurniture.mobile.util.SoundManager.playSound(requireContext(), com.unifurniture.mobile.util.SoundManager.SOUND_SUCCESS);
         });
@@ -161,6 +168,7 @@ public class ProductDetailFragment extends Fragment {
                     return;
                 }
             }
+            if (!ensureRequestedQuantityAvailable()) return;
             isBuyNowAction = true;
             viewModel.addToCart(selectedVariantId, quantity);
         });
@@ -778,6 +786,8 @@ public class ProductDetailFragment extends Fragment {
         Integer stock = variantStock.get(variantId);
         if (stock == null) {
             binding.tvStockStatus.setVisibility(View.GONE);
+            binding.btnAddToCart.setEnabled(true);
+            binding.btnBuyNow.setEnabled(true);
             return;
         }
         binding.tvStockStatus.setVisibility(View.VISIBLE);
@@ -786,16 +796,45 @@ public class ProductDetailFragment extends Fragment {
             binding.tvStockStatus.setText(getString(R.string.out_of_stock));
             binding.tvStockStatus.setTextColor(requireContext().getColor(R.color.discount_red));
             binding.btnAddToCart.setEnabled(false);
+            binding.btnBuyNow.setEnabled(false);
             binding.btnAddToCart.setText(R.string.add_to_cart);
             restoreAddToCartButtonStyle();
         } else {
             selectedVariantInStock = true;
-            binding.tvStockStatus.setText(getString(R.string.in_stock));
+            binding.tvStockStatus.setText(getString(R.string.in_stock_with_quantity, stock));
             binding.tvStockStatus.setTextColor(requireContext().getColor(R.color.success));
             binding.btnAddToCart.setEnabled(true);
+            binding.btnBuyNow.setEnabled(true);
             binding.btnAddToCart.setText(R.string.add_to_cart);
             restoreAddToCartButtonStyle();
+            clampQuantityToStock(stock);
         }
+    }
+
+    private Integer getSelectedStockLimit() {
+        if (selectedVariantId == null) return null;
+        return variantStock.get(selectedVariantId);
+    }
+
+    private void clampQuantityToStock(Integer stock) {
+        if (binding == null || stock == null || stock <= 0 || quantity <= stock) return;
+        quantity = Math.max(1, Math.min(99, stock));
+        binding.tvQuantity.setText(String.valueOf(quantity));
+    }
+
+    private boolean ensureRequestedQuantityAvailable() {
+        Integer stock = getSelectedStockLimit();
+        if (stock == null) return true;
+        if (stock <= 0) {
+            Toast.makeText(requireContext(), R.string.out_of_stock, Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (quantity > stock) {
+            clampQuantityToStock(stock);
+            Toast.makeText(requireContext(), getString(R.string.stock_quantity_limit, stock), Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
     }
 
     private String getVariantLabelText(com.unifurniture.mobile.data.model.ProductVariantDto variant) {

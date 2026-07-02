@@ -120,6 +120,12 @@ public interface ApiService {
             @Body Map<String, String> body
     );
 
+    @POST("orders/{id}/exchange-request")
+    Call<OrderDto> requestExchangeOrder(
+            @Path("id") String orderId,
+            @Body Map<String, String> body
+    );
+
     @POST("orders/{id}/demo-transfer-timeout")
     Call<Map<String, Object>> completeDemoTransfer(@Path("id") String orderId);
 

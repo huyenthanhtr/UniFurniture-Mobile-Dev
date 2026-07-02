@@ -134,18 +134,37 @@ function buildNotificationItem({
   };
 }
 
+async function resolveNotificationIdentity(rawId) {
+  const normalizedId = String(rawId || "").trim();
+  if (!mongoose.Types.ObjectId.isValid(normalizedId)) {
+    return { customerId: null, profileId: null, profile: null };
+  }
+
+  const objectId = new mongoose.Types.ObjectId(normalizedId);
+  let profile = await Profile.findById(objectId).lean();
+  if (profile) {
+    const customerId = mongoose.Types.ObjectId.isValid(String(profile.customer_id || ""))
+      ? profile.customer_id
+      : null;
+    return { customerId, profileId: profile._id, profile };
+  }
+
+  profile = await Profile.findOne({ customer_id: objectId }).lean();
+  return {
+    customerId: objectId,
+    profileId: profile?._id || null,
+    profile,
+  };
+}
+
 async function getNotifications(req, res, next) {
   try {
     const lang = resolveLang(req);
     const limit = Math.min(Math.max(parseInt(req.query.limit || "20", 10) || 20, 1), 50);
-    const customerId = String(req.query.customer_id || "").trim();
+    const identity = await resolveNotificationIdentity(req.query.customer_id);
 
     const items = [];
-    let profile = null;
-
-    if (customerId && mongoose.Types.ObjectId.isValid(customerId)) {
-      profile = await Profile.findOne({ customer_id: new mongoose.Types.ObjectId(customerId) }).lean();
-    }
+    const profile = identity.profile;
 
     if (profile?.date_of_birth) {
       const today = new Date();
@@ -177,8 +196,12 @@ async function getNotifications(req, res, next) {
       }
     }
 
-    if (customerId && mongoose.Types.ObjectId.isValid(customerId)) {
-      const orders = await Order.find({ customer_id: new mongoose.Types.ObjectId(customerId) })
+    const orderFilters = [];
+    if (identity.customerId) orderFilters.push({ customer_id: identity.customerId });
+    if (identity.profileId) orderFilters.push({ account_id: identity.profileId });
+
+    if (orderFilters.length) {
+      const orders = await Order.find(orderFilters.length === 1 ? orderFilters[0] : { $or: orderFilters })
         .sort({ updatedAt: -1, createdAt: -1, _id: -1 })
         .limit(10)
         .lean();

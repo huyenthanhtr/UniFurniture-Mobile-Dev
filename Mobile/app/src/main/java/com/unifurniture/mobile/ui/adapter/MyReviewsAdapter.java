@@ -99,11 +99,11 @@ public class MyReviewsAdapter extends ListAdapter<ReviewDto, MyReviewsAdapter.Vi
                 binding.llReply.setVisibility(View.GONE);
             }
 
-            binding.btnViewProduct.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onOpenProduct(review);
-                }
-            });
+            boolean canOpenProduct = review.getProductSlug() != null && !review.getProductSlug().trim().isEmpty();
+            binding.btnViewProduct.setVisibility(canOpenProduct ? View.VISIBLE : View.GONE);
+            binding.btnViewProduct.setOnClickListener(canOpenProduct ? v -> {
+                if (listener != null) listener.onOpenProduct(review);
+            } : null);
         }
 
         private void bindProductImage(String rawUrl, String serverHost) {

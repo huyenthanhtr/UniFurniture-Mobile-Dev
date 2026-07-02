@@ -69,6 +69,76 @@ async function populateCartItem(item) {
   return doc;
 }
 
+function getVariantStock(variant) {
+  return Math.max(0, Number(variant?.stock_quantity || 0));
+}
+
+function getVariantDisplayName(variant) {
+  return String(
+    variant?.variant_name ||
+    variant?.name ||
+    variant?.sku ||
+    "biến thể"
+  ).trim();
+}
+
+function buildStockError(variant, requestedQty) {
+  return `Số lượng vượt quá tồn kho của ${getVariantDisplayName(variant)}. Còn ${getVariantStock(variant)}, bạn chọn ${requestedQty}.`;
+}
+
+async function findActiveVariant(variantId) {
+  if (!mongoose.Types.ObjectId.isValid(variantId)) {
+    return { status: 400, message: "Invalid variant_id" };
+  }
+
+  const variant = await ProductVariant.findById(variantId).lean();
+  if (!variant) {
+    return { status: 404, message: "Variant not found" };
+  }
+
+  if (String(variant.variant_status || "").toLowerCase() !== "active") {
+    return { status: 400, message: "Biến thể sản phẩm hiện không còn mở bán." };
+  }
+
+  return { variant };
+}
+
+async function validateVariantQuantity(variantId, quantity) {
+  const result = await findActiveVariant(variantId);
+  if (result.message) return result;
+
+  const qty = Math.max(1, parseInt(quantity, 10) || 1);
+  if (getVariantStock(result.variant) < qty) {
+    return { status: 400, message: buildStockError(result.variant, qty) };
+  }
+
+  return { variant: result.variant, quantity: qty };
+}
+
+async function normalizeCartQuantities(cartId) {
+  if (!cartId) return;
+
+  const items = await CartItem.find({ cart_id: cartId });
+  for (const item of items) {
+    const variant = await ProductVariant.findById(item.variant_id).lean();
+    if (!variant || String(variant.variant_status || "").toLowerCase() !== "active") {
+      await CartItem.findByIdAndDelete(item._id);
+      continue;
+    }
+
+    const stock = getVariantStock(variant);
+    if (stock <= 0) {
+      await CartItem.findByIdAndDelete(item._id);
+      continue;
+    }
+
+    if (Number(item.quantity || 0) > stock) {
+      item.quantity = stock;
+      await item.save();
+    }
+  }
+}
+
 async function getActiveCart(req, res) {
   try {
     const { customer_id, cart_id } = req.query;
@@ -98,6 +168,7 @@ async function getActiveCart(req, res) {
               await gItem.save();
             }
           }
+          await normalizeCartQuantities(userCart._id);
           await Cart.findByIdAndDelete(cart._id);
           cart = userCart;
         } else {
@@ -169,6 +240,7 @@ async function upsertCartItem(req, res) {
               await gItem.save();
             }
           }
+          await normalizeCartQuantities(userCart._id);
           await Cart.findByIdAndDelete(finalCart._id);
           finalCart = userCart;
         } else {
@@ -196,11 +268,12 @@ async function upsertCartItem(req, res) {
       finalCart = await Cart.create({ customer_id: guestCustomer._id, status: "active" });
     }
 
-    const qty = Math.max(1, parseInt(quantity, 10));
-    const variant = await ProductVariant.findById(variant_id).lean();
-    if (!variant) {
-      return res.status(404).json({ message: "Variant not found" });
+    const validation = await validateVariantQuantity(variant_id, quantity);
+    if (validation.message) {
+      return res.status(validation.status).json({ message: validation.message });
     }
+    const qty = validation.quantity;
+    const variant = validation.variant;
 
     let item = await CartItem.findOne({ cart_id: finalCart._id, variant_id });
     if (item) {
@@ -243,10 +316,21 @@ async function updateCartItem(req, res) {
 
     const { quantity, unit_price, variant_id } = req.body;
 
-    if (quantity !== undefined) item.quantity = Math.max(1, parseInt(quantity, 10));
+    const nextQuantity = quantity !== undefined
+      ? Math.max(1, parseInt(quantity, 10) || 1)
+      : Math.max(1, Number(item.quantity || 1));
     if (unit_price !== undefined) item.unit_price = unit_price;
 
-    if (variant_id !== undefined && mongoose.Types.ObjectId.isValid(variant_id)) {
+    if (variant_id !== undefined) {
+      if (!mongoose.Types.ObjectId.isValid(variant_id)) {
+        return res.status(400).json({ message: "Invalid variant_id" });
+      }
+
+      const validation = await validateVariantQuantity(variant_id, nextQuantity);
+      if (validation.message) {
+        return res.status(validation.status).json({ message: validation.message });
+      }
+
       // Check if another item with the same variant_id already exists in this cart
       const existingItem = await CartItem.findOne({
         cart_id: item.cart_id,
@@ -255,19 +339,27 @@ async function updateCartItem(req, res) {
       });
       if (existingItem) {
         // Merge quantities and delete this item
-        existingItem.quantity += item.quantity;
+        const mergedQuantity = Math.max(1, Number(existingItem.quantity || 1)) + nextQuantity;
+        if (getVariantStock(validation.variant) < mergedQuantity) {
+          return res.status(400).json({ message: buildStockError(validation.variant, mergedQuantity) });
+        }
+
+        existingItem.quantity = mergedQuantity;
         await existingItem.save();
         await CartItem.findByIdAndDelete(item._id);
       } else {
         // Just swap the variant_id and update the unit price to match the new variant
         item.variant_id = variant_id;
-        const variant = await ProductVariant.findById(variant_id).lean();
-        if (variant) {
-          item.unit_price = variant.price || 0;
-        }
+        item.quantity = nextQuantity;
+        item.unit_price = validation.variant.price || 0;
         await item.save();
       }
     } else {
+      const validation = await validateVariantQuantity(item.variant_id, nextQuantity);
+      if (validation.message) {
+        return res.status(validation.status).json({ message: validation.message });
+      }
+      item.quantity = nextQuantity;
       await item.save();
     }
 

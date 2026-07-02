@@ -123,9 +123,11 @@ public class CartItemAdapter extends ListAdapter<CartItemDto, CartItemAdapter.Vi
                 binding.tvName.setOnClickListener(null);
             }
             ProductVariantDto variant = item.getVariant();
+            Integer stockLimit = null;
             if (variant != null) {
                 binding.tvVariant.setText(FormatUtil.getVariantLabel(binding.tvVariant.getContext(), variant));
                 binding.tvVariant.setVisibility(View.VISIBLE);
+                stockLimit = variant.stockQuantity;
 
                 // Show Shopee-style pricing
                 double unitPrice = item.getUnitPrice();
@@ -166,8 +168,19 @@ public class CartItemAdapter extends ListAdapter<CartItemDto, CartItemAdapter.Vi
                 int qty = item.quantity != null ? item.quantity : 1;
                 quantityListener.onChange(item, qty - 1);
             });
+            Integer finalStockLimit = stockLimit;
+            int currentQty = item.quantity != null ? item.quantity : 1;
+            binding.btnPlus.setEnabled(finalStockLimit == null || currentQty < finalStockLimit);
             binding.btnPlus.setOnClickListener(v -> {
                 int qty = item.quantity != null ? item.quantity : 1;
+                if (finalStockLimit != null && finalStockLimit > 0 && qty >= finalStockLimit) {
+                    android.widget.Toast.makeText(
+                            binding.getRoot().getContext(),
+                            binding.getRoot().getContext().getString(R.string.stock_quantity_limit, finalStockLimit),
+                            android.widget.Toast.LENGTH_SHORT
+                    ).show();
+                    return;
+                }
                 quantityListener.onChange(item, qty + 1);
             });
             binding.btnRemove.setOnClickListener(v -> removeListener.onRemove(item));

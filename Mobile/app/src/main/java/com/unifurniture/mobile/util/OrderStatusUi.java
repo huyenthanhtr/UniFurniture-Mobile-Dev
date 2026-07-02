@@ -35,8 +35,12 @@ public final class OrderStatusUi {
                 return R.string.status_completed;
             case "cancel_pending":
                 return R.string.status_cancel_pending;
+            case "exchange_pending":
+                return R.string.status_exchange_pending;
             case "cancelled":
                 return R.string.status_cancelled;
+            case "exchanged":
+                return R.string.status_exchanged;
             default:
                 return 0;
         }
@@ -63,8 +67,12 @@ public final class OrderStatusUi {
                 return R.color.status_completed_text;
             case "cancel_pending":
                 return R.color.status_cancel_pending_text;
+            case "exchange_pending":
+                return R.color.status_processing_text;
             case "cancelled":
                 return R.color.status_cancelled_text;
+            case "exchanged":
+                return R.color.status_completed_text;
             default:
                 return R.color.gray_700;
         }
@@ -86,8 +94,12 @@ public final class OrderStatusUi {
                 return R.color.status_completed_bg;
             case "cancel_pending":
                 return R.color.status_cancel_pending_bg;
+            case "exchange_pending":
+                return R.color.status_processing_bg;
             case "cancelled":
                 return R.color.status_cancelled_bg;
+            case "exchanged":
+                return R.color.status_completed_bg;
             default:
                 return R.color.gray_100;
         }
@@ -109,8 +121,12 @@ public final class OrderStatusUi {
                 return R.color.status_completed_stroke;
             case "cancel_pending":
                 return R.color.status_cancel_pending_stroke;
+            case "exchange_pending":
+                return R.color.status_processing_stroke;
             case "cancelled":
                 return R.color.status_cancelled_stroke;
+            case "exchanged":
+                return R.color.status_completed_stroke;
             default:
                 return R.color.gray_300;
         }
@@ -183,6 +199,22 @@ public final class OrderStatusUi {
             return;
         }
 
+        if ("exchange_pending".equals(s)) {
+            iv1.setImageTintList(android.content.res.ColorStateList.valueOf(activeColor));
+            tv1.setTextColor(activeColor);
+            if (l1 != null) l1.setBackgroundColor(activeColor);
+            iv2.setImageTintList(android.content.res.ColorStateList.valueOf(activeColor));
+            tv2.setTextColor(activeColor);
+            if (l2 != null) l2.setBackgroundColor(activeColor);
+            iv3.setImageTintList(android.content.res.ColorStateList.valueOf(activeColor));
+            tv3.setTextColor(activeColor);
+            if (l3 != null) l3.setBackgroundColor(activeColor);
+            iv4.setImageTintList(android.content.res.ColorStateList.valueOf(errorColor));
+            tv4.setTextColor(errorColor);
+            tv4.setText(R.string.status_exchange_pending);
+            return;
+        }
+
         // Step 1 active for all non-cancelled
         iv1.setImageTintList(android.content.res.ColorStateList.valueOf(activeColor));
         tv1.setTextColor(activeColor);
@@ -212,6 +244,8 @@ public final class OrderStatusUi {
             tv4.setText(R.string.status_delivered);
         } else if ("completed".equals(s)) {
             tv4.setText(R.string.status_completed);
+        } else if ("exchanged".equals(s)) {
+            tv4.setText(R.string.status_exchanged);
         }
     }
 
