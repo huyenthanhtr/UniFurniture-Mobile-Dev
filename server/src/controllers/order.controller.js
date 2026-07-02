@@ -17,8 +17,8 @@ const { getTierByPoints } = require("./loyalty.controller");
 const { recalculateProductAggregates } = require("../utils/product-aggregate");
 const { generateCustomerCode, generateUniqueOrderCode } = require("../utils/code-generator");
 
-const ORDER_STATUSES = ["pending", "confirmed", "cancel_pending", "processing", "shipping", "delivered", "completed", "cancelled", "exchanged"];
-const INVENTORY_DEDUCT_STATUSES = new Set(["confirmed", "processing", "shipping", "delivered", "completed"]);
+const ORDER_STATUSES = ["pending", "confirmed", "cancel_pending", "processing", "shipping", "delivered", "completed", "exchange_pending", "cancelled", "exchanged"];
+const INVENTORY_DEDUCT_STATUSES = new Set(["confirmed", "processing", "shipping", "delivered", "completed", "exchanged"]);
 const NORMAL_STATUS_ASC_WEIGHT = {
   pending: 1,
   confirmed: 2,
@@ -27,19 +27,20 @@ const NORMAL_STATUS_ASC_WEIGHT = {
   shipping: 5,
   delivered: 6,
   completed: 7,
+  exchange_pending: 8,
 };
 const NORMAL_STATUS_DESC_WEIGHT = {
-  completed: 1,
-  delivered: 2,
-  shipping: 3,
-  processing: 4,
-  cancel_pending: 5,
-  confirmed: 6,
-  pending: 7,
+  exchange_pending: 1,
+  completed: 2,
+  delivered: 3,
+  shipping: 4,
+  processing: 5,
+  cancel_pending: 6,
+  confirmed: 7,
+  pending: 8,
 };
-const CANCELLATION_GRACE_HOURS = 24;
 const WARRANTY_YEARS = 5;
-const SOLD_COUNT_STATUSES = new Set(["completed"]);
+const SOLD_COUNT_STATUSES = new Set(["completed", "exchanged"]);
 const MEMBERSHIP_TIER_RANK = { dong: 1, bac: 2, vang: 3, kim_cuong: 4 };
 const PRODUCT_TRANSLATION_LANGS = new Set(["en", "fr", "zh"]);
 
@@ -158,52 +159,87 @@ function normalizeStatus(value) {
 
 function normalizeStoredOrderStatus(value) {
   const status = String(value || "").trim().toLowerCase();
-  if (status === "refunded" || status === "cancel_pending") return "cancelled";
+  if (status === "refunded") return "cancelled";
   return ORDER_STATUSES.includes(status) ? status : status;
 }
 
 const ADMIN_STATUS_TRANSITIONS = {
   pending: ["confirmed", "cancelled"],
-  confirmed: ["processing"],
-  processing: ["shipping"],
+  confirmed: ["processing", "cancelled"],
+  cancel_pending: ["cancelled", "pending", "confirmed", "processing"],
+  processing: ["shipping", "cancelled"],
   shipping: ["delivered"],
-  delivered: ["completed"],
+  delivered: ["completed", "exchanged"],
   completed: ["exchanged"],
+  exchange_pending: ["exchanged", "delivered", "completed"],
   cancelled: [],
   exchanged: [],
 };
 
 async function getOrderInventoryItems(orderId) {
   const details = await OrderDetail.find({ order_id: orderId }).lean();
-  return details.map((detail) => ({
-    variantId: String(detail.variant_id || "").trim(),
-    quantity: Math.max(0, Number(detail.quantity || 0)),
-    sku: String(detail.sku || "").trim(),
-    productName: String(detail.product_name || "").trim(),
-    variantName: String(detail.variant_name || "").trim(),
-  }));
+  const byVariant = new Map();
+
+  for (const detail of details) {
+    const variantId = String(detail.variant_id || "").trim();
+    if (!variantId) continue;
+
+    const quantity = Math.max(0, Number(detail.quantity || 0));
+    const existing = byVariant.get(variantId);
+    if (existing) {
+      existing.quantity += quantity;
+      continue;
+    }
+
+    byVariant.set(variantId, {
+      variantId,
+      quantity,
+      sku: String(detail.sku || "").trim(),
+      productName: String(detail.product_name || "").trim(),
+      variantName: String(detail.variant_name || "").trim(),
+    });
+  }
+
+  return Array.from(byVariant.values());
 }
 
 async function deductInventoryForOrder(orderId) {
   const items = await getOrderInventoryItems(orderId);
+  const deductedItems = [];
 
-  for (const item of items) {
-    if (!mongoose.Types.ObjectId.isValid(item.variantId) || item.quantity <= 0) continue;
+  try {
+    for (const item of items) {
+      if (!mongoose.Types.ObjectId.isValid(item.variantId) || item.quantity <= 0) continue;
 
-    const variant = await ProductVariant.findById(item.variantId);
-    if (!variant) {
-      throw new Error(`Không tìm thấy biến thể để trừ kho: ${item.variantName || item.sku || item.productName || item.variantId}`);
-    }
-
-    const currentStock = Math.max(0, Number(variant.stock_quantity || 0));
-    if (currentStock < item.quantity) {
-      throw new Error(
-        `Tồn kho không đủ cho ${item.variantName || item.productName || variant.sku || "biến thể"}. Còn ${currentStock}, cần ${item.quantity}.`
+      const updatedVariant = await ProductVariant.findOneAndUpdate(
+        {
+          _id: item.variantId,
+          variant_status: "active",
+          stock_quantity: { $gte: item.quantity },
+        },
+        { $inc: { stock_quantity: -item.quantity } },
+        { new: true }
       );
-    }
 
-    variant.stock_quantity = currentStock - item.quantity;
-    await variant.save();
+      if (!updatedVariant) {
+        const variant = await ProductVariant.findById(item.variantId).lean();
+        if (!variant) {
+          throw new Error(`Không tìm thấy biến thể để trừ kho: ${item.variantName || item.sku || item.productName || item.variantId}`);
+        }
+
+        const currentStock = Math.max(0, Number(variant.stock_quantity || 0));
+        throw new Error(
+          `Tồn kho không đủ cho ${item.variantName || item.productName || variant.sku || "biến thể"}. Còn ${currentStock}, cần ${item.quantity}.`
+        );
+      }
+
+      deductedItems.push(item);
+    }
+  } catch (err) {
+    for (const item of deductedItems) {
+      await ProductVariant.findByIdAndUpdate(item.variantId, { $inc: { stock_quantity: item.quantity } });
+    }
+    throw err;
   }
 }
 
@@ -213,11 +249,7 @@ async function restoreInventoryForOrder(orderId) {
   for (const item of items) {
     if (!mongoose.Types.ObjectId.isValid(item.variantId) || item.quantity <= 0) continue;
 
-    const variant = await ProductVariant.findById(item.variantId);
-    if (!variant) continue;
-
-    variant.stock_quantity = Math.max(0, Number(variant.stock_quantity || 0)) + item.quantity;
-    await variant.save();
+    await ProductVariant.findByIdAndUpdate(item.variantId, { $inc: { stock_quantity: item.quantity } });
   }
 }
 
@@ -252,12 +284,16 @@ function validateAdminStatusTransition(order, nextStatus) {
   const currentStatus = normalizeStoredOrderStatus(order?.status);
   const targetStatus = normalizeStoredOrderStatus(nextStatus);
 
-  if (!targetStatus || rawTargetStatus === "cancel_pending") {
+  if (!targetStatus) {
     return { allowed: false, message: "Trạng thái đơn hàng không hợp lệ." };
   }
 
   if (targetStatus === currentStatus) {
     return { allowed: true, message: "" };
+  }
+
+  if (rawTargetStatus === "cancel_pending" || rawTargetStatus === "exchange_pending") {
+    return { allowed: false, message: "Trạng thái chờ duyệt chỉ được tạo từ yêu cầu của khách hàng." };
   }
 
   const allowedNextStatuses = ADMIN_STATUS_TRANSITIONS[currentStatus] || [];
@@ -274,11 +310,11 @@ function validateAdminStatusTransition(order, nextStatus) {
   }
 
   if (targetStatus === "cancelled") {
-    return { allowed: false, message: "Chỉ có thể chuyển sang \"Đã hủy\" khi đơn đang ở trạng thái \"Chờ xác nhận\"." };
+    return { allowed: false, message: "Chỉ có thể hủy đơn trước khi đơn chuyển sang trạng thái đang giao." };
   }
 
   if (targetStatus === "exchanged") {
-    return { allowed: false, message: "Chỉ có thể chuyển sang \"Đã đổi hàng\" sau khi đơn đã ở trạng thái \"Hoàn tất\"." };
+    return { allowed: false, message: "Chỉ có thể đổi hàng sau khi đơn đã giao xong và đã tất toán." };
   }
 
   return {
@@ -392,37 +428,10 @@ async function getWarrantyHistoryForOrder(orderId, orderDetailMap = new Map()) {
   return [];
 }
 
-function getConfirmedAt(order) {
-  const direct = order?.confirmed_at || order?.status_confirmed_at;
-  if (direct) {
-    const date = new Date(direct);
-    if (!Number.isNaN(date.getTime())) return date;
-  }
-
-  const fallback = new Date(order?.updatedAt || 0);
-  if (!Number.isNaN(fallback.getTime())) return fallback;
-  return null;
-}
-
 function checkCancelEligibility(order) {
   const status = String(order?.status || "").toLowerCase();
 
-  if (status === "pending") {
-    return { allowed: true, message: "" };
-  }
-
-  if (status === "confirmed") {
-    const confirmedAt = getConfirmedAt(order);
-    if (!confirmedAt) {
-      return { allowed: false, message: "Không xác định được thời điểm xác nhận đơn." };
-    }
-
-    const elapsedMs = Date.now() - confirmedAt.getTime();
-    const withinWindow = elapsedMs <= CANCELLATION_GRACE_HOURS * 60 * 60 * 1000;
-    if (!withinWindow) {
-        return { allowed: false, message: "Đơn đã quá 24 giờ kể từ lúc xác nhận nên không thể yêu cầu hủy." };
-      }
-
+  if (["pending", "confirmed", "processing"].includes(status)) {
     return { allowed: true, message: "" };
   }
 
@@ -430,7 +439,34 @@ function checkCancelEligibility(order) {
     return { allowed: false, message: "Đơn đang chờ xác nhận hủy." };
   }
 
-  return { allowed: false, message: "Đơn hàng không còn trong thời hạn cho phép hủy." };
+  return { allowed: false, message: "Đơn đã sang trạng thái giao hàng hoặc sau đó nên không thể yêu cầu hủy." };
+}
+
+function checkExchangeEligibility(order, orderPayments = []) {
+  const status = String(order?.status || "").toLowerCase();
+  const exchangeStatus = String(order?.exchange_request?.status || "").toLowerCase();
+
+  if (status === "exchange_pending" || exchangeStatus === "pending") {
+    return { allowed: false, message: "Đơn đang chờ xét duyệt đổi hàng." };
+  }
+
+  if (status === "exchanged" || exchangeStatus === "approved") {
+    return { allowed: false, message: "Đơn hàng này đã được xử lý đổi hàng." };
+  }
+
+  if (!["delivered", "completed"].includes(status)) {
+    return { allowed: false, message: "Chỉ có thể yêu cầu đổi hàng sau khi đơn đã giao xong." };
+  }
+
+  if (!isOrderPaymentSettled(order, orderPayments)) {
+    return { allowed: false, message: "Chỉ có thể yêu cầu đổi hàng sau khi đơn đã được tất toán." };
+  }
+
+  if (order?.exchange_request?.requested_at && exchangeStatus !== "rejected") {
+    return { allowed: false, message: "Mỗi đơn hàng chỉ được hỗ trợ đổi hàng một lần." };
+  }
+
+  return { allowed: true, message: "" };
 }
 
 async function resolveProfile(order, customerId) {
@@ -602,7 +638,8 @@ function getPaymentSortWeight(paymentSummary, direction) {
 function getStatusSortWeight(status, direction) {
   const key = normalizeStoredOrderStatus(status);
   if (key === "cancelled") return 8;
-  if (key === "exchanged") return 9;
+  if (key === "exchange_pending") return 9;
+  if (key === "exchanged") return 10;
   return direction === "desc"
     ? (NORMAL_STATUS_DESC_WEIGHT[key] || 99)
     : (NORMAL_STATUS_ASC_WEIGHT[key] || 99);
@@ -1116,13 +1153,13 @@ async function requestCancelOrder(req, res, next) {
       return res.status(400).json({ error: "Lý do hủy là bắt buộc." });
     }
 
-    if (!phone) {
-      return res.status(400).json({ error: "Số điện thoại xác nhận là bắt buộc." });
-    }
-
     const order = await Order.findById(id);
     if (!order) {
       return res.status(404).json({ error: "Order not found" });
+    }
+
+    if (!phone) {
+      phone = String(order.shipping_phone || "").trim();
     }
 
     const eligibility = checkCancelEligibility(order);
@@ -1133,13 +1170,16 @@ async function requestCancelOrder(req, res, next) {
     const previousStatus = String(order.status || "").toLowerCase();
     const over10mWithDeposit = Number(order.total_amount || 0) >= 10000000 && Number(order.deposit_amount || 0) > 0;
 
-    order.status = "cancelled";
+    order.status = "cancel_pending";
     order.cancellation_request = {
       reason,
       note,
       phone,
       cancelled_by: "customer",
       requested_at: new Date(),
+      reviewed_at: null,
+      status: "pending",
+      admin_reason: "",
       previous_status: previousStatus,
       over_10m_with_deposit: over10mWithDeposit,
     };
@@ -1147,7 +1187,58 @@ async function requestCancelOrder(req, res, next) {
     await order.save();
 
     return res.status(200).json({
-      message: "Da huy don hang thanh cong.",
+      message: "Yêu cầu hủy đơn đã được gửi và đang chờ xét duyệt.",
+      order: order.toObject(),
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function requestExchangeOrder(req, res, next) {
+  try {
+    const { id } = req.params;
+    const reason = String(req.body?.reason || "").trim();
+    const note = String(req.body?.note || "").trim();
+    let phone = String(req.body?.phone || "").trim();
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid id" });
+    }
+
+    if (!reason) {
+      return res.status(400).json({ error: "Lý do đổi hàng là bắt buộc." });
+    }
+
+    const order = await Order.findById(id);
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    const orderPayments = await Payment.find({ order_id: order._id }).lean();
+    const eligibility = checkExchangeEligibility(order, orderPayments);
+    if (!eligibility.allowed) {
+      return res.status(400).json({ error: eligibility.message || "Đơn hàng không thể yêu cầu đổi hàng." });
+    }
+
+    const previousStatus = String(order.status || "").toLowerCase();
+    order.status = "exchange_pending";
+    order.exchange_request = {
+      reason,
+      note,
+      phone,
+      requested_by: "customer",
+      requested_at: new Date(),
+      reviewed_at: null,
+      status: "pending",
+      admin_reason: "",
+      previous_status: previousStatus,
+    };
+
+    await order.save();
+
+    return res.status(200).json({
+      message: "Yêu cầu đổi hàng đã được gửi và đang chờ xét duyệt.",
       order: order.toObject(),
     });
   } catch (err) {
@@ -1178,11 +1269,11 @@ async function patchOrderStatus(req, res, next) {
       return res.status(400).json({ error: transitionValidation.message });
     }
 
-    if (nextStatus === "completed") {
+    if (["completed", "exchanged"].includes(nextStatus)) {
       const orderPayments = await Payment.find({ order_id: doc._id }).lean();
       if (!isOrderPaymentSettled(doc, orderPayments)) {
         return res.status(400).json({
-          error: "Chỉ có thể chuyển đơn sang \"Hoàn tất\" khi trạng thái thanh toán đã là \"Tất toán\".",
+          error: "Chỉ có thể hoàn tất hoặc đổi hàng khi trạng thái thanh toán đã là \"Tất toán\".",
         });
       }
     }
@@ -1199,7 +1290,7 @@ async function patchOrderStatus(req, res, next) {
       doc.inventory_deducted_at = null;
     }
 
-    if (nextStatus === "completed" && !doc.sold_counted) {
+    if (["completed", "exchanged"].includes(nextStatus) && !doc.sold_counted) {
       await adjustSoldCountForOrder(doc._id, 1);
       doc.sold_counted = true;
       doc.sold_counted_at = new Date();
@@ -1217,7 +1308,7 @@ async function patchOrderStatus(req, res, next) {
       doc.confirmed_at = new Date();
     }
 
-    if (nextStatus === "completed" && !doc.completed_at) {
+    if (["completed", "exchanged"].includes(nextStatus) && !doc.completed_at) {
       doc.completed_at = new Date();
     }
 
@@ -1237,25 +1328,68 @@ async function patchOrderStatus(req, res, next) {
         Number(doc.total_amount || 0) >= 10000000 && Number(doc.deposit_amount || 0) > 0;
 
       doc.cancellation_request = {
-        reason: statusReason || existingReason,
+        reason: existingReason || statusReason,
         note: String(existingCancellation.note || "").trim(),
         phone: String(existingCancellation.phone || doc.shipping_phone || "").trim(),
         cancelled_by: String(existingCancellation.cancelled_by || "").toLowerCase() === "customer" ? "customer" : "admin",
         requested_at: existingCancellation.requested_at || new Date(),
-        previous_status: previousStatus,
+        reviewed_at: new Date(),
+        status: "approved",
+        admin_reason: statusReason || String(existingCancellation.admin_reason || "").trim(),
+        previous_status: String(existingCancellation.previous_status || previousStatus).trim(),
         over_10m_with_deposit: over10mWithDeposit,
       };
     }
 
+    if (previousStatus === "cancel_pending" && nextStatus !== "cancelled") {
+      const existingCancellation = doc.cancellation_request || {};
+      doc.cancellation_request = {
+        reason: String(existingCancellation.reason || "").trim(),
+        note: String(existingCancellation.note || "").trim(),
+        phone: String(existingCancellation.phone || doc.shipping_phone || "").trim(),
+        cancelled_by: String(existingCancellation.cancelled_by || "customer").toLowerCase() === "admin" ? "admin" : "customer",
+        requested_at: existingCancellation.requested_at || null,
+        reviewed_at: new Date(),
+        status: "rejected",
+        admin_reason: statusReason || String(existingCancellation.admin_reason || "").trim(),
+        previous_status: String(existingCancellation.previous_status || nextStatus).trim(),
+        over_10m_with_deposit: !!existingCancellation.over_10m_with_deposit,
+      };
+    }
+
     if (nextStatus === "exchanged") {
-      if (!statusReason) {
+      const existingExchange = doc.exchange_request || {};
+      const existingReason = String(existingExchange.reason || "").trim();
+
+      if (!statusReason && !existingReason) {
         return res.status(400).json({ error: "Lý do đổi hàng là bắt buộc." });
       }
 
       doc.exchange_request = {
-        reason: statusReason,
-        requested_at: new Date(),
-        previous_status: previousStatus,
+        reason: existingReason || statusReason,
+        note: String(existingExchange.note || "").trim(),
+        phone: String(existingExchange.phone || doc.shipping_phone || "").trim(),
+        requested_by: String(existingExchange.requested_by || "").toLowerCase() === "customer" ? "customer" : "admin",
+        requested_at: existingExchange.requested_at || new Date(),
+        reviewed_at: new Date(),
+        status: "approved",
+        admin_reason: statusReason || String(existingExchange.admin_reason || "").trim(),
+        previous_status: String(existingExchange.previous_status || previousStatus).trim(),
+      };
+    }
+
+    if (previousStatus === "exchange_pending" && nextStatus !== "exchanged") {
+      const existingExchange = doc.exchange_request || {};
+      doc.exchange_request = {
+        reason: String(existingExchange.reason || "").trim(),
+        note: String(existingExchange.note || "").trim(),
+        phone: String(existingExchange.phone || doc.shipping_phone || "").trim(),
+        requested_by: String(existingExchange.requested_by || "customer").toLowerCase() === "admin" ? "admin" : "customer",
+        requested_at: existingExchange.requested_at || null,
+        reviewed_at: new Date(),
+        status: "rejected",
+        admin_reason: statusReason || String(existingExchange.admin_reason || "").trim(),
+        previous_status: String(existingExchange.previous_status || nextStatus).trim(),
       };
     }
 
@@ -1269,7 +1403,10 @@ async function patchOrderStatus(req, res, next) {
         case "confirmed": statusMsg = "đã được xác nhận"; break;
         case "shipping": statusMsg = "đang được giao đến bạn"; break;
         case "completed": statusMsg = "đã giao thành công"; break;
+        case "cancel_pending": statusMsg = "đang chờ xét duyệt hủy"; break;
         case "cancelled": statusMsg = "đã bị hủy"; break;
+        case "exchange_pending": statusMsg = "đang chờ xét duyệt đổi hàng"; break;
+        case "exchanged": statusMsg = "đã được duyệt đổi hàng"; break;
         default: statusMsg = `đã chuyển sang trạng thái ${nextStatus}`; break;
       }
       await sendToCustomer(doc.customer_id.toString(), {
@@ -1489,6 +1626,28 @@ async function createCheckoutOrder(req, res, next) {
       });
     }
 
+    const requestedByVariant = new Map();
+    for (const item of prepared) {
+      const key = String(item.variant?._id || "");
+      if (!key) continue;
+
+      const existing = requestedByVariant.get(key) || {
+        quantity: 0,
+        stock: Math.max(0, Number(item.variant?.stock_quantity || 0)),
+        label: item.variantName || item.productName || item.sku || "sản phẩm",
+      };
+      existing.quantity += item.quantity;
+      requestedByVariant.set(key, existing);
+    }
+
+    for (const requested of requestedByVariant.values()) {
+      if (requested.quantity > requested.stock) {
+        return res.status(400).json({
+          error: `Số lượng ${requested.label} vượt tồn kho hiện tại. Còn ${requested.stock}, bạn chọn ${requested.quantity}.`,
+        });
+      }
+    }
+
     const itemsSubtotal = prepared.reduce((sum, item) => sum + item.lineTotal, 0);
     const couponDiscount = Math.max(0, Number(coupon_discount || 0));
     const computedTotal = Math.max(0, itemsSubtotal - couponDiscount);
@@ -1653,6 +1812,7 @@ module.exports = {
   getOrderById,
   patchOrderStatus,
   requestCancelOrder,
+  requestExchangeOrder,
   createCheckoutOrder,
   addWarrantyRecord,
   demoTransferTimeoutComplete,

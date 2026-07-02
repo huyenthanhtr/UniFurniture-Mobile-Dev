@@ -4,9 +4,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.RatingBar;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -110,6 +112,7 @@ public class OrderDetailFragment extends Fragment {
                         pendingReviewImageUris.addAll(limitUris(uris, true));
                     }
                     updateSelectedMediaLabels();
+                    scrollReviewDialogToSelectedMedia(false);
                 }
         );
 
@@ -121,6 +124,7 @@ public class OrderDetailFragment extends Fragment {
                         pendingReviewVideoUris.addAll(limitUris(uris, false));
                     }
                     updateSelectedMediaLabels();
+                    scrollReviewDialogToSelectedMedia(true);
                 }
         );
     }
@@ -132,6 +136,8 @@ public class OrderDetailFragment extends Fragment {
 
         binding.toolbar.setNavigationOnClickListener(v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
         binding.pricingHeader.setOnClickListener(v -> togglePricingDetails());
+        binding.btnRequestCancel.setOnClickListener(v -> showOrderRequestDialog(false));
+        binding.btnRequestExchange.setOnClickListener(v -> showOrderRequestDialog(true));
 
         if (getArguments() != null) {
             orderId = getArguments().getString("order_id");
@@ -242,6 +248,7 @@ public class OrderDetailFragment extends Fragment {
 
         pricingExpanded = false;
         bindPricingSummary(currentOrder, detailResponse, currentItems);
+        updateOrderActions(summary);
         renderOrderItems();
         updateTimeline(currentOrder.getStatus());
         loadOrderReviewStatus();
@@ -254,6 +261,136 @@ public class OrderDetailFragment extends Fragment {
             bindOrderItemContent(itemBinding, item);
             bindReviewState(itemBinding, item);
         }
+    }
+
+    private void updateOrderActions(PaymentSummaryDto paymentSummary) {
+        if (binding == null || currentOrder == null) return;
+
+        String status = OrderStatusUi.normalize(currentOrder.getStatus());
+        boolean canCancel = canRequestCancel(status);
+        boolean canExchange = canRequestExchange(status, paymentSummary);
+        String hint = null;
+
+        if ("cancel_pending".equals(status)) {
+            hint = getString(R.string.order_cancel_request_pending);
+        } else if ("exchange_pending".equals(status)) {
+            hint = getString(R.string.order_exchange_request_pending);
+        } else if (isDeliveredOrCompleted(status) && !isPaymentSettled(paymentSummary)) {
+            hint = getString(R.string.order_exchange_requires_settlement);
+        }
+
+        binding.btnRequestCancel.setVisibility(canCancel ? View.VISIBLE : View.GONE);
+        binding.btnRequestExchange.setVisibility(canExchange ? View.VISIBLE : View.GONE);
+        binding.spOrderAction.setVisibility(canCancel && canExchange ? View.VISIBLE : View.GONE);
+        binding.layoutOrderActionButtons.setVisibility(canCancel || canExchange ? View.VISIBLE : View.GONE);
+        binding.tvOrderActionHint.setVisibility(hint != null ? View.VISIBLE : View.GONE);
+        if (hint != null) binding.tvOrderActionHint.setText(hint);
+        binding.cardOrderActions.setVisibility((canCancel || canExchange || hint != null) ? View.VISIBLE : View.GONE);
+    }
+
+    private boolean canRequestCancel(String status) {
+        return "pending".equals(status) || "confirmed".equals(status) || "processing".equals(status);
+    }
+
+    private boolean canRequestExchange(String status, PaymentSummaryDto paymentSummary) {
+        return isDeliveredOrCompleted(status) && isPaymentSettled(paymentSummary);
+    }
+
+    private boolean isDeliveredOrCompleted(String status) {
+        return "delivered".equals(status) || "completed".equals(status);
+    }
+
+    private boolean isPaymentSettled(PaymentSummaryDto summary) {
+        if (summary == null) return false;
+        if (Boolean.TRUE.equals(summary.getHasFullPaid())) return true;
+        Double paid = summary.getPaidTotal();
+        Double total = summary.getTotalAmount();
+        return paid != null && total != null && total > 0 && paid >= total;
+    }
+
+    private void showOrderRequestDialog(boolean exchangeMode) {
+        if (!isAdded() || currentOrder == null || orderId == null) return;
+
+        int padding = dp(4);
+        LinearLayout container = new LinearLayout(requireContext());
+        container.setOrientation(LinearLayout.VERTICAL);
+        container.setPadding(padding, padding, padding, 0);
+
+        TextInputLayout reasonLayout = new TextInputLayout(requireContext());
+        reasonLayout.setHint(getString(exchangeMode
+                ? R.string.order_exchange_reason_hint
+                : R.string.order_cancel_reason_hint));
+
+        TextInputEditText reasonInput = new TextInputEditText(reasonLayout.getContext());
+        reasonInput.setMinLines(3);
+        reasonInput.setMaxLines(5);
+        reasonInput.setGravity(android.view.Gravity.TOP | android.view.Gravity.START);
+        reasonInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        reasonLayout.addView(reasonInput);
+        container.addView(reasonLayout);
+
+        AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext())
+                .setTitle(exchangeMode ? R.string.order_request_exchange_title : R.string.order_request_cancel_title)
+                .setMessage(exchangeMode ? R.string.order_request_exchange_message : R.string.order_request_cancel_message)
+                .setView(container)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(exchangeMode ? R.string.order_send_exchange_request : R.string.order_send_cancel_request, null)
+                .create();
+
+        dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String reason = reasonInput.getText() != null ? reasonInput.getText().toString().trim() : "";
+            if (reason.isEmpty()) {
+                reasonLayout.setError(getString(R.string.required_field));
+                return;
+            }
+            reasonLayout.setError(null);
+            submitOrderRequest(exchangeMode, reason, dialog);
+        }));
+
+        dialog.show();
+    }
+
+    private void submitOrderRequest(boolean exchangeMode, String reason, AlertDialog dialog) {
+        Map<String, String> body = new HashMap<>();
+        body.put("reason", reason);
+        body.put("note", "");
+        body.put("phone", currentOrder != null ? safeRequestText(currentOrder.getShippingPhone()) : "");
+
+        if (dialog != null && dialog.getButton(AlertDialog.BUTTON_POSITIVE) != null) {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+        }
+
+        Call<OrderDto> call = exchangeMode
+                ? apiService.requestExchangeOrder(orderId, body)
+                : apiService.requestCancelOrder(orderId, body);
+
+        call.enqueue(new Callback<OrderDto>() {
+            @Override
+            public void onResponse(@NonNull Call<OrderDto> call, @NonNull Response<OrderDto> response) {
+                if (!isAdded()) return;
+                if (response.isSuccessful()) {
+                    if (dialog != null) dialog.dismiss();
+                    ToastUtil.show(requireContext(), exchangeMode
+                            ? R.string.order_exchange_request_sent
+                            : R.string.order_cancel_request_sent);
+                    loadOrderDetails();
+                } else {
+                    if (dialog != null && dialog.getButton(AlertDialog.BUTTON_POSITIVE) != null) {
+                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
+                    }
+                    ToastUtil.error(requireContext(), parseApiError(response, R.string.error_unknown));
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<OrderDto> call, @NonNull Throwable t) {
+                if (!isAdded()) return;
+                if (dialog != null && dialog.getButton(AlertDialog.BUTTON_POSITIVE) != null) {
+                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
+                }
+                ToastUtil.error(requireContext(), getString(R.string.error_network, t.getMessage()));
+            }
+        });
     }
 
     private void bindOrderItemContent(ItemOrderDetailBinding itemBinding, OrderDetailDto item) {
@@ -272,7 +409,12 @@ public class OrderDetailFragment extends Fragment {
             itemBinding.ivProductImage.setImageResource(R.drawable.placeholder_product);
         }
 
-        itemBinding.layoutProductLink.setOnClickListener(v -> openProductDetail(item));
+        String productSlug = resolveProductSlug(item);
+        boolean canOpenProduct = productSlug != null;
+        itemBinding.layoutProductLink.setClickable(canOpenProduct);
+        itemBinding.layoutProductLink.setFocusable(canOpenProduct);
+        itemBinding.tvViewProduct.setVisibility(canOpenProduct ? View.VISIBLE : View.GONE);
+        itemBinding.layoutProductLink.setOnClickListener(canOpenProduct ? v -> openProductDetail(productSlug) : null);
     }
 
     private void loadOrderReviewStatus() {
@@ -379,6 +521,14 @@ public class OrderDetailFragment extends Fragment {
 
         DialogSubmitReviewBinding dialogBinding = DialogSubmitReviewBinding.inflate(getLayoutInflater());
         activeReviewDialogBinding = dialogBinding;
+        dialogBinding.ratingBarReview.setIsIndicator(false);
+        dialogBinding.ratingBarReview.setOnTouchListener((v, event) -> {
+            v.getParent().requestDisallowInterceptTouchEvent(true);
+            return false;
+        });
+        dialogBinding.ratingBarReview.setOnRatingBarChangeListener((ratingBar, rating, fromUser) -> {
+            if (rating > 0) dialogBinding.tilReviewContent.setError(null);
+        });
         dialogBinding.tvReviewProductName.setText(firstNonBlank(
                 item.getProductName(),
                 item.getProduct() != null ? item.getProduct().getTitle() : null,
@@ -458,6 +608,7 @@ public class OrderDetailFragment extends Fragment {
             pendingReviewVideoUris.clear();
         });
         dialog.show();
+        constrainReviewDialogHeight(dialogBinding);
     }
 
     private void updateSelectedMediaLabels() {
@@ -482,6 +633,28 @@ public class OrderDetailFragment extends Fragment {
         if (activeReviewDialogBinding.rvSelectedVideos.getAdapter() != null) {
             activeReviewDialogBinding.rvSelectedVideos.getAdapter().notifyDataSetChanged();
         }
+    }
+
+    private void scrollReviewDialogToSelectedMedia(boolean videoMode) {
+        DialogSubmitReviewBinding binding = activeReviewDialogBinding;
+        if (binding == null) return;
+        View target = videoMode
+                ? binding.tvSelectedVideos
+                : binding.tvSelectedImages;
+        binding.getRoot().post(() -> binding.getRoot().smoothScrollTo(0, Math.max(0, target.getTop() - 24)));
+    }
+
+    private void constrainReviewDialogHeight(DialogSubmitReviewBinding dialogBinding) {
+        if (dialogBinding == null) return;
+        dialogBinding.getRoot().post(() -> {
+            if (!isAdded() || dialogBinding.getRoot() == null) return;
+            int maxHeight = (int) (getResources().getDisplayMetrics().heightPixels * 0.74f);
+            if (dialogBinding.getRoot().getHeight() <= maxHeight) return;
+            ViewGroup.LayoutParams params = dialogBinding.getRoot().getLayoutParams();
+            if (params == null) return;
+            params.height = maxHeight;
+            dialogBinding.getRoot().setLayoutParams(params);
+        });
     }
 
     private void uploadMediaThenSubmitReview(OrderDetailDto item, int rating, String content, AlertDialog dialog) {
@@ -679,6 +852,8 @@ public class OrderDetailFragment extends Fragment {
                     JSONObject object = new JSONObject(raw);
                     String message = object.optString("message", "").trim();
                     if (!message.isEmpty()) return message;
+                    message = object.optString("error", "").trim();
+                    if (!message.isEmpty()) return message;
                 }
             }
         } catch (Exception ignored) {
@@ -691,6 +866,8 @@ public class OrderDetailFragment extends Fragment {
             if (raw != null && !raw.trim().isEmpty()) {
                 JSONObject object = new JSONObject(raw);
                 String message = object.optString("message", "").trim();
+                if (!message.isEmpty()) return message;
+                message = object.optString("error", "").trim();
                 if (!message.isEmpty()) return message;
             }
         } catch (Exception ignored) {
@@ -809,22 +986,6 @@ public class OrderDetailFragment extends Fragment {
         }
     }
 
-    private void openProductDetail(OrderDetailDto item) {
-        String slug = null;
-        ProductDto product = item != null ? item.getProduct() : null;
-        if (product != null) {
-            slug = firstNonBlank(product.slug);
-        }
-        if (slug == null && item != null) {
-            slug = firstNonBlank(item.getProductSlug(), item.getProductId());
-        }
-        if (slug == null) return;
-
-        Bundle args = new Bundle();
-        args.putString("slug", slug);
-        Navigation.findNavController(requireView()).navigate(R.id.productDetailFragment, args);
-    }
-
     private String resolveProductTitle(OrderDetailDto item) {
         ProductDto product = item != null ? item.getProduct() : null;
         String title = firstNonBlank(
@@ -832,6 +993,21 @@ public class OrderDetailFragment extends Fragment {
                 product != null ? product.getTitle() : null
         );
         return title != null ? title : getString(R.string.product_default_name);
+    }
+
+    private String resolveProductSlug(OrderDetailDto item) {
+        ProductDto product = item != null ? item.getProduct() : null;
+        return firstNonBlank(
+                product != null ? product.slug : null,
+                item != null ? item.getProductSlug() : null
+        );
+    }
+
+    private void openProductDetail(String slug) {
+        if (slug == null || slug.trim().isEmpty()) return;
+        Bundle args = new Bundle();
+        args.putString("slug", slug.trim());
+        Navigation.findNavController(requireView()).navigate(R.id.productDetailFragment, args);
     }
 
     private String resolveVariantTitle(OrderDetailDto item) {
@@ -854,6 +1030,14 @@ public class OrderDetailFragment extends Fragment {
 
     private String safeText(String value) {
         return value != null && !value.trim().isEmpty() ? value : "-";
+    }
+
+    private String safeRequestText(String value) {
+        return value != null ? value.trim() : "";
+    }
+
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
     private String firstNonBlank(String... values) {

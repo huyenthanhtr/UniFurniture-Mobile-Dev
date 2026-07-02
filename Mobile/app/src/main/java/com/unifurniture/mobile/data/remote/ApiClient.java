@@ -2,7 +2,10 @@ package com.unifurniture.mobile.data.remote;
 
 import com.unifurniture.mobile.BuildConfig;
 import com.unifurniture.mobile.UniFurnitureApp;
+import com.unifurniture.mobile.data.model.ReviewDto;
 import com.unifurniture.mobile.util.SessionManager;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -107,10 +110,14 @@ public class ApiClient {
                     .build();
             RAW_CLIENT = okHttpClient;
 
+            Gson gson = new GsonBuilder()
+                    .registerTypeAdapter(ReviewDto.class, new ReviewDto.Deserializer())
+                    .create();
+
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(BuildConfig.API_BASE_URL)
                     .client(okHttpClient)
-                    .addConverterFactory(GsonConverterFactory.create())
+                    .addConverterFactory(GsonConverterFactory.create(gson))
                     .build();
 
             INSTANCE = retrofit.create(ApiService.class);

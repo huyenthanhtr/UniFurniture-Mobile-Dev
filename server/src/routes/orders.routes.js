@@ -5,6 +5,7 @@ const {
   getOrderById,
   patchOrderStatus,
   requestCancelOrder,
+  requestExchangeOrder,
   createCheckoutOrder,
   addWarrantyRecord,
   demoTransferTimeoutComplete,
@@ -15,6 +16,7 @@ router.post("/", createCheckoutOrder);
 router.get("/:id", getOrderById);
 router.patch('/:id/status', patchOrderStatus);
 router.post('/:id/cancel-request', requestCancelOrder);
+router.post('/:id/exchange-request', requestExchangeOrder);
 router.post('/:id/warranty-records', addWarrantyRecord);
 router.post('/:id/demo-transfer-timeout', demoTransferTimeoutComplete);
 

@@ -64,14 +64,11 @@ public class MyReviewsFragment extends Fragment {
         String serverHost = com.unifurniture.mobile.BuildConfig.API_BASE_URL.replace("/api/", "");
         adapter = new MyReviewsAdapter(serverHost, review -> {
             String slug = review.getProductSlug();
-            if (slug == null || slug.trim().isEmpty()) {
-                slug = review.getProductId();
-            }
             if (slug == null || slug.trim().isEmpty() || !isAdded()) {
                 return;
             }
             Bundle args = new Bundle();
-            args.putString("slug", slug);
+            args.putString("slug", slug.trim());
             Navigation.findNavController(requireView()).navigate(R.id.productDetailFragment, args);
         });
         binding.rvReviews.setLayoutManager(new LinearLayoutManager(requireContext()));

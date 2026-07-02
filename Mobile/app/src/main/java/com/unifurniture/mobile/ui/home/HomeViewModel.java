@@ -147,14 +147,19 @@ public class HomeViewModel extends AndroidViewModel {
             if (it.id != null) excludeIds.add(it.id);
         }
 
-        String customerId = SessionManager.getInstance(getApplication()).getCustomerId();
-        if (customerId == null || customerId.isEmpty()) {
+        SessionManager session = SessionManager.getInstance(getApplication());
+        String accountId = session.getProfileId();
+        String customerId = session.getCustomerId();
+        String orderCustomerId = (accountId == null || accountId.isEmpty()) ? customerId : null;
+        String orderAccountId = (accountId == null || accountId.isEmpty()) ? null : accountId;
+        final String recommendationUserId = orderAccountId != null ? orderAccountId : orderCustomerId;
+        if (recommendationUserId == null || recommendationUserId.isEmpty()) {
             fetchRecommendations(seeds, excludeIds, null);
             return;
         }
 
         // Logged in → fold in purchase history, then fetch.
-        UniFurnitureApp.getInstance().getApiService().getOrders(customerId, null)
+        UniFurnitureApp.getInstance().getApiService().getOrders(orderCustomerId, orderAccountId)
                 .enqueue(new Callback<ApiListResponse<OrderDto>>() {
                     @Override
                     public void onResponse(@NonNull Call<ApiListResponse<OrderDto>> call,
@@ -170,11 +175,11 @@ public class HomeViewModel extends AndroidViewModel {
                                 }
                             }
                         }
-                        fetchRecommendations(seeds, excludeIds, customerId);
+                        fetchRecommendations(seeds, excludeIds, recommendationUserId);
                     }
                     @Override
                     public void onFailure(@NonNull Call<ApiListResponse<OrderDto>> call, @NonNull Throwable t) {
-                        fetchRecommendations(seeds, excludeIds, customerId);
+                        fetchRecommendations(seeds, excludeIds, recommendationUserId);
                     }
                 });
     }

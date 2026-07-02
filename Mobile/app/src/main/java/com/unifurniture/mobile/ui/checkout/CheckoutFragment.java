@@ -362,7 +362,11 @@ public class CheckoutFragment extends Fragment {
         }
 
         SessionManager session = SessionManager.getInstance(requireContext());
-        CheckoutRequest req = new CheckoutRequest(session.getCustomerId(), session.getCartId(), name, phone, address, paymentMethod);
+        String accountId = session.getProfileId();
+        if (accountId == null || accountId.trim().isEmpty()) {
+            accountId = session.getCustomerId();
+        }
+        CheckoutRequest req = new CheckoutRequest(accountId, session.getCartId(), name, phone, address, paymentMethod);
         req.shippingEmail = email.isEmpty() ? null : email;
         req.province = province;
         req.district = district;

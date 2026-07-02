@@ -435,6 +435,8 @@
     <string name="status_processing">Đang xử lý</string>
     <string name="status_delivered">Đã giao hàng</string>
     <string name="status_cancel_pending">Chờ hủy</string>
+    <string name="status_exchange_pending">Chờ đổi hàng</string>
+    <string name="status_exchanged">Đã đổi hàng</string>
     <string name="timeline_step_1">Chờ xác nhận</string>
     <string name="timeline_step_2">Đã xác nhận</string>
     <string name="timeline_step_3">Đang giao hàng</string>
@@ -479,6 +481,24 @@
     <string name="review_summary_with_rating">%1$d★ - %2$s</string>
     <string name="review_videos">Video đính kèm</string>
     <string name="review_video_label">Video %1$d</string>
+
+    <string name="in_stock_with_quantity">Còn %1$d sản phẩm</string>
+    <string name="stock_quantity_limit">Chỉ còn %1$d sản phẩm trong kho.</string>
+    <string name="order_request_cancel">Yêu cầu hủy đơn</string>
+    <string name="order_request_exchange">Yêu cầu đổi hàng</string>
+    <string name="order_request_cancel_title">Yêu cầu hủy đơn hàng</string>
+    <string name="order_request_exchange_title">Yêu cầu đổi hàng</string>
+    <string name="order_request_cancel_message">Yêu cầu của bạn sẽ được admin xét duyệt trước khi đơn được hủy.</string>
+    <string name="order_request_exchange_message">UniFurniture hỗ trợ đổi hàng một lần sau khi đơn đã giao và đã tất toán.</string>
+    <string name="order_cancel_reason_hint">Lý do hủy đơn</string>
+    <string name="order_exchange_reason_hint">Lý do đổi hàng</string>
+    <string name="order_send_cancel_request">Gửi yêu cầu</string>
+    <string name="order_send_exchange_request">Gửi yêu cầu</string>
+    <string name="order_cancel_request_sent">Đã gửi yêu cầu hủy đơn.</string>
+    <string name="order_exchange_request_sent">Đã gửi yêu cầu đổi hàng.</string>
+    <string name="order_cancel_request_pending">Yêu cầu hủy đơn của bạn đang chờ admin xét duyệt.</string>
+    <string name="order_exchange_request_pending">Yêu cầu đổi hàng của bạn đang chờ admin xét duyệt.</string>
+    <string name="order_exchange_requires_settlement">Bạn có thể yêu cầu đổi hàng sau khi đơn được tất toán.</string>
 
     <!-- Other missing strings -->
     <string name="buy_now">Mua ngay</string>

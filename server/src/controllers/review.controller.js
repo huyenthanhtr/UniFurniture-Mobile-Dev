@@ -88,6 +88,18 @@ async function applyReviewReward(profileId, orderId, orderDetailIds) {
   return { rewardedCount, rewardedPoints };
 }
 
+async function resolveCustomerIdForQuery(rawId) {
+  const normalizedId = String(rawId || '').trim();
+  if (!mongoose.Types.ObjectId.isValid(normalizedId)) return null;
+
+  const profile = await Profile.findById(normalizedId).select('customer_id').lean();
+  if (profile?.customer_id && mongoose.Types.ObjectId.isValid(String(profile.customer_id))) {
+    return profile.customer_id;
+  }
+
+  return new mongoose.Types.ObjectId(normalizedId);
+}
+
 function toPublicAssetUrl(req, value) {
   const raw = String(value || '').trim();
   if (!raw) {
@@ -358,8 +370,9 @@ exports.getAllReviews = async (req, res) => {
     const { customer_id: customerId } = req.query || {};
     const query = {};
 
-    if (customerId && mongoose.Types.ObjectId.isValid(String(customerId))) {
-      query.customer_id = new mongoose.Types.ObjectId(String(customerId));
+    const resolvedCustomerId = await resolveCustomerIdForQuery(customerId);
+    if (resolvedCustomerId) {
+      query.customer_id = resolvedCustomerId;
     }
 
     const reviews = await Review.find(query)
@@ -377,7 +390,7 @@ exports.getAllReviews = async (req, res) => {
             select: 'image product_id',
             populate: {
               path: 'product_id',
-              select: 'thumbnail_url thumbnail'
+              select: 'thumbnail_url thumbnail slug'
             }
           }
         ]

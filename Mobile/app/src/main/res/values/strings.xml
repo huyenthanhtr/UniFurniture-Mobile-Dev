@@ -462,6 +462,8 @@
     <string name="status_processing">Processing</string>
     <string name="status_delivered">Delivered</string>
     <string name="status_cancel_pending">Cancel Pending</string>
+    <string name="status_exchange_pending">Exchange Pending</string>
+    <string name="status_exchanged">Exchanged</string>
     <string name="timeline_step_1">Pending</string>
     <string name="timeline_step_2">Confirmed</string>
     <string name="timeline_step_3">Shipping</string>
@@ -506,6 +508,24 @@
     <string name="review_summary_with_rating">%1$d★ - %2$s</string>
     <string name="review_videos">Videos</string>
     <string name="review_video_label">Video %1$d</string>
+
+    <string name="in_stock_with_quantity">In stock: %1$d</string>
+    <string name="stock_quantity_limit">Only %1$d item(s) left in stock.</string>
+    <string name="order_request_cancel">Request cancellation</string>
+    <string name="order_request_exchange">Request exchange</string>
+    <string name="order_request_cancel_title">Request order cancellation</string>
+    <string name="order_request_exchange_title">Request product exchange</string>
+    <string name="order_request_cancel_message">Your request will be reviewed before the order is cancelled.</string>
+    <string name="order_request_exchange_message">UniFurniture supports one product exchange after delivery and full payment.</string>
+    <string name="order_cancel_reason_hint">Cancellation reason</string>
+    <string name="order_exchange_reason_hint">Exchange reason</string>
+    <string name="order_send_cancel_request">Send request</string>
+    <string name="order_send_exchange_request">Send request</string>
+    <string name="order_cancel_request_sent">Cancellation request sent.</string>
+    <string name="order_exchange_request_sent">Exchange request sent.</string>
+    <string name="order_cancel_request_pending">Your cancellation request is waiting for admin review.</string>
+    <string name="order_exchange_request_pending">Your exchange request is waiting for admin review.</string>
+    <string name="order_exchange_requires_settlement">Exchange is available after this order is fully paid.</string>
 
     <!-- Other missing strings -->
     <string name="buy_now">Buy Now</string>
