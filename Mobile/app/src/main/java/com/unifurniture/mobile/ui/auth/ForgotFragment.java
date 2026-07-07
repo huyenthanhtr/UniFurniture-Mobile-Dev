@@ -98,6 +98,7 @@ public class ForgotFragment extends Fragment {
         viewModel.getError().observe(getViewLifecycleOwner(), error -> {
             if (error != null) {
                 com.unifurniture.mobile.util.CustomBlueDialog.showError(requireContext(), error);
+                viewModel.clearError();
             }
         });
 

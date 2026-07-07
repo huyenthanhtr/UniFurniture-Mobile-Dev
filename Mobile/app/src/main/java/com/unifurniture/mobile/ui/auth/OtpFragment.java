@@ -75,7 +75,10 @@ public class OtpFragment extends Fragment {
                 binding.progressBar.setVisibility(loading ? View.VISIBLE : View.GONE));
 
         viewModel.getError().observe(getViewLifecycleOwner(), error -> {
-            if (error != null) com.unifurniture.mobile.util.CustomBlueDialog.showError(requireContext(), error);
+            if (error != null) {
+                com.unifurniture.mobile.util.CustomBlueDialog.showError(requireContext(), error);
+                viewModel.clearError();
+            }
         });
 
         // OTP verified → account created (server returns no token). Like the web, go to Login.

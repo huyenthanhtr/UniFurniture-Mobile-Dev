@@ -74,7 +74,10 @@ public class LoginFragment extends Fragment {
         });
 
         viewModel.getError().observe(getViewLifecycleOwner(), error -> {
-            if (error != null) com.unifurniture.mobile.util.CustomBlueDialog.showError(requireContext(), error);
+            if (error != null) {
+                com.unifurniture.mobile.util.CustomBlueDialog.showError(requireContext(), error);
+                viewModel.clearError();
+            }
         });
 
         viewModel.getAuthResult().observe(getViewLifecycleOwner(), result -> {
