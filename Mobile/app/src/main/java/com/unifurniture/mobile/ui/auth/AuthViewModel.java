@@ -163,6 +163,8 @@ public class AuthViewModel extends AndroidViewModel {
     // One-shot consumers clear these after handling so they don't re-fire on fragment re-creation.
     public void clearRegisterSuccess() { registerSuccess.setValue(null); }
     public void clearOtpSuccess() { otpSuccess.setValue(null); }
+    // Error is one-shot too: clear it once shown so it doesn't replay to the next screen's observer.
+    public void clearError() { error.setValue(null); }
  
     public LiveData<AuthResponse> getAuthResult() { return authResult; }
     public LiveData<String> getRegisterSuccess() { return registerSuccess; }
