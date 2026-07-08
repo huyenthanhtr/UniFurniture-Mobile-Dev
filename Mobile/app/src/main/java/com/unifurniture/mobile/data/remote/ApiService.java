@@ -181,6 +181,12 @@ public interface ApiService {
     @GET("profiles/{id}")
     Call<ProfileDto> getProfileById(@Path("id") String profileId);
 
+    @GET("loyalty/profiles/{id}")
+    Call<com.unifurniture.mobile.data.model.LoyaltyDto> getProfileLoyalty(@Path("id") String profileId);
+
+    @GET("loyalty/profiles/{id}/transactions")
+    Call<java.util.List<com.unifurniture.mobile.data.model.PointTransactionDto>> getPointTransactions(@Path("id") String profileId);
+
     @PATCH("profiles/{id}")
     Call<ProfileDto> updateProfile(
             @Path("id") String profileId,

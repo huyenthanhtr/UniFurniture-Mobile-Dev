@@ -54,6 +54,7 @@ public class AccountFragment extends Fragment {
             binding.btnEditProfile.setVisibility(View.GONE);
             binding.btnLoginPrompt.setVisibility(View.VISIBLE);
             binding.btnLogout.setVisibility(View.GONE);
+            binding.cardLoyalty.setVisibility(View.GONE);
             
             binding.btnLoginPrompt.setOnClickListener(v ->
                     ((MainActivity) requireActivity()).launchAuth());
@@ -78,6 +79,15 @@ public class AccountFragment extends Fragment {
             var customer = session.getCustomer();
             binding.tvUserName.setText(customer.getName() != null ? customer.getName() : getString(R.string.guest_customer));
             binding.tvUserPhone.setText(customer.getPhone());
+            
+            String profileId = resolveProfileId(session);
+            loadLoyaltyData(profileId);
+            
+            binding.cardLoyalty.setOnClickListener(v -> {
+                String pId = resolveProfileId(session);
+                PointHistoryBottomSheet sheet = PointHistoryBottomSheet.newInstance(pId);
+                sheet.show(getChildFragmentManager(), "PointHistory");
+            });
             
             if (customer.getEmail() != null && !customer.getEmail().isEmpty()) {
                 binding.tvUserEmail.setText(customer.getEmail());
@@ -271,6 +281,43 @@ public class AccountFragment extends Fragment {
         if (binding == null) return;
         boolean hasUnread = com.unifurniture.mobile.util.NotificationManager.getInstance(requireContext()).hasUnreadNotifications();
         binding.viewNotificationBadge.setVisibility(hasUnread ? View.VISIBLE : View.GONE);
+    }
+
+    private void loadLoyaltyData(String profileId) {
+        if (binding == null || profileId == null || profileId.isEmpty()) return;
+
+        apiService.getProfileLoyalty(profileId).enqueue(new retrofit2.Callback<com.unifurniture.mobile.data.model.LoyaltyDto>() {
+            @Override
+            public void onResponse(@NonNull retrofit2.Call<com.unifurniture.mobile.data.model.LoyaltyDto> call, 
+                                   @NonNull retrofit2.Response<com.unifurniture.mobile.data.model.LoyaltyDto> response) {
+                if (!isAdded() || binding == null) return;
+                
+                com.unifurniture.mobile.data.model.LoyaltyDto loyalty = response.isSuccessful() ? response.body() : null;
+                if (loyalty != null) {
+                    binding.cardLoyalty.setVisibility(View.VISIBLE);
+                    binding.tvLoyaltyTier.setText(loyalty.getMembershipTierLabel());
+                    binding.tvLoyaltyPoints.setText(String.valueOf(loyalty.getLoyaltyPointsLifetime()));
+                    
+                    if (loyalty.getNextTierLabel() != null && !loyalty.getNextTierLabel().isEmpty()) {
+                        String nextTierText = getString(R.string.points_to_next_tier_pattern, 
+                                String.valueOf(loyalty.getPointsToNextTier()), loyalty.getNextTierLabel());
+                        binding.tvPointsToNextTier.setText(nextTierText);
+                        binding.tvPointsToNextTier.setVisibility(View.VISIBLE);
+                    } else {
+                        binding.tvPointsToNextTier.setVisibility(View.GONE);
+                    }
+                } else {
+                    binding.cardLoyalty.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull retrofit2.Call<com.unifurniture.mobile.data.model.LoyaltyDto> call, @NonNull Throwable t) {
+                if (binding != null) {
+                    binding.cardLoyalty.setVisibility(View.GONE);
+                }
+            }
+        });
     }
 
     @Override

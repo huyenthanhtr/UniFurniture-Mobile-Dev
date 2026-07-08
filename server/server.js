@@ -30,6 +30,10 @@ const notificationsRoutes = require("./src/routes/notifications.routes");
 const postsRoutes = require("./src/routes/posts.routes");
 const { normalizeSystemCodes } = require("./src/utils/normalize-system-codes");
 const app = express();
+app.use((req, res, next) => {
+  console.log(`[REQUEST] ${req.method} ${req.url}`);
+  next();
+});
 app.use(cors());
 app.use(express.json({ limit: "20mb" }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
