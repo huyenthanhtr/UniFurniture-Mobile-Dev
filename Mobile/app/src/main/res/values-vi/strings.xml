@@ -544,4 +544,8 @@
     <string name="order_deposit_amount">Ti&#7873;n c&#7885;c</string>
     <string name="order_promotion_discount">Gi&#7843;m khuy&#7871;n m&#227;i</string>
     <string name="order_promotion_with_code">Khuy&#7871;n m&#227;i %1$s</string>
+    <string name="membership_loyalty">Thành viên U-HOMIE</string>
+    <string name="loyalty_tier">Hạng thành viên</string>
+    <string name="loyalty_points">Điểm tích lũy</string>
+    <string name="points_to_next_tier_pattern">Cần thêm %1$s điểm để thăng hạng %2$s</string>
 </resources>

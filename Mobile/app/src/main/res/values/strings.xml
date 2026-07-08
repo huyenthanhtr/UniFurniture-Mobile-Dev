@@ -554,4 +554,8 @@
     <string name="voucher_name_percent">Discount %1$d%%</string>
     <string name="voucher_used_status">Used</string>
     <string name="you_may_be_interested">You may also like</string>
+    <string name="membership_loyalty">U-HOMIE Membership</string>
+    <string name="loyalty_tier">Membership Tier</string>
+    <string name="loyalty_points">Accumulated Points</string>
+    <string name="points_to_next_tier_pattern">Need %1$s more points to level up to %2$s</string>
 </resources>

@@ -219,6 +219,23 @@ function estimatePoints(req, res) {
   }
 }
 
+async function getPointTransactions(req, res) {
+  try {
+    const profileId = String(req.params.profileId || "").trim();
+    if (!mongoose.Types.ObjectId.isValid(profileId)) {
+      return res.status(400).json({ message: "profileId không hợp lệ." });
+    }
+
+    const transactions = await PointTransaction.find({ profile_id: profileId })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return res.json(transactions);
+  } catch (error) {
+    return res.status(500).json({ message: "Không thể lấy lịch sử tích điểm.", error: error.message });
+  }
+}
+
 module.exports = {
   TIER_RULES,
   getTierByPoints,
@@ -226,4 +243,5 @@ module.exports = {
   buildLoyaltySummary,
   getProfileLoyalty,
   estimatePoints,
+  getPointTransactions,
 };
